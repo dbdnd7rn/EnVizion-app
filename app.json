@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "EnVizion Life",
+    "slug": "envizion-life",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.envizionlife.caregiver"
+    },
+    "android": { "package": "com.envizionlife.caregiver" },
+    "web": {
+      "bundler": "metro",
+      "name": "EnVizion Life | Your care companion"
+    },
+    "plugins": ["expo-font"]
+  }
+}

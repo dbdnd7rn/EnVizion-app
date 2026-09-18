@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+dist/
+.pnpm-store/
+.pnpm-cache/
+.pnpm-state/
+*.log
+.tools/
+*.tgz

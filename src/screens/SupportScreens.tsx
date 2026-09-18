@@ -1,0 +1,578 @@
+import React, { useEffect, useState } from "react";
+import { Linking, Pressable, Switch, Text, View } from "react-native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { RootStack } from "../navigation";
+import { useCare } from "../store";
+import { guides, specialists, trustedResources } from "../content";
+import {
+  Brand,
+  Button,
+  C,
+  Card,
+  Field,
+  Heading,
+  Icon,
+  Landscape,
+  Page,
+  Row,
+  S,
+  Section,
+  Txt,
+} from "../ui";
+import { useNav } from "./MainScreens";
+import { printResource } from "../printing";
+export function OnboardingScreen() {
+  const n = useNav();
+  const { dispatch } = useCare();
+  const [step, setStep] = useState(0);
+  const [name, setName] = useState("");
+  const [relationship, setRelationship] = useState("A parent");
+  const [faith, setFaith] = useState(true);
+  function finish() {
+    dispatch({ type: "profile", name, relationship, faith });
+    n.reset({ index: 0, routes: [{ name: "Main" }] });
+  }
+  return (
+    <Page>
+      <View style={S.between}>
+        <Brand />
+        <Text style={S.small}>WELCOME • {step + 1} / 2</Text>
+      </View>
+      {step === 0 ? (
+        <>
+          <View style={{ borderRadius: 28, overflow: "hidden" }}>
+            <Landscape height={240} />
+          </View>
+          <Heading
+            eyebrow="FAITH. CLARITY. COMPASSION."
+            title={"Care is a journey.\nLet’s walk together."}
+            body="A little guidance for the big responsibility of caring for someone you love."
+          />
+          <View style={{ gap: 17 }}>
+            {[
+              [
+                "heart-outline",
+                "Organize everyday care",
+                "Keep observations, medicines, and questions together.",
+              ],
+              [
+                "compass-outline",
+                "Find your next step",
+                "Understand resources and the people on your care team.",
+              ],
+              [
+                "sparkles-outline",
+                "Make room for yourself",
+                "Find encouragement and spiritual support.",
+              ],
+            ].map(([icon, title, body]) => (
+              <View key={title} style={S.row}>
+                <Icon name={icon} size={24} />
+                <View style={{ flex: 1 }}>
+                  <Text style={S.h3}>{title}</Text>
+                  <Txt>{body}</Txt>
+                </View>
+              </View>
+            ))}
+          </View>
+          <Button
+            title="Let’s get started"
+            icon="arrow-forward"
+            onPress={() => setStep(1)}
+          />
+          <Button title="Explore the demo" secondary onPress={finish} />
+        </>
+      ) : (
+        <>
+          <Heading
+            eyebrow="MAKE YOURSELF AT HOME"
+            title="A companion for your kind of care."
+            body="Use a sample first name to personalize this demo."
+          />
+          <Field
+            label="What should we call you?"
+            value={name}
+            onChange={setName}
+          />
+          <Text style={S.h3}>Who are you caring for?</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
+            {["A parent", "My partner", "A loved one", "Myself"].map((r) => (
+              <Pressable
+                key={r}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: r === relationship }}
+                onPress={() => setRelationship(r)}
+                style={[
+                  S.pill,
+                  {
+                    padding: 14,
+                    backgroundColor: r === relationship ? C.purple : C.lavender,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    S.h3,
+                    {
+                      fontSize: 13,
+                      color: r === relationship ? C.white : C.deep,
+                    },
+                  ]}
+                >
+                  {r}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <Card>
+            <View style={S.between}>
+              <View style={{ flex: 1 }}>
+                <Text style={S.h3}>Include spiritual encouragement</Text>
+                <Txt>Optional moments of faith on your home screen.</Txt>
+              </View>
+              <Switch
+                accessibilityLabel="Include spiritual encouragement"
+                value={faith}
+                onValueChange={setFaith}
+                trackColor={{ true: C.purple }}
+              />
+            </View>
+          </Card>
+          <Txt style={S.small}>
+            This is an educational prototype with session-only sample data. It
+            does not diagnose, monitor emergencies, or replace professional
+            care.
+          </Txt>
+          <Button title="Open my care companion" onPress={finish} />
+        </>
+      )}
+      <Text style={[S.small, { textAlign: "center" }]}>
+        ENVIZION LIFE • CAREGIVER & PATIENT ADVOCATE SUPPORT
+      </Text>
+    </Page>
+  );
+}
+export function GuideScreen({
+  route,
+}: NativeStackScreenProps<RootStack, "Guide">) {
+  const g = guides.find((g) => g.id === route.params.id);
+  const { state, dispatch } = useCare();
+  const [message, setMessage] = useState("");
+  if (!g)
+    return (
+      <Page>
+        <Heading
+          title="Guide unavailable"
+          body="Please return to the library and choose another guide."
+        />
+      </Page>
+    );
+  return (
+    <Page>
+      <Heading eyebrow={g.category} title={g.title} body={g.description} />
+      <View style={S.between}>
+        <Text style={S.small}>{g.readTime} • Educational draft</Text>
+        <Icon name={g.icon} size={30} />
+      </View>
+      {g.sections.map((s) => (
+        <View key={s.title} style={{ gap: 8 }}>
+          <Text style={S.h2}>{s.title}</Text>
+          <Txt>{s.body}</Txt>
+        </View>
+      ))}
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Text style={S.h3}>Bring it into the conversation</Text>
+        <Txt>
+          What is one question you want to ask your loved one or healthcare team
+          after reading this?
+        </Txt>
+      </Card>
+      <Button
+        title={
+          state.saved.includes(g.id) ? "Saved to your library" : "Save guide"
+        }
+        icon={state.saved.includes(g.id) ? "bookmark" : "bookmark-outline"}
+        secondary
+        onPress={() => dispatch({ type: "bookmark", id: g.id })}
+      />
+      <Button
+        title="Print or save this resource"
+        icon="print-outline"
+        onPress={async () => {
+          try {
+            await printResource(
+              g.title,
+              g.sections.map((s) => `${s.title}: ${s.body}`),
+            );
+          } catch {
+            setMessage("Printing could not open. Please try again.");
+          }
+        }}
+      />
+      {g.url && (
+        <Button
+          title="Visit the trusted source"
+          secondary
+          icon="open-outline"
+          onPress={() =>
+            Linking.openURL(g.url!).catch(() =>
+              setMessage("The source could not open. Please try again."),
+            )
+          }
+        />
+      )}
+      <Txt style={S.small}>
+        Draft learning content awaiting EnVizion Life clinical review. It does
+        not replace an individualized care plan.
+      </Txt>
+      {Boolean(message) && <Txt>{message}</Txt>}
+    </Page>
+  );
+}
+export function SpecialistsScreen() {
+  const n = useNav();
+  return (
+    <Page>
+      <Heading
+        eyebrow="HEALTHCARE NAVIGATION"
+        title="Understand your care team"
+        body="Different specialists, one shared goal: care for your loved one."
+      />
+      {specialists.map(([title, subtitle], i) => (
+        <Row
+          key={title}
+          title={title}
+          subtitle={subtitle}
+          icon={
+            [
+              "medical-outline",
+              "heart-outline",
+              "water-outline",
+              "leaf-outline",
+              "flower-outline",
+              "pulse-outline",
+              "fitness-outline",
+              "body-outline",
+            ][i]
+          }
+          onPress={() => n.navigate("Specialist", { index: i })}
+        />
+      ))}
+    </Page>
+  );
+}
+export function SpecialistScreen({
+  route,
+}: NativeStackScreenProps<RootStack, "Specialist">) {
+  const n = useNav();
+  const item = specialists[route.params.index];
+  if (!item)
+    return (
+      <Page>
+        <Heading title="Specialist not found" />
+      </Page>
+    );
+  return (
+    <Page>
+      <Heading eyebrow="MEET YOUR CARE TEAM" title={item[0]} body={item[1]} />
+      <Card>
+        <Icon name="medical-outline" size={32} />
+        <Text style={S.h2}>Before your visit</Text>
+        <Txt>{item[2]}</Txt>
+      </Card>
+      <Section title="A few questions to ask" />
+      {[
+        "What is the next step in our care plan?",
+        "What changes should prompt us to call?",
+        "How will you coordinate with the rest of the care team?",
+      ].map((q) => (
+        <Card key={q}>
+          <Txt style={{ color: C.ink }}>{q}</Txt>
+        </Card>
+      ))}
+      <Button
+        title="Open my appointment questions"
+        onPress={() => n.navigate("Appointments")}
+      />
+      <Txt style={S.small}>
+        This guide explains general roles. Your primary care team can help with
+        individual referral questions.
+      </Txt>
+    </Page>
+  );
+}
+export function CoachingScreen() {
+  const { state, dispatch } = useCare();
+  const [topic, setTopic] = useState("Navigating care");
+  return (
+    <Page>
+      <Heading
+        eyebrow="PATIENT ADVOCATE COACHING"
+        title="You deserve someone in your corner."
+        body="Explore the support EnVizion Life envisions for caregivers and families."
+      />
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Icon name="people-outline" size={34} />
+        <Text style={S.h2}>Clarity, with compassion.</Text>
+        <Txt>
+          One-on-one and group coaching, healthcare navigation, insurance and
+          Medicare education, and spiritual wellness support.
+        </Txt>
+      </Card>
+      <Section title="Where would support help?" />
+      {[
+        "Navigating care",
+        "Hospital to home",
+        "Caregiver wellbeing",
+        "Insurance & Medicare",
+        "Patient rights & planning",
+      ].map((t) => (
+        <Pressable
+          key={t}
+          accessibilityRole="radio"
+          accessibilityState={{ selected: topic === t }}
+          onPress={() => setTopic(t)}
+          style={[
+            S.card,
+            S.row,
+            { padding: 16, borderColor: topic === t ? C.purple : C.line },
+          ]}
+        >
+          <Icon name={topic === t ? "radio-button-on" : "radio-button-off"} />
+          <Text style={S.h3}>{t}</Text>
+        </Pressable>
+      ))}
+      <Button
+        title="Save coaching interest"
+        onPress={() => dispatch({ type: "coaching", topic })}
+      />
+      {Boolean(state.coaching) && (
+        <Card>
+          <Icon name="checkmark-circle" color={C.green} />
+          <Text accessibilityRole="alert" style={S.h3}>
+            Your interest is saved in this demo.
+          </Text>
+          <Txt>
+            {state.coaching}. No request has been sent and no session has been
+            booked. Booking will be connected in a later phase.
+          </Txt>
+        </Card>
+      )}
+      <Txt style={S.small}>
+        Coaching is educational and supportive. It is not emergency care or a
+        medical consultation.
+      </Txt>
+    </Page>
+  );
+}
+export function WellnessScreen() {
+  const [running, setRunning] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const [reflection, setReflection] = useState("");
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (!running) return;
+    const timer = setInterval(
+      () => setSeconds((s) => Math.min(s + 1, 60)),
+      1000,
+    );
+    return () => clearInterval(timer);
+  }, [running]);
+  useEffect(() => {
+    if (seconds === 60) setRunning(false);
+  }, [seconds]);
+  return (
+    <Page>
+      <Heading
+        eyebrow="SPIRITUAL WELLNESS"
+        title="A quiet moment, just for you."
+        body="There is space here for your faith, your feelings, and your need to rest."
+      />
+      <View style={{ borderRadius: 24, overflow: "hidden" }}>
+        <Landscape height={160} />
+      </View>
+      <Card
+        style={{
+          backgroundColor: C.lavender,
+          alignItems: "center",
+          paddingVertical: 30,
+        }}
+      >
+        <Icon name="sparkles-outline" size={28} />
+        <Text style={[S.h2, { textAlign: "center" }]}>
+          {running
+            ? "Rest in this moment."
+            : seconds === 60
+              ? "A small pause. A fresh start."
+              : "You can pause here."}
+        </Text>
+        <Txt style={{ textAlign: "center" }}>
+          Sit comfortably. Let your breathing stay natural.{"\n"}There is
+          nothing you need to achieve.
+        </Txt>
+        <Text style={[S.title, { fontSize: 40 }]}>
+          {running ? `${60 - seconds}s` : "1 minute"}
+        </Text>
+        <Button
+          title={running ? "End quiet moment" : "Begin a quiet moment"}
+          secondary
+          onPress={() => {
+            setRunning(!running);
+            setSeconds(0);
+          }}
+        />
+      </Card>
+      <Text
+        style={[S.h2, { textAlign: "center", fontSize: 24, lineHeight: 34 }]}
+      >
+        “God is our refuge and strength, a very present help in trouble.”
+      </Text>
+      <Text style={[S.small, { textAlign: "center" }]}>
+        PSALM 46:1 • KING JAMES VERSION
+      </Text>
+      <Field
+        label="What is one thing you can set down today?"
+        value={reflection}
+        onChange={(v) => {
+          setReflection(v);
+          setSaved(false);
+        }}
+        multiline
+      />
+      <Button
+        title={
+          saved ? "Reflection kept for this visit" : "Keep this reflection"
+        }
+        disabled={!reflection.trim()}
+        secondary
+        onPress={() => setSaved(true)}
+      />
+      <Txt style={S.small}>
+        Your reflection stays on this screen during this visit. No reflection is
+        sent or stored. Spiritual practices are optional.
+      </Txt>
+    </Page>
+  );
+}
+export function ResourcesScreen() {
+  const [message, setMessage] = useState("");
+  return (
+    <Page>
+      <Heading
+        eyebrow="A TRUSTED STARTING POINT"
+        title="Resources within reach"
+        body="Read online, or take a printable worksheet into your next conversation."
+      />
+      <Section title="Printable & digital toolkit" />
+      {[
+        [
+          "Daily caregiver record",
+          [
+            "Date and time: __________",
+            "Observations: __________",
+            "Medication questions: __________",
+            "Who we contacted and next steps: __________",
+          ],
+        ],
+        [
+          "Advance care conversation starter",
+          [
+            "What matters most to me? __________",
+            "Who would I want involved? __________",
+            "What should we ask a qualified professional? __________",
+          ],
+        ],
+      ].map(([title, lines]) => (
+        <Row
+          key={title as string}
+          title={title as string}
+          subtitle="Open print dialog or save as PDF"
+          icon="print-outline"
+          onPress={async () => {
+            try {
+              await printResource(title as string, lines as string[]);
+            } catch {
+              setMessage("Could not open printing. Please try again.");
+            }
+          }}
+        />
+      ))}
+      <Section title="Trusted organizations" />
+      {trustedResources.map((r) => (
+        <Row
+          key={r.title}
+          title={r.title}
+          subtitle={r.subtitle}
+          icon="globe-outline"
+          trailing={<Icon name="open-outline" size={18} />}
+          onPress={() =>
+            Linking.openURL(r.url).catch(() =>
+              setMessage("Could not open this resource. Please try again."),
+            )
+          }
+        />
+      ))}
+      {Boolean(message) && <Txt>{message}</Txt>}
+      <Txt style={S.small}>
+        External resources open outside the app. Printable starter sheets are
+        educational drafts, not clinical or legal documents.
+      </Txt>
+    </Page>
+  );
+}
+export function ProfileScreen() {
+  const { state, dispatch } = useCare();
+  const n = useNav();
+  return (
+    <Page>
+      <Heading
+        eyebrow="YOUR CARE COMPANION"
+        title={`Hello, ${state.name}.`}
+        body={`You’re here caring for ${state.relationship.toLowerCase()}.`}
+      />
+      <Card>
+        <Text style={S.h3}>Your demo session</Text>
+        <Txt>
+          {state.entries.length} care observations · {state.saved.length} saved
+          resources
+        </Txt>
+        <Txt>
+          Changes reset when the app reloads. This preview is for sample
+          information only.
+        </Txt>
+      </Card>
+      <Card>
+        <View style={S.between}>
+          <Text style={[S.h3, { flex: 1 }]}>
+            Spiritual encouragement on home
+          </Text>
+          <Switch
+            accessibilityLabel="Spiritual encouragement on home"
+            value={state.faith}
+            onValueChange={(faith) =>
+              dispatch({
+                type: "profile",
+                name: state.name,
+                relationship: state.relationship,
+                faith,
+              })
+            }
+            trackColor={{ true: C.purple }}
+          />
+        </View>
+      </Card>
+      <Button
+        title="Restart demo & clear sample entries"
+        secondary
+        onPress={() => {
+          dispatch({ type: "reset" });
+          n.reset({ index: 0, routes: [{ name: "Onboarding" }] });
+        }}
+      />
+      <Txt style={S.small}>
+        EnVizion Life Caregiver Toolkit & Patient Advocate Support Program.
+        Founded by Dr. Delphine Tolbert, DNP, RN, CLC.
+      </Txt>
+    </Page>
+  );
+}
