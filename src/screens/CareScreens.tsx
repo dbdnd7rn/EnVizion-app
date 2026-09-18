@@ -3,7 +3,12 @@ import { Linking, Pressable, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
-import { trackerFields, validateEntry } from "../domain";
+import {
+  appointmentLines,
+  trackerFields,
+  validateAppointment,
+  validateEntry,
+} from "../domain";
 import {
   Button,
   C,
@@ -247,6 +252,9 @@ export function AppointmentScreen() {
   const { state, dispatch } = useCare();
   const [question, setQuestion] = useState("");
   const [message, setMessage] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(state.appointment);
+  const [error, setError] = useState("");
   return (
     <Page>
       <Heading
@@ -257,13 +265,88 @@ export function AppointmentScreen() {
       <Card style={{ backgroundColor: C.lavender }}>
         <View style={S.row}>
           <Icon name="calendar-outline" size={28} />
-          <View>
-            <Text style={S.eyebrow}>SAMPLE APPOINTMENT</Text>
-            <Text style={S.h3}>Primary care follow-up</Text>
-            <Txt>Bring your discharge papers and care notes.</Txt>
+          <View style={{ flex: 1, gap: 5 }}>
+            <Text style={S.eyebrow}>YOUR NEXT VISIT • DEMO</Text>
+            <Text style={S.h3}>{state.appointment.title}</Text>
+            <Txt>
+              {state.appointment.date || "Date to be confirmed"}
+              {state.appointment.time ? ` · ${state.appointment.time}` : ""}
+            </Txt>
+            {Boolean(state.appointment.location) && (
+              <Txt>{state.appointment.location}</Txt>
+            )}
+            {Boolean(state.appointment.notes) && (
+              <Txt>{state.appointment.notes}</Txt>
+            )}
           </View>
         </View>
+        <Button
+          title={editing ? "Cancel editing visit" : "Edit visit details"}
+          secondary
+          icon="create-outline"
+          onPress={() => {
+            setDraft(state.appointment);
+            setError("");
+            setEditing(!editing);
+          }}
+        />
       </Card>
+      {editing && (
+        <Card>
+          <Field
+            label="Visit title"
+            value={draft.title}
+            onChange={(title) => setDraft((d) => ({ ...d, title }))}
+          />
+          <Field
+            label="Date (YYYY-MM-DD, optional)"
+            value={draft.date}
+            onChange={(date) => setDraft((d) => ({ ...d, date }))}
+          />
+          <Field
+            label="Time (HH:MM, 24-hour, optional)"
+            value={draft.time}
+            onChange={(time) => setDraft((d) => ({ ...d, time }))}
+          />
+          <Field
+            label="Location or joining details (optional)"
+            value={draft.location}
+            onChange={(location) => setDraft((d) => ({ ...d, location }))}
+          />
+          <Field
+            label="Preparation notes (optional)"
+            value={draft.notes}
+            onChange={(notes) => setDraft((d) => ({ ...d, notes }))}
+            multiline
+          />
+          {Boolean(error) && (
+            <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
+              {error}
+            </Text>
+          )}
+          <Button
+            title="Save visit details"
+            onPress={() => {
+              const appointment = {
+                title: draft.title.trim(),
+                date: draft.date.trim(),
+                time: draft.time.trim(),
+                location: draft.location.trim(),
+                notes: draft.notes.trim(),
+              };
+              const error = validateAppointment(appointment);
+              if (error) {
+                setError(error);
+                return;
+              }
+              dispatch({ type: "appointment", appointment });
+              setEditing(false);
+              setError("");
+              setMessage("Visit details saved for this demo session.");
+            }}
+          />
+        </Card>
+      )}
       <Section title="Questions to bring" />
       {state.questions.map((q, i) => (
         <Card key={`${i}-${q}`} style={{ flexDirection: "row", gap: 14 }}>
@@ -271,8 +354,29 @@ export function AppointmentScreen() {
             {String(i + 1).padStart(2, "0")}
           </Text>
           <Txt style={{ flex: 1, color: C.ink }}>{q}</Txt>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Remove question ${i + 1}`}
+            onPress={() => dispatch({ type: "remove-question", index: i })}
+            style={{
+              minWidth: 44,
+              minHeight: 44,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="close-circle-outline" color={C.muted} />
+          </Pressable>
         </Card>
       ))}
+      {state.questions.length === 0 && (
+        <Card>
+          <Txt>
+            Your question list is clear. Add anything you want to remember
+            below.
+          </Txt>
+        </Card>
+      )}
       <Field
         label="What else would you like to ask?"
         value={question}
@@ -294,7 +398,10 @@ export function AppointmentScreen() {
         icon="print-outline"
         onPress={async () => {
           try {
-            await printResource("My appointment questions", state.questions);
+            await printResource(
+              "My appointment plan",
+              appointmentLines(state.appointment, state.questions),
+            );
             setMessage("Your print or share window has opened.");
           } catch {
             setMessage(

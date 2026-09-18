@@ -34,7 +34,7 @@ Tests use the Node 22+ built-in TypeScript stripping feature (validated with Nod
 - Two-step onboarding with name, caregiving relationship, and optional spiritual encouragement
 - Home dashboard, Toolkit, Library, and Support tabs
 - Vitals, blood sugar, CHF observations, behavior/delirium observations, and red-flag logs, with input validation and session history
-- Sample medication check-offs; appointment question builder and printable sheet
+- Sample medication check-offs; editable appointment title, date, time, location, and preparation notes, with question add/remove and a printable plan
 - Hospital-to-home checklist with progress and printable worksheet
 - Patient rights and advance care conversation starters
 - COPD, heart failure, diabetes, kidney health, memory/neurological care, and stroke/TIA guides

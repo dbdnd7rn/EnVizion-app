@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer } from "react";
-import type { Entry } from "./domain";
+import type { Appointment, Entry } from "./domain";
 type Medication = {
   id: string;
   name: string;
@@ -17,8 +17,11 @@ type State = {
   questions: string[];
   saved: string[];
   coaching: string | null;
+  appointment: Appointment;
 };
 type Action =
+  | { type: "appointment"; appointment: Appointment }
+  | { type: "remove-question"; index: number }
   | {
       type: "profile";
       name: string;
@@ -83,9 +86,23 @@ const initial: State = {
   ],
   saved: [],
   coaching: null,
+  appointment: {
+    title: "Primary care follow-up",
+    date: "",
+    time: "",
+    location: "",
+    notes: "Bring your discharge papers and care notes.",
+  },
 };
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "appointment":
+      return { ...state, appointment: action.appointment };
+    case "remove-question":
+      return {
+        ...state,
+        questions: state.questions.filter((_, index) => index !== action.index),
+      };
     case "profile":
       return {
         ...state,

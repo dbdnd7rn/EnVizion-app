@@ -10,6 +10,46 @@ export type Entry = {
   values: Record<string, string>;
   recordedAt: string;
 };
+export type Appointment = {
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  notes: string;
+};
+export function validateAppointment(appointment: Appointment): string | null {
+  if (!appointment.title.trim()) return "Please add a visit title.";
+  if (appointment.date) {
+    const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(appointment.date);
+    if (!parts) return "Use YYYY-MM-DD for the appointment date.";
+    const [, year, month, day] = parts.map(Number);
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    )
+      return "Enter a valid calendar date.";
+  }
+  if (appointment.time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(appointment.time))
+    return "Use a 24-hour time, such as 14:30.";
+  return null;
+}
+export function appointmentLines(
+  appointment: Appointment,
+  questions: string[],
+): string[] {
+  return [
+    `Visit: ${appointment.title}`,
+    `Date: ${appointment.date || "To be confirmed"}`,
+    `Time: ${appointment.time || "To be confirmed"}`,
+    `Location or joining details: ${appointment.location || "To be confirmed"}`,
+    ...(appointment.notes.trim()
+      ? [`Preparation notes: ${appointment.notes}`]
+      : []),
+    ...questions.map((question, index) => `Question ${index + 1}: ${question}`),
+  ];
+}
 export type Field = {
   key: string;
   label: string;
@@ -80,7 +120,9 @@ export function validateEntry(
     if (
       value &&
       field.numeric &&
-      (!/^\d+(\.\d+)?$/.test(value) || Number(value) <= 0)
+      (!/^\d+(\.\d+)?$/.test(value) ||
+        !Number.isFinite(Number(value)) ||
+        Number(value) <= 0)
     )
       return `Enter a positive number for ${field.label}.`;
   }

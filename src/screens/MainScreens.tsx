@@ -165,7 +165,7 @@ export function HomeScreen() {
           </View>
           <Row
             title="Prepare for your next visit"
-            subtitle={`${state.questions.length} questions ready to bring along`}
+            subtitle={`${state.appointment.title}${state.appointment.date ? ` · ${state.appointment.date}` : ""} · ${state.questions.length} questions`}
             icon="calendar-outline"
             onPress={() => n.navigate("Appointments")}
           />
