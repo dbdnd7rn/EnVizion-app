@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +11,13 @@ import {
   View,
 } from "react-native";
 import { useCare } from "../store";
+import {
+  createSupportRequest,
+  loadLatestSupportRequest,
+  sendSupportMessage,
+  type SupportMessageRecord,
+  type SupportRequestRecord,
+} from "../backend";
 import {
   makeMessage,
   previewReply,
@@ -215,7 +222,7 @@ function Composer({
           <Icon name="arrow-up" color={C.white} />
         </Pressable>
       </View>
-      <Text style={S.small}>Sample information only · {text.length}/1200</Text>
+      <Text style={S.small}>Educational support · {text.length}/1200</Text>
     </View>
   );
 }
@@ -250,7 +257,7 @@ export function AssistantScreen() {
             <Text style={S.h3}>EnVizion Assistant</Text>
             <Text style={S.small}>A starting point for your questions</Text>
           </View>
-          <Badge text="Preview" />
+          <Badge text="Guided support" />
         </View>
         <View style={S.between}>
           <Pressable
@@ -347,176 +354,215 @@ export function AssistantScreen() {
 }
 
 export function HandoffScreen() {
-  const { state, dispatch } = useCare();
+  const { state } = useCare();
   const n = useNav();
   const [topic, setTopic] = useState("Navigating care");
   const [context, setContext] = useState("");
   const [include, setInclude] = useState(false);
   const [channel, setChannel] =
-    useState<SupportRequest["channel"]>("In-app inbox");
-  const active = state.conversation.request?.status === "preview-open";
+    useState<"In-app inbox" | "WhatsApp" | "Email">("In-app inbox");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function submit() {
+    setMessage("");
+    setSubmitting(true);
+    try {
+      await createSupportRequest({
+        topic,
+        context,
+        preferredChannel: channel,
+        includeAssistantContext: include && state.conversation.messages.length > 0,
+      });
+      n.replace("TeamConversation");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not send your request. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <Page>
       <Heading
         eyebrow="SUPPORT FROM A PERSON"
         title="Let’s bring in the team."
-        body="Some questions deserve a conversation. Tell the team what you would like help with."
+        body="Some questions deserve a conversation. Tell the EnVizion Life team what you would like help with."
       />
       <Card style={{ backgroundColor: C.lavender }}>
-        <Text style={S.h3}>Review the handoff before sharing</Text>
+        <Text style={S.h3}>Your request is securely saved</Text>
         <Txt>
-          This preview saves a request on this device session only. No staff are
-          notified and no WhatsApp message or email is sent.
+          Requests are stored with your account so the support team can review
+          them when the staff workspace is connected.
         </Txt>
       </Card>
-      {active ? (
-        <Row
-          title="View your open preview conversation"
-          subtitle="Continue the request you already prepared"
-          icon="chatbubbles-outline"
-          onPress={() => n.navigate("TeamConversation")}
-        />
-      ) : (
-        <>
-          <Section title="What’s on your mind?" />
-          <View style={styles.chips}>
-            {[
-              "Navigating care",
-              "Coaching support",
-              "Using the toolkit",
-              "Something else",
-            ].map((value) => (
-              <Pressable
-                key={value}
-                accessibilityRole="button"
-                accessibilityState={{ selected: topic === value }}
-                onPress={() => setTopic(value)}
-                style={[
-                  styles.chip,
-                  topic === value && {
-                    backgroundColor: C.lavender,
-                    borderColor: C.purple,
-                  },
-                ]}
-              >
-                <Text style={S.body}>{value}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Field
-            label="What would you like the team to know?"
-            value={context}
-            onChange={(value) => setContext(value.slice(0, 1200))}
-            multiline
+
+      <Section title="What’s on your mind?" />
+      <View style={styles.chips}>
+        {[
+          "Navigating care",
+          "Coaching support",
+          "Using the toolkit",
+          "Something else",
+        ].map((value) => (
+          <Pressable
+            key={value}
+            accessibilityRole="button"
+            accessibilityState={{ selected: topic === value }}
+            onPress={() => setTopic(value)}
+            style={[
+              styles.chip,
+              topic === value && {
+                backgroundColor: C.lavender,
+                borderColor: C.purple,
+              },
+            ]}
+          >
+            <Text style={S.body}>{value}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Field
+        label="What would you like the team to know?"
+        value={context}
+        onChange={(value) => setContext(value.slice(0, 1200))}
+        multiline
+      />
+      <Text style={S.small}>{context.length}/1200</Text>
+
+      <Section title="Preferred reply channel" />
+      <View style={styles.chips}>
+        {(["In-app inbox", "WhatsApp", "Email"] as const).map((value) => (
+          <Pressable
+            key={value}
+            accessibilityRole="button"
+            accessibilityState={{ selected: channel === value }}
+            onPress={() => setChannel(value)}
+            style={[
+              styles.chip,
+              channel === value && {
+                backgroundColor: C.lavender,
+                borderColor: C.purple,
+              },
+            ]}
+          >
+            <Text style={S.body}>{value}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Card>
+        <View style={S.between}>
+          <Text style={[S.h3, { flex: 1 }]}>Include assistant context</Text>
+          <Switch
+            accessibilityLabel="Include assistant context with support request"
+            value={include}
+            onValueChange={setInclude}
+            trackColor={{ true: C.purple }}
           />
-          <Text style={S.small}>
-            {context.length}/1200 · Use sample details in this preview.
-          </Text>
-          <Section title="Preferred reply channel" />
-          <View style={styles.chips}>
-            {(["In-app inbox", "WhatsApp", "Email"] as const).map((value) => (
-              <Pressable
-                key={value}
-                accessibilityRole="button"
-                accessibilityState={{ selected: channel === value }}
-                onPress={() => setChannel(value)}
-                style={[
-                  styles.chip,
-                  channel === value && {
-                    backgroundColor: C.lavender,
-                    borderColor: C.purple,
-                  },
-                ]}
-              >
-                <Text style={S.body}>{value}</Text>
-              </Pressable>
-            ))}
-          </View>
-          <Txt style={S.small}>
-            {channel === "In-app inbox"
-              ? "Preview replies can be entered from the staff workspace. No live staff connection yet."
-              : `${channel} delivery is not connected. Your preference is saved with the preview request; no contact details are collected here.`}
-          </Txt>
-          <Card>
-            <View style={S.between}>
-              <Text style={[S.h3, { flex: 1 }]}>
-                Include assistant conversation
-              </Text>
-              <Switch
-                accessibilityLabel="Include assistant conversation with support request"
-                value={include}
-                onValueChange={setInclude}
-                trackColor={{ true: C.purple }}
-              />
-            </View>
-            <Txt style={S.small}>
-              Optional. Tracker readings, medication logs, and reflections are
-              never attached by this screen.
-            </Txt>
-            {include && (
-              <View style={{ gap: 10 }}>
-                <Text style={S.eyebrow}>EXACT CONVERSATION TO INCLUDE</Text>
-                {state.conversation.messages.length ? (
-                  state.conversation.messages.map((m) => (
-                    <Text key={m.id} style={S.small}>
-                      {m.role === "user" ? "You" : "Assistant"}: {m.text}
-                    </Text>
-                  ))
-                ) : (
-                  <Txt>No assistant messages to include.</Txt>
-                )}
-              </View>
-            )}
-          </Card>
-          <Button
-            title="Save preview request"
-            icon="arrow-forward-outline"
-            disabled={!context.trim()}
-            onPress={() => {
-              dispatch({
-                type: "support-request",
-                request: {
-                  id: `EV-${Date.now()}`,
-                  topic,
-                  context: context.trim(),
-                  channel,
-                  transcript: include ? state.conversation.messages : [],
-                  thread: [],
-                  status: "preview-open",
-                },
-              });
-              n.replace("TeamConversation");
-            }}
-          />
-        </>
+        </View>
+        <Txt style={S.small}>
+          This records whether you want the EnVizion team to consider the
+          assistant conversation when reviewing your request. Health tracker
+          entries are not automatically attached.
+        </Txt>
+      </Card>
+
+      {Boolean(message) && (
+        <Text accessibilityRole="alert" style={[S.small, { color: C.rose }]}>
+          {message}
+        </Text>
       )}
+
+      <Button
+        title={submitting ? "Sending request…" : "Send support request"}
+        icon="arrow-forward-outline"
+        disabled={!context.trim() || submitting}
+        onPress={submit}
+      />
+
+      <Button
+        title="View my latest request"
+        secondary
+        onPress={() => n.navigate("TeamConversation")}
+      />
+
       <Safety onPress={() => n.navigate("Emergency")} />
       <Txt style={S.small}>
-        Support chat is not an emergency service. Staff availability and
-        response times will be shown when live support is connected.
+        Support messaging is not an emergency service. For urgent medical help,
+        use your local emergency services.
       </Txt>
     </Page>
   );
 }
 
 export function TeamConversationScreen() {
-  const { state, dispatch } = useCare();
   const n = useNav();
-  const request = state.conversation.request;
+  const [request, setRequest] = useState<SupportRequestRecord | null>(null);
+  const [messages, setMessages] = useState<SupportMessageRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [composer, setComposer] = useState("");
+  const [sending, setSending] = useState(false);
+  const [message, setMessage] = useState("");
   const scroll = useRef<ScrollView>(null);
-  if (!request)
+
+  async function refresh() {
+    try {
+      const result = await loadLatestSupportRequest();
+      setRequest(result.request);
+      setMessages(result.messages);
+    } catch {
+      setMessage("We could not load your support request.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void refresh();
+  }, []);
+
+  async function send() {
+    if (!request || !composer.trim()) return;
+    setSending(true);
+    setMessage("");
+    try {
+      await sendSupportMessage(request.id, composer);
+      setComposer("");
+      await refresh();
+    } catch {
+      setMessage("We could not send your message. Please try again.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <Page>
+        <Heading title="Your support request" />
+        <Txt>Loading your conversation…</Txt>
+      </Page>
+    );
+  }
+
+  if (!request) {
     return (
       <Page>
         <Heading
           title="Your support conversations"
-          body="Prepare a request to start a conversation."
+          body="Send a request when you would like help from the EnVizion Life team."
         />
-        <Button
-          title="Talk to our team"
-          onPress={() => n.navigate("Handoff")}
-        />
+        <Button title="Talk to our team" onPress={() => n.navigate("Handoff")} />
       </Page>
     );
+  }
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: C.paper }}
@@ -524,185 +570,139 @@ export function TeamConversationScreen() {
       keyboardVerticalOffset={90}
     >
       <View style={styles.header}>
-        <Text style={S.h3}>EnVizion support team</Text>
+        <Text style={S.h3}>EnVizion Life support</Text>
         <Badge
           text={
-            request.status === "preview-open"
-              ? "Local preview · not delivered"
-              : "Preview conversation closed"
+            request.status === "closed"
+              ? "Closed"
+              : request.status === "responded"
+                ? "Response available"
+                : request.status === "in_review"
+                  ? "In review"
+                  : "Submitted"
           }
         />
         <Text style={S.small}>
-          Preferred channel: {request.channel} · No live delivery
+          Preferred channel: {request.preferred_channel}
         </Text>
       </View>
+
       <ScrollView
         ref={scroll}
         contentContainerStyle={{ padding: 20, gap: 16 }}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
         onContentSizeChange={() => {
-          if (request.thread.length)
-            scroll.current?.scrollToEnd({ animated: false });
+          if (messages.length) scroll.current?.scrollToEnd({ animated: false });
         }}
       >
         <Card>
           <Text style={S.eyebrow}>{request.topic}</Text>
           <Text style={S.body}>{request.context}</Text>
           <Text style={S.small}>
-            {request.transcript.length
-              ? `${request.transcript.length} assistant conversation messages included`
-              : "Assistant conversation not included"}
+            Sent {new Date(request.created_at).toLocaleString()}
           </Text>
         </Card>
-        {request.thread.length ? (
-          request.thread.map((message) => (
-            <Bubble key={message.id} message={message} />
+
+        {messages.length ? (
+          messages.map((item) => (
+            <View
+              key={item.id}
+              style={[
+                styles.bubble,
+                item.sender_type === "caregiver"
+                  ? styles.userBubble
+                  : styles.assistantBubble,
+              ]}
+            >
+              <Text
+                style={[
+                  S.body,
+                  {
+                    color:
+                      item.sender_type === "caregiver" ? C.white : C.ink,
+                  },
+                ]}
+              >
+                {item.body}
+              </Text>
+              <Text
+                style={[
+                  S.small,
+                  {
+                    color:
+                      item.sender_type === "caregiver" ? "#DDCAE5" : C.muted,
+                  },
+                ]}
+              >
+                {item.sender_type === "caregiver" ? "You" : "EnVizion team"} ·{" "}
+                {new Date(item.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </Text>
+            </View>
           ))
         ) : (
           <Card>
-            <Icon name="chatbubble-ellipses-outline" />
-            <Text style={S.h3}>Your request is ready to review.</Text>
+            <Icon name="time-outline" />
+            <Text style={S.h3}>Your request has been submitted.</Text>
             <Txt>
-              No one has received this preview request. To test both sides, open
-              Staff inbox preview from your profile and write a sample reply.
+              It is stored securely with your account. Team responses will
+              appear here once the staff workspace is connected.
             </Txt>
           </Card>
         )}
-        {request.status === "preview-resolved" && (
-          <Button
-            title="Prepare another request"
-            onPress={() => n.navigate("Handoff")}
-          />
+
+        {Boolean(message) && (
+          <Text accessibilityRole="alert" style={[S.small, { color: C.rose }]}>
+            {message}
+          </Text>
         )}
       </ScrollView>
-      <Composer
-        placeholder="Write a follow-up…"
-        disabled={request.status !== "preview-open"}
-        onSend={(text) =>
-          dispatch({
-            type: "support-message",
-            requestId: request.id,
-            message: makeMessage("user", text),
-          })
-        }
-      />
-    </KeyboardAvoidingView>
-  );
-}
 
-export function StaffInboxScreen() {
-  const { state, dispatch } = useCare();
-  const n = useNav();
-  const request = state.conversation.request;
-  const [reply, setReply] = useState("");
-  const [status, setStatus] = useState("");
-  return (
-    <Page>
-      <Heading
-        eyebrow="STAFF WORKSPACE · PREVIEW"
-        title="Every conversation matters."
-        body="Review context and respond from one shared inbox."
-      />
-      <Card style={{ backgroundColor: C.deep }}>
-        <Text style={[S.h3, { color: C.white }]}>Demonstration workspace</Text>
-        <Txt style={{ color: "#E4D7EA" }}>
-          You are testing the staff view with local sample data. This is not
-          staff authentication or a live inbox. WhatsApp and email delivery are
-          not connected.
-        </Txt>
-      </Card>
-      {!request ? (
-        <Card>
-          <Icon name="file-tray-outline" />
-          <Text style={S.h3}>No preview requests yet</Text>
-          <Txt>
-            Prepare a request from the caregiver assistant to see it here.
-          </Txt>
-          <Button
-            title="Open caregiver assistant"
-            secondary
-            onPress={() => n.navigate("Assistant")}
-          />
-        </Card>
-      ) : (
-        <>
-          <View style={S.between}>
-            <Text style={S.h2}>{request.topic}</Text>
-            <Badge
-              text={
-                request.status === "preview-open"
-                  ? "Open preview"
-                  : "Closed preview"
-              }
+      {request.status !== "closed" && (
+        <View style={styles.composer}>
+          <View style={styles.inputRow}>
+            <TextInput
+              value={composer}
+              onChangeText={(value) => setComposer(value.slice(0, 1200))}
+              accessibilityLabel="Message EnVizion support"
+              placeholder="Add a follow-up message…"
+              placeholderTextColor={C.muted}
+              multiline
+              editable={!sending}
+              style={[
+                S.input,
+                {
+                  flex: 1,
+                  minHeight: 50,
+                  maxHeight: 130,
+                  textAlignVertical: "top",
+                  padding: 13,
+                },
+              ]}
             />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Send follow-up message"
+              disabled={sending || !composer.trim()}
+              onPress={() => void send()}
+              style={({ pressed }) => ({
+                width: 50,
+                height: 50,
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 15,
+                backgroundColor: C.deep,
+                opacity: sending || !composer.trim() ? 0.4 : pressed ? 0.7 : 1,
+              })}
+            >
+              <Icon name="arrow-up" color={C.white} />
+            </Pressable>
           </View>
-          <Card>
-            <Text style={S.eyebrow}>REQUEST DETAILS</Text>
-            <Text style={S.body}>{request.context}</Text>
-            <Txt style={S.small}>Preferred channel: {request.channel}</Txt>
-            <Txt style={S.small}>Reference: {request.id}</Txt>
-          </Card>
-          <Section title="Shared context" />
-          <Card>
-            {request.transcript.length ? (
-              request.transcript.map((m) => (
-                <Txt key={m.id}>
-                  {m.role === "user" ? "Caregiver" : "Assistant"}: {m.text}
-                </Txt>
-              ))
-            ) : (
-              <Txt>The caregiver did not attach an assistant conversation.</Txt>
-            )}
-          </Card>
-          <Section title="Conversation" />
-          {request.thread.map((message) => (
-            <Bubble key={message.id} message={message} />
-          ))}
-          {request.status === "preview-open" && (
-            <Card>
-              <Field
-                label="Staff preview reply"
-                value={reply}
-                onChange={(value) => setReply(value.slice(0, 1200))}
-                multiline
-              />
-              <Button
-                title="Add sample staff reply"
-                disabled={!reply.trim()}
-                onPress={() => {
-                  dispatch({
-                    type: "support-message",
-                    requestId: request.id,
-                    message: makeMessage("staff", reply),
-                  });
-                  setReply("");
-                  setStatus(
-                    "Sample reply added to the caregiver view. Nothing was sent externally.",
-                  );
-                }}
-              />
-              <Button
-                title="Close preview conversation"
-                secondary
-                onPress={() =>
-                  dispatch({ type: "support-resolve", requestId: request.id })
-                }
-              />
-            </Card>
-          )}
-          {Boolean(status) && (
-            <Text accessibilityRole="alert" style={S.body}>
-              {status}
-            </Text>
-          )}
-          <Button
-            title="View caregiver conversation"
-            secondary
-            onPress={() => n.navigate("TeamConversation")}
-          />
-        </>
+        </View>
       )}
-    </Page>
+    </KeyboardAvoidingView>
   );
 }
