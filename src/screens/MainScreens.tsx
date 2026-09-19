@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
-import { guides } from "../content";
+import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
 import {
   Brand,
@@ -375,12 +375,13 @@ export function ToolkitScreen() {
       <Section title="Understand & advocate" />
       <Row
         title="Patient rights"
+        subtitle="Available after EnVizion clinical publication"
         icon="shield-checkmark-outline"
         onPress={() => n.navigate("Guide", { id: "rights" })}
       />
       <Row
         title="Advance directive starter"
-        subtitle="Begin a conversation about their wishes"
+        subtitle="Available after EnVizion clinical publication"
         icon="chatbubbles-outline"
         onPress={() => n.navigate("Guide", { id: "advance" })}
       />
@@ -392,24 +393,52 @@ export function LibraryScreen() {
   const { state } = useCare();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
+  const [guides, setGuides] = useState<ClinicalContentRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+
+  async function refresh() {
+    setLoading(true);
+    setMessage("");
+    try {
+      setGuides(await loadPublishedGuides());
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not load the published resource library.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void refresh();
+  }, []);
+
   const filtered = guides.filter(
     (g) =>
-      `${g.title} ${g.category}`.toLowerCase().includes(query.toLowerCase()) &&
+      `${g.title} ${g.category}`
+        .toLowerCase()
+        .includes(query.toLowerCase()) &&
       (filter !== "Saved" || state.saved.includes(g.id)) &&
       (filter !== "Conditions" || g.category === "Condition guide"),
   );
+
   return (
     <Page>
       <Heading
         eyebrow="KNOWLEDGE BRINGS CLARITY"
         title="A little more understanding"
-        body="Practical guides for the questions along the way."
+        body="Clinically governed resources published by EnVizion Life."
       />
+
       <View style={[S.input, S.row]}>
         <Icon name="search-outline" size={20} />
         <TextInput
           accessibilityLabel="Search resources"
-          placeholder="Search guides and resources"
+          placeholder="Search published guides"
           value={query}
           onChangeText={setQuery}
           style={{
@@ -420,6 +449,7 @@ export function LibraryScreen() {
           }}
         />
       </View>
+
       <View style={S.row}>
         {["All", "Conditions", "Saved"].map((f) => (
           <Pressable
@@ -447,12 +477,14 @@ export function LibraryScreen() {
           </Pressable>
         ))}
       </View>
+
       {filter === "All" && !query && (
         <Card style={{ backgroundColor: "#F0E8F3" }}>
-          <Text style={S.eyebrow}>YOUR PRINTABLE COMPANION</Text>
-          <Text style={S.h2}>Good care goes with you.</Text>
+          <Text style={S.eyebrow}>CLINICALLY GOVERNED LIBRARY</Text>
+          <Text style={S.h2}>Published with review behind it.</Text>
           <Txt>
-            Read guides here, or print a copy to bring to the next conversation.
+            Only resources that have completed EnVizion Life’s approval and
+            publication workflow appear in this library.
           </Txt>
           <Button
             title="Browse trusted resources"
@@ -462,40 +494,60 @@ export function LibraryScreen() {
           />
         </Card>
       )}
-      <View style={{ gap: 12 }}>
-        {filtered.map((g) => (
-          <Row
-            key={g.id}
-            title={g.title}
-            subtitle={`${g.category} · ${g.readTime}`}
-            icon={g.icon}
-            onPress={() => n.navigate("Guide", { id: g.id })}
-          />
-        ))}
-        {!filtered.length && (
-          <Card>
-            <Text style={S.h3}>
-              {filter === "Saved"
-                ? "Your saved guides will live here"
-                : "No guides found"}
-            </Text>
-            <Txt>
-              {filter === "Saved"
-                ? "Open a guide and tap Save guide to keep it close."
-                : "Try a condition name, such as COPD or diabetes."}
-            </Txt>
-          </Card>
-        )}
-      </View>
+
+      {Boolean(message) && (
+        <Card style={{ backgroundColor: C.redBg }}>
+          <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
+            {message}
+          </Text>
+          <Button title="Try again" secondary onPress={() => void refresh()} />
+        </Card>
+      )}
+
+      {loading ? (
+        <Card>
+          <Txt>Loading published resources…</Txt>
+        </Card>
+      ) : (
+        <View style={{ gap: 12 }}>
+          {filtered.map((g) => (
+            <Row
+              key={g.id}
+              title={g.title}
+              subtitle={`${g.category} · ${g.readTime}`}
+              icon={g.icon}
+              onPress={() => n.navigate("Guide", { id: g.id })}
+            />
+          ))}
+
+          {!filtered.length && (
+            <Card>
+              <Icon name="shield-checkmark-outline" />
+              <Text style={S.h3}>
+                {filter === "Saved"
+                  ? "No saved published guides yet"
+                  : "No published guides yet"}
+              </Text>
+              <Txt>
+                {filter === "Saved"
+                  ? "Published guides you save will appear here."
+                  : "EnVizion Life’s current educational drafts are in clinical review. Approved resources will appear here once published."}
+              </Txt>
+            </Card>
+          )}
+        </View>
+      )}
+
       <Row
         title="Trusted resource directory"
         subtitle="Public health resources and EnVizion Life"
         icon="globe-outline"
         onPress={() => n.navigate("Resources")}
       />
+
       <Text style={S.small}>
-        Educational drafts for clinical review. Guides support conversations
-        with your healthcare team.
+        Published guides support conversations with your healthcare team and do
+        not replace an individualized care plan.
       </Text>
     </Page>
   );
