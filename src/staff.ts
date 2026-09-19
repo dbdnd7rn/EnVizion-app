@@ -52,7 +52,7 @@ export async function getStaffMembership(): Promise<StaffMembership | null> {
     error: userError,
   } = await supabase.auth.getUser();
 
-  if (userError || !user) return null;
+  if (userError) throw userError;\n  if (!user) return null;
 
   const { data, error } = await supabase
     .from("staff_members")
@@ -60,7 +60,7 @@ export async function getStaffMembership(): Promise<StaffMembership | null> {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (error || !data?.active) return null;
+  if (error) throw error;\n  if (!data?.active) return null;
 
   return {
     userId: data.user_id,
