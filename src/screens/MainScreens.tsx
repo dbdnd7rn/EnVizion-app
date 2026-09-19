@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
 import { guides } from "../content";
+import { NotificationBell } from "../notifications";
 import {
   Brand,
   Button,
@@ -34,47 +35,50 @@ export function HomeScreen() {
       <Fade>
         <View style={S.between}>
           <Brand />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Emergency and warning signs"
-            onPress={() => n.navigate("Emergency")}
-            style={{
-              backgroundColor: C.redBg,
-              paddingHorizontal: 12,
-              minHeight: 44,
-              borderRadius: 22,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Icon name="alert-circle-outline" color={C.rose} size={18} />
-            <Text
-              style={[
-                S.small,
-                { color: C.rose, fontFamily: "DMSans_600SemiBold" },
-              ]}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Emergency and warning signs"
+              onPress={() => n.navigate("Emergency")}
+              style={{
+                backgroundColor: C.redBg,
+                paddingHorizontal: 11,
+                minHeight: 43,
+                borderRadius: 22,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+              }}
             >
-              Get help
-            </Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Open your profile"
-            onPress={() => n.navigate("Profile")}
-            style={{
-              width: 43,
-              height: 43,
-              borderRadius: 22,
-              backgroundColor: "#ECE2F1",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Text style={[S.h3, { color: C.purple }]}>
-              {state.name.slice(0, 1).toUpperCase()}
-            </Text>
-          </Pressable>
+              <Icon name="alert-circle-outline" color={C.rose} size={18} />
+              <Text
+                style={[
+                  S.small,
+                  { color: C.rose, fontFamily: "DMSans_600SemiBold" },
+                ]}
+              >
+                Help
+              </Text>
+            </Pressable>
+            <NotificationBell onPress={() => n.navigate("Notifications")} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Open your profile"
+              onPress={() => n.navigate("Profile")}
+              style={{
+                width: 43,
+                height: 43,
+                borderRadius: 22,
+                backgroundColor: "#ECE2F1",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={[S.h3, { color: C.purple }]}>
+                {state.name.slice(0, 1).toUpperCase()}
+              </Text>
+            </Pressable>
+          </View>
         </View>
         <View style={{ gap: 7 }}>
           <Text style={S.eyebrow}>YOUR CARE COMPANION</Text>
@@ -193,8 +197,8 @@ export function HomeScreen() {
             <QuickCard
               title="Medications"
               subtitle={
-                state.meds.morning
-                  ? "Morning log complete"
+                doseRecorded
+                  ? "Dose record added"
                   : "Keep a simple record"
               }
               icon="medical-outline"
@@ -258,8 +262,7 @@ export function HomeScreen() {
           </Card>
         )}
         <Text style={[S.small, { textAlign: "center" }]}>
-          Made with faith, clarity & compassion.{"\n"}Demo experience • Sample
-          data • Educational support
+          Made with faith, clarity & compassion.{"\n"}Secure care tools • Educational support
         </Text>
       </Fade>
     </Page>
