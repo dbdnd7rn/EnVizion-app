@@ -27,7 +27,7 @@ export function HomeScreen() {
   const n = useNav();
   const { state } = useCare();
   const logged = state.entries.length > 0;
-  const completed = Number(logged) + Number(!!state.meds.morning);
+  const doseRecorded = state.medicationRecords.some((record) => !record.correctedAt);\n  const completed = Number(logged) + Number(doseRecorded);
   return (
     <Page>
       <Fade>
