@@ -92,3 +92,45 @@ test("printable resources escape user supplied markup", () => {
   assert.ok(!html.includes("<img"));
   assert.ok(html.includes("A &amp; B"));
 });
+import {
+  correctMedicationRecord,
+  medicationLines,
+} from "../src/medications.ts";
+test("medication corrections preserve the original and do not alter other doses", () => {
+  const medication = {
+    id: "m1",
+    name: "Sample medicine",
+    instructions: "Sample label",
+    time: "Morning",
+  };
+  const records = [
+    {
+      id: "r1",
+      medication: { ...medication },
+      recordedAt: "2026-09-19T08:00:00Z",
+    },
+    {
+      id: "r2",
+      medication: { ...medication },
+      recordedAt: "2026-09-19T09:00:00Z",
+    },
+  ];
+  const corrected = correctMedicationRecord(
+    records,
+    "r1",
+    "2026-09-19T10:00:00Z",
+  );
+  assert.equal(corrected[0].correctedAt, "2026-09-19T10:00:00Z");
+  assert.equal(corrected[1].correctedAt, undefined);
+  assert.equal(corrected[0].recordedAt, records[0].recordedAt);
+  assert.equal("correctedAt" in records[0], false);
+  assert.deepEqual(
+    correctMedicationRecord(corrected, "r1", "2026-09-19T11:00:00Z"),
+    corrected,
+  );
+  medication.name = "Edited name";
+  const lines = medicationLines([medication], corrected).join("\n");
+  assert.ok(lines.includes("Edited name"));
+  assert.ok(lines.includes("Sample medicine"));
+  assert.ok(lines.includes("Corrected / withdrawn"));
+});

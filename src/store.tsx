@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useReducer } from "react";
 import type { Appointment, Entry } from "./domain";
-type Medication = {
-  id: string;
-  name: string;
-  instructions: string;
-  time: string;
-};
+import {
+  correctMedicationRecord,
+  type Medication,
+  type MedicationRecord,
+} from "./medications";
 type State = {
   name: string;
   relationship: string;
@@ -13,6 +12,7 @@ type State = {
   entries: Entry[];
   medications: Medication[];
   meds: Record<string, boolean>;
+  medicationRecords: MedicationRecord[];
   transition: number[];
   questions: string[];
   saved: string[];
@@ -33,9 +33,11 @@ type Action =
       entry: Entry;
     }
   | {
-      type: "med";
-      id: string;
+      type: "record-med";
+      record: MedicationRecord;
     }
+  | { type: "correct-med"; id: string; at: string }
+  | { type: "edit-med"; medication: Medication }
   | {
       type: "add-med";
       medication: Medication;
@@ -79,6 +81,7 @@ const initial: State = {
     },
   ],
   meds: {},
+  medicationRecords: [],
   transition: [],
   questions: [
     "What changes should we watch for at home?",
@@ -112,10 +115,35 @@ function reducer(state: State, action: Action): State {
       };
     case "entry":
       return { ...state, entries: [action.entry, ...state.entries] };
-    case "med":
+    case "record-med":
       return {
         ...state,
-        meds: { ...state.meds, [action.id]: !state.meds[action.id] },
+        meds: { ...state.meds, [action.record.medication.id]: true },
+        medicationRecords: [action.record, ...state.medicationRecords],
+      };
+    case "correct-med": {
+      const records = correctMedicationRecord(
+        state.medicationRecords,
+        action.id,
+        action.at,
+      );
+      return {
+        ...state,
+        medicationRecords: records,
+        meds: Object.fromEntries(
+          state.medications.map((m) => [
+            m.id,
+            records.some((r) => r.medication.id === m.id && !r.correctedAt),
+          ]),
+        ),
+      };
+    }
+    case "edit-med":
+      return {
+        ...state,
+        medications: state.medications.map((m) =>
+          m.id === action.medication.id ? action.medication : m,
+        ),
       };
     case "add-med":
       return {

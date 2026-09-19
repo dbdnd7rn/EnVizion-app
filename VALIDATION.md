@@ -1,12 +1,12 @@
 # Validation status
 
-Verified on September 18, 2026.
+Verified on September 19, 2026.
 
 ## Passed
 
 - Full dependency installation completed; `pnpm-lock.yaml` records resolved versions.
 - TypeScript: `pnpm typecheck`.
-- Six domain tests: `pnpm test` (required readings, numeric validation including overflow, required observations, safe printable HTML, calendar/time validation, and appointment worksheet content).
+- Seven domain tests: `pnpm test` (required readings, numeric validation including overflow, required observations, safe printable HTML, calendar/time validation, and appointment worksheet content).
 - Production web export: `pnpm build:web`.
 - Browser: onboarding renders with the original logo and typography, demo onboarding opens the dashboard, the care form accepts a sample 120/80 reading, the saved observation appears in history, and back navigation updates dashboard progress.
 - Fixed a web-only SVG accessibility warning and empty-string rendering warnings. Rechecked the health-entry flow without new console errors.
@@ -20,6 +20,13 @@ Verified on September 18, 2026.
 
 ## Running locally
 
-The development preview uses http://localhost:8081. Start it again with `pnpm web --localhost` if the local server stops.
+The development preview uses http://localhost:8082. Start it again with `pnpm web --localhost` if the local server stops.
 
 The frontend is a session-only demo. Real coaching bookings, backend integration, persistent records, clinical content approval, and app-store distribution are outside this frontend increment.
+
+## Medication logging increment
+
+- Type checking and production web export pass.
+- New test verifies corrections preserve original entries and printed history retains the earlier medication name after an edit.
+- Browser verified: recording a dose adds a timestamp, withdrawing it reduces the count and preserves history, and editing the medication name updates the list without changing the original record.
+- Medication print layout and native device behavior remain unverified.

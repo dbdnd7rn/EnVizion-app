@@ -2,7 +2,7 @@
 
 A caregiver-facing Expo + React Native + TypeScript frontend for iOS, Android, and web review. Uses React Navigation, shared design tokens, bundled DM Sans and Lora typography, and the original EnVizion Life logo extracted from the supplied care-team document.
 
-The browser preview runs at http://localhost:8081. Dependency installation, type checking, domain tests, and a production web export have completed successfully. See [validation details](VALIDATION.md).
+The browser preview runs at http://localhost:8082. Dependency installation, type checking, domain tests, and a production web export have completed successfully. See [validation details](VALIDATION.md).
 
 ## Run
 
@@ -17,7 +17,7 @@ pnpm android
 pnpm ios
 ```
 
-iOS simulator requires macOS. Physical device testing can use a compatible Expo development environment. The browser preview is at http://localhost:8081.
+iOS simulator requires macOS. Physical device testing can use a compatible Expo development environment. The browser preview is at http://localhost:8082.
 
 ## Checks
 
@@ -34,7 +34,7 @@ Tests use the Node 22+ built-in TypeScript stripping feature (validated with Nod
 - Two-step onboarding with name, caregiving relationship, and optional spiritual encouragement
 - Home dashboard, Toolkit, Library, and Support tabs
 - Vitals, blood sugar, CHF observations, behavior/delirium observations, and red-flag logs, with input validation and session history
-- Sample medication check-offs; editable appointment title, date, time, location, and preparation notes, with question add/remove and a printable plan
+- Editable sample medication list, timestamped dose history, corrections that retain original entries, and printable medication records; editable appointment title, date, time, location, and preparation notes, with question add/remove and a printable plan
 - Hospital-to-home checklist with progress and printable worksheet
 - Patient rights and advance care conversation starters
 - COPD, heart failure, diabetes, kidney health, memory/neurological care, and stroke/TIA guides

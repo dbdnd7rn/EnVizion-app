@@ -26,6 +26,7 @@ import {
 import { transitionSteps } from "../content";
 import { useNav } from "./MainScreens";
 import { printResource } from "../printing";
+import { medicationLines } from "../medications";
 export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
@@ -152,98 +153,206 @@ export function TrackerScreen({
 export function MedicationScreen() {
   const { state, dispatch } = useCare();
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [instructions, setInstructions] = useState("");
   const [time, setTime] = useState("");
+  const [message, setMessage] = useState("");
+  const closeForm = () => {
+    setAdding(false);
+    setEditingId(null);
+    setName("");
+    setInstructions("");
+    setTime("");
+  };
+  const activeRecords = state.medicationRecords.filter((r) => !r.correctedAt);
   return (
     <Page>
       <Heading
         eyebrow="DAILY CARE"
         title="A clearer medication routine"
-        body="Record what happened. Keep the conversation with your care team informed."
+        body="Keep your list, record each dose, and bring your notes to the care team."
       />
-      <Card style={{ backgroundColor: "#F1EBF5" }}>
-        <Text style={S.h3}>A sample routine, just for exploring</Text>
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Text style={S.eyebrow}>YOUR DEMO SESSION</Text>
+        <Text style={S.h2}>{activeRecords.length} doses recorded</Text>
         <Txt>
-          These are example labels, not prescriptions or dose instructions. You
-          can add a sample medication below to explore the log.
+          Use sample information. Times show when you made each entry, not a
+          verified administration time. Reloading clears this demo.
         </Txt>
       </Card>
-      {state.medications.map(
-        ({ id, name: title, time, instructions: desc }) => (
-          <Card key={id}>
-            <View style={S.between}>
-              <View style={S.row}>
-                <Icon name="medical-outline" />
-                <Text style={S.h3}>{title}</Text>
-              </View>
-              <Text style={S.small}>{time}</Text>
+      <Section title="Your medication list" />
+      {state.medications.map((medication) => (
+        <Card key={medication.id}>
+          <View style={S.row}>
+            <Icon name="medical-outline" />
+            <View style={{ flex: 1, gap: 5 }}>
+              <Text style={S.h3}>{medication.name}</Text>
+              <Text style={S.small}>Scheduled: {medication.time}</Text>
             </View>
-            <Txt>{desc}</Txt>
-            <Pressable
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: !!state.meds[id] }}
-              accessibilityLabel={`Mark ${title} as taken`}
-              onPress={() => dispatch({ type: "med", id })}
-              style={{
-                borderRadius: 12,
-                padding: 15,
-                backgroundColor: state.meds[id] ? "#E9F2EC" : C.lavender,
-                flexDirection: "row",
-                gap: 10,
-              }}
-            >
-              <Icon
-                name={state.meds[id] ? "checkmark-circle" : "ellipse-outline"}
-                color={state.meds[id] ? C.green : C.purple}
-              />
-              <Text style={S.h3}>
-                {state.meds[id] ? "Recorded as taken" : "Mark as taken"}
-              </Text>
-            </Pressable>
-          </Card>
-        ),
-      )}
+          </View>
+          <Txt>{medication.instructions}</Txt>
+          <Button
+            title={"Record dose: " + medication.name}
+            icon="checkmark-circle-outline"
+            onPress={() => {
+              dispatch({
+                type: "record-med",
+                record: {
+                  id: String(Date.now()) + Math.random(),
+                  medication: { ...medication },
+                  recordedAt: new Date().toISOString(),
+                },
+              });
+              setMessage(
+                medication.name +
+                  ": recorded as taken. You can correct this entry in session history.",
+              );
+            }}
+          />
+          <Button
+            title={"Edit " + medication.name}
+            secondary
+            icon="create-outline"
+            onPress={() => {
+              setEditingId(medication.id);
+              setAdding(true);
+              setName(medication.name);
+              setInstructions(medication.instructions);
+              setTime(medication.time);
+              setMessage("");
+            }}
+          />
+        </Card>
+      ))}
       <Button
-        title={adding ? "Cancel adding medication" : "Add sample medication"}
+        title={adding ? "Cancel medication changes" : "Add sample medication"}
         secondary
-        icon="add-outline"
-        onPress={() => setAdding(!adding)}
+        icon={adding ? "close-outline" : "add-outline"}
+        onPress={() => {
+          if (adding) closeForm();
+          else {
+            closeForm();
+            setAdding(true);
+          }
+        }}
       />
       {adding && (
         <Card>
+          <Text style={S.h3}>
+            {editingId ? "Edit medication details" : "Add to your list"}
+          </Text>
           <Field label="Medication name" value={name} onChange={setName} />
           <Field
             label="Directions exactly as prescribed"
             value={instructions}
             onChange={setInstructions}
+            multiline
           />
           <Field label="Scheduled time" value={time} onChange={setTime} />
+          <Txt style={S.small}>
+            Copy the label for this demo. Editing your list never changes
+            earlier records or your prescribed care plan.
+          </Txt>
           <Button
-            title="Add to my medication log"
+            title={
+              editingId ? "Save medication details" : "Add to my medication log"
+            }
             disabled={!name.trim() || !instructions.trim() || !time.trim()}
             onPress={() => {
+              const medication = {
+                id: editingId || String(Date.now()) + Math.random(),
+                name: name.trim(),
+                instructions: instructions.trim(),
+                time: time.trim(),
+              };
               dispatch({
-                type: "add-med",
-                medication: {
-                  id: String(Date.now()),
-                  name: name.trim(),
-                  instructions: instructions.trim(),
-                  time: time.trim(),
-                },
+                type: editingId ? "edit-med" : "add-med",
+                medication,
               });
-              setName("");
-              setInstructions("");
-              setTime("");
-              setAdding(false);
+              closeForm();
+              setMessage("Medication list updated for this demo session.");
             }}
           />
         </Card>
       )}
+      {Boolean(message) && (
+        <Text accessibilityRole="alert" style={S.body}>
+          {message}
+        </Text>
+      )}
+      <Section title="Session history" />
+      {!state.medicationRecords.length && (
+        <Card>
+          <Icon name="journal-outline" />
+          <Text style={S.h3}>Your record starts here.</Text>
+          <Txt>
+            Record a sample dose above. Each entry will appear with its own
+            timestamp.
+          </Txt>
+        </Card>
+      )}
+      {state.medicationRecords.map((record) => (
+        <Card key={record.id}>
+          <Text
+            style={[
+              S.eyebrow,
+              { color: record.correctedAt ? C.muted : C.green },
+            ]}
+          >
+            {record.correctedAt ? "CORRECTED / WITHDRAWN" : "RECORDED AS TAKEN"}
+          </Text>
+          <Text style={S.h3}>{record.medication.name}</Text>
+          <Txt>{record.medication.instructions}</Txt>
+          <Text style={S.small}>
+            Entry recorded: {new Date(record.recordedAt).toLocaleString()}
+          </Text>
+          {record.correctedAt ? (
+            <Text style={S.small}>
+              Withdrawn: {new Date(record.correctedAt).toLocaleString()}. Kept
+              here for clarity.
+            </Text>
+          ) : (
+            <Button
+              title={"Correct entry for " + record.medication.name}
+              secondary
+              onPress={() => {
+                dispatch({
+                  type: "correct-med",
+                  id: record.id,
+                  at: new Date().toISOString(),
+                });
+                setMessage(
+                  "Entry withdrawn. The original record remains visible in history.",
+                );
+              }}
+            />
+          )}
+        </Card>
+      ))}
+      <Button
+        title="Print medication list and history"
+        icon="print-outline"
+        onPress={async () => {
+          try {
+            await printResource(
+              "My medication record",
+              medicationLines(state.medications, state.medicationRecords),
+            );
+            setMessage(
+              "Print or share requested. Check your browser or device window.",
+            );
+          } catch {
+            setMessage(
+              "Printing could not open. Please try again on a supported browser or device.",
+            );
+          }
+        }}
+      />
       <Text style={S.small}>
-        Check-offs are demo session records, not reminders or dose
-        recommendations. Ask a pharmacist or clinician about missed doses or
-        medication questions.
+        These are session records, not reminders or dose recommendations. Follow
+        the pharmacy label and ask a pharmacist or clinician about medication
+        questions.
       </Text>
     </Page>
   );
