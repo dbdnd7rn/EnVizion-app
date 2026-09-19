@@ -31,6 +31,7 @@ export type RootStack = {
   Emergency: undefined;
   Resources: undefined;
   Profile: undefined;
+  Notifications: undefined;
   StaffWorkspace: undefined;
   StaffManagement: undefined;
   StaffSupportThread: {
