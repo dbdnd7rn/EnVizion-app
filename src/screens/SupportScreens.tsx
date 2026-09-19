@@ -45,7 +45,7 @@ export function OnboardingScreen() {
     let active = true;
 
     loadSavedOnboarding()
-      .then((saved) => {
+      .then(async (saved) => {
         if (!active) return;
 
         if (saved) {
@@ -55,6 +55,7 @@ export function OnboardingScreen() {
             relationship: saved.relationship,
             faith: saved.faith,
           });
+          await refresh();
           n.reset({ index: 0, routes: [{ name: "Main" }] });
           return;
         }
@@ -68,7 +69,7 @@ export function OnboardingScreen() {
     return () => {
       active = false;
     };
-  }, [dispatch, n]);
+  }, [dispatch, n, refresh]);
 
   async function finish() {
     setMessage("");
