@@ -273,3 +273,87 @@ export async function updateCoachingRequestStatus(
 
   if (error) throw error;
 }
+
+
+export type ManagedStaffMember = {
+  userId: string;
+  displayName: string;
+  role: StaffRole;
+  active: boolean;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+  isCurrentUser: boolean;
+};
+
+export type StaffAdminAuditEntry = {
+  id: string;
+  action: "invite" | "activate" | "role_change" | "deactivate" | "reactivate";
+  details: Record<string, unknown>;
+  createdAt: string;
+};
+
+async function invokeStaffAdmin<T>(body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke("staff-admin", {
+    body,
+  });
+
+  if (error) throw error;
+  if (data?.error) throw new Error(String(data.error));
+  return data as T;
+}
+
+export async function loadManagedStaff(): Promise<ManagedStaffMember[]> {
+  const result = await invokeStaffAdmin<{ staff: ManagedStaffMember[] }>({
+    action: "list",
+  });
+  return result.staff ?? [];
+}
+
+export async function inviteStaffMember(input: {
+  displayName: string;
+  email: string;
+  role: StaffRole;
+}): Promise<{ invited: boolean; userId: string }> {
+  return invokeStaffAdmin({
+    action: "invite",
+    displayName: input.displayName,
+    email: input.email,
+    role: input.role,
+  });
+}
+
+export async function updateManagedStaff(input: {
+  userId: string;
+  role: StaffRole;
+  active: boolean;
+}) {
+  await invokeStaffAdmin({
+    action: "update",
+    userId: input.userId,
+    role: input.role,
+    active: input.active,
+  });
+}
+
+export async function loadStaffAdminAudit(): Promise<StaffAdminAuditEntry[]> {
+  const membership = await requireStaff();
+  if (membership.role !== "admin") {
+    throw new Error("Administrator access required.");
+  }
+
+  const { data, error } = await supabase
+    .from("staff_admin_audit")
+    .select("id, action, details, created_at")
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    action: row.action as StaffAdminAuditEntry["action"],
+    details: (row.details ?? {}) as Record<string, unknown>,
+    createdAt: row.created_at,
+  }));
+}
