@@ -314,6 +314,8 @@ function appointmentFromRow(
         id: string;
         title: string;
         starts_at: string | null;
+        appointment_date: string | null;
+        appointment_time: string | null;
         location: string | null;
         notes: string | null;
       }
@@ -332,14 +334,17 @@ function appointmentFromRow(
     };
   }
 
-  let date = "";
-  let time = "";
-  if (row.starts_at) {
+  let date = row.appointment_date ?? "";
+  let time = row.appointment_time ? row.appointment_time.slice(0, 5) : "";
+
+  if (!date && row.starts_at) {
     const value = new Date(row.starts_at);
     if (!Number.isNaN(value.getTime())) {
       const pad = (part: number) => String(part).padStart(2, "0");
       date = `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
-      time = `${pad(value.getHours())}:${pad(value.getMinutes())}`;
+      if (!time) {
+        time = `${pad(value.getHours())}:${pad(value.getMinutes())}`;
+      }
     }
   }
 
@@ -404,7 +409,7 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
       .order("recorded_at", { ascending: false }),
     supabase
       .from("appointments")
-      .select("id, title, starts_at, location, notes")
+      .select("id, title, starts_at, appointment_date, appointment_time, location, notes")
       .eq("care_recipient_id", careRecipientId)
       .eq("user_id", user.id)
       .order("created_at", { ascending: true })
@@ -471,6 +476,8 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
           id: appointmentResult.data.id,
           title: appointmentResult.data.title,
           starts_at: appointmentResult.data.starts_at,
+          appointment_date: appointmentResult.data.appointment_date,
+          appointment_time: appointmentResult.data.appointment_time,
           location: appointmentResult.data.location,
           notes: appointmentResult.data.notes,
         }
@@ -663,6 +670,8 @@ export async function saveAppointment(
     user_id: user.id,
     title: appointment.title.trim(),
     starts_at: appointmentStart(appointment),
+    appointment_date: appointment.date || null,
+    appointment_time: appointment.time ? `${appointment.time}:00` : null,
     location: appointment.location.trim() || null,
     notes: appointment.notes.trim() || null,
   };
@@ -784,7 +793,7 @@ export async function setSavedResource(resourceId: string, saved: boolean) {
       resource_id: resourceId,
       saved_at: new Date().toISOString(),
     },
-    { onConflict: "user_id,resource_id" },
+    { onConflict: "user_id,resource_id", ignoreDuplicates: true },
   );
 
   if (error) throw error;
