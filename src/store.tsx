@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useReducer, useState } from "react";
 import type { Appointment, Entry } from "./domain";
+import { loadCareData, type CareSnapshot } from "./backend";
 import {
   conversationReducer,
   initialConversation,
@@ -25,10 +26,14 @@ type State = {
   saved: string[];
   coaching: string | null;
   appointment: Appointment;
+  appointmentId: string | null;
+  questionIds: string[];
+  hydrated: boolean;
 };
 type Action =
   | ConversationAction
-  | { type: "appointment"; appointment: Appointment }
+  | { type: "hydrate-care"; snapshot: CareSnapshot }
+  | { type: "appointment"; appointment: Appointment; appointmentId?: string | null }
   | { type: "remove-question"; index: number }
   | {
       type: "profile";
@@ -57,6 +62,8 @@ type Action =
   | {
       type: "question";
       text: string;
+      id?: string;
+      appointmentId?: string | null;
     }
   | {
       type: "bookmark";
@@ -71,43 +78,44 @@ type Action =
     };
 const initial: State = {
   conversation: initialConversation,
-  name: "Sarah",
-  relationship: "A parent",
+  name: "",
+  relationship: "A loved one",
   faith: false,
   entries: [],
-  medications: [
-    {
-      id: "morning",
-      name: "Morning medication",
-      instructions: "Follow the pharmacy label",
-      time: "8:00 AM",
-    },
-    {
-      id: "evening",
-      name: "Evening medication",
-      instructions: "Follow the pharmacy label",
-      time: "6:00 PM",
-    },
-  ],
+  medications: [],
   meds: {},
   medicationRecords: [],
   transition: [],
-  questions: [
-    "What changes should we watch for at home?",
-    "Can we review the current medication list?",
-  ],
+  questions: [],
+  questionIds: [],
   saved: [],
   coaching: null,
   appointment: {
-    title: "Primary care follow-up",
+    title: "Next appointment",
     date: "",
     time: "",
     location: "",
-    notes: "Bring your discharge papers and care notes.",
+    notes: "",
   },
+  appointmentId: null,
+  hydrated: false,
 };
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "hydrate-care":
+      return {
+        ...state,
+        ...action.snapshot,
+        meds: Object.fromEntries(
+          action.snapshot.medications.map((m) => [
+            m.id,
+            action.snapshot.medicationRecords.some(
+              (r) => r.medication.id === m.id && !r.correctedAt,
+            ),
+          ]),
+        ),
+        hydrated: true,
+      };
     case "conversation-turn":
     case "support-request":
     case "support-message":
@@ -118,16 +126,24 @@ function reducer(state: State, action: Action): State {
         conversation: conversationReducer(state.conversation, action),
       };
     case "appointment":
-      return { ...state, appointment: action.appointment };
+      return {
+        ...state,
+        appointment: action.appointment,
+        appointmentId:
+          action.appointmentId === undefined
+            ? state.appointmentId
+            : action.appointmentId,
+      };
     case "remove-question":
       return {
         ...state,
         questions: state.questions.filter((_, index) => index !== action.index),
+        questionIds: state.questionIds.filter((_, index) => index !== action.index),
       };
     case "profile":
       return {
         ...state,
-        name: action.name.trim() || "Sarah",
+        name: action.name.trim() || "Caregiver",
         relationship: action.relationship,
         faith: action.faith,
       };
@@ -176,7 +192,15 @@ function reducer(state: State, action: Action): State {
           : [...state.transition, action.index],
       };
     case "question":
-      return { ...state, questions: [...state.questions, action.text] };
+      return {
+        ...state,
+        questions: [...state.questions, action.text],
+        questionIds: [...state.questionIds, action.id ?? ""],
+        appointmentId:
+          action.appointmentId === undefined
+            ? state.appointmentId
+            : action.appointmentId,
+      };
     case "bookmark":
       return {
         ...state,
@@ -193,11 +217,36 @@ function reducer(state: State, action: Action): State {
 const Context = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
+  refresh: () => Promise<void>;
+  loading: boolean;
 } | null>(null);
+
 export function CareProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initial);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const snapshot = await loadCareData();
+      if (snapshot) {
+        dispatch({ type: "hydrate-care", snapshot });
+      }
+    } catch {
+      // Keep the app usable if the network is temporarily unavailable.
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
   return (
-    <Context.Provider value={{ state, dispatch }}>{children}</Context.Provider>
+    <Context.Provider value={{ state, dispatch, refresh, loading }}>
+      {children}
+    </Context.Provider>
   );
 }
 export function useCare() {

@@ -28,17 +28,17 @@ export function medicationLines(
   records: MedicationRecord[],
 ) {
   return [
-    "Demo session only. This list is a caregiver record, not a prescription or dosing recommendation.",
+    "This list is a caregiver record, not a prescription or dosing recommendation.",
     "MEDICATION LIST",
     ...medications.map(
       (m) =>
         `${m.name} | Directions entered: ${m.instructions} | Scheduled time: ${m.time}`,
     ),
-    "SESSION HISTORY (times indicate when entries were recorded)",
+    "MEDICATION HISTORY (times indicate when entries were recorded)",
     ...records.map(
       (r) =>
         `${r.medication.name} | ${r.medication.instructions} | Recorded as taken: ${new Date(r.recordedAt).toLocaleString()}${r.correctedAt ? ` | Corrected / withdrawn: ${new Date(r.correctedAt).toLocaleString()}` : ""}`,
     ),
-    ...(records.length ? [] : ["No doses recorded in this session."]),
+    ...(records.length ? [] : ["No doses recorded yet."]),
   ];
 }

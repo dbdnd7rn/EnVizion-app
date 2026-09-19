@@ -27,6 +27,18 @@ import { transitionSteps } from "../content";
 import { useNav } from "./MainScreens";
 import { printResource } from "../printing";
 import { medicationLines } from "../medications";
+import {
+  addAppointmentQuestion,
+  correctMedicationDose,
+  createMedication,
+  recordMedicationDose,
+  removeAppointmentQuestion,
+  saveAppointment,
+  saveObservation,
+  setTransitionItem,
+  updateMedication,
+} from "../backend";
+
 export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
@@ -36,7 +48,34 @@ export function TrackerScreen({
   const [values, setValues] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
   const history = state.entries.filter((e) => e.kind === kind);
+
+  async function save() {
+    const validationMessage = validateEntry(kind, values);
+    if (validationMessage) {
+      setError(validationMessage);
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    try {
+      const entry = await saveObservation(kind, values);
+      dispatch({ type: "entry", entry });
+      setValues({});
+      setSuccess(true);
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "We could not save this observation. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <Page>
       <Heading
@@ -58,15 +97,15 @@ export function TrackerScreen({
         </Card>
       )}
       <Card>
-        <Text style={S.eyebrow}>NEW OBSERVATION • DEMO</Text>
-        {trackerFields[kind].map((f) => (
+        <Text style={S.eyebrow}>NEW OBSERVATION</Text>
+        {trackerFields[kind].map((field) => (
           <Field
-            key={f.key}
-            label={f.label + (f.required ? " *" : "")}
-            value={values[f.key] || ""}
-            numeric={f.numeric}
-            onChange={(v) => {
-              setValues((old) => ({ ...old, [f.key]: v }));
+            key={field.key}
+            label={field.label + (field.required ? " *" : "")}
+            value={values[field.key] || ""}
+            numeric={field.numeric}
+            onChange={(value) => {
+              setValues((old) => ({ ...old, [field.key]: value }));
               setSuccess(false);
             }}
           />
@@ -74,7 +113,9 @@ export function TrackerScreen({
         <Field
           label="Additional notes (optional)"
           value={values.notes || ""}
-          onChange={(v) => setValues((old) => ({ ...old, notes: v }))}
+          onChange={(value) =>
+            setValues((old) => ({ ...old, notes: value }))
+          }
           multiline
         />
         {Boolean(error) && (
@@ -84,37 +125,21 @@ export function TrackerScreen({
         )}
         {success && (
           <Text accessibilityRole="alert" style={[S.h3, { color: C.green }]}>
-            Observation saved to this demo session.
+            Observation saved securely.
           </Text>
         )}
         <Button
-          title="Save observation"
+          title={saving ? "Saving observation…" : "Save observation"}
           icon="checkmark-outline"
-          onPress={() => {
-            const message = validateEntry(kind, values);
-            if (message) {
-              setError(message);
-              return;
-            }
-            dispatch({
-              type: "entry",
-              entry: {
-                id: `${Date.now()}-${Math.random()}`,
-                kind,
-                values: { ...values },
-                recordedAt: new Date().toISOString(),
-              },
-            });
-            setValues({});
-            setError("");
-            setSuccess(true);
-          }}
+          disabled={saving}
+          onPress={() => void save()}
         />
         <Text style={S.small}>
-          * Required. This demo keeps entries only while the app is open. Use
-          sample information.
+          * Required. Readings are stored with your account and are not
+          interpreted as a diagnosis.
         </Text>
       </Card>
+
       <Section title="Your recent observations" />
       {!history.length ? (
         <Card>
@@ -126,20 +151,20 @@ export function TrackerScreen({
           </Txt>
         </Card>
       ) : (
-        history.map((e) => (
-          <Card key={e.id}>
+        history.map((entry) => (
+          <Card key={entry.id}>
             <Text style={S.eyebrow}>
-              {new Date(e.recordedAt).toLocaleString()}
+              {new Date(entry.recordedAt).toLocaleString()}
             </Text>
             {trackerFields[kind]
-              .filter((f) => e.values[f.key])
-              .map((f) => (
-                <View key={f.key}>
-                  <Text style={S.small}>{f.label}</Text>
-                  <Text style={S.h3}>{e.values[f.key]}</Text>
+              .filter((field) => entry.values[field.key])
+              .map((field) => (
+                <View key={field.key}>
+                  <Text style={S.small}>{field.label}</Text>
+                  <Text style={S.h3}>{entry.values[field.key]}</Text>
                 </View>
               ))}
-            {Boolean(e.values.notes) && <Txt>{e.values.notes}</Txt>}
+            {Boolean(entry.values.notes) && <Txt>{entry.values.notes}</Txt>}
           </Card>
         ))
       )}
@@ -150,6 +175,7 @@ export function TrackerScreen({
     </Page>
   );
 }
+
 export function MedicationScreen() {
   const { state, dispatch } = useCare();
   const [adding, setAdding] = useState(false);
@@ -158,6 +184,8 @@ export function MedicationScreen() {
   const [instructions, setInstructions] = useState("");
   const [time, setTime] = useState("");
   const [message, setMessage] = useState("");
+  const [busyId, setBusyId] = useState<string | null>(null);
+
   const closeForm = () => {
     setAdding(false);
     setEditingId(null);
@@ -165,7 +193,45 @@ export function MedicationScreen() {
     setInstructions("");
     setTime("");
   };
-  const activeRecords = state.medicationRecords.filter((r) => !r.correctedAt);
+
+  const activeRecords = state.medicationRecords.filter(
+    (record) => !record.correctedAt,
+  );
+
+  async function saveMedicationDetails() {
+    setMessage("");
+    setBusyId(editingId ?? "new");
+    try {
+      const medication = editingId
+        ? await updateMedication({
+            id: editingId,
+            name: name.trim(),
+            instructions: instructions.trim(),
+            time: time.trim(),
+          })
+        : await createMedication({
+            name: name.trim(),
+            instructions: instructions.trim(),
+            time: time.trim(),
+          });
+
+      dispatch({
+        type: editingId ? "edit-med" : "add-med",
+        medication,
+      });
+      closeForm();
+      setMessage("Medication list updated securely.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not update the medication list.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   return (
     <Page>
       <Heading
@@ -174,46 +240,72 @@ export function MedicationScreen() {
         body="Keep your list, record each dose, and bring your notes to the care team."
       />
       <Card style={{ backgroundColor: C.lavender }}>
-        <Text style={S.eyebrow}>YOUR DEMO SESSION</Text>
-        <Text style={S.h2}>{activeRecords.length} doses recorded</Text>
+        <Text style={S.eyebrow}>YOUR MEDICATION RECORD</Text>
+        <Text style={S.h2}>{activeRecords.length} active dose records</Text>
         <Txt>
-          Use sample information. Times show when you made each entry, not a
-          verified administration time. Reloading clears this demo.
+          Times show when you recorded each entry. This caregiver log does not
+          change the prescribed medication plan.
         </Txt>
       </Card>
+
       <Section title="Your medication list" />
+      {!state.medications.length && (
+        <Card>
+          <Icon name="medical-outline" />
+          <Text style={S.h3}>No medications added yet.</Text>
+          <Txt>
+            Add medications from the pharmacy label so your caregiver record is
+            ready when you need it.
+          </Txt>
+        </Card>
+      )}
+
       {state.medications.map((medication) => (
         <Card key={medication.id}>
           <View style={S.row}>
             <Icon name="medical-outline" />
             <View style={{ flex: 1, gap: 5 }}>
               <Text style={S.h3}>{medication.name}</Text>
-              <Text style={S.small}>Scheduled: {medication.time}</Text>
+              <Text style={S.small}>
+                Scheduled: {medication.time || "Not specified"}
+              </Text>
             </View>
           </View>
           <Txt>{medication.instructions}</Txt>
           <Button
-            title={"Record dose: " + medication.name}
+            title={
+              busyId === `dose-${medication.id}`
+                ? "Recording dose…"
+                : "Record dose: " + medication.name
+            }
             icon="checkmark-circle-outline"
-            onPress={() => {
-              dispatch({
-                type: "record-med",
-                record: {
-                  id: String(Date.now()) + Math.random(),
-                  medication: { ...medication },
-                  recordedAt: new Date().toISOString(),
-                },
-              });
-              setMessage(
-                medication.name +
-                  ": recorded as taken. You can correct this entry in session history.",
-              );
+            disabled={busyId !== null}
+            onPress={async () => {
+              setBusyId(`dose-${medication.id}`);
+              setMessage("");
+              try {
+                const record = await recordMedicationDose(medication);
+                dispatch({ type: "record-med", record });
+                setMessage(
+                  medication.name +
+                    ": recorded as taken. You can correct this entry below.",
+                );
+              } catch (error) {
+                setMessage(
+                  error instanceof Error
+                    ? error.message
+                    : "We could not record this dose.",
+                );
+              } finally {
+                setBusyId(null);
+              }
             }}
           />
           <Button
             title={"Edit " + medication.name}
             secondary
             icon="create-outline"
+            disabled={busyId !== null}
             onPress={() => {
               setEditingId(medication.id);
               setAdding(true);
@@ -225,10 +317,12 @@ export function MedicationScreen() {
           />
         </Card>
       ))}
+
       <Button
-        title={adding ? "Cancel medication changes" : "Add sample medication"}
+        title={adding ? "Cancel medication changes" : "Add medication"}
         secondary
         icon={adding ? "close-outline" : "add-outline"}
+        disabled={busyId !== null}
         onPress={() => {
           if (adding) closeForm();
           else {
@@ -237,6 +331,7 @@ export function MedicationScreen() {
           }
         }}
       />
+
       {adding && (
         <Card>
           <Text style={S.h3}>
@@ -251,47 +346,45 @@ export function MedicationScreen() {
           />
           <Field label="Scheduled time" value={time} onChange={setTime} />
           <Txt style={S.small}>
-            Copy the label for this demo. Editing your list never changes
-            earlier records or your prescribed care plan.
+            Copy the pharmacy label carefully. This record is for organization;
+            it does not alter the prescription.
           </Txt>
           <Button
             title={
-              editingId ? "Save medication details" : "Add to my medication log"
+              busyId
+                ? "Saving medication…"
+                : editingId
+                  ? "Save medication details"
+                  : "Add to my medication log"
             }
-            disabled={!name.trim() || !instructions.trim() || !time.trim()}
-            onPress={() => {
-              const medication = {
-                id: editingId || String(Date.now()) + Math.random(),
-                name: name.trim(),
-                instructions: instructions.trim(),
-                time: time.trim(),
-              };
-              dispatch({
-                type: editingId ? "edit-med" : "add-med",
-                medication,
-              });
-              closeForm();
-              setMessage("Medication list updated for this demo session.");
-            }}
+            disabled={
+              busyId !== null ||
+              !name.trim() ||
+              !instructions.trim() ||
+              !time.trim()
+            }
+            onPress={() => void saveMedicationDetails()}
           />
         </Card>
       )}
+
       {Boolean(message) && (
         <Text accessibilityRole="alert" style={S.body}>
           {message}
         </Text>
       )}
-      <Section title="Session history" />
+
+      <Section title="Medication history" />
       {!state.medicationRecords.length && (
         <Card>
           <Icon name="journal-outline" />
           <Text style={S.h3}>Your record starts here.</Text>
           <Txt>
-            Record a sample dose above. Each entry will appear with its own
-            timestamp.
+            Dose records will appear here with the time they were entered.
           </Txt>
         </Card>
       )}
+
       {state.medicationRecords.map((record) => (
         <Card key={record.id}>
           <Text
@@ -316,20 +409,31 @@ export function MedicationScreen() {
             <Button
               title={"Correct entry for " + record.medication.name}
               secondary
-              onPress={() => {
-                dispatch({
-                  type: "correct-med",
-                  id: record.id,
-                  at: new Date().toISOString(),
-                });
-                setMessage(
-                  "Entry withdrawn. The original record remains visible in history.",
-                );
+              disabled={busyId !== null}
+              onPress={async () => {
+                setBusyId(`correct-${record.id}`);
+                setMessage("");
+                try {
+                  const at = await correctMedicationDose(record.id);
+                  dispatch({ type: "correct-med", id: record.id, at });
+                  setMessage(
+                    "Entry withdrawn. The original record remains visible in history.",
+                  );
+                } catch (error) {
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : "We could not correct this record.",
+                  );
+                } finally {
+                  setBusyId(null);
+                }
               }}
             />
           )}
         </Card>
       ))}
+
       <Button
         title="Print medication list and history"
         icon="print-outline"
@@ -350,13 +454,14 @@ export function MedicationScreen() {
         }}
       />
       <Text style={S.small}>
-        These are session records, not reminders or dose recommendations. Follow
-        the pharmacy label and ask a pharmacist or clinician about medication
-        questions.
+        These are caregiver records, not reminders or dose recommendations.
+        Follow the pharmacy label and ask a pharmacist or clinician about
+        medication questions.
       </Text>
     </Page>
   );
 }
+
 export function AppointmentScreen() {
   const { state, dispatch } = useCare();
   const [question, setQuestion] = useState("");
@@ -364,6 +469,44 @@ export function AppointmentScreen() {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(state.appointment);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function saveVisit() {
+    const appointment = {
+      title: draft.title.trim(),
+      date: draft.date.trim(),
+      time: draft.time.trim(),
+      location: draft.location.trim(),
+      notes: draft.notes.trim(),
+    };
+
+    const validationError = validateAppointment(appointment);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+    try {
+      const appointmentId = await saveAppointment(
+        appointment,
+        state.appointmentId,
+      );
+      dispatch({ type: "appointment", appointment, appointmentId });
+      setEditing(false);
+      setMessage("Visit details saved securely.");
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "We could not save the visit details.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <Page>
       <Heading
@@ -375,7 +518,7 @@ export function AppointmentScreen() {
         <View style={S.row}>
           <Icon name="calendar-outline" size={28} />
           <View style={{ flex: 1, gap: 5 }}>
-            <Text style={S.eyebrow}>YOUR NEXT VISIT • DEMO</Text>
+            <Text style={S.eyebrow}>YOUR NEXT VISIT</Text>
             <Text style={S.h3}>{state.appointment.title}</Text>
             <Txt>
               {state.appointment.date || "Date to be confirmed"}
@@ -393,6 +536,7 @@ export function AppointmentScreen() {
           title={editing ? "Cancel editing visit" : "Edit visit details"}
           secondary
           icon="create-outline"
+          disabled={saving}
           onPress={() => {
             setDraft(state.appointment);
             setError("");
@@ -400,32 +544,35 @@ export function AppointmentScreen() {
           }}
         />
       </Card>
+
       {editing && (
         <Card>
           <Field
             label="Visit title"
             value={draft.title}
-            onChange={(title) => setDraft((d) => ({ ...d, title }))}
+            onChange={(title) => setDraft((item) => ({ ...item, title }))}
           />
           <Field
             label="Date (YYYY-MM-DD, optional)"
             value={draft.date}
-            onChange={(date) => setDraft((d) => ({ ...d, date }))}
+            onChange={(date) => setDraft((item) => ({ ...item, date }))}
           />
           <Field
             label="Time (HH:MM, 24-hour, optional)"
             value={draft.time}
-            onChange={(time) => setDraft((d) => ({ ...d, time }))}
+            onChange={(time) => setDraft((item) => ({ ...item, time }))}
           />
           <Field
             label="Location or joining details (optional)"
             value={draft.location}
-            onChange={(location) => setDraft((d) => ({ ...d, location }))}
+            onChange={(location) =>
+              setDraft((item) => ({ ...item, location }))
+            }
           />
           <Field
             label="Preparation notes (optional)"
             value={draft.notes}
-            onChange={(notes) => setDraft((d) => ({ ...d, notes }))}
+            onChange={(notes) => setDraft((item) => ({ ...item, notes }))}
             multiline
           />
           {Boolean(error) && (
@@ -434,39 +581,45 @@ export function AppointmentScreen() {
             </Text>
           )}
           <Button
-            title="Save visit details"
-            onPress={() => {
-              const appointment = {
-                title: draft.title.trim(),
-                date: draft.date.trim(),
-                time: draft.time.trim(),
-                location: draft.location.trim(),
-                notes: draft.notes.trim(),
-              };
-              const error = validateAppointment(appointment);
-              if (error) {
-                setError(error);
-                return;
-              }
-              dispatch({ type: "appointment", appointment });
-              setEditing(false);
-              setError("");
-              setMessage("Visit details saved for this demo session.");
-            }}
+            title={saving ? "Saving visit…" : "Save visit details"}
+            disabled={saving}
+            onPress={() => void saveVisit()}
           />
         </Card>
       )}
+
       <Section title="Questions to bring" />
-      {state.questions.map((q, i) => (
-        <Card key={`${i}-${q}`} style={{ flexDirection: "row", gap: 14 }}>
+      {state.questions.map((item, index) => (
+        <Card key={state.questionIds[index] || `${index}-${item}`} style={{ flexDirection: "row", gap: 14 }}>
           <Text style={[S.h3, { color: C.purple }]}>
-            {String(i + 1).padStart(2, "0")}
+            {String(index + 1).padStart(2, "0")}
           </Text>
-          <Txt style={{ flex: 1, color: C.ink }}>{q}</Txt>
+          <Txt style={{ flex: 1, color: C.ink }}>{item}</Txt>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Remove question ${i + 1}`}
-            onPress={() => dispatch({ type: "remove-question", index: i })}
+            accessibilityLabel={`Remove question ${index + 1}`}
+            disabled={saving}
+            onPress={async () => {
+              const questionId = state.questionIds[index];
+              if (!questionId) {
+                dispatch({ type: "remove-question", index });
+                return;
+              }
+
+              setSaving(true);
+              try {
+                await removeAppointmentQuestion(questionId);
+                dispatch({ type: "remove-question", index });
+              } catch (removeError) {
+                setMessage(
+                  removeError instanceof Error
+                    ? removeError.message
+                    : "We could not remove that question.",
+                );
+              } finally {
+                setSaving(false);
+              }
+            }}
             style={{
               minWidth: 44,
               minHeight: 44,
@@ -478,6 +631,7 @@ export function AppointmentScreen() {
           </Pressable>
         </Card>
       ))}
+
       {state.questions.length === 0 && (
         <Card>
           <Txt>
@@ -486,6 +640,7 @@ export function AppointmentScreen() {
           </Txt>
         </Card>
       )}
+
       <Field
         label="What else would you like to ask?"
         value={question}
@@ -493,15 +648,39 @@ export function AppointmentScreen() {
         multiline
       />
       <Button
-        title="Add my question"
-        disabled={!question.trim()}
+        title={saving ? "Saving question…" : "Add my question"}
+        disabled={!question.trim() || saving}
         icon="add-outline"
         secondary
-        onPress={() => {
-          dispatch({ type: "question", text: question.trim() });
-          setQuestion("");
+        onPress={async () => {
+          setSaving(true);
+          setMessage("");
+          try {
+            const result = await addAppointmentQuestion({
+              appointment: state.appointment,
+              appointmentId: state.appointmentId,
+              question: question.trim(),
+              position: state.questions.length,
+            });
+            dispatch({
+              type: "question",
+              text: question.trim(),
+              id: result.questionId,
+              appointmentId: result.appointmentId,
+            });
+            setQuestion("");
+          } catch (addError) {
+            setMessage(
+              addError instanceof Error
+                ? addError.message
+                : "We could not save that question.",
+            );
+          } finally {
+            setSaving(false);
+          }
         }}
       />
+
       <Button
         title="Print or save appointment sheet"
         icon="print-outline"
@@ -530,10 +709,13 @@ export function AppointmentScreen() {
     </Page>
   );
 }
+
 export function TransitionScreen() {
   const { state, dispatch } = useCare();
   const n = useNav();
   const [message, setMessage] = useState("");
+  const [savingIndex, setSavingIndex] = useState<number | null>(null);
+
   return (
     <Page>
       <Heading
@@ -542,14 +724,16 @@ export function TransitionScreen() {
         body="You don’t need to remember everything. Take it one step at a time."
       />
       <Card style={{ backgroundColor: C.lavender }}>
-        <Text style={S.h2}>{state.transition.length} of 6 steps prepared</Text>
+        <Text style={S.h2}>
+          {state.transition.length} of {transitionSteps.length} steps prepared
+        </Text>
         <View
           style={{ height: 6, backgroundColor: "#DDCDE6", borderRadius: 4 }}
         >
           <View
             style={{
               height: 6,
-              width: `${(state.transition.length / 6) * 100}%`,
+              width: `${(state.transition.length / transitionSteps.length) * 100}%`,
               backgroundColor: C.purple,
               borderRadius: 4,
             }}
@@ -559,48 +743,63 @@ export function TransitionScreen() {
           Use this checklist alongside your discharge team’s instructions.
         </Txt>
       </Card>
-      {transitionSteps.map((step, i) => (
-        <Pressable
-          key={step}
-          accessibilityRole="checkbox"
-          accessibilityLabel={step}
-          accessibilityState={{ checked: state.transition.includes(i) }}
-          onPress={() => dispatch({ type: "transition", index: i })}
-          style={[S.card, S.row, { padding: 17 }]}
-        >
-          <Icon
-            name={
-              state.transition.includes(i)
-                ? "checkmark-circle"
-                : "ellipse-outline"
-            }
-            color={state.transition.includes(i) ? C.green : C.purple}
-          />
-          <Text style={[S.body, { flex: 1, color: C.ink }]}>{step}</Text>
-        </Pressable>
-      ))}
-      <Button
-        title="Print my transition checklist"
-        icon="print-outline"
-        onPress={async () => {
-          try {
-            await printResource(
-              "Walking Through the Transition",
-              transitionSteps.map(
-                (s, i) =>
-                  `${state.transition.includes(i) ? "[Done]" : "[  ]"} ${s}`,
-              ),
-            );
-          } catch {
-            setMessage("Unable to open printing. Please try again.");
-          }
-        }}
-      />
+
+      {transitionSteps.map((step, index) => {
+        const completed = state.transition.includes(index);
+        return (
+          <Pressable
+            key={step}
+            accessibilityRole="checkbox"
+            accessibilityLabel={step}
+            accessibilityState={{ checked: completed }}
+            disabled={savingIndex !== null}
+            onPress={async () => {
+              setSavingIndex(index);
+              setMessage("");
+              try {
+                await setTransitionItem(index, !completed);
+                dispatch({ type: "transition", index });
+              } catch (error) {
+                setMessage(
+                  error instanceof Error
+                    ? error.message
+                    : "We could not update the checklist.",
+                );
+              } finally {
+                setSavingIndex(null);
+              }
+            }}
+            style={[S.card, S.row, { padding: 17 }]}
+          >
+            <Icon
+              name={completed ? "checkmark-circle" : "ellipse-outline"}
+              color={completed ? C.green : C.muted}
+            />
+            <Text style={[S.body, { flex: 1, color: C.ink }]}>{step}</Text>
+          </Pressable>
+        );
+      })}
+
       {Boolean(message) && <Txt>{message}</Txt>}
-      <Safety onPress={() => n.navigate("Emergency")} />
+
+      <Card style={{ backgroundColor: C.redBg }}>
+        <Text style={[S.h3, { color: C.rose }]}>
+          Know who to call before you leave.
+        </Text>
+        <Txt>
+          Ask the discharge team which symptoms need urgent help and which
+          number to call after hours.
+        </Txt>
+        <Button
+          title="Review warning signs"
+          secondary
+          onPress={() => n.navigate("Emergency")}
+        />
+      </Card>
     </Page>
   );
 }
+
 export function EmergencyScreen() {
   const [message, setMessage] = useState("");
   return (
