@@ -31,4 +31,8 @@ export type RootStack = {
   Emergency: undefined;
   Resources: undefined;
   Profile: undefined;
+  StaffWorkspace: undefined;
+  StaffSupportThread: {
+    requestId: string;
+  };
 };
