@@ -74,6 +74,16 @@ const styles = StyleSheet.create({
     borderColor: C.line,
     backgroundColor: C.white,
   },
+  userBubble: {
+    alignSelf: "flex-end",
+    backgroundColor: C.deep,
+    borderBottomRightRadius: 6,
+  },
+  assistantBubble: {
+    alignSelf: "flex-start",
+    backgroundColor: C.white,
+    borderBottomLeftRadius: 6,
+  },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: {
     paddingHorizontal: 14,
@@ -126,8 +136,8 @@ function Bubble({ message }: { message: Message }) {
         {own
           ? "YOU"
           : message.role === "staff"
-            ? "STAFF REPLY · PREVIEW"
-            : "ENVIZION ASSISTANT · SCRIPTED PREVIEW"}
+            ? "ENVIZION SUPPORT"
+            : "ENVIZION ASSISTANT"}
       </Text>
       <Text
         selectable
