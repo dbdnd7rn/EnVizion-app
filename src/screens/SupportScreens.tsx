@@ -27,10 +27,11 @@ import {
   saveOnboarding,
   submitCoachingRequest,
   updateFaithPreference,
+  setSavedResource,
 } from "../backend";
 export function OnboardingScreen() {
   const n = useNav();
-  const { dispatch } = useCare();
+  const { dispatch, refresh } = useCare();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [careName, setCareName] = useState("");
@@ -97,6 +98,7 @@ export function OnboardingScreen() {
         relationship: saved.relationship,
         faith: saved.faith,
       });
+      await refresh();
       n.reset({ index: 0, routes: [{ name: "Main" }] });
     } catch (error) {
       setMessage(
@@ -298,7 +300,21 @@ export function GuideScreen({
         }
         icon={state.saved.includes(g.id) ? "bookmark" : "bookmark-outline"}
         secondary
-        onPress={() => dispatch({ type: "bookmark", id: g.id })}
+        onPress={async () => {
+          const nextSaved = !state.saved.includes(g.id);
+          setMessage("");
+          try {
+            await setSavedResource(g.id, nextSaved);
+            dispatch({ type: "bookmark", id: g.id });
+            setMessage(nextSaved ? "Guide saved to your library." : "Guide removed from saved items.");
+          } catch (error) {
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : "We could not update your saved guides.",
+            );
+          }
+        }}
       />
       <Button
         title="Print or save this resource"
@@ -689,8 +705,8 @@ export function ProfileScreen() {
           resources
         </Txt>
         <Txt>
-          Profile information is now cloud-backed. Care logs are being connected
-          to the secure account record module by module.
+          Your observations, medications, appointments, transition checklist,
+          and saved resources are connected to your secure account.
         </Txt>
       </Card>
 
