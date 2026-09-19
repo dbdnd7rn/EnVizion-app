@@ -18,6 +18,7 @@ import {
   DMSans_700Bold,
 } from "@expo-google-fonts/dm-sans";
 import { Lora_500Medium } from "@expo-google-fonts/lora";
+import { AuthProvider, AuthScreen, useAuth } from "./src/auth";
 import { CareProvider } from "./src/store";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import {
@@ -51,8 +52,10 @@ import {
   ResourcesScreen,
   ProfileScreen,
 } from "./src/screens/SupportScreens";
+
 const Stack = createNativeStackNavigator<RootStack>();
 const Tab = createBottomTabNavigator<Tabs>();
+
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -95,24 +98,190 @@ function MainTabs() {
     </Tab.Navigator>
   );
 }
+
 function useReducedMotion() {
   const [reduced, setReduced] = useState(true);
+
   useEffect(() => {
     let active = true;
+
     AccessibilityInfo.isReduceMotionEnabled().then((value) => {
       if (active) setReduced(value);
     });
+
     const subscription = AccessibilityInfo.addEventListener(
       "reduceMotionChanged",
       setReduced,
     );
+
     return () => {
       active = false;
       subscription.remove();
     };
   }, []);
+
   return reduced;
 }
+
+function LoadingState() {
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: C.paper,
+      }}
+    >
+      <ActivityIndicator color={C.purple} />
+      <Text style={{ marginTop: 12, color: C.deep }}>
+        Preparing your care companion…
+      </Text>
+    </View>
+  );
+}
+
+function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
+  return (
+    <CareProvider>
+      <NavigationContainer
+        theme={{
+          ...DefaultTheme,
+          colors: {
+            ...DefaultTheme.colors,
+            background: C.paper,
+            primary: C.purple,
+            card: C.paper,
+            text: C.ink,
+            border: C.line,
+          },
+        }}
+      >
+        <Stack.Navigator
+          initialRouteName="Onboarding"
+          screenOptions={{
+            headerStyle: { backgroundColor: C.paper },
+            headerShadowVisible: false,
+            headerTintColor: C.purple,
+            headerTitleStyle: {
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 15,
+            },
+            headerBackTitle: "Back",
+            contentStyle: { backgroundColor: C.paper },
+            animation: reducedMotion ? "none" : "fade",
+          }}
+        >
+          <Stack.Screen
+            name="Onboarding"
+            component={OnboardingScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Main"
+            component={MainTabs}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Tracker"
+            component={TrackerScreen}
+            options={{ title: "Daily care" }}
+          />
+          <Stack.Screen
+            name="Assistant"
+            component={AssistantScreen}
+            options={{ title: "Your assistant" }}
+          />
+          <Stack.Screen
+            name="Handoff"
+            component={HandoffScreen}
+            options={{ title: "Talk to our team" }}
+          />
+          <Stack.Screen
+            name="TeamConversation"
+            component={TeamConversationScreen}
+            options={{ title: "Team conversation" }}
+          />
+          <Stack.Screen
+            name="StaffInbox"
+            component={StaffInboxScreen}
+            options={{ title: "Staff inbox" }}
+          />
+          <Stack.Screen
+            name="Medications"
+            component={MedicationScreen}
+            options={{ title: "Medication logs" }}
+          />
+          <Stack.Screen
+            name="Summary"
+            component={SummaryScreen}
+            options={{ title: "Care summary" }}
+          />
+          <Stack.Screen
+            name="Appointments"
+            component={AppointmentScreen}
+            options={{ title: "Appointment prep" }}
+          />
+          <Stack.Screen
+            name="Transition"
+            component={TransitionScreen}
+            options={{ title: "Transitioning home" }}
+          />
+          <Stack.Screen
+            name="Emergency"
+            component={EmergencyScreen}
+            options={{ title: "Get help" }}
+          />
+          <Stack.Screen
+            name="Guide"
+            component={GuideScreen}
+            options={{ title: "Your resource library" }}
+          />
+          <Stack.Screen
+            name="Specialists"
+            component={SpecialistsScreen}
+            options={{ title: "Healthcare navigation" }}
+          />
+          <Stack.Screen
+            name="Specialist"
+            component={SpecialistScreen}
+            options={{ title: "Specialist guide" }}
+          />
+          <Stack.Screen
+            name="Coaching"
+            component={CoachingScreen}
+            options={{ title: "Advocate coaching" }}
+          />
+          <Stack.Screen
+            name="Wellness"
+            component={WellnessScreen}
+            options={{ title: "Spiritual Wellness" }}
+          />
+          <Stack.Screen
+            name="Resources"
+            component={ResourcesScreen}
+            options={{ title: "Trusted resources" }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{ title: "Your profile" }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </CareProvider>
+  );
+}
+
+function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
+  const { session, loading } = useAuth();
+
+  if (loading) return <LoadingState />;
+  if (!session) return <AuthScreen />;
+
+  return <SignedInApp reducedMotion={reducedMotion} />;
+}
+
 export default function App() {
   const reducedMotion = useReducedMotion();
   const [loaded, error] = useFonts({
@@ -121,22 +290,9 @@ export default function App() {
     DMSans_700Bold,
     Lora_500Medium,
   });
-  if (!loaded && !error)
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: C.paper,
-        }}
-      >
-        <ActivityIndicator color={C.purple} />
-        <Text style={{ marginTop: 12, color: C.deep }}>
-          Preparing your care companion…
-        </Text>
-      </View>
-    );
+
+  if (!loaded && !error) return <LoadingState />;
+
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
@@ -155,133 +311,9 @@ export default function App() {
           }}
         >
           <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-            <CareProvider>
-              <NavigationContainer
-                theme={{
-                  ...DefaultTheme,
-                  colors: {
-                    ...DefaultTheme.colors,
-                    background: C.paper,
-                    primary: C.purple,
-                    card: C.paper,
-                    text: C.ink,
-                    border: C.line,
-                  },
-                }}
-              >
-                <Stack.Navigator
-                  initialRouteName="Onboarding"
-                  screenOptions={{
-                    headerStyle: { backgroundColor: C.paper },
-                    headerShadowVisible: false,
-                    headerTintColor: C.purple,
-                    headerTitleStyle: {
-                      fontFamily: "DMSans_600SemiBold",
-                      fontSize: 15,
-                    },
-                    headerBackTitle: "Back",
-                    contentStyle: { backgroundColor: C.paper },
-                    animation: reducedMotion ? "none" : "fade",
-                  }}
-                >
-                  <Stack.Screen
-                    name="Onboarding"
-                    component={OnboardingScreen}
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="Main"
-                    component={MainTabs}
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen
-                    name="Tracker"
-                    component={TrackerScreen}
-                    options={{ title: "Daily care" }}
-                  />
-                  <Stack.Screen
-                    name="Assistant"
-                    component={AssistantScreen}
-                    options={{ title: "Your assistant" }}
-                  />
-                  <Stack.Screen
-                    name="Handoff"
-                    component={HandoffScreen}
-                    options={{ title: "Talk to our team" }}
-                  />
-                  <Stack.Screen
-                    name="TeamConversation"
-                    component={TeamConversationScreen}
-                    options={{ title: "Team conversation" }}
-                  />
-                  <Stack.Screen
-                    name="StaffInbox"
-                    component={StaffInboxScreen}
-                    options={{ title: "Staff inbox preview" }}
-                  />
-                  <Stack.Screen
-                    name="Medications"
-                    component={MedicationScreen}
-                    options={{ title: "Medication logs" }}
-                  />
-                  <Stack.Screen
-                    name="Summary"
-                    component={SummaryScreen}
-                    options={{ title: "Care summary" }}
-                  />
-                  <Stack.Screen
-                    name="Appointments"
-                    component={AppointmentScreen}
-                    options={{ title: "Appointment prep" }}
-                  />
-                  <Stack.Screen
-                    name="Transition"
-                    component={TransitionScreen}
-                    options={{ title: "Transitioning home" }}
-                  />
-                  <Stack.Screen
-                    name="Emergency"
-                    component={EmergencyScreen}
-                    options={{ title: "Get help" }}
-                  />
-                  <Stack.Screen
-                    name="Guide"
-                    component={GuideScreen}
-                    options={{ title: "Your resource library" }}
-                  />
-                  <Stack.Screen
-                    name="Specialists"
-                    component={SpecialistsScreen}
-                    options={{ title: "Healthcare navigation" }}
-                  />
-                  <Stack.Screen
-                    name="Specialist"
-                    component={SpecialistScreen}
-                    options={{ title: "Specialist guide" }}
-                  />
-                  <Stack.Screen
-                    name="Coaching"
-                    component={CoachingScreen}
-                    options={{ title: "Advocate coaching" }}
-                  />
-                  <Stack.Screen
-                    name="Wellness"
-                    component={WellnessScreen}
-                    options={{ title: "Spiritual Wellness" }}
-                  />
-                  <Stack.Screen
-                    name="Resources"
-                    component={ResourcesScreen}
-                    options={{ title: "Trusted resources" }}
-                  />
-                  <Stack.Screen
-                    name="Profile"
-                    component={ProfileScreen}
-                    options={{ title: "Your profile" }}
-                  />
-                </Stack.Navigator>
-              </NavigationContainer>
-            </CareProvider>
+            <AuthProvider>
+              <AuthGate reducedMotion={reducedMotion} />
+            </AuthProvider>
           </SafeAreaView>
         </View>
       </View>
