@@ -232,6 +232,8 @@ export function CareProvider({ children }: { children: React.ReactNode }) {
       if (snapshot) {
         dispatch({ type: "hydrate-care", snapshot });
       }
+    } catch {
+      // Keep the app usable if the network is temporarily unavailable.
     } finally {
       setLoading(false);
     }
