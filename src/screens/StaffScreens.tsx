@@ -176,14 +176,42 @@ export function StaffWorkspaceScreen() {
             </Text>
             <Txt style={{ color: "#E9DDED" }}>open support requests</Txt>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={[S.title, { color: C.white, fontSize: 30 }]}>
-              {openCoaching}
-            </Text>
-            <Txt style={{ color: "#E9DDED" }}>active coaching requests</Txt>
-          </View>
+          {member.role !== "support" && (
+            <View style={{ flex: 1 }}>
+              <Text style={[S.title, { color: C.white, fontSize: 30 }]}>
+                {openCoaching}
+              </Text>
+              <Txt style={{ color: "#E9DDED" }}>active coaching requests</Txt>
+            </View>
+          )}
         </View>
       </Card>
+
+      {member.role === "admin" && (
+        <Card
+          onPress={() => n.navigate("StaffManagement")}
+          label="Manage EnVizion staff"
+          style={{ flexDirection: "row", alignItems: "center", gap: 14 }}
+        >
+          <View
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 14,
+              backgroundColor: C.lavender,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="people-circle-outline" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={S.h3}>Manage staff access</Text>
+            <Txt>Invite staff, assign roles, and review admin activity.</Txt>
+          </View>
+          <Icon name="chevron-forward" color="#A092A6" size={17} />
+        </Card>
+      )}
 
       <View style={{ flexDirection: "row", gap: 10 }}>
         <Pressable
@@ -213,33 +241,35 @@ export function StaffWorkspaceScreen() {
             Support inbox
           </Text>
         </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ selected: section === "coaching" }}
-          onPress={() => setSection("coaching")}
-          style={[
-            S.pill,
-            {
-              flex: 1,
-              minHeight: 46,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: section === "coaching" ? C.purple : C.lavender,
-            },
-          ]}
-        >
-          <Text
+        {member.role !== "support" && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ selected: section === "coaching" }}
+            onPress={() => setSection("coaching")}
             style={[
-              S.h3,
+              S.pill,
               {
-                fontSize: 13,
-                color: section === "coaching" ? C.white : C.deep,
+                flex: 1,
+                minHeight: 46,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: section === "coaching" ? C.purple : C.lavender,
               },
             ]}
           >
-            Coaching
-          </Text>
-        </Pressable>
+            <Text
+              style={[
+                S.h3,
+                {
+                  fontSize: 13,
+                  color: section === "coaching" ? C.white : C.deep,
+                },
+              ]}
+            >
+              Coaching
+            </Text>
+          </Pressable>
+        )}
       </View>
 
       {Boolean(message) && (
@@ -251,7 +281,7 @@ export function StaffWorkspaceScreen() {
         </Card>
       )}
 
-      {section === "support" ? (
+      {section === "support" || member.role === "support" ? (
         <>
           <Section title="Support requests" action="Refresh" onPress={() => void refresh()} />
           {!support.length ? (
