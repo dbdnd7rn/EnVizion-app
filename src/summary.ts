@@ -23,13 +23,13 @@ export function observationLines(entry: Entry): string[] {
 
 export function careSummaryLines(data: SummaryData): string[] {
   return [
-    "Caregiver-entered demo records from this session only. Not a diagnosis, verified medical record, or complete care plan.",
+    "Caregiver-entered records saved to this account. Not a diagnosis, verified clinical medical record, or complete care plan.",
     "APPOINTMENT PREPARATION",
     ...appointmentLines(data.appointment, data.questions),
     "OBSERVATIONS",
     ...(data.entries.length
       ? data.entries.flatMap(observationLines)
-      : ["No observations recorded in this session."]),
+      : ["No observations recorded yet."]),
     ...medicationLines(data.medications, data.medicationRecords),
   ];
 }
