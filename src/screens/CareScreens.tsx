@@ -1,3 +1,44 @@
+import React, { useState } from "react";
+import { Linking, Pressable, Text, View } from "react-native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import type { RootStack } from "../navigation";
+import { useCare } from "../store";
+import {
+  appointmentLines,
+  trackerFields,
+  validateAppointment,
+  validateEntry,
+} from "../domain";
+import {
+  Button,
+  C,
+  Card,
+  Field,
+  Heading,
+  Icon,
+  Page,
+  Row,
+  S,
+  Safety,
+  Section,
+  Txt,
+} from "../ui";
+import { transitionSteps } from "../content";
+import { useNav } from "./MainScreens";
+import { printResource } from "../printing";
+import { medicationLines } from "../medications";
+import {
+  addAppointmentQuestion,
+  correctMedicationDose,
+  createMedication,
+  recordMedicationDose,
+  removeAppointmentQuestion,
+  saveAppointment,
+  saveObservation,
+  setTransitionItem,
+  updateMedication,
+} from "../backend";
+
 export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
