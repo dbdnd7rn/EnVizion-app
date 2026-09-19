@@ -164,6 +164,12 @@ export function HomeScreen() {
             />
           </View>
           <Row
+            title="Care summary"
+            subtitle="Bring your session records together"
+            icon="document-text-outline"
+            onPress={() => n.navigate("Summary")}
+          />
+          <Row
             title="Prepare for your next visit"
             subtitle={`${state.appointment.title}${state.appointment.date ? ` · ${state.appointment.date}` : ""} · ${state.questions.length} questions`}
             icon="calendar-outline"
@@ -292,6 +298,12 @@ export function ToolkitScreen() {
           />
         ))}
       </View>
+      <Row
+        title="Care summary"
+        subtitle="Observations, medicines, and visit questions"
+        icon="document-text-outline"
+        onPress={() => n.navigate("Summary")}
+      />
       <Section title="Plan & prepare" />
       <View style={{ gap: 10 }}>
         <Row

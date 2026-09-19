@@ -19,6 +19,7 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { CareProvider } from "./src/store";
+import { SummaryScreen } from "./src/screens/SummaryScreen";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
 import {
@@ -196,6 +197,11 @@ export default function App() {
                     name="Medications"
                     component={MedicationScreen}
                     options={{ title: "Medication logs" }}
+                  />
+                  <Stack.Screen
+                    name="Summary"
+                    component={SummaryScreen}
+                    options={{ title: "Care summary" }}
                   />
                   <Stack.Screen
                     name="Appointments"

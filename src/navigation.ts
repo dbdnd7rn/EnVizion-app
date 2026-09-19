@@ -13,6 +13,7 @@ export type RootStack = {
     kind: TrackerKind;
   };
   Medications: undefined;
+  Summary: undefined;
   Appointments: undefined;
   Transition: undefined;
   Specialists: undefined;

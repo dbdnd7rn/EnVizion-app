@@ -31,6 +31,8 @@ Tests use the Node 22+ built-in TypeScript stripping feature (validated with Nod
 
 ## Included flows
 
+- Care summary combining session observations, medications, and appointment preparation, with printable export
+
 - Two-step onboarding with name, caregiving relationship, and optional spiritual encouragement
 - Home dashboard, Toolkit, Library, and Support tabs
 - Vitals, blood sugar, CHF observations, behavior/delirium observations, and red-flag logs, with input validation and session history

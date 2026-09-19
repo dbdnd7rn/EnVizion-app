@@ -134,3 +134,48 @@ test("medication corrections preserve the original and do not alter other doses"
   assert.ok(lines.includes("Sample medicine"));
   assert.ok(lines.includes("Corrected / withdrawn"));
 });
+import { careSummaryLines } from "../src/summary.ts";
+test("care summary includes observations with units and preserves medication corrections", () => {
+  const lines = careSummaryLines({
+    appointment: {
+      title: "Review",
+      date: "",
+      time: "",
+      location: "",
+      notes: "",
+    },
+    questions: ["What happens next?"],
+    entries: [
+      {
+        id: "e",
+        kind: "Vitals",
+        recordedAt: "2026-09-20T08:00:00Z",
+        values: { systolic: "120", diastolic: "80", notes: "Sample note" },
+      },
+    ],
+    medications: [],
+    medicationRecords: [
+      {
+        id: "r",
+        medication: {
+          id: "m",
+          name: "Old sample label",
+          instructions: "Sample directions",
+          time: "Morning",
+        },
+        recordedAt: "2026-09-20T08:00:00Z",
+        correctedAt: "2026-09-20T09:00:00Z",
+      },
+    ],
+  }).join("\n");
+  for (const text of [
+    "120",
+    "80",
+    "mmHg",
+    "Sample note",
+    "What happens next?",
+    "Old sample label",
+    "Corrected / withdrawn",
+  ])
+    assert.ok(lines.includes(text), text);
+});
