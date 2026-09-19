@@ -219,6 +219,35 @@ export function StaffWorkspaceScreen() {
         </Card>
       )}
 
+
+      {member.role !== "support" && (
+        <Card
+          onPress={() => n.navigate("ClinicalContent")}
+          label="Open clinical content governance"
+          style={{ flexDirection: "row", alignItems: "center", gap: 14 }}
+        >
+          <View
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 14,
+              backgroundColor: C.lavender,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="document-text-outline" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={S.h3}>Clinical content</Text>
+            <Txt>
+              Edit drafts, review versions, and publish approved caregiver
+              education.
+            </Txt>
+          </View>
+          <Icon name="chevron-forward" color="#A092A6" size={17} />
+        </Card>
+      )}
       <View style={{ flexDirection: "row", gap: 10 }}>
         <Pressable
           accessibilityRole="button"

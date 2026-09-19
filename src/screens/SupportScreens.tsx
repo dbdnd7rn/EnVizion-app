@@ -3,7 +3,8 @@ import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
-import { guides, specialists, trustedResources } from "../content";
+import { specialists, trustedResources } from "../content";
+import { loadPublishedGuide, type ClinicalContentRecord } from "../clinicalContent";
 import {
   Brand,
   Button,
@@ -263,31 +264,88 @@ export function OnboardingScreen() {
 export function GuideScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Guide">) {
-  const g = guides.find((g) => g.id === route.params.id);
   const { state, dispatch } = useCare();
+  const [guide, setGuide] = useState<ClinicalContentRecord | null>(null);
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  if (!g)
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setMessage("");
+
+    loadPublishedGuide(route.params.id)
+      .then((record) => {
+        if (active) setGuide(record);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "We could not load this published guide.",
+        );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [route.params.id]);
+
+  if (loading) {
+    return (
+      <Page>
+        <ActivityIndicator color={C.purple} />
+        <Txt>Loading published guide…</Txt>
+      </Page>
+    );
+  }
+
+  if (!guide) {
     return (
       <Page>
         <Heading
-          title="Guide unavailable"
-          body="Please return to the library and choose another guide."
+          eyebrow="CLINICAL CONTENT REVIEW"
+          title="This guide is not published yet."
+          body="EnVizion Life only shows caregiver education here after it has completed clinical review, approval, and publication."
         />
+        <Card style={{ backgroundColor: C.lavender }}>
+          <Icon name="shield-checkmark-outline" size={30} />
+          <Text style={S.h3}>Why you’re seeing this</Text>
+          <Txt>
+            The resource may still be a draft, in clinical review, or awaiting
+            publication. This prevents unapproved educational content from being
+            presented as finalized guidance.
+          </Txt>
+        </Card>
+        {Boolean(message) && <Txt>{message}</Txt>}
       </Page>
     );
+  }
+
+  const g = guide;
+
   return (
     <Page>
       <Heading eyebrow={g.category} title={g.title} body={g.description} />
+
       <View style={S.between}>
-        <Text style={S.small}>{g.readTime} • Educational draft</Text>
+        <Text style={S.small}>
+          {g.readTime} • Published version {g.version}
+        </Text>
         <Icon name={g.icon} size={30} />
       </View>
-      {g.sections.map((s) => (
-        <View key={s.title} style={{ gap: 8 }}>
-          <Text style={S.h2}>{s.title}</Text>
-          <Txt>{s.body}</Txt>
+
+      {g.sections.map((section) => (
+        <View key={section.title} style={{ gap: 8 }}>
+          <Text style={S.h2}>{section.title}</Text>
+          <Txt>{section.body}</Txt>
         </View>
       ))}
+
       <Card style={{ backgroundColor: C.lavender }}>
         <Text style={S.h3}>Bring it into the conversation</Text>
         <Txt>
@@ -295,6 +353,7 @@ export function GuideScreen({
           after reading this?
         </Txt>
       </Card>
+
       <Button
         title={
           state.saved.includes(g.id) ? "Saved to your library" : "Save guide"
@@ -307,7 +366,11 @@ export function GuideScreen({
           try {
             await setSavedResource(g.id, nextSaved);
             dispatch({ type: "bookmark", id: g.id });
-            setMessage(nextSaved ? "Guide saved to your library." : "Guide removed from saved items.");
+            setMessage(
+              nextSaved
+                ? "Guide saved to your library."
+                : "Guide removed from saved items.",
+            );
           } catch (error) {
             setMessage(
               error instanceof Error
@@ -317,6 +380,7 @@ export function GuideScreen({
           }
         }}
       />
+
       <Button
         title="Print or save this resource"
         icon="print-outline"
@@ -324,13 +388,14 @@ export function GuideScreen({
           try {
             await printResource(
               g.title,
-              g.sections.map((s) => `${s.title}: ${s.body}`),
+              g.sections.map((section) => `${section.title}: ${section.body}`),
             );
           } catch {
             setMessage("Printing could not open. Please try again.");
           }
         }}
       />
+
       {g.url && (
         <Button
           title="Visit the trusted source"
@@ -343,10 +408,13 @@ export function GuideScreen({
           }
         />
       )}
+
       <Txt style={S.small}>
-        Draft learning content awaiting EnVizion Life clinical review. It does
-        not replace an individualized care plan.
+        This EnVizion Life resource has been published through the clinical
+        content workflow. It supports education and does not replace an
+        individualized care plan.
       </Txt>
+
       {Boolean(message) && <Txt>{message}</Txt>}
     </Page>
   );

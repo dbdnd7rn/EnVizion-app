@@ -37,6 +37,10 @@ import {
 } from "./src/screens/StaffScreens";
 import { StaffManagementScreen } from "./src/screens/StaffManagementScreen";
 import {
+  ClinicalContentEditorScreen,
+  StaffClinicalContentScreen,
+} from "./src/screens/StaffClinicalContentScreens";
+import {
   HomeScreen,
   ToolkitScreen,
   LibraryScreen,
@@ -323,6 +327,16 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           name="StaffManagement"
           component={StaffManagementScreen}
           options={{ title: "Manage staff" }}
+        />
+        <StaffStack.Screen
+          name="ClinicalContent"
+          component={StaffClinicalContentScreen}
+          options={{ title: "Clinical content" }}
+        />
+        <StaffStack.Screen
+          name="ClinicalContentEditor"
+          component={ClinicalContentEditorScreen}
+          options={{ title: "Content review" }}
         />
         <StaffStack.Screen
           name="StaffSupportThread"
