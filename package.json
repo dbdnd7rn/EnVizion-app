@@ -10,7 +10,7 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test --test-isolation=none tests/domain.test.ts",
-    "build:web": "expo export --platform web"
+    "build:web": "npm run typecheck && expo export --platform web"
   },
   "dependencies": {
     "expo": "~54.0.0",
