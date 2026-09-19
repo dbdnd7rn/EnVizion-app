@@ -161,3 +161,112 @@ export async function submitCoachingRequest(topic: string) {
 
   if (error) throw error;
 }
+
+
+export type SupportRequestRecord = {
+  id: string;
+  topic: string;
+  context: string;
+  preferred_channel: "In-app inbox" | "WhatsApp" | "Email";
+  status: "submitted" | "in_review" | "responded" | "closed";
+  created_at: string;
+};
+
+export type SupportMessageRecord = {
+  id: string;
+  sender_type: "caregiver" | "staff";
+  body: string;
+  created_at: string;
+};
+
+export async function createSupportRequest(input: {
+  topic: string;
+  context: string;
+  preferredChannel: "In-app inbox" | "WhatsApp" | "Email";
+  includeAssistantContext: boolean;
+}) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) throw new Error("Please sign in again.");
+
+  const { data: recipient } = await supabase
+    .from("care_recipients")
+    .select("id")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const { data, error } = await supabase
+    .from("support_requests")
+    .insert({
+      user_id: user.id,
+      care_recipient_id: recipient?.id ?? null,
+      topic: input.topic,
+      context: input.context.trim(),
+      preferred_channel: input.preferredChannel,
+      include_assistant_context: input.includeAssistantContext,
+      status: "submitted",
+    })
+    .select("id, topic, context, preferred_channel, status, created_at")
+    .single();
+
+  if (error) throw error;
+  return data as SupportRequestRecord;
+}
+
+export async function loadLatestSupportRequest(): Promise<{
+  request: SupportRequestRecord | null;
+  messages: SupportMessageRecord[];
+}> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { request: null, messages: [] };
+
+  const { data: request, error } = await supabase
+    .from("support_requests")
+    .select("id, topic, context, preferred_channel, status, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!request) return { request: null, messages: [] };
+
+  const { data: messages, error: messagesError } = await supabase
+    .from("support_messages")
+    .select("id, sender_type, body, created_at")
+    .eq("request_id", request.id)
+    .order("created_at", { ascending: true });
+
+  if (messagesError) throw messagesError;
+
+  return {
+    request: request as SupportRequestRecord,
+    messages: (messages ?? []) as SupportMessageRecord[],
+  };
+}
+
+export async function sendSupportMessage(requestId: string, body: string) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) throw new Error("Please sign in again.");
+
+  const { error } = await supabase.from("support_messages").insert({
+    request_id: requestId,
+    user_id: user.id,
+    sender_type: "caregiver",
+    body: body.trim(),
+  });
+
+  if (error) throw error;
+}
