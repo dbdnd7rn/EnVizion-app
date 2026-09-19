@@ -170,11 +170,11 @@ export function AuthScreen() {
 
       <Heading
         eyebrow="ENVIZION LIFE"
-        title={mode === "signin" ? "Welcome back." : "Create your care account."}
+        title={mode === "signin" ? "Welcome back." : "Create your EnVizion Life account."}
         body={
           mode === "signin"
-            ? "Sign in to securely continue your caregiver toolkit."
-            : "Your account keeps your care profile connected across visits."
+            ? "Sign in to securely continue your EnVizion Life workspace."
+            : "Your account keeps your EnVizion Life access connected across visits."
         }
       />
 
@@ -271,7 +271,7 @@ export function AuthScreen() {
       {busy && <ActivityIndicator color={C.purple} />}
 
       <Txt style={[S.small, { textAlign: "center" }]}>
-        Your account protects access to your saved care information. EnVizion Life
+        Your account protects access to saved care information and authorized staff tools. EnVizion Life
         does not replace emergency or professional medical care.
       </Txt>
     </Page>

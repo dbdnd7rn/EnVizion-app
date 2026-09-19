@@ -28,6 +28,11 @@ import {
 } from "./src/screens/ConversationScreens";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
+import { getStaffMembership, type StaffMembership } from "./src/staff";
+import {
+  StaffSupportThreadScreen,
+  StaffWorkspaceScreen,
+} from "./src/screens/StaffScreens";
 import {
   HomeScreen,
   ToolkitScreen,
@@ -53,6 +58,7 @@ import {
 } from "./src/screens/SupportScreens";
 
 const Stack = createNativeStackNavigator<RootStack>();
+const StaffStack = createNativeStackNavigator<RootStack>();
 const Tab = createBottomTabNavigator<Tabs>();
 
 function MainTabs() {
@@ -267,11 +273,131 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
   );
 }
 
+function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
+  return (
+    <NavigationContainer
+      theme={{
+        ...DefaultTheme,
+        colors: {
+          ...DefaultTheme.colors,
+          background: C.paper,
+          primary: C.purple,
+          card: C.paper,
+          text: C.ink,
+          border: C.line,
+        },
+      }}
+    >
+      <StaffStack.Navigator
+        initialRouteName="StaffWorkspace"
+        screenOptions={{
+          headerStyle: { backgroundColor: C.paper },
+          headerShadowVisible: false,
+          headerTintColor: C.purple,
+          headerTitleStyle: {
+            fontFamily: "DMSans_600SemiBold",
+            fontSize: 15,
+          },
+          headerBackTitle: "Back",
+          contentStyle: { backgroundColor: C.paper },
+          animation: reducedMotion ? "none" : "fade",
+        }}
+      >
+        <StaffStack.Screen
+          name="StaffWorkspace"
+          component={StaffWorkspaceScreen}
+          options={{ headerShown: false }}
+        />
+        <StaffStack.Screen
+          name="StaffSupportThread"
+          component={StaffSupportThreadScreen}
+          options={{ title: "Support conversation" }}
+        />
+      </StaffStack.Navigator>
+    </NavigationContainer>
+  );
+}
+
 function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
   const { session, loading } = useAuth();
+  const [staff, setStaff] = useState<StaffMembership | null>(null);
+  const [checkingStaff, setCheckingStaff] = useState(true);
+  const [staffError, setStaffError] = useState("");
 
-  if (loading) return <LoadingState />;
+  useEffect(() => {
+    let active = true;
+
+    if (!session) {
+      setStaff(null);
+      setStaffError("");
+      setCheckingStaff(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setCheckingStaff(true);
+    setStaffError("");
+
+    getStaffMembership()
+      .then((membership) => {
+        if (!active) return;
+        setStaff(membership);
+      })
+      .catch(() => {
+        if (!active) return;
+        setStaff(null);
+        setStaffError(
+          "We could not verify your workspace access. Check your connection and sign in again.",
+        );
+      })
+      .finally(() => {
+        if (active) setCheckingStaff(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session?.user.id]);
+
+  if (loading || (session && checkingStaff)) return <LoadingState />;
   if (!session) return <AuthScreen />;
+
+  if (staffError) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          padding: 28,
+          justifyContent: "center",
+          backgroundColor: C.paper,
+          gap: 14,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: "DMSans_700Bold",
+            fontSize: 24,
+            color: C.ink,
+          }}
+        >
+          Workspace verification failed
+        </Text>
+        <Text
+          style={{
+            fontFamily: "DMSans_400Regular",
+            fontSize: 14,
+            lineHeight: 22,
+            color: C.muted,
+          }}
+        >
+          {staffError}
+        </Text>
+      </View>
+    );
+  }
+
+  if (staff) return <StaffSignedInApp reducedMotion={reducedMotion} />;
 
   return <SignedInApp reducedMotion={reducedMotion} />;
 }
