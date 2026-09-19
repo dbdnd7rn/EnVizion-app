@@ -6,7 +6,7 @@ Verified on September 20, 2026.
 
 - Full dependency installation completed; `pnpm-lock.yaml` records resolved versions.
 - TypeScript: `pnpm typecheck`.
-- Eight domain tests: `pnpm test` (required readings, numeric validation including overflow, required observations, safe printable HTML, calendar/time validation, and appointment worksheet content).
+- Ten domain tests: `pnpm test` (required readings, numeric validation including overflow, required observations, safe printable HTML, calendar/time validation, and appointment worksheet content).
 - Production web export: `pnpm build:web`.
 - Browser: onboarding renders with the original logo and typography, demo onboarding opens the dashboard, the care form accepts a sample 120/80 reading, the saved observation appears in history, and back navigation updates dashboard progress.
 - Fixed a web-only SVG accessibility warning and empty-string rendering warnings. Rechecked the health-entry flow without new console errors.
@@ -37,3 +37,11 @@ The frontend is a session-only demo. Real coaching bookings, backend integration
 - Browser verified dashboard navigation, empty states, medication-history navigation, and summary total updating after a dose entry.
 - Summary data test checks observation units, notes, questions, and medication corrections.
 - Final print layout and native device behavior remain unverified.
+
+## Assistant and staff inbox preview
+
+- TypeScript, ten domain tests, and production web export pass.
+- Tests cover scripted-answer boundaries, spiritual opt-in, excluded conversation context, snapshot immutability, stale request IDs, duplicate open requests, staff replies, and rejection of replies after closure.
+- Browser verified assistant navigation and starter question, handoff transcript preview, WhatsApp preference, local request creation, staff inbox context, staff reply appearing for caregiver, caregiver follow-up, and disabled composer after closure.
+- Browser screenshot reviewed for the caregiver team conversation. Native keyboard behavior and broader small-screen/accessibility coverage remain unverified.
+- Live AI and real staff, email, or WhatsApp delivery are not implemented or claimed.

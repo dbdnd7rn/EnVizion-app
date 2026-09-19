@@ -20,6 +20,12 @@ import {
 import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { CareProvider } from "./src/store";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
+import {
+  AssistantScreen,
+  HandoffScreen,
+  TeamConversationScreen,
+  StaffInboxScreen,
+} from "./src/screens/ConversationScreens";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
 import {
@@ -192,6 +198,26 @@ export default function App() {
                     name="Tracker"
                     component={TrackerScreen}
                     options={{ title: "Daily care" }}
+                  />
+                  <Stack.Screen
+                    name="Assistant"
+                    component={AssistantScreen}
+                    options={{ title: "Your assistant" }}
+                  />
+                  <Stack.Screen
+                    name="Handoff"
+                    component={HandoffScreen}
+                    options={{ title: "Talk to our team" }}
+                  />
+                  <Stack.Screen
+                    name="TeamConversation"
+                    component={TeamConversationScreen}
+                    options={{ title: "Team conversation" }}
+                  />
+                  <Stack.Screen
+                    name="StaffInbox"
+                    component={StaffInboxScreen}
+                    options={{ title: "Staff inbox preview" }}
                   />
                   <Stack.Screen
                     name="Medications"

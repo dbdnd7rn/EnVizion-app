@@ -14,6 +14,10 @@ export type RootStack = {
   };
   Medications: undefined;
   Summary: undefined;
+  Assistant: undefined;
+  Handoff: undefined;
+  TeamConversation: undefined;
+  StaffInbox: undefined;
   Appointments: undefined;
   Transition: undefined;
   Specialists: undefined;

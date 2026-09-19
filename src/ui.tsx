@@ -44,15 +44,17 @@ export const S = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontFamily: "Lora_500Medium",
+    fontFamily: "DMSans_700Bold",
     fontSize: 30,
     lineHeight: 38,
+    letterSpacing: -0.6,
     color: C.ink,
   },
   h2: {
-    fontFamily: "Lora_500Medium",
+    fontFamily: "DMSans_600SemiBold",
     fontSize: 23,
     lineHeight: 30,
+    letterSpacing: -0.3,
     color: C.ink,
   },
   h3: {
@@ -82,7 +84,7 @@ export const S = StyleSheet.create({
   },
   card: {
     backgroundColor: C.white,
-    borderRadius: 22,
+    borderRadius: 18,
     padding: 20,
     borderWidth: 1,
     borderColor: C.line,

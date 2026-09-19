@@ -76,10 +76,47 @@ export function HomeScreen() {
           </Pressable>
         </View>
         <View style={{ gap: 7 }}>
-          <Text style={S.eyebrow}>YOUR DAILY DOSE OF SUPPORT</Text>
-          <Text style={S.title}>A little clarity.{"\n"}A lot of care.</Text>
-          <Txt>Welcome, {state.name}. You don’t have to do this alone.</Txt>
+          <Text style={S.eyebrow}>YOUR CARE COMPANION</Text>
+          <Text style={[S.title, { fontFamily: "DMSans_600SemiBold" }]}>
+            Welcome, {state.name}.
+          </Text>
+          <Txt>Your care tools and support, together.</Txt>
         </View>
+        <Card
+          onPress={() => n.navigate("Assistant")}
+          label="Ask EnVizion Assistant"
+          style={{
+            backgroundColor: "#F0EBF4",
+            borderColor: "#DCCEE5",
+            gap: 16,
+          }}
+        >
+          <View style={S.between}>
+            <View style={S.row}>
+              <Icon name="chatbubbles-outline" />
+              <Text style={S.h3}>EnVizion Assistant</Text>
+            </View>
+            <Text style={[S.small, { color: C.purple }]}>Preview</Text>
+          </View>
+          <Text
+            style={[S.h2, { fontFamily: "DMSans_600SemiBold", fontSize: 24 }]}
+          >
+            A question is a good{`\n`}place to start.
+          </Text>
+          <Txt>
+            Find guidance for everyday tasks or bring a person into the
+            conversation.
+          </Txt>
+          <View
+            style={[
+              S.between,
+              { borderRadius: 12, backgroundColor: C.white, padding: 14 },
+            ]}
+          >
+            <Text style={S.body}>How can we help today?</Text>
+            <Icon name="arrow-forward" />
+          </View>
+        </Card>
         <Card
           style={{
             backgroundColor: C.deep,
@@ -461,12 +498,33 @@ export function LibraryScreen() {
 }
 export function SupportScreen() {
   const n = useNav();
+  const { state } = useCare();
   return (
     <Page>
       <Heading
         eyebrow="YOU ARE NOT ALONE"
         title="Care for the caregiver"
         body="Support for the practical, emotional, and spiritual parts of your journey."
+      />
+      <Row
+        title="Ask EnVizion Assistant"
+        subtitle="Basic guidance, with a path to a person"
+        icon="chatbubbles-outline"
+        onPress={() => n.navigate("Assistant")}
+      />
+      <Row
+        title="Your team conversation"
+        subtitle={
+          state.conversation.request
+            ? "Review your local preview conversation"
+            : "Prepare a request for personal support"
+        }
+        icon="people-outline"
+        onPress={() =>
+          n.navigate(
+            state.conversation.request ? "TeamConversation" : "Handoff",
+          )
+        }
       />
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <Icon name="people-outline" color="#E5C8ED" size={32} />

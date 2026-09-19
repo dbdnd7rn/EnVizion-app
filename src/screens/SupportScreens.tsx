@@ -27,7 +27,7 @@ export function OnboardingScreen() {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [relationship, setRelationship] = useState("A parent");
-  const [faith, setFaith] = useState(true);
+  const [faith, setFaith] = useState(false);
   function finish() {
     dispatch({ type: "profile", name, relationship, faith });
     n.reset({ index: 0, routes: [{ name: "Main" }] });
@@ -568,6 +568,12 @@ export function ProfileScreen() {
           dispatch({ type: "reset" });
           n.reset({ index: 0, routes: [{ name: "Onboarding" }] });
         }}
+      />
+      <Row
+        title="Staff inbox preview"
+        subtitle="Test the staff side with local sample conversations"
+        icon="file-tray-outline"
+        onPress={() => n.navigate("StaffInbox")}
       />
       <Txt style={S.small}>
         EnVizion Life Caregiver Toolkit & Patient Advocate Support Program.

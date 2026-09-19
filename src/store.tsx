@@ -1,11 +1,18 @@
 import React, { createContext, useContext, useReducer } from "react";
 import type { Appointment, Entry } from "./domain";
 import {
+  conversationReducer,
+  initialConversation,
+  type ConversationState,
+  type ConversationAction,
+} from "./assistant/model";
+import {
   correctMedicationRecord,
   type Medication,
   type MedicationRecord,
 } from "./medications";
 type State = {
+  conversation: ConversationState;
   name: string;
   relationship: string;
   faith: boolean;
@@ -20,6 +27,7 @@ type State = {
   appointment: Appointment;
 };
 type Action =
+  | ConversationAction
   | { type: "appointment"; appointment: Appointment }
   | { type: "remove-question"; index: number }
   | {
@@ -62,9 +70,10 @@ type Action =
       type: "reset";
     };
 const initial: State = {
+  conversation: initialConversation,
   name: "Sarah",
   relationship: "A parent",
-  faith: true,
+  faith: false,
   entries: [],
   medications: [
     {
@@ -99,6 +108,15 @@ const initial: State = {
 };
 function reducer(state: State, action: Action): State {
   switch (action.type) {
+    case "conversation-turn":
+    case "support-request":
+    case "support-message":
+    case "support-resolve":
+    case "conversation-clear":
+      return {
+        ...state,
+        conversation: conversationReducer(state.conversation, action),
+      };
     case "appointment":
       return { ...state, appointment: action.appointment };
     case "remove-question":

@@ -31,6 +31,10 @@ Tests use the Node 22+ built-in TypeScript stripping feature (validated with Nod
 
 ## Included flows
 
+- Assistant conversation preview with scripted app guidance, resource links, opt-in spiritual encouragement, and a path to a person
+- Reviewed support handoff with optional conversation attachment and in-app/WhatsApp/email channel preferences
+- Staff inbox preview with sample replies, caregiver follow-ups, and conversation closure
+
 - Care summary combining session observations, medications, and appointment preparation, with printable export
 
 - Two-step onboarding with name, caregiving relationship, and optional spiritual encouragement
@@ -50,7 +54,7 @@ Tests use the Node 22+ built-in TypeScript stripping feature (validated with Nod
 
 `App.tsx` owns the native stack and bottom tabs. `src/navigation.ts` defines route contracts. `src/ui.tsx` contains shared components and design tokens. Feature screens live in `src/screens/`. `src/content.ts` separates educational content from presentation. `src/domain.ts` contains pure validation and safe printable HTML rendering. `src/store.tsx` owns session state through a typed reducer. `src/printing.ts` adapts export to the platform.
 
-The frontend intentionally has no authentication, backend, analytics, external messaging, or persistent health data. Only sample information should be entered. Reloading clears session state. No medical thresholds, risk scoring, medication dosing, or automated clinical recommendations are generated.
+The frontend has no authentication, live AI, backend, analytics, external messaging, or persistent health data. The staff inbox is a local demonstration, not an authenticated staff area. WhatsApp and email preferences do not send messages. See [the production roadmap](PRODUCT_ROADMAP.md). Only sample information should be entered. Reloading clears session state. No medical thresholds, risk scoring, medication dosing, or automated clinical recommendations are generated.
 
 ## Content and branding
 
