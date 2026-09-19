@@ -80,14 +80,14 @@ export function OnboardingScreen() {
             icon="arrow-forward"
             onPress={() => setStep(1)}
           />
-          <Button title="Explore the demo" secondary onPress={finish} />
+          <Button title="Explore the app" secondary onPress={finish} />
         </>
       ) : (
         <>
           <Heading
             eyebrow="MAKE YOURSELF AT HOME"
             title="A companion for your kind of care."
-            body="Use a sample first name to personalize this demo."
+            body="Add your first name to personalize your care companion."
           />
           <Field
             label="What should we call you?"
@@ -350,7 +350,7 @@ export function CoachingScreen() {
         <Card>
           <Icon name="checkmark-circle" color={C.green} />
           <Text accessibilityRole="alert" style={S.h3}>
-            Your interest is saved in this demo.
+            Your interest is saved for this session.
           </Text>
           <Txt>
             {state.coaching}. No request has been sent and no session has been
@@ -531,7 +531,7 @@ export function ProfileScreen() {
         body={`You’re here caring for ${state.relationship.toLowerCase()}.`}
       />
       <Card>
-        <Text style={S.h3}>Your demo session</Text>
+        <Text style={S.h3}>Your care activity</Text>
         <Txt>
           {state.entries.length} care observations · {state.saved.length} saved
           resources
@@ -562,7 +562,7 @@ export function ProfileScreen() {
         </View>
       </Card>
       <Button
-        title="Restart demo & clear sample entries"
+        title="Start over & clear current entries"
         secondary
         onPress={() => {
           dispatch({ type: "reset" });
