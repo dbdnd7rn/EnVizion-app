@@ -33,6 +33,7 @@ import {
   StaffSupportThreadScreen,
   StaffWorkspaceScreen,
 } from "./src/screens/StaffScreens";
+import { StaffManagementScreen } from "./src/screens/StaffManagementScreen";
 import {
   HomeScreen,
   ToolkitScreen,
@@ -307,6 +308,11 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           name="StaffWorkspace"
           component={StaffWorkspaceScreen}
           options={{ headerShown: false }}
+        />
+        <StaffStack.Screen
+          name="StaffManagement"
+          component={StaffManagementScreen}
+          options={{ title: "Manage staff" }}
         />
         <StaffStack.Screen
           name="StaffSupportThread"
