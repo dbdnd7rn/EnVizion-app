@@ -118,3 +118,46 @@ export async function saveOnboarding(input: {
     careRecipientId,
   };
 }
+
+
+export async function updateFaithPreference(faith: boolean) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) throw new Error("Please sign in again.");
+
+  const { error } = await supabase.from("user_preferences").upsert({
+    user_id: user.id,
+    faith_encouragement: faith,
+  });
+
+  if (error) throw error;
+}
+
+export async function submitCoachingRequest(topic: string) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) throw new Error("Please sign in again.");
+
+  const { data: recipient } = await supabase
+    .from("care_recipients")
+    .select("id")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("coaching_requests").insert({
+    user_id: user.id,
+    care_recipient_id: recipient?.id ?? null,
+    topic,
+    status: "submitted",
+  });
+
+  if (error) throw error;
+}
