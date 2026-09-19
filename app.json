@@ -9,11 +9,16 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.envizionlife.caregiver"
     },
-    "android": { "package": "com.envizionlife.caregiver" },
+    "android": {
+      "package": "com.envizionlife.caregiver"
+    },
     "web": {
       "bundler": "metro",
-      "name": "EnVizion Life | Your care companion"
+      "name": "EnVizion Life | Your care companion",
+      "output": "single"
     },
-    "plugins": ["expo-font"]
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
