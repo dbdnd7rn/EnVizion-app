@@ -498,7 +498,6 @@ export function LibraryScreen() {
 }
 export function SupportScreen() {
   const n = useNav();
-  const { state } = useCare();
   return (
     <Page>
       <Heading
@@ -514,17 +513,9 @@ export function SupportScreen() {
       />
       <Row
         title="Your team conversation"
-        subtitle={
-          state.conversation.request
-            ? "Review your team conversation"
-            : "Prepare a request for personal support"
-        }
+        subtitle="View your latest request or ask for personal support"
         icon="people-outline"
-        onPress={() =>
-          n.navigate(
-            state.conversation.request ? "TeamConversation" : "Handoff",
-          )
-        }
+        onPress={() => n.navigate("TeamConversation")}
       />
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <Icon name="people-outline" color="#E5C8ED" size={32} />
