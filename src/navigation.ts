@@ -17,7 +17,6 @@ export type RootStack = {
   Assistant: undefined;
   Handoff: undefined;
   TeamConversation: undefined;
-  StaffInbox: undefined;
   Appointments: undefined;
   Transition: undefined;
   Specialists: undefined;
