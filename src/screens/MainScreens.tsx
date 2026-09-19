@@ -96,7 +96,7 @@ export function HomeScreen() {
               <Icon name="chatbubbles-outline" />
               <Text style={S.h3}>EnVizion Assistant</Text>
             </View>
-            <Text style={[S.small, { color: C.purple }]}>Preview</Text>
+            <Text style={[S.small, { color: C.purple }]}>Support</Text>
           </View>
           <Text
             style={[S.h2, { fontFamily: "DMSans_600SemiBold", fontSize: 24 }]}
@@ -165,7 +165,7 @@ export function HomeScreen() {
             onPress={() => n.navigate("Main", { screen: "Toolkit" })}
           />
           <View style={S.between}>
-            <Txt style={{ fontSize: 12 }}>Your sample care routine</Txt>
+            <Txt style={{ fontSize: 12 }}>Your care routine</Txt>
             <Text style={[S.small, { color: C.purple }]}>
               {completed} of 2 complete
             </Text>
@@ -202,7 +202,7 @@ export function HomeScreen() {
           </View>
           <Row
             title="Care summary"
-            subtitle="Bring your session records together"
+            subtitle="Bring your care records together"
             icon="document-text-outline"
             onPress={() => n.navigate("Summary")}
           />
@@ -498,7 +498,6 @@ export function LibraryScreen() {
 }
 export function SupportScreen() {
   const n = useNav();
-  const { state } = useCare();
   return (
     <Page>
       <Heading
@@ -514,17 +513,9 @@ export function SupportScreen() {
       />
       <Row
         title="Your team conversation"
-        subtitle={
-          state.conversation.request
-            ? "Review your local preview conversation"
-            : "Prepare a request for personal support"
-        }
+        subtitle="View your latest request or ask for personal support"
         icon="people-outline"
-        onPress={() =>
-          n.navigate(
-            state.conversation.request ? "TeamConversation" : "Handoff",
-          )
-        }
+        onPress={() => n.navigate("TeamConversation")}
       />
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <Icon name="people-outline" color="#E5C8ED" size={32} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Linking, Pressable, Switch, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
@@ -21,17 +21,106 @@ import {
 } from "../ui";
 import { useNav } from "./MainScreens";
 import { printResource } from "../printing";
+import { useAuth } from "../auth";
+import {
+  loadSavedOnboarding,
+  saveOnboarding,
+  submitCoachingRequest,
+  updateFaithPreference,
+} from "../backend";
 export function OnboardingScreen() {
   const n = useNav();
   const { dispatch } = useCare();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
+  const [careName, setCareName] = useState("");
   const [relationship, setRelationship] = useState("A parent");
   const [faith, setFaith] = useState(false);
-  function finish() {
-    dispatch({ type: "profile", name, relationship, faith });
-    n.reset({ index: 0, routes: [{ name: "Main" }] });
+  const [checking, setChecking] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    loadSavedOnboarding()
+      .then((saved) => {
+        if (!active) return;
+
+        if (saved) {
+          dispatch({
+            type: "profile",
+            name: saved.name,
+            relationship: saved.relationship,
+            faith: saved.faith,
+          });
+          n.reset({ index: 0, routes: [{ name: "Main" }] });
+          return;
+        }
+
+        setChecking(false);
+      })
+      .catch(() => {
+        if (active) setChecking(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [dispatch, n]);
+
+  async function finish() {
+    setMessage("");
+
+    const resolvedCareName =
+      relationship === "Myself"
+        ? careName.trim() || name.trim()
+        : careName.trim();
+
+    if (!name.trim() || !resolvedCareName) {
+      setMessage("Add your name and the name of the person you are caring for.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const saved = await saveOnboarding({
+        name,
+        careName: resolvedCareName,
+        relationship,
+        faith,
+      });
+
+      dispatch({
+        type: "profile",
+        name: saved.name,
+        relationship: saved.relationship,
+        faith: saved.faith,
+      });
+      n.reset({ index: 0, routes: [{ name: "Main" }] });
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not save your profile. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
+
+  if (checking) {
+    return (
+      <Page>
+        <Brand />
+        <View style={{ minHeight: 360, alignItems: "center", justifyContent: "center", gap: 12 }}>
+          <ActivityIndicator color={C.purple} />
+          <Txt>Loading your care profile…</Txt>
+        </View>
+      </Page>
+    );
+  }
+
   return (
     <Page>
       <View style={S.between}>
@@ -80,19 +169,27 @@ export function OnboardingScreen() {
             icon="arrow-forward"
             onPress={() => setStep(1)}
           />
-          <Button title="Explore the app" secondary onPress={finish} />
         </>
       ) : (
         <>
           <Heading
             eyebrow="MAKE YOURSELF AT HOME"
             title="A companion for your kind of care."
-            body="Add your first name to personalize your care companion."
+            body="Set up the care profile that will stay connected to your account."
           />
           <Field
             label="What should we call you?"
             value={name}
             onChange={setName}
+          />
+          <Field
+            label={
+              relationship === "Myself"
+                ? "Your name for the care profile"
+                : "What should we call the person you’re caring for?"
+            }
+            value={careName}
+            onChange={setCareName}
           />
           <Text style={S.h3}>Who are you caring for?</Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
@@ -139,11 +236,19 @@ export function OnboardingScreen() {
             </View>
           </Card>
           <Txt style={S.small}>
-            This is an educational prototype with session-only sample data. It
-            does not diagnose, monitor emergencies, or replace professional
-            care.
+            EnVizion Life helps organize care and educational resources. It does
+            not diagnose, monitor emergencies, or replace professional care.
           </Txt>
-          <Button title="Open my care companion" onPress={finish} />
+          {Boolean(message) && (
+            <Text accessibilityRole="alert" style={[S.small, { color: C.rose }]}>
+              {message}
+            </Text>
+          )}
+          <Button
+            title={saving ? "Saving your care profile…" : "Open my care companion"}
+            disabled={saving}
+            onPress={finish}
+          />
         </>
       )}
       <Text style={[S.small, { textAlign: "center" }]}>
@@ -304,12 +409,33 @@ export function SpecialistScreen({
 export function CoachingScreen() {
   const { state, dispatch } = useCare();
   const [topic, setTopic] = useState("Navigating care");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+
+  async function submit() {
+    setMessage("");
+    setSubmitting(true);
+    try {
+      await submitCoachingRequest(topic);
+      dispatch({ type: "coaching", topic });
+      setMessage("Your coaching request has been sent to EnVizion Life.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not submit your request. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <Page>
       <Heading
         eyebrow="PATIENT ADVOCATE COACHING"
         title="You deserve someone in your corner."
-        body="Explore the support EnVizion Life envisions for caregivers and families."
+        body="Request support from EnVizion Life for the part of care that feels hardest right now."
       />
       <Card style={{ backgroundColor: C.lavender }}>
         <Icon name="people-outline" size={34} />
@@ -343,19 +469,20 @@ export function CoachingScreen() {
         </Pressable>
       ))}
       <Button
-        title="Save coaching interest"
-        onPress={() => dispatch({ type: "coaching", topic })}
+        title={submitting ? "Sending request…" : "Request coaching support"}
+        disabled={submitting}
+        onPress={submit}
       />
-      {Boolean(state.coaching) && (
+      {Boolean(message) && (
         <Card>
-          <Icon name="checkmark-circle" color={C.green} />
+          <Icon
+            name={state.coaching ? "checkmark-circle" : "alert-circle-outline"}
+            color={state.coaching ? C.green : C.rose}
+          />
           <Text accessibilityRole="alert" style={S.h3}>
-            Your interest is saved for this session.
+            {message}
           </Text>
-          <Txt>
-            {state.coaching}. No request has been sent and no session has been
-            booked. Booking will be connected in a later phase.
-          </Txt>
+          {state.coaching && <Txt>Topic: {state.coaching}</Txt>}
         </Card>
       )}
       <Txt style={S.small}>
@@ -522,7 +649,25 @@ export function ResourcesScreen() {
 }
 export function ProfileScreen() {
   const { state, dispatch } = useCare();
-  const n = useNav();
+  const { user, signOut } = useAuth();
+  const [message, setMessage] = useState("");
+
+  async function changeFaith(faith: boolean) {
+    dispatch({
+      type: "profile",
+      name: state.name,
+      relationship: state.relationship,
+      faith,
+    });
+
+    try {
+      await updateFaithPreference(faith);
+      setMessage("Preference saved.");
+    } catch {
+      setMessage("Could not save that preference. Please try again.");
+    }
+  }
+
   return (
     <Page>
       <Heading
@@ -530,6 +675,13 @@ export function ProfileScreen() {
         title={`Hello, ${state.name}.`}
         body={`You’re here caring for ${state.relationship.toLowerCase()}.`}
       />
+
+      <Card>
+        <Text style={S.h3}>Your account</Text>
+        <Txt>{user?.email ?? "Signed in"}</Txt>
+        <Txt>Your caregiver profile is connected to your EnVizion Life account.</Txt>
+      </Card>
+
       <Card>
         <Text style={S.h3}>Your care activity</Text>
         <Txt>
@@ -537,10 +689,11 @@ export function ProfileScreen() {
           resources
         </Txt>
         <Txt>
-          Changes reset when the app reloads. This preview is for sample
-          information only.
+          Profile information is now cloud-backed. Care logs are being connected
+          to the secure account record module by module.
         </Txt>
       </Card>
+
       <Card>
         <View style={S.between}>
           <Text style={[S.h3, { flex: 1 }]}>
@@ -549,32 +702,22 @@ export function ProfileScreen() {
           <Switch
             accessibilityLabel="Spiritual encouragement on home"
             value={state.faith}
-            onValueChange={(faith) =>
-              dispatch({
-                type: "profile",
-                name: state.name,
-                relationship: state.relationship,
-                faith,
-              })
-            }
+            onValueChange={changeFaith}
             trackColor={{ true: C.purple }}
           />
         </View>
       </Card>
+
+      {Boolean(message) && <Txt style={S.small}>{message}</Txt>}
+
       <Button
-        title="Start over & clear current entries"
+        title="Sign out"
         secondary
         onPress={() => {
-          dispatch({ type: "reset" });
-          n.reset({ index: 0, routes: [{ name: "Onboarding" }] });
+          void signOut();
         }}
       />
-      <Row
-        title="Staff inbox preview"
-        subtitle="Test the staff side with local sample conversations"
-        icon="file-tray-outline"
-        onPress={() => n.navigate("StaffInbox")}
-      />
+
       <Txt style={S.small}>
         EnVizion Life Caregiver Toolkit & Patient Advocate Support Program.
         Founded by Dr. Delphine Tolbert, DNP, RN, CLC.
