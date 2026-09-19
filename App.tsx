@@ -28,6 +28,8 @@ import {
 } from "./src/screens/ConversationScreens";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
+import { NotificationsProvider } from "./src/notifications";
+import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { getStaffMembership, type StaffMembership } from "./src/staff";
 import {
   StaffSupportThreadScreen,
@@ -149,8 +151,9 @@ function LoadingState() {
 
 function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
   return (
-    <CareProvider>
-      <NavigationContainer
+    <NotificationsProvider>
+      <CareProvider>
+        <NavigationContainer
         theme={{
           ...DefaultTheme,
           colors: {
@@ -268,15 +271,22 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             component={ProfileScreen}
             options={{ title: "Your profile" }}
           />
+          <Stack.Screen
+            name="Notifications"
+            component={NotificationsScreen}
+            options={{ title: "Notifications" }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
-    </CareProvider>
+      </CareProvider>
+    </NotificationsProvider>
   );
 }
 
 function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
   return (
-    <NavigationContainer
+    <NotificationsProvider>
+      <NavigationContainer
       theme={{
         ...DefaultTheme,
         colors: {
@@ -319,8 +329,14 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           component={StaffSupportThreadScreen}
           options={{ title: "Support conversation" }}
         />
+        <StaffStack.Screen
+          name="Notifications"
+          component={NotificationsScreen}
+          options={{ title: "Notifications" }}
+        />
       </StaffStack.Navigator>
     </NavigationContainer>
+    </NotificationsProvider>
   );
 }
 
