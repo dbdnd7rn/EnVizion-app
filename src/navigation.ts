@@ -32,6 +32,7 @@ export type RootStack = {
   Resources: undefined;
   Profile: undefined;
   StaffWorkspace: undefined;
+  StaffManagement: undefined;
   StaffSupportThread: {
     requestId: string;
   };
