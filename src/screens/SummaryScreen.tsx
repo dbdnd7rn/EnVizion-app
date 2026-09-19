@@ -22,7 +22,7 @@ export function SummaryScreen() {
         body="Bring the details you have recorded to your next care conversation."
       />
       <Card style={{ backgroundColor: C.lavender }}>
-        <Text style={S.eyebrow}>THIS DEMO SESSION</Text>
+        <Text style={S.eyebrow}>YOUR CARE RECORD</Text>
         <View style={{ gap: 8 }}>
           <Text style={S.h3}>{state.entries.length} observations recorded</Text>
           <Text style={S.h3}>{doses} dose entries recorded as taken</Text>
@@ -30,7 +30,7 @@ export function SummaryScreen() {
         </View>
         <Txt>
           Caregiver-entered information, without clinical interpretation. This
-          summary includes this session only and clears when you reload.
+          summary reflects the care information saved to your account.
         </Txt>
       </Card>
       <Button
