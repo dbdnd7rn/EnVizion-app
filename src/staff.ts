@@ -106,7 +106,7 @@ export async function loadStaffDashboard(): Promise<{
   support: StaffSupportRequest[];
   coaching: StaffCoachingRequest[];
 }> {
-  await requireStaff();
+  const membership = await requireStaff();
 
   const [supportResult, coachingResult] = await Promise.all([
     supabase
@@ -115,12 +115,14 @@ export async function loadStaffDashboard(): Promise<{
         "id, user_id, care_recipient_id, topic, context, preferred_channel, status, created_at",
       )
       .order("created_at", { ascending: false }),
-    supabase
-      .from("coaching_requests")
-      .select(
-        "id, user_id, care_recipient_id, topic, message, status, created_at",
-      )
-      .order("created_at", { ascending: false }),
+    membership.role === "support"
+      ? Promise.resolve({ data: [], error: null })
+      : supabase
+          .from("coaching_requests")
+          .select(
+            "id, user_id, care_recipient_id, topic, message, status, created_at",
+          )
+          .order("created_at", { ascending: false }),
   ]);
 
   if (supportResult.error) throw supportResult.error;
