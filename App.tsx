@@ -25,7 +25,6 @@ import {
   AssistantScreen,
   HandoffScreen,
   TeamConversationScreen,
-  StaffInboxScreen,
 } from "./src/screens/ConversationScreens";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
@@ -201,11 +200,6 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="TeamConversation"
             component={TeamConversationScreen}
             options={{ title: "Team conversation" }}
-          />
-          <Stack.Screen
-            name="StaffInbox"
-            component={StaffInboxScreen}
-            options={{ title: "Staff inbox" }}
           />
           <Stack.Screen
             name="Medications"
