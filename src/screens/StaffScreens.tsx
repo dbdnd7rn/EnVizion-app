@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import { useAuth } from "../auth";
+import { NotificationBell } from "../notifications";
 import {
   getStaffMembership,
   loadStaffDashboard,
@@ -150,13 +151,18 @@ export function StaffWorkspaceScreen() {
     <Page>
       <View style={S.between}>
         <Brand />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => void signOut()}
-          style={{ minHeight: 44, justifyContent: "center" }}
-        >
-          <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>Sign out</Text>
-        </Pressable>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <NotificationBell onPress={() => n.navigate("Notifications")} />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void signOut()}
+            style={{ minHeight: 44, justifyContent: "center" }}
+          >
+            <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
+              Sign out
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       <Heading
