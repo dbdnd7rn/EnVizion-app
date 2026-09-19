@@ -275,9 +275,9 @@ export function StaffWorkspaceScreen() {
                 </View>
                 <Text style={S.h3}>{item.caregiverName}</Text>
                 <Txt>Care recipient: {item.careRecipientName}</Txt>
-                <Txt numberOfLines={3} style={{ color: C.ink }}>
+                <Text numberOfLines={3} style={[S.body, { color: C.ink }]}>
                   {item.context}
-                </Txt>
+                </Text>
                 <View style={S.between}>
                   <Text style={S.small}>{item.preferredChannel}</Text>
                   <Text style={S.small}>
