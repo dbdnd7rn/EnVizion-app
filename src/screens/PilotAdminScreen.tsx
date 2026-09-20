@@ -145,15 +145,15 @@ export function PilotAdminScreen() {
 
   async function run(
     key: string,
-    task: () => Promise<void>,
+    task: () => Promise<string | void>,
     success?: string,
   ) {
     setBusy(key);
     setMessage("");
     try {
-      await task();
-      if (success) setMessage(success);
+      const taskMessage = await task();
       await refresh();
+      setMessage(taskMessage || success || "");
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -273,11 +273,9 @@ export function PilotAdminScreen() {
                 });
                 setInviteName("");
                 setInviteEmail("");
-                setMessage(
-                  result.invitationEmailSent
-                    ? "Pilot invitation email sent."
-                    : "Pilot enrollment added to the existing EnVizion account.",
-                );
+                return result.invitationEmailSent
+                  ? "Pilot invitation email sent."
+                  : "Pilot enrollment added to the existing EnVizion account.";
               },
             )
           }
