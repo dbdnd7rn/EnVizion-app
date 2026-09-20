@@ -312,6 +312,7 @@ export type CareSnapshot = {
   careRecipientId: string;
   careRecipientName: string;
   accessRole: CareRole;
+  relationship: string;
   entries: Entry[];
   medications: Medication[];
   medicationRecords: MedicationRecord[];
@@ -411,7 +412,7 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
   const context = await resolveCareContextForUser(user.id);
   if (!context) return null;
 
-  const { careRecipientId, careRecipientName, accessRole } = context;
+  const { careRecipientId, careRecipientName, accessRole, relationship } = context;
   void recordCareWorkspaceOpen(careRecipientId);
 
   const [
@@ -536,6 +537,7 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
     careRecipientId,
     careRecipientName,
     accessRole,
+    relationship,
     entries,
     medications,
     medicationRecords,
