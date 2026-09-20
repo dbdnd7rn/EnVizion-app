@@ -879,6 +879,13 @@ export function ProfileScreen() {
         onPress={() => n.navigate("CareTeam")}
       />
 
+      <Row
+        title="Account, privacy & data"
+        subtitle="Password, exports, consent and deletion controls"
+        icon="shield-checkmark-outline"
+        onPress={() => n.navigate("PrivacyData")}
+      />
+
       <Card>
         <View style={S.between}>
           <Text style={[S.h3, { flex: 1 }]}>
