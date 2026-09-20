@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import {
   deleteCareRecipientData,
   deleteOwnAccount,
@@ -41,6 +41,7 @@ export function PrivacyDataScreen() {
   const [careConfirmation, setCareConfirmation] = useState("");
   const [deleteWord, setDeleteWord] = useState("");
   const [deleteEmail, setDeleteEmail] = useState("");
+  const [deletePassword, setDeletePassword] = useState("");
 
   const isOwner = state.accessRole === "owner";
   const hasCareProfile = Boolean(state.careRecipientId);
@@ -273,18 +274,35 @@ export function PrivacyDataScreen() {
           value={deleteEmail}
           onChange={setDeleteEmail}
         />
+        <View style={{ gap: 8 }}>
+          <Text style={[S.h3, { fontSize: 13 }]}>Current password</Text>
+          <TextInput
+            accessibilityLabel="Current password"
+            value={deletePassword}
+            onChangeText={setDeletePassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="current-password"
+            secureTextEntry
+            style={S.input}
+            placeholder="Re-enter your password"
+            placeholderTextColor="#AAA0AF"
+          />
+        </View>
         <Button
           title={busy === "account-delete" ? "Deleting account…" : "Delete my account permanently"}
           secondary
           disabled={
             busy !== null ||
             deleteWord !== "DELETE" ||
-            deleteEmail.trim().toLowerCase() !== accountEmail.toLowerCase()
+            deleteEmail.trim().toLowerCase() !== accountEmail.toLowerCase() ||
+            !deletePassword
           }
           onPress={() =>
             void run("account-delete", async () => {
               await deleteOwnAccount({
                 email: deleteEmail,
+                password: deletePassword,
                 confirmation: deleteWord,
               });
             })
