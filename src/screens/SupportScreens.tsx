@@ -30,6 +30,11 @@ import {
   updateFaithPreference,
   setSavedResource,
 } from "../backend";
+import {
+  loadPendingCareInvitations,
+  respondToCareInvitation,
+  type CareInvitation,
+} from "../careTeam";
 export function OnboardingScreen() {
   const n = useNav();
   const { dispatch, refresh } = useCare();
@@ -41,6 +46,7 @@ export function OnboardingScreen() {
   const [checking, setChecking] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [pendingInvite, setPendingInvite] = useState<CareInvitation | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -61,6 +67,9 @@ export function OnboardingScreen() {
           return;
         }
 
+        const invitations = await loadPendingCareInvitations();
+        if (!active) return;
+        setPendingInvite(invitations[0] ?? null);
         setChecking(false);
       })
       .catch(() => {
@@ -71,6 +80,44 @@ export function OnboardingScreen() {
       active = false;
     };
   }, [dispatch, n, refresh]);
+
+  async function respondToInvite(response: "accept" | "decline") {
+    if (!pendingInvite) return;
+
+    setSaving(true);
+    setMessage("");
+    try {
+      await respondToCareInvitation(pendingInvite.careRecipientId, response);
+
+      if (response === "decline") {
+        setPendingInvite(null);
+        setMessage("Invitation declined. You can set up your own care profile below.");
+        return;
+      }
+
+      const saved = await loadSavedOnboarding();
+      if (!saved) {
+        throw new Error("The shared care profile could not be opened.");
+      }
+
+      dispatch({
+        type: "profile",
+        name: saved.name,
+        relationship: saved.relationship,
+        faith: saved.faith,
+      });
+      await refresh();
+      n.reset({ index: 0, routes: [{ name: "Main" }] });
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not update this care invitation.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function finish() {
     setMessage("");
@@ -121,6 +168,51 @@ export function OnboardingScreen() {
           <ActivityIndicator color={C.purple} />
           <Txt>Loading your care profile…</Txt>
         </View>
+      </Page>
+    );
+  }
+
+  if (pendingInvite) {
+    return (
+      <Page>
+        <Brand />
+        <Heading
+          eyebrow="CARE TEAM INVITATION"
+          title={`You’ve been invited to help care for ${pendingInvite.careRecipientName}.`}
+          body="Your access remains private and inactive until you choose to accept."
+        />
+        <Card style={{ backgroundColor: C.lavender }}>
+          <Icon name="people-outline" size={34} />
+          <Text style={S.h2}>
+            {pendingInvite.role === "caregiver" ? "Caregiver access" : "Viewer access"}
+          </Text>
+          <Txt>
+            {pendingInvite.role === "caregiver"
+              ? "You’ll be able to view and update the shared care record."
+              : "You’ll be able to read the shared care record, but not change it."}
+          </Txt>
+        </Card>
+        <Button
+          title={saving ? "Accepting invitation…" : "Accept and open care profile"}
+          disabled={saving}
+          icon="checkmark-circle-outline"
+          onPress={() => void respondToInvite("accept")}
+        />
+        <Button
+          title="Decline invitation"
+          secondary
+          disabled={saving}
+          onPress={() => void respondToInvite("decline")}
+        />
+        {Boolean(message) && (
+          <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
+            {message}
+          </Text>
+        )}
+        <Txt style={S.small}>
+          Accepting adds you to the care team. The care owner can later change
+          your role or revoke access.
+        </Txt>
       </Page>
     );
   }
