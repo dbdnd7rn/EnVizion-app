@@ -36,6 +36,7 @@ export type RootStack = {
   Notifications: undefined;
   StaffWorkspace: undefined;
   StaffManagement: undefined;
+  PilotAdmin: undefined;
   ClinicalContent: undefined;
   ClinicalContentEditor: {
     contentId: string;
