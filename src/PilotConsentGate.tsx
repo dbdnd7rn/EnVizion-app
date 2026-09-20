@@ -105,6 +105,7 @@ export function PilotConsentGate({
           ? error.message
           : "We could not record your response.",
       );
+    } finally {
       setAccepting(false);
     }
   }
