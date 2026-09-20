@@ -32,6 +32,8 @@ import { NotificationsProvider } from "./src/notifications";
 import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { CareTeamScreen } from "./src/screens/CareTeamScreen";
 import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
+import { PilotConsentGate } from "./src/PilotConsentGate";
+import { PilotAdminScreen } from "./src/screens/PilotAdminScreen";
 import { getStaffMembership, type StaffMembership } from "./src/staff";
 import {
   StaffSupportThreadScreen,
@@ -341,6 +343,11 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           options={{ title: "Manage staff" }}
         />
         <StaffStack.Screen
+          name="PilotAdmin"
+          component={PilotAdminScreen}
+          options={{ title: "Pilot administration" }}
+        />
+        <StaffStack.Screen
           name="ClinicalContent"
           component={StaffClinicalContentScreen}
           options={{ title: "Clinical content" }}
@@ -448,7 +455,11 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
 
   if (staff) return <StaffSignedInApp reducedMotion={reducedMotion} />;
 
-  return <SignedInApp reducedMotion={reducedMotion} />;
+  return (
+    <PilotConsentGate>
+      <SignedInApp reducedMotion={reducedMotion} />
+    </PilotConsentGate>
+  );
 }
 
 export default function App() {

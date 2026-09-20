@@ -219,6 +219,34 @@ export function StaffWorkspaceScreen() {
         </Card>
       )}
 
+      {member.role === "admin" && (
+        <Card
+          onPress={() => n.navigate("PilotAdmin")}
+          label="Open pilot administration"
+          style={{ flexDirection: "row", alignItems: "center", gap: 14 }}
+        >
+          <View
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 14,
+              backgroundColor: C.lavender,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="analytics-outline" />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={S.h3}>Pilot administration</Text>
+            <Txt>
+              Manage participant status, consent versions, and pilot readiness.
+            </Txt>
+          </View>
+          <Icon name="chevron-forward" color="#A092A6" size={17} />
+        </Card>
+      )}
+
 
       {member.role !== "support" && (
         <Card
