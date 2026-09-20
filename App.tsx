@@ -31,6 +31,7 @@ import { C, Icon } from "./src/ui";
 import { NotificationsProvider } from "./src/notifications";
 import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { CareTeamScreen } from "./src/screens/CareTeamScreen";
+import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
 import { getStaffMembership, type StaffMembership } from "./src/staff";
 import {
   StaffSupportThreadScreen,
@@ -275,6 +276,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="Profile"
             component={ProfileScreen}
             options={{ title: "Your profile" }}
+          />
+          <Stack.Screen
+            name="PrivacyData"
+            component={PrivacyDataScreen}
+            options={{ title: "Account, privacy & data" }}
           />
           <Stack.Screen
             name="CareTeam"
