@@ -44,8 +44,18 @@ export async function deleteCareRecipientData(input: {
 
 export async function deleteOwnAccount(input: {
   email: string;
+  password: string;
   confirmation: string;
 }) {
+  const { error: reauthError } = await supabase.auth.signInWithPassword({
+    email: input.email.trim().toLowerCase(),
+    password: input.password,
+  });
+
+  if (reauthError) {
+    throw new Error("Password verification failed. Your account was not deleted.");
+  }
+
   await invokeAccountData({
     action: "delete_account",
     email: input.email,
