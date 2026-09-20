@@ -85,7 +85,11 @@ export function HomeScreen() {
           <Text style={[S.title, { fontFamily: "DMSans_600SemiBold" }]}>
             Welcome, {state.name}.
           </Text>
-          <Txt>Your care tools and support, together.</Txt>
+          <Txt>
+            {state.careRecipientName
+              ? `${state.careRecipientName} · ${state.accessRole === "owner" ? "Owner" : state.accessRole === "caregiver" ? "Caregiver" : "Viewer"} access`
+              : "Your care tools and support, together."}
+          </Txt>
         </View>
         <Card
           onPress={() => n.navigate("Assistant")}
@@ -299,6 +303,12 @@ export function ToolkitScreen() {
         body="A little structure for the things that matter most."
       />
       <Safety onPress={() => n.navigate("Emergency")} />
+      <Row
+        title="Care team & sharing"
+        subtitle="Invite family, switch care profiles, and manage access"
+        icon="people-outline"
+        onPress={() => n.navigate("CareTeam")}
+      />
       <Section title="Daily care" />
       <View style={{ gap: 10 }}>
         {(
