@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import type { Appointment, Entry, TrackerKind } from "./domain";
 import type { Medication, MedicationRecord } from "./medications";
+import { recordCareWorkspaceOpen, type CareRole } from "./careTeam";
 
 export type SavedOnboarding = {
   name: string;
@@ -8,7 +9,49 @@ export type SavedOnboarding = {
   relationship: string;
   faith: boolean;
   careRecipientId: string;
+  accessRole: CareRole;
 };
+
+async function resolveCareContextForUser(userId: string) {
+  const [{ data: preferences }, { data: memberships, error: membershipError }] =
+    await Promise.all([
+      supabase
+        .from("user_preferences")
+        .select("active_care_recipient_id")
+        .eq("user_id", userId)
+        .maybeSingle(),
+      supabase
+        .from("care_recipient_members")
+        .select("care_recipient_id, role, accepted_at")
+        .eq("user_id", userId)
+        .eq("status", "active"),
+    ]);
+
+  if (membershipError) throw membershipError;
+  const rows = memberships ?? [];
+  if (!rows.length) return null;
+
+  const preferredId = preferences?.active_care_recipient_id ?? null;
+  const selected =
+    rows.find((row) => row.care_recipient_id === preferredId) ??
+    rows.find((row) => row.role === "owner") ??
+    rows[0];
+
+  const { data: recipient, error: recipientError } = await supabase
+    .from("care_recipients")
+    .select("id, display_name, relationship")
+    .eq("id", selected.care_recipient_id)
+    .single();
+
+  if (recipientError) throw recipientError;
+
+  return {
+    careRecipientId: recipient.id as string,
+    careRecipientName: recipient.display_name as string,
+    relationship: (recipient.relationship || "A loved one") as string,
+    accessRole: selected.role as CareRole,
+  };
+}
 
 export async function loadSavedOnboarding(): Promise<SavedOnboarding | null> {
   const {
@@ -17,31 +60,25 @@ export async function loadSavedOnboarding(): Promise<SavedOnboarding | null> {
 
   if (!user) return null;
 
-  const [{ data: profile }, { data: preferences }, { data: recipient }] =
-    await Promise.all([
-      supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-      supabase
-        .from("user_preferences")
-        .select("faith_encouragement")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-      supabase
-        .from("care_recipients")
-        .select("id, display_name, relationship")
-        .eq("owner_id", user.id)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+  const [{ data: profile }, { data: preferences }, context] = await Promise.all([
+    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    supabase
+      .from("user_preferences")
+      .select("faith_encouragement")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    resolveCareContextForUser(user.id),
+  ]);
 
-  if (!recipient) return null;
+  if (!context) return null;
 
   return {
     name: profile?.full_name || user.user_metadata?.full_name || "",
-    careName: recipient.display_name,
-    relationship: recipient.relationship || "A loved one",
+    careName: context.careRecipientName,
+    relationship: context.relationship,
     faith: preferences?.faith_encouragement ?? false,
-    careRecipientId: recipient.id,
+    careRecipientId: context.careRecipientId,
+    accessRole: context.accessRole,
   };
 }
 
@@ -112,12 +149,21 @@ export async function saveOnboarding(input: {
     careRecipientId = data.id;
   }
 
+  const { error: activePreferenceError } = await supabase
+    .from("user_preferences")
+    .upsert({
+      user_id: user.id,
+      active_care_recipient_id: careRecipientId,
+    });
+  if (activePreferenceError) throw activePreferenceError;
+
   return {
     name,
     careName,
     relationship: input.relationship,
     faith: input.faith,
     careRecipientId,
+    accessRole: "owner",
   };
 }
 
@@ -146,17 +192,11 @@ export async function submitCoachingRequest(topic: string) {
 
   if (userError || !user) throw new Error("Please sign in again.");
 
-  const { data: recipient } = await supabase
-    .from("care_recipients")
-    .select("id")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  const context = await resolveCareContextForUser(user.id);
 
   const { error } = await supabase.from("coaching_requests").insert({
     user_id: user.id,
-    care_recipient_id: recipient?.id ?? null,
+    care_recipient_id: context?.careRecipientId ?? null,
     topic,
     status: "submitted",
   });
@@ -194,19 +234,13 @@ export async function createSupportRequest(input: {
 
   if (userError || !user) throw new Error("Please sign in again.");
 
-  const { data: recipient } = await supabase
-    .from("care_recipients")
-    .select("id")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  const context = await resolveCareContextForUser(user.id);
 
   const { data, error } = await supabase
     .from("support_requests")
     .insert({
       user_id: user.id,
-      care_recipient_id: recipient?.id ?? null,
+      care_recipient_id: context?.careRecipientId ?? null,
       topic: input.topic,
       context: input.context.trim(),
       preferred_channel: input.preferredChannel,
@@ -275,6 +309,9 @@ export async function sendSupportMessage(requestId: string, body: string) {
 
 
 export type CareSnapshot = {
+  careRecipientId: string;
+  careRecipientName: string;
+  accessRole: CareRole;
   entries: Entry[];
   medications: Medication[];
   medicationRecords: MedicationRecord[];
@@ -294,18 +331,22 @@ async function requireCareContext() {
 
   if (userError || !user) throw new Error("Please sign in again.");
 
-  const { data: recipient, error: recipientError } = await supabase
-    .from("care_recipients")
-    .select("id")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  const context = await resolveCareContextForUser(user.id);
+  if (!context) {
+    throw new Error("Finish setting up or accept a care invitation first.");
+  }
 
-  if (recipientError) throw recipientError;
-  if (!recipient) throw new Error("Finish setting up your care profile first.");
+  return { user, ...context };
+}
 
-  return { user, careRecipientId: recipient.id as string };
+async function requireEditableCareContext() {
+  const context = await requireCareContext();
+  if (context.accessRole === "viewer") {
+    throw new Error(
+      "Viewer access is read-only. Ask the care owner for Caregiver access to make changes.",
+    );
+  }
+  return context;
 }
 
 function appointmentFromRow(
@@ -367,18 +408,11 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
 
   if (!user) return null;
 
-  const { data: recipient, error: recipientError } = await supabase
-    .from("care_recipients")
-    .select("id")
-    .eq("owner_id", user.id)
-    .order("created_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  const context = await resolveCareContextForUser(user.id);
+  if (!context) return null;
 
-  if (recipientError) throw recipientError;
-  if (!recipient) return null;
-
-  const careRecipientId = recipient.id as string;
+  const { careRecipientId, careRecipientName, accessRole } = context;
+  void recordCareWorkspaceOpen(careRecipientId);
 
   const [
     observationsResult,
@@ -392,26 +426,24 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
       .from("care_observations")
       .select("id, kind, data, notes, observed_at")
       .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
       .order("observed_at", { ascending: false }),
     supabase
       .from("medications")
       .select("id, name, instructions, time_label")
       .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
       .eq("active", true)
       .order("created_at", { ascending: true }),
     supabase
       .from("medication_records")
       .select("id, medication_id, status, recorded_at, corrected_at")
       .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
       .order("recorded_at", { ascending: false }),
     supabase
       .from("appointments")
-      .select("id, title, starts_at, appointment_date, appointment_time, location, notes")
+      .select(
+        "id, title, starts_at, appointment_date, appointment_time, location, notes",
+      )
       .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle(),
@@ -419,7 +451,6 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
       .from("transition_items")
       .select("item_key")
       .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
       .not("completed_at", "is", null),
     supabase
       .from("saved_resources")
@@ -493,7 +524,6 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
       .select("id, question")
       .eq("appointment_id", appointmentId)
       .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
       .order("position", { ascending: true })
       .order("created_at", { ascending: true });
 
@@ -503,6 +533,9 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
   }
 
   return {
+    careRecipientId,
+    careRecipientName,
+    accessRole,
     entries,
     medications,
     medicationRecords,
@@ -521,7 +554,7 @@ export async function saveObservation(
   kind: TrackerKind,
   values: Record<string, string>,
 ): Promise<Entry> {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
   const { notes = "", ...data } = values;
 
   const { data: row, error } = await supabase
@@ -555,7 +588,7 @@ export async function createMedication(input: {
   instructions: string;
   time: string;
 }): Promise<Medication> {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
 
   const { data, error } = await supabase
     .from("medications")
@@ -581,7 +614,7 @@ export async function createMedication(input: {
 }
 
 export async function updateMedication(input: Medication): Promise<Medication> {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
 
   const { data, error } = await supabase
     .from("medications")
@@ -592,7 +625,6 @@ export async function updateMedication(input: Medication): Promise<Medication> {
     })
     .eq("id", input.id)
     .eq("care_recipient_id", careRecipientId)
-    .eq("user_id", user.id)
     .select("id, name, instructions, time_label")
     .single();
 
@@ -609,7 +641,7 @@ export async function updateMedication(input: Medication): Promise<Medication> {
 export async function recordMedicationDose(
   medication: Medication,
 ): Promise<MedicationRecord> {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
 
   const { data, error } = await supabase
     .from("medication_records")
@@ -634,7 +666,7 @@ export async function recordMedicationDose(
 }
 
 export async function correctMedicationDose(recordId: string): Promise<string> {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
   const correctedAt = new Date().toISOString();
 
   const { error } = await supabase
@@ -644,8 +676,7 @@ export async function correctMedicationDose(recordId: string): Promise<string> {
       corrected_at: correctedAt,
     })
     .eq("id", recordId)
-    .eq("care_recipient_id", careRecipientId)
-    .eq("user_id", user.id);
+    .eq("care_recipient_id", careRecipientId);
 
   if (error) throw error;
   return correctedAt;
@@ -663,11 +694,9 @@ export async function saveAppointment(
   appointment: Appointment,
   existingId?: string | null,
 ): Promise<string> {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
 
-  const values = {
-    care_recipient_id: careRecipientId,
-    user_id: user.id,
+  const editableValues = {
     title: appointment.title.trim(),
     starts_at: appointmentStart(appointment),
     appointment_date: appointment.date || null,
@@ -679,10 +708,9 @@ export async function saveAppointment(
   if (existingId) {
     const { data, error } = await supabase
       .from("appointments")
-      .update(values)
+      .update(editableValues)
       .eq("id", existingId)
       .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
       .select("id")
       .single();
 
@@ -692,7 +720,11 @@ export async function saveAppointment(
 
   const { data, error } = await supabase
     .from("appointments")
-    .insert(values)
+    .insert({
+      care_recipient_id: careRecipientId,
+      user_id: user.id,
+      ...editableValues,
+    })
     .select("id")
     .single();
 
@@ -706,7 +738,7 @@ export async function addAppointmentQuestion(input: {
   question: string;
   position: number;
 }): Promise<{ appointmentId: string; questionId: string }> {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
   const appointmentId =
     input.appointmentId ?? (await saveAppointment(input.appointment, null));
 
@@ -727,43 +759,60 @@ export async function addAppointmentQuestion(input: {
 }
 
 export async function removeAppointmentQuestion(questionId: string) {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
 
   const { error } = await supabase
     .from("appointment_questions")
     .delete()
     .eq("id", questionId)
-    .eq("care_recipient_id", careRecipientId)
-    .eq("user_id", user.id);
+    .eq("care_recipient_id", careRecipientId);
 
   if (error) throw error;
 }
 
 export async function setTransitionItem(index: number, completed: boolean) {
-  const { user, careRecipientId } = await requireCareContext();
+  const { user, careRecipientId } = await requireEditableCareContext();
   const itemKey = String(index);
 
+  const { data: existing, error: existingError } = await supabase
+    .from("transition_items")
+    .select("id")
+    .eq("care_recipient_id", careRecipientId)
+    .eq("item_key", itemKey)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+
   if (!completed) {
+    if (!existing) return;
+
     const { error } = await supabase
       .from("transition_items")
       .delete()
-      .eq("care_recipient_id", careRecipientId)
-      .eq("user_id", user.id)
-      .eq("item_key", itemKey);
+      .eq("id", existing.id)
+      .eq("care_recipient_id", careRecipientId);
 
     if (error) throw error;
     return;
   }
 
-  const { error } = await supabase.from("transition_items").upsert(
-    {
-      care_recipient_id: careRecipientId,
-      user_id: user.id,
-      item_key: itemKey,
-      completed_at: new Date().toISOString(),
-    },
-    { onConflict: "care_recipient_id,item_key" },
-  );
+  if (existing) {
+    const { error } = await supabase
+      .from("transition_items")
+      .update({ completed_at: new Date().toISOString() })
+      .eq("id", existing.id)
+      .eq("care_recipient_id", careRecipientId);
+
+    if (error) throw error;
+    return;
+  }
+
+  const { error } = await supabase.from("transition_items").insert({
+    care_recipient_id: careRecipientId,
+    user_id: user.id,
+    item_key: itemKey,
+    completed_at: new Date().toISOString(),
+  });
 
   if (error) throw error;
 }
