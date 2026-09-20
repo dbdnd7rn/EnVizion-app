@@ -1,0 +1,68 @@
+name: Dependency audit diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Resolve dependencies like Render
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Print vulnerability summary
+        shell: bash
+        run: |
+          npm audit --json > audit.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync('audit.json', 'utf8'));
+          const vulnerabilities = audit.vulnerabilities || {};
+          const summary = Object.entries(vulnerabilities).map(([name, v]) => ({
+            name,
+            severity: v.severity,
+            direct: Boolean(v.isDirect),
+            range: v.range,
+            fixAvailable: v.fixAvailable,
+            via: Array.isArray(v.via)
+              ? v.via.map(item => typeof item === 'string' ? item : {
+                  source: item.source,
+                  name: item.name,
+                  dependency: item.dependency,
+                  title: item.title,
+                  url: item.url,
+                  severity: item.severity,
+                  range: item.range
+                })
+              : v.via,
+            effects: v.effects,
+            nodes: v.nodes
+          }));
+          console.log('AUDIT_METADATA=' + JSON.stringify(audit.metadata));
+          console.log('AUDIT_VULNERABILITIES_BEGIN');
+          console.log(JSON.stringify(summary, null, 2));
+          console.log('AUDIT_VULNERABILITIES_END');
+          NODE
+
+      - name: Check currently resolvable top-level updates
+        shell: bash
+        run: |
+          npm outdated --json > outdated.json || true
+          node <<'NODE'
+          const fs = require('fs');
+          const data = JSON.parse(fs.readFileSync('outdated.json', 'utf8') || '{}');
+          console.log('OUTDATED_BEGIN');
+          console.log(JSON.stringify(data, null, 2));
+          console.log('OUTDATED_END');
+          NODE
