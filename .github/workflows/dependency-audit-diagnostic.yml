@@ -20,6 +20,38 @@ jobs:
       - name: Resolve dependencies like Render
         run: npm install --package-lock-only --ignore-scripts
 
+      - name: Print resolved vulnerable package versions
+        shell: bash
+        run: |
+          npm install --ignore-scripts --no-audit
+          npm ls @expo/cli @expo/config @expo/config-plugins @expo/metro @expo/metro-config @expo/prebuild-config expo-asset expo-constants image-size metro metro-config metro-transform-worker postcss uuid xcode --all || true
+          echo "CONSTRAINTS_BEGIN"
+          node <<'NODE'
+          const { execSync } = require('child_process');
+          const queries = [
+            'expo@54.0.37',
+            '@expo/metro@54',
+            '@expo/metro-config@54',
+            '@expo/config-plugins@54',
+            'metro@0.83.7',
+            'metro-config@0.83.7',
+            'metro-transform-worker@0.83.7',
+            'image-size',
+            'postcss',
+            'uuid',
+            'xcode'
+          ];
+          for (const q of queries) {
+            try {
+              const result = execSync(`npm view "${q}" version dependencies --json`, { encoding: 'utf8' });
+              console.log(q + '=' + result.trim());
+            } catch (error) {
+              console.log(q + '=UNAVAILABLE');
+            }
+          }
+          NODE
+          echo "CONSTRAINTS_END"
+
       - name: Print vulnerability summary
         shell: bash
         run: |
