@@ -19,6 +19,7 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "scheme": "envizionlife"
   }
 }
