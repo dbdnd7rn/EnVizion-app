@@ -132,13 +132,7 @@ export function PilotConsentGate({
       <Card>
         <Text
           selectable
-          style={[
-            S.body,
-            {
-              lineHeight: 24,
-              whiteSpace: "pre-wrap" as never,
-            },
-          ]}
+          style={[S.body, { lineHeight: 24 }]}
         >
           {document.body}
         </Text>
