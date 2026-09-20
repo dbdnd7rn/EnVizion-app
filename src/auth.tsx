@@ -366,9 +366,12 @@ export function PasswordRecoveryScreen() {
         </View>
 
         {Boolean(message) && (
-          <Txt style={{ color: C.rose }} accessibilityRole="alert">
+          <Text
+            accessibilityRole="alert"
+            style={[S.body, { color: C.rose }]}
+          >
             {message}
-          </Txt>
+          </Text>
         )}
 
         <Button
@@ -591,12 +594,12 @@ export function AuthScreen() {
         )}
 
         {Boolean(message) && (
-          <Txt
+          <Text
             accessibilityRole="alert"
-            style={{ color: successMessage ? C.green : C.rose }}
+            style={[S.body, { color: successMessage ? C.green : C.rose }]}
           >
             {message}
-          </Txt>
+          </Text>
         )}
 
         <Button
