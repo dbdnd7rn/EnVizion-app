@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useState } from "react";
 import type { Appointment, Entry } from "./domain";
 import { loadCareData, type CareSnapshot } from "./backend";
+import type { CareRole } from "./careTeam";
 import {
   conversationReducer,
   initialConversation,
@@ -17,6 +18,9 @@ type State = {
   name: string;
   relationship: string;
   faith: boolean;
+  careRecipientId: string | null;
+  careRecipientName: string;
+  accessRole: CareRole;
   entries: Entry[];
   medications: Medication[];
   meds: Record<string, boolean>;
@@ -81,6 +85,9 @@ const initial: State = {
   name: "",
   relationship: "A loved one",
   faith: false,
+  careRecipientId: null,
+  careRecipientName: "",
+  accessRole: "viewer",
   entries: [],
   medications: [],
   meds: {},

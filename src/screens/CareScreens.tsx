@@ -39,6 +39,20 @@ import {
   updateMedication,
 } from "../backend";
 
+
+function ReadOnlyCareNotice() {
+  return (
+    <Card style={{ backgroundColor: C.lavender }}>
+      <Icon name="eye-outline" />
+      <Text style={S.h3}>Viewer access is read-only.</Text>
+      <Txt>
+        You can review the shared care record, but only the Owner or a Caregiver
+        can make changes.
+      </Txt>
+    </Card>
+  );
+}
+
 export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
@@ -49,6 +63,7 @@ export function TrackerScreen({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  const readOnly = state.accessRole === "viewer";
   const history = state.entries.filter((e) => e.kind === kind);
 
   async function save() {
@@ -84,6 +99,7 @@ export function TrackerScreen({
         body="Notice, record, and share with your healthcare team."
       />
       <Safety onPress={() => n.navigate("Emergency")} />
+      {readOnly && <ReadOnlyCareNotice />}
       {(kind === "Red-flag symptoms" || kind === "Behavior & memory") && (
         <Card style={{ backgroundColor: C.redBg }}>
           <Text style={[S.h3, { color: C.rose }]}>
@@ -129,9 +145,15 @@ export function TrackerScreen({
           </Text>
         )}
         <Button
-          title={saving ? "Saving observation…" : "Save observation"}
+          title={
+            readOnly
+              ? "Viewer access — read only"
+              : saving
+                ? "Saving observation…"
+                : "Save observation"
+          }
           icon="checkmark-outline"
-          disabled={saving}
+          disabled={saving || readOnly}
           onPress={() => void save()}
         />
         <Text style={S.small}>
@@ -185,6 +207,7 @@ export function MedicationScreen() {
   const [time, setTime] = useState("");
   const [message, setMessage] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const readOnly = state.accessRole === "viewer";
 
   const closeForm = () => {
     setAdding(false);
@@ -239,6 +262,7 @@ export function MedicationScreen() {
         title="A clearer medication routine"
         body="Keep your list, record each dose, and bring your notes to the care team."
       />
+      {readOnly && <ReadOnlyCareNotice />}
       <Card style={{ backgroundColor: C.lavender }}>
         <Text style={S.eyebrow}>YOUR MEDICATION RECORD</Text>
         <Text style={S.h2}>{activeRecords.length} active dose records</Text>
@@ -279,7 +303,7 @@ export function MedicationScreen() {
                 : "Record dose: " + medication.name
             }
             icon="checkmark-circle-outline"
-            disabled={busyId !== null}
+            disabled={busyId !== null || readOnly}
             onPress={async () => {
               setBusyId(`dose-${medication.id}`);
               setMessage("");
@@ -305,7 +329,7 @@ export function MedicationScreen() {
             title={"Edit " + medication.name}
             secondary
             icon="create-outline"
-            disabled={busyId !== null}
+            disabled={busyId !== null || readOnly}
             onPress={() => {
               setEditingId(medication.id);
               setAdding(true);
@@ -322,7 +346,7 @@ export function MedicationScreen() {
         title={adding ? "Cancel medication changes" : "Add medication"}
         secondary
         icon={adding ? "close-outline" : "add-outline"}
-        disabled={busyId !== null}
+        disabled={busyId !== null || readOnly}
         onPress={() => {
           if (adding) closeForm();
           else {
@@ -359,6 +383,7 @@ export function MedicationScreen() {
             }
             disabled={
               busyId !== null ||
+              readOnly ||
               !name.trim() ||
               !instructions.trim() ||
               !time.trim()
@@ -409,7 +434,7 @@ export function MedicationScreen() {
             <Button
               title={"Correct entry for " + record.medication.name}
               secondary
-              disabled={busyId !== null}
+              disabled={busyId !== null || readOnly}
               onPress={async () => {
                 setBusyId(`correct-${record.id}`);
                 setMessage("");
@@ -470,6 +495,7 @@ export function AppointmentScreen() {
   const [draft, setDraft] = useState(state.appointment);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const readOnly = state.accessRole === "viewer";
 
   async function saveVisit() {
     const appointment = {
@@ -514,6 +540,7 @@ export function AppointmentScreen() {
         title="Walk in feeling prepared"
         body="Keep the important things together for your next appointment."
       />
+      {readOnly && <ReadOnlyCareNotice />}
       <Card style={{ backgroundColor: C.lavender }}>
         <View style={S.row}>
           <Icon name="calendar-outline" size={28} />
@@ -536,7 +563,7 @@ export function AppointmentScreen() {
           title={editing ? "Cancel editing visit" : "Edit visit details"}
           secondary
           icon="create-outline"
-          disabled={saving}
+          disabled={saving || readOnly}
           onPress={() => {
             setDraft(state.appointment);
             setError("");
@@ -598,7 +625,7 @@ export function AppointmentScreen() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Remove question ${index + 1}`}
-            disabled={saving}
+            disabled={saving || readOnly}
             onPress={async () => {
               const questionId = state.questionIds[index];
               if (!questionId) {
@@ -641,45 +668,49 @@ export function AppointmentScreen() {
         </Card>
       )}
 
-      <Field
-        label="What else would you like to ask?"
-        value={question}
-        onChange={setQuestion}
-        multiline
-      />
-      <Button
-        title={saving ? "Saving question…" : "Add my question"}
-        disabled={!question.trim() || saving}
-        icon="add-outline"
-        secondary
-        onPress={async () => {
-          setSaving(true);
-          setMessage("");
-          try {
-            const result = await addAppointmentQuestion({
-              appointment: state.appointment,
-              appointmentId: state.appointmentId,
-              question: question.trim(),
-              position: state.questions.length,
-            });
-            dispatch({
-              type: "question",
-              text: question.trim(),
-              id: result.questionId,
-              appointmentId: result.appointmentId,
-            });
-            setQuestion("");
-          } catch (addError) {
-            setMessage(
-              addError instanceof Error
-                ? addError.message
-                : "We could not save that question.",
-            );
-          } finally {
-            setSaving(false);
-          }
-        }}
-      />
+      {!readOnly && (
+        <>
+          <Field
+            label="What else would you like to ask?"
+            value={question}
+            onChange={setQuestion}
+            multiline
+          />
+          <Button
+            title={saving ? "Saving question…" : "Add my question"}
+            disabled={!question.trim() || saving}
+            icon="add-outline"
+            secondary
+            onPress={async () => {
+              setSaving(true);
+              setMessage("");
+              try {
+                const result = await addAppointmentQuestion({
+                  appointment: state.appointment,
+                  appointmentId: state.appointmentId,
+                  question: question.trim(),
+                  position: state.questions.length,
+                });
+                dispatch({
+                  type: "question",
+                  text: question.trim(),
+                  id: result.questionId,
+                  appointmentId: result.appointmentId,
+                });
+                setQuestion("");
+              } catch (addError) {
+                setMessage(
+                  addError instanceof Error
+                    ? addError.message
+                    : "We could not save that question.",
+                );
+              } finally {
+                setSaving(false);
+              }
+            }}
+          />
+        </>
+      )}
 
       <Button
         title="Print or save appointment sheet"
@@ -715,6 +746,7 @@ export function TransitionScreen() {
   const n = useNav();
   const [message, setMessage] = useState("");
   const [savingIndex, setSavingIndex] = useState<number | null>(null);
+  const readOnly = state.accessRole === "viewer";
 
   return (
     <Page>
@@ -723,6 +755,7 @@ export function TransitionScreen() {
         title="Walking Through the Transition"
         body="You don’t need to remember everything. Take it one step at a time."
       />
+      {readOnly && <ReadOnlyCareNotice />}
       <Card style={{ backgroundColor: C.lavender }}>
         <Text style={S.h2}>
           {state.transition.length} of {transitionSteps.length} steps prepared
@@ -752,7 +785,7 @@ export function TransitionScreen() {
             accessibilityRole="checkbox"
             accessibilityLabel={step}
             accessibilityState={{ checked: completed }}
-            disabled={savingIndex !== null}
+            disabled={savingIndex !== null || readOnly}
             onPress={async () => {
               setSavingIndex(index);
               setMessage("");

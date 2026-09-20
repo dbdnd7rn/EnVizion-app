@@ -44,6 +44,11 @@ export function NotificationsScreen() {
 
       if (item.entityType === "coaching_request") {
         n.navigate("Coaching");
+        return;
+      }
+
+      if (item.entityType === "care_recipient") {
+        n.navigate("CareTeam");
       }
     } catch (error) {
       setMessage(
