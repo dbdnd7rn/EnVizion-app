@@ -18,7 +18,7 @@ import {
   DMSans_700Bold,
 } from "@expo-google-fonts/dm-sans";
 import { Lora_500Medium } from "@expo-google-fonts/lora";
-import { AuthProvider, AuthScreen, useAuth } from "./src/auth";
+import { AuthProvider, AuthScreen, PasswordRecoveryScreen, useAuth } from "./src/auth";
 import { CareProvider } from "./src/store";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import {
@@ -361,7 +361,7 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
-  const { session, loading } = useAuth();
+  const { session, loading, recoveryMode } = useAuth();
   const [staff, setStaff] = useState<StaffMembership | null>(null);
   const [checkingStaff, setCheckingStaff] = useState(true);
   const [staffError, setStaffError] = useState("");
@@ -402,7 +402,8 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
     };
   }, [session?.user.id]);
 
-  if (loading || (session && checkingStaff)) return <LoadingState />;
+  if (loading || (session && checkingStaff && !recoveryMode)) return <LoadingState />;
+  if (session && recoveryMode) return <PasswordRecoveryScreen />;
   if (!session) return <AuthScreen />;
 
   if (staffError) {
