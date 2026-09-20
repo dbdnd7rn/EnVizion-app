@@ -59,6 +59,7 @@ export async function deleteOwnAccount(input: {
   await invokeAccountData({
     action: "delete_account",
     email: input.email,
+    password: input.password,
     confirmation: input.confirmation,
   });
 
