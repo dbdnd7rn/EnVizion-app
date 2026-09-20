@@ -62,7 +62,24 @@ export async function getStaffMembership(): Promise<StaffMembership | null> {
     .maybeSingle();
 
   if (error) throw error;
-  if (!data?.active) return null;
+
+  if (!data) {
+    const { data: claim } = await supabase.functions.invoke("pilot-admin", {
+      body: { action: "claim_initial_admin" },
+    });
+
+    if (claim?.claimed && claim.membership) {
+      return {
+        userId: String(claim.membership.userId),
+        displayName: String(claim.membership.displayName),
+        role: "admin",
+      };
+    }
+
+    return null;
+  }
+
+  if (!data.active) return null;
 
   return {
     userId: data.user_id,
