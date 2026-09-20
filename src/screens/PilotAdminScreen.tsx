@@ -463,7 +463,7 @@ export function PilotAdminScreen() {
               key={type}
               accessibilityRole="radio"
               accessibilityState={{ selected: documentType === type }}
-              disabled={busy !== null}
+              disabled={busy !== null || documentId !== null}
               onPress={() => setDocumentType(type)}
               style={[
                 S.pill,
@@ -471,6 +471,7 @@ export function PilotAdminScreen() {
                   minHeight: 42,
                   justifyContent: "center",
                   paddingHorizontal: 12,
+                  opacity: documentId ? 0.7 : 1,
                   backgroundColor:
                     documentType === type ? C.purple : C.lavender,
                 },
