@@ -825,6 +825,7 @@ export function ResourcesScreen() {
   );
 }
 export function ProfileScreen() {
+  const n = useNav();
   const { state, dispatch } = useCare();
   const { user, signOut } = useAuth();
   const [message, setMessage] = useState("");
@@ -870,6 +871,13 @@ export function ProfileScreen() {
           and saved resources are connected to your secure account.
         </Txt>
       </Card>
+
+      <Row
+        title="Care team & sharing"
+        subtitle={`${state.careRecipientName || "Care profile"} · ${state.accessRole === "owner" ? "Owner" : state.accessRole === "caregiver" ? "Caregiver" : "Viewer"} access`}
+        icon="people-outline"
+        onPress={() => n.navigate("CareTeam")}
+      />
 
       <Card>
         <View style={S.between}>
