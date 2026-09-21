@@ -21,6 +21,7 @@ function reminder(overrides: Partial<CareReminder> = {}): CareReminder {
     notifyScope: "creator",
     completedAt: null,
     dismissedAt: null,
+    snoozedUntil: null,
     createdAt: "2026-09-20T18:00:00.000Z",
     updatedAt: "2026-09-20T18:00:00.000Z",
     ...overrides,
@@ -56,6 +57,20 @@ test("reminder status prioritizes completed and dismissed state", () => {
   assert.equal(
     reminderStatus(reminder({ dismissedAt: "2026-09-21T19:00:00.000Z" }), now),
     "dismissed",
+  );
+});
+
+test("reminder status respects a snoozed occurrence without moving the base schedule", () => {
+  const now = new Date("2026-09-21T20:00:00.000Z");
+  assert.equal(
+    reminderStatus(
+      reminder({
+        scheduledFor: "2026-09-21T19:00:00.000Z",
+        snoozedUntil: "2026-09-21T21:00:00.000Z",
+      }),
+      now,
+    ),
+    "upcoming",
   );
 });
 
