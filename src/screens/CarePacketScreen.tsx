@@ -253,7 +253,6 @@ export function CarePacketScreen() {
       const html = buildCarePacketHtml({
         packetType,
         generatedAt: new Date().toISOString(),
-        caregiverName: state.name,
         careRecipient: recipient,
         appointment: state.appointment,
         questions: state.questions,
