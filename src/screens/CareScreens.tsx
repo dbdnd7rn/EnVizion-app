@@ -463,6 +463,7 @@ export function MedicationScreen() {
       <Button
         title="Print medication list and history"
         icon="print-outline"
+        disabled={readOnly}
         onPress={async () => {
           try {
             await printResource(
@@ -490,6 +491,7 @@ export function MedicationScreen() {
 
 export function AppointmentScreen() {
   const { state, dispatch } = useCare();
+  const n = useNav();
   const [question, setQuestion] = useState("");
   const [message, setMessage] = useState("");
   const [editing, setEditing] = useState(false);
@@ -735,6 +737,7 @@ export function AppointmentScreen() {
       <Button
         title="Print or save appointment sheet"
         icon="print-outline"
+        disabled={readOnly}
         onPress={async () => {
           try {
             await printResource(
@@ -748,6 +751,13 @@ export function AppointmentScreen() {
             );
           }
         }}
+      />
+      <Button
+        title="Build a focused visit packet"
+        secondary
+        icon="reader-outline"
+        disabled={readOnly}
+        onPress={() => n.navigate("CarePacket")}
       />
       {Boolean(message) && <Txt>{message}</Txt>}
       <Card>
