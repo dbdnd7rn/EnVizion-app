@@ -24,6 +24,7 @@ import { SummaryScreen } from "./src/screens/SummaryScreen";
 import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
 import { CareCalendarScreen } from "./src/screens/CareCalendarScreen";
 import { CareDocumentsScreen } from "./src/screens/CareDocumentsScreen";
+import { CareContactsScreen } from "./src/screens/CareContactsScreen";
 import { CarePacketScreen } from "./src/screens/CarePacketScreen";
 import {
   AssistantScreen,
@@ -223,6 +224,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareDocuments"
             component={CareDocumentsScreen}
             options={{ title: "Care Document Vault" }}
+          />
+          <Stack.Screen
+            name="CareContacts"
+            component={CareContactsScreen}
+            options={{ title: "Care contacts & providers" }}
           />
           <Stack.Screen
             name="CarePacket"
