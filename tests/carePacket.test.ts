@@ -156,7 +156,7 @@ test("packet includes only explicitly selected care contacts", () => {
   input.selectedSections = [...input.selectedSections, "care_contacts"];
   const html = buildCarePacketHtml(input);
 
-  assert.match(html, /Care contacts & providers/);
+  assert.match(html, /Care contacts &amp; providers/);
   assert.match(html, /Dr\. Rivera/);
   assert.match(html, /Preferred contact: Phone/);
 });
@@ -166,7 +166,7 @@ test("packet includes only selected communication history", () => {
   input.selectedSections = [...input.selectedSections, "communication_log"];
   const html = buildCarePacketHtml(input);
 
-  assert.match(html, /Care notes & communication history/);
+  assert.match(html, /Care notes &amp; communication history/);
   assert.match(html, /Nurse James/);
   assert.match(html, /Dr\. Rivera/);
   assert.match(html, /Follow-up/);
