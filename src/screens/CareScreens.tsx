@@ -27,6 +27,7 @@ import { transitionSteps } from "../content";
 import { useNav } from "./MainScreens";
 import { printResource } from "../printing";
 import { medicationLines } from "../medications";
+import { addAppointmentToDeviceCalendar } from "../deviceCalendar";
 import {
   addAppointmentQuestion,
   correctMedicationDose,
@@ -568,6 +569,25 @@ export function AppointmentScreen() {
             setDraft(state.appointment);
             setError("");
             setEditing(!editing);
+          }}
+        />
+        <Button
+          title="Add visit to device calendar"
+          secondary
+          icon="calendar-outline"
+          disabled={saving || !state.appointment.date}
+          onPress={async () => {
+            setMessage("");
+            try {
+              await addAppointmentToDeviceCalendar(state.appointment);
+              setMessage("Calendar window opened.");
+            } catch (calendarError) {
+              setMessage(
+                calendarError instanceof Error
+                  ? calendarError.message
+                  : "We could not open the device calendar.",
+              );
+            }
           }}
         />
       </Card>
