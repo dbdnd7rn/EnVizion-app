@@ -894,6 +894,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Care tasks & shared care plan"
+        subtitle="Responsibilities, assignments, due dates, and completion history"
+        icon="checkbox-outline"
+        onPress={() => n.navigate("CareTasks")}
+      />
+
+      <Row
         title="Account, privacy & data"
         subtitle="Password, exports, consent and deletion controls"
         icon="shield-checkmark-outline"
