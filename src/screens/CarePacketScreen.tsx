@@ -4,6 +4,7 @@ import {
   completeCarePacketExport,
   failCarePacketExport,
   loadCarePacketSupportingData,
+  packetCareContactReference,
   packetDocumentReference,
   startCarePacketExport,
   type CarePacketExportRecord,
@@ -17,6 +18,7 @@ import {
   type CarePacketType,
 } from "../carePacketHelpers";
 import { transitionSteps } from "../content";
+import { careContactCategoryLabels, type CareContact } from "../careContacts";
 import type { CareDocument } from "../documents";
 import { documentCategoryLabels, formatDocumentBytes } from "../documentHelpers";
 import { printHtmlResource } from "../printing";
@@ -101,6 +103,7 @@ function SectionToggle({
     reminders: "Up to 10 active shared care reminders.",
     transition: "Hospital-to-home checklist status.",
     vault_documents: "A checklist of selected private documents to bring separately.",
+    care_contacts: "Only the doctors, services, or organizations you select.",
   };
 
   return (
@@ -138,7 +141,9 @@ export function CarePacketScreen() {
   const [recipient, setRecipient] = useState<CarePacketRecipient | null>(null);
   const [reminders, setReminders] = useState<CareReminder[]>([]);
   const [documents, setDocuments] = useState<CareDocument[]>([]);
+  const [contacts, setContacts] = useState<CareContact[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
   const [history, setHistory] = useState<CarePacketExportRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -160,9 +165,13 @@ export function CarePacketScreen() {
       setRecipient(data.recipient);
       setReminders(data.reminders);
       setDocuments(data.documents);
+      setContacts(data.contacts);
       setHistory(data.history);
       setSelectedDocumentIds((current) =>
         current.filter((id) => data.documents.some((document) => document.id === id)),
+      );
+      setSelectedContactIds((current) =>
+        current.filter((id) => data.contacts.some((contact) => contact.id === id)),
       );
     } catch (error) {
       setMessage(
@@ -200,6 +209,14 @@ export function CarePacketScreen() {
     [documents, selectedDocumentIds],
   );
 
+  const selectedContacts = useMemo(
+    () =>
+      contacts
+        .filter((contact) => selectedContactIds.includes(contact.id))
+        .map(packetCareContactReference),
+    [contacts, selectedContactIds],
+  );
+
   function toggleSection(section: CarePacketSection, enabled: boolean) {
     setSelectedSections((current) => {
       if (enabled) return current.includes(section) ? current : [...current, section];
@@ -208,6 +225,9 @@ export function CarePacketScreen() {
 
     if (section === "vault_documents" && !enabled) {
       setSelectedDocumentIds([]);
+    }
+    if (section === "care_contacts" && !enabled) {
+      setSelectedContactIds([]);
     }
   }
 
@@ -219,10 +239,25 @@ export function CarePacketScreen() {
     );
   }
 
+  function toggleContact(contactId: string) {
+    setSelectedContactIds((current) =>
+      current.includes(contactId)
+        ? current.filter((id) => id !== contactId)
+        : [...current, contactId],
+    );
+  }
+
   async function exportPacket() {
     if (!careRecipientId || !recipient || viewer || exporting) return;
     if (!selectedSections.length) {
       setMessage("Choose at least one section before creating a packet.");
+      return;
+    }
+
+    if (selectedSet.has("care_contacts") && selectedContactIds.length === 0) {
+      setMessage(
+        "Choose at least one care contact, or turn off the care contacts section.",
+      );
       return;
     }
 
@@ -246,6 +281,7 @@ export function CarePacketScreen() {
         packetType,
         sections: selectedSections,
         selectedDocumentIds,
+        selectedContactIds,
         observationLimit,
       });
       packetId = started.packetId;
@@ -263,6 +299,7 @@ export function CarePacketScreen() {
         transitionSteps,
         transitionCompleted: state.transition,
         selectedDocuments,
+        careContacts: selectedContacts,
         selectedSections,
         observationLimit,
         receiverNote,
@@ -381,6 +418,7 @@ export function CarePacketScreen() {
           "observations",
           "reminders",
           "transition",
+          "care_contacts",
           "vault_documents",
         ] as CarePacketSection[]
       ).map((section) => (
@@ -431,6 +469,74 @@ export function CarePacketScreen() {
             ))}
           </View>
         </Card>
+      )}
+
+      {selectedSet.has("care_contacts") && (
+        <>
+          <Section title="3. Care contacts to include" />
+          <Card style={{ backgroundColor: C.lavender }}>
+            <Txt>
+              Select only the providers relevant to this visit or handoff. The
+              rest of the directory stays private to the care profile.
+            </Txt>
+          </Card>
+
+          {contacts.length ? (
+            contacts.map((contact) => {
+              const selected = selectedContactIds.includes(contact.id);
+              return (
+                <Pressable
+                  key={contact.id}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: selected }}
+                  disabled={exporting}
+                  onPress={() => toggleContact(contact.id)}
+                  style={[
+                    S.card,
+                    {
+                      borderColor: selected ? C.purple : C.line,
+                      backgroundColor: selected ? "#F6F0F8" : C.white,
+                      opacity: exporting ? 0.6 : 1,
+                    },
+                  ]}
+                >
+                  <View style={S.between}>
+                    <View style={{ flex: 1, gap: 4 }}>
+                      <Text style={S.h3}>{contact.providerName}</Text>
+                      <Txt style={S.small}>
+                        {careContactCategoryLabels[contact.category]}
+                        {contact.specialty ? ` · ${contact.specialty}` : ""}
+                        {contact.organizationName
+                          ? ` · ${contact.organizationName}`
+                          : ""}
+                      </Txt>
+                      {Boolean(contact.phone || contact.email) && (
+                        <Text style={S.small}>
+                          {[contact.phone, contact.email]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </Text>
+                      )}
+                    </View>
+                    <Icon
+                      name={selected ? "checkmark-circle" : "ellipse-outline"}
+                      color={selected ? C.purple : C.muted}
+                    />
+                  </View>
+                </Pressable>
+              );
+            })
+          ) : (
+            <Card>
+              <Icon name="call-outline" />
+              <Text style={S.h3}>No provider contacts saved yet.</Text>
+              <Txt>
+                Add doctors, pharmacy, insurance, or other care contacts in the
+                provider directory before including them in a packet.
+              </Txt>
+            </Card>
+          )}
+        </>
       )}
 
       {selectedSet.has("vault_documents") && (
