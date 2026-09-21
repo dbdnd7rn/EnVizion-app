@@ -9,6 +9,7 @@ function iconFor(item: NotificationRecord) {
   if (item.kind.includes("coaching")) return "people-outline";
   if (item.kind.includes("support")) return "heart-outline";
   if (item.kind.includes("reminder")) return "alarm-outline";
+  if (item.kind.includes("document")) return "folder-open-outline";
   return "notifications-outline";
 }
 
@@ -55,6 +56,11 @@ export function NotificationsScreen() {
 
       if (item.entityType === "care_reminder") {
         n.navigate("CareCalendar");
+        return;
+      }
+
+      if (item.entityType === "care_document") {
+        n.navigate("CareDocuments");
       }
     } catch (error) {
       setMessage(
