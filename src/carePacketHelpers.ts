@@ -13,6 +13,7 @@ export const carePacketSections = [
   "reminders",
   "transition",
   "vault_documents",
+  "care_contacts",
 ] as const;
 
 export type CarePacketSection = (typeof carePacketSections)[number];
@@ -28,6 +29,7 @@ export const carePacketSectionLabels: Record<CarePacketSection, string> = {
   reminders: "Upcoming reminders",
   transition: "Transition checklist",
   vault_documents: "Selected Care Vault documents",
+  care_contacts: "Selected care contacts & providers",
 };
 
 export type PacketDocumentReference = {
@@ -36,6 +38,20 @@ export type PacketDocumentReference = {
   originalName: string;
   categoryLabel: string;
   sizeLabel: string;
+};
+
+export type PacketCareContact = {
+  id: string;
+  providerName: string;
+  organizationName: string;
+  specialty: string;
+  phone: string;
+  email: string;
+  address: string;
+  officeHours: string;
+  notes: string;
+  categoryLabel: string;
+  preferredContactLabel: string;
 };
 
 export type CarePacketBuildInput = {
@@ -56,6 +72,7 @@ export type CarePacketBuildInput = {
   transitionSteps: string[];
   transitionCompleted: number[];
   selectedDocuments: PacketDocumentReference[];
+  careContacts: PacketCareContact[];
   selectedSections: CarePacketSection[];
   observationLimit: number;
   receiverNote: string;
@@ -243,6 +260,31 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
       : paragraph("No active reminders.");
 
     blocks.push(section("Upcoming reminders", body));
+  }
+
+  if (selected.has("care_contacts")) {
+    const body = input.careContacts.length
+      ? input.careContacts
+          .map((contact) => {
+            const details = [
+              contact.organizationName,
+              contact.specialty,
+              contact.phone ? `Phone: ${contact.phone}` : "",
+              contact.email ? `Email: ${contact.email}` : "",
+              contact.address ? `Address: ${contact.address}` : "",
+              contact.officeHours ? `Office hours: ${contact.officeHours}` : "",
+              `Preferred contact: ${contact.preferredContactLabel}`,
+              contact.notes ? `Caregiver notes: ${contact.notes}` : "",
+            ].filter(Boolean);
+
+            return `<article class="observation"><strong>${escapeHtml(
+              `${contact.providerName} · ${contact.categoryLabel}`,
+            )}</strong><ul>${details.map(item).join("")}</ul></article>`;
+          })
+          .join("")
+      : paragraph("No care contacts selected.");
+
+    blocks.push(section("Care contacts & providers", body));
   }
 
   if (selected.has("transition")) {
