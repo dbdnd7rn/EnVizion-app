@@ -77,6 +77,21 @@ function baseInput(): CarePacketBuildInput {
     ],
     transitionSteps: ["Review medication list", "Confirm transport"],
     transitionCompleted: [0],
+    careContacts: [
+      {
+        id: "contact-1",
+        providerName: "Dr. Rivera",
+        organizationName: "Heart Center",
+        specialty: "Cardiology",
+        phone: "+1 555 0200",
+        email: "cardiology@example.org",
+        address: "100 Clinic Way",
+        officeHours: "Mon-Fri 8-5",
+        notes: "Ask for the nurse line",
+        categoryLabel: "Specialist",
+        preferredContactLabel: "Phone",
+      },
+    ],
     selectedDocuments: [
       {
         id: "doc-1",
@@ -116,6 +131,16 @@ test("packet includes only explicitly selected sections", () => {
   assert.doesNotMatch(html, /Recent medication records/);
   assert.doesNotMatch(html, /Upcoming reminders/);
   assert.doesNotMatch(html, /Hospital-to-home transition checklist/);
+});
+
+test("packet includes only explicitly selected care contacts", () => {
+  const input = baseInput();
+  input.selectedSections = [...input.selectedSections, "care_contacts"];
+  const html = buildCarePacketHtml(input);
+
+  assert.match(html, /Care contacts & providers/);
+  assert.match(html, /Dr\. Rivera/);
+  assert.match(html, /Preferred contact: Phone/);
 });
 
 test("packet escapes user-entered HTML-sensitive content", () => {
