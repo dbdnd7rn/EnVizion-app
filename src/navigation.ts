@@ -14,6 +14,7 @@ export type RootStack = {
   };
   Medications: undefined;
   Summary: undefined;
+  Insights: undefined;
   Assistant: undefined;
   Handoff: undefined;
   TeamConversation: undefined;
