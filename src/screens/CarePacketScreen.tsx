@@ -541,7 +541,9 @@ export function CarePacketScreen() {
 
       {selectedSet.has("vault_documents") && (
         <>
-          <Section title="3. Documents to bring or share separately" />
+          <Section
+            title={`${selectedSet.has("care_contacts") ? "4" : "3"}. Documents to bring or share separately`}
+          />
           <Card style={{ backgroundColor: C.lavender }}>
             <Txt>
               Selected documents are listed in the packet as an attachment
@@ -587,7 +589,13 @@ export function CarePacketScreen() {
         </>
       )}
 
-      <Section title={selectedSet.has("vault_documents") ? "4. Optional note" : "3. Optional note"} />
+      <Section
+        title={`${
+          3 +
+          Number(selectedSet.has("care_contacts")) +
+          Number(selectedSet.has("vault_documents"))
+        }. Optional note`}
+      />
       <Field
         label="Note for the receiving caregiver or healthcare team"
         value={receiverNote}
@@ -614,6 +622,9 @@ export function CarePacketScreen() {
         )}
         {selectedSet.has("reminders") && (
           <Txt>{Math.min(activeReminderCount, 10)} active reminder(s).</Txt>
+        )}
+        {selectedSet.has("care_contacts") && (
+          <Txt>{selectedContactIds.length} care contact(s) included.</Txt>
         )}
         {selectedSet.has("vault_documents") && (
           <Txt>{selectedDocumentIds.length} vault document(s) listed separately.</Txt>
