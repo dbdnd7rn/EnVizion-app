@@ -887,6 +887,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Care notes & communication log"
+        subtitle="Shared calls, outcomes, decisions, and follow-ups for this care profile"
+        icon="chatbubbles-outline"
+        onPress={() => n.navigate("CareCommunicationLog")}
+      />
+
+      <Row
         title="Account, privacy & data"
         subtitle="Password, exports, consent and deletion controls"
         icon="shield-checkmark-outline"
