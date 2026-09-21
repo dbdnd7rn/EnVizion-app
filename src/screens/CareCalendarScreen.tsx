@@ -195,8 +195,9 @@ function ReminderCard({
           {Boolean(reminder.note) && <Txt>{reminder.note}</Txt>}
 
           <Txt style={S.small}>
-            {new Date(reminder.scheduledFor).toLocaleString()} ·{" "}
+            {new Date(reminder.snoozedUntil ?? reminder.scheduledFor).toLocaleString()} ·{" "}
             {reminder.timezone}
+            {reminder.snoozedUntil ? " · snoozed" : ""}
           </Txt>
           <Txt style={S.small}>
             {typeLabels[reminder.reminderType]} ·{" "}
