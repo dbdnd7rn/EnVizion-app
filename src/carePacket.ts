@@ -1,5 +1,6 @@
 import { loadCareDocuments, type CareDocument } from "./documents";
 import { loadCareContacts, careContactCategoryLabels, preferredContactMethodLabels, type CareContact } from "./careContacts";
+import { loadCareCommunications, careCommunicationPriorityLabels, careCommunicationTypeLabels, type CareCommunication } from "./careCommunications";
 import { documentCategoryLabels, formatDocumentBytes } from "./documentHelpers";
 import { loadCareReminders } from "./reminders";
 import type { CareReminder } from "./reminderHelpers";
@@ -8,6 +9,7 @@ import type {
   CarePacketType,
   PacketDocumentReference,
   PacketCareContact,
+  PacketCareCommunication,
 } from "./carePacketHelpers";
 import { supabase } from "./supabase";
 
@@ -24,6 +26,7 @@ export type CarePacketExportRecord = {
   includedSections: CarePacketSection[];
   selectedDocumentIds: string[];
   selectedContactIds: string[];
+  selectedCommunicationIds: string[];
   observationLimit: number;
   status: "started" | "completed" | "failed";
   startedAt: string;
@@ -38,6 +41,7 @@ function mapExport(row: any): CarePacketExportRecord {
     includedSections: (row.included_sections ?? []) as CarePacketSection[],
     selectedDocumentIds: row.selected_document_ids ?? [],
     selectedContactIds: row.selected_contact_ids ?? [],
+    selectedCommunicationIds: row.selected_communication_ids ?? [],
     observationLimit: Number(row.observation_limit ?? 5),
     status: row.status,
     startedAt: row.started_at,
@@ -77,6 +81,37 @@ export function packetCareContactReference(
   };
 }
 
+export function packetCareCommunicationReference(
+  communication: CareCommunication,
+  contact?: CareContact,
+): PacketCareCommunication {
+  return {
+    id: communication.id,
+    communicationTypeLabel:
+      careCommunicationTypeLabels[communication.communicationType],
+    occurredAt: communication.occurredAt,
+    personSpokenTo: communication.personSpokenTo,
+    organizationName: communication.organizationName,
+    summary: communication.summary,
+    outcome: communication.outcome,
+    followUpNeeded: communication.followUpNeeded,
+    followUpAt: communication.followUpAt,
+    notes: communication.notes,
+    priorityLabel: careCommunicationPriorityLabels[communication.priority],
+    tag: communication.tag,
+    linkedContactName: contact?.providerName ?? "",
+    linkedContactRole: contact
+      ? [
+          careContactCategoryLabels[contact.category],
+          contact.specialty,
+          contact.organizationName,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : "",
+  };
+}
+
 export async function loadCarePacketSupportingData(
   careRecipientId: string,
 ): Promise<{
@@ -84,9 +119,10 @@ export async function loadCarePacketSupportingData(
   reminders: CareReminder[];
   documents: CareDocument[];
   contacts: CareContact[];
+  communications: CareCommunication[];
   history: CarePacketExportRecord[];
 }> {
-  const [recipientResult, reminders, documents, contacts, historyResult] = await Promise.all([
+  const [recipientResult, reminders, documents, contacts, communications, historyResult] = await Promise.all([
     supabase
       .from("care_recipients")
       .select(
@@ -97,10 +133,11 @@ export async function loadCarePacketSupportingData(
     loadCareReminders(careRecipientId),
     loadCareDocuments(careRecipientId),
     loadCareContacts(careRecipientId),
+    loadCareCommunications(careRecipientId),
     supabase
       .from("care_packet_exports")
       .select(
-        "id, packet_type, included_sections, selected_document_ids, selected_contact_ids, observation_limit, status, started_at, completed_at, failed_at",
+        "id, packet_type, included_sections, selected_document_ids, selected_contact_ids, selected_communication_ids, observation_limit, status, started_at, completed_at, failed_at",
       )
       .eq("care_recipient_id", careRecipientId)
       .order("started_at", { ascending: false })
@@ -122,6 +159,7 @@ export async function loadCarePacketSupportingData(
     reminders,
     documents,
     contacts,
+    communications,
     history: (historyResult.data ?? []).map(mapExport),
   };
 }
@@ -142,6 +180,7 @@ export async function startCarePacketExport(input: {
   sections: CarePacketSection[];
   selectedDocumentIds: string[];
   selectedContactIds: string[];
+  selectedCommunicationIds: string[];
   observationLimit: number;
 }) {
   return invokePacket<{ packetId: string; startedAt: string }>({
@@ -151,6 +190,7 @@ export async function startCarePacketExport(input: {
     sections: input.sections,
     selectedDocumentIds: input.selectedDocumentIds,
     selectedContactIds: input.selectedContactIds,
+    selectedCommunicationIds: input.selectedCommunicationIds,
     observationLimit: input.observationLimit,
   });
 }
