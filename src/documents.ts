@@ -94,7 +94,7 @@ export async function pickCareDocument(): Promise<PickedCareDocument | null> {
   const asset = result.assets[0];
   const file = Platform.OS === "web" && asset.file
     ? asset.file
-    : new File(asset);
+    : new File(asset.uri);
   const sizeBytes = Number(asset.size ?? file.size ?? 0);
   const mimeType = inferDocumentMime(asset.name, asset.mimeType || file.type);
 
@@ -121,7 +121,7 @@ export async function uploadCareDocument(input: {
     payload = input.picked.asset.file;
     sizeBytes = input.picked.asset.file.size;
   } else {
-    const file = new File(input.picked.asset);
+    const file = new File(input.picked.asset.uri);
     payload = await file.arrayBuffer();
     sizeBytes = payload.byteLength;
   }
