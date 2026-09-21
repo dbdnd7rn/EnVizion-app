@@ -240,6 +240,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareContacts")}
           />
           <Row
+            title="Care notes & communication log"
+            subtitle="Track calls, updates, outcomes, and follow-ups"
+            icon="chatbubbles-outline"
+            onPress={() => n.navigate("CareCommunicationLog")}
+          />
+          <Row
             title="Handoff & visit packet"
             subtitle="Create a focused PDF with only the care details you choose"
             icon="reader-outline"
@@ -422,6 +428,12 @@ export function ToolkitScreen() {
           subtitle="Keep the people and organizations around this care profile together"
           icon="call-outline"
           onPress={() => n.navigate("CareContacts")}
+        />
+        <Row
+          title="Care notes & communication log"
+          subtitle="Calls, messages, hospital updates, decisions, and follow-ups"
+          icon="chatbubbles-outline"
+          onPress={() => n.navigate("CareCommunicationLog")}
         />
         <Row
           title="Handoff & visit packet"
