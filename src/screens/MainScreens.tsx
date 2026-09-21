@@ -234,6 +234,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareDocuments")}
           />
           <Row
+            title="Care contacts & providers"
+            subtitle="Doctors, specialists, pharmacy, insurance, and care services"
+            icon="call-outline"
+            onPress={() => n.navigate("CareContacts")}
+          />
+          <Row
             title="Handoff & visit packet"
             subtitle="Create a focused PDF with only the care details you choose"
             icon="reader-outline"
@@ -410,6 +416,12 @@ export function ToolkitScreen() {
           subtitle="Private discharge papers, care plans, insurance files, and more"
           icon="folder-open-outline"
           onPress={() => n.navigate("CareDocuments")}
+        />
+        <Row
+          title="Care contacts & providers"
+          subtitle="Keep the people and organizations around this care profile together"
+          icon="call-outline"
+          onPress={() => n.navigate("CareContacts")}
         />
         <Row
           title="Handoff & visit packet"
