@@ -92,6 +92,24 @@ function baseInput(): CarePacketBuildInput {
         preferredContactLabel: "Phone",
       },
     ],
+    careCommunications: [
+      {
+        id: "communication-1",
+        communicationTypeLabel: "Phone call",
+        occurredAt: "2026-09-21T14:00:00.000Z",
+        personSpokenTo: "Nurse James",
+        organizationName: "Heart Center",
+        summary: "Reviewed swelling <changes>",
+        outcome: "Continue monitoring and call if symptoms worsen",
+        followUpNeeded: true,
+        followUpAt: "2026-09-23T13:00:00.000Z",
+        notes: "Ask about the new appointment time",
+        priorityLabel: "Follow-up",
+        tag: "Cardiology",
+        linkedContactName: "Dr. Rivera",
+        linkedContactRole: "Specialist · Cardiology · Heart Center",
+      },
+    ],
     selectedDocuments: [
       {
         id: "doc-1",
@@ -141,6 +159,19 @@ test("packet includes only explicitly selected care contacts", () => {
   assert.match(html, /Care contacts & providers/);
   assert.match(html, /Dr\. Rivera/);
   assert.match(html, /Preferred contact: Phone/);
+});
+
+test("packet includes only selected communication history", () => {
+  const input = baseInput();
+  input.selectedSections = [...input.selectedSections, "communication_log"];
+  const html = buildCarePacketHtml(input);
+
+  assert.match(html, /Care notes & communication history/);
+  assert.match(html, /Nurse James/);
+  assert.match(html, /Dr\. Rivera/);
+  assert.match(html, /Follow-up/);
+  assert.match(html, /Reviewed swelling &lt;changes&gt;/);
+  assert.doesNotMatch(html, /Reviewed swelling <changes>/);
 });
 
 test("packet escapes user-entered HTML-sensitive content", () => {
