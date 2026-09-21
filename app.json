@@ -18,7 +18,20 @@
       "output": "single"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "color": "#7B428E",
+          "defaultChannel": "care-updates"
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Allow EnVizion Life to open your calendar so you can add care events you choose."
+        }
+      ]
     ],
     "scheme": "envizionlife"
   }
