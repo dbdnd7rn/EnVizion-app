@@ -768,8 +768,11 @@ export function CarePacketScreen() {
         )}
         {selectedSet.has("communication_log") && (
           <Txt>
-            {selectedCommunicationIds.length} communication entr
-            {selectedCommunicationIds.length === 1 ? "y" : "ies"} included.
+            {selectedCommunicationIds.length}{" "}
+            {selectedCommunicationIds.length === 1
+              ? "communication entry"
+              : "communication entries"}{" "}
+            included.
           </Txt>
         )}
         {selectedSet.has("vault_documents") && (
