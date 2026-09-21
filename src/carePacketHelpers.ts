@@ -14,6 +14,7 @@ export const carePacketSections = [
   "transition",
   "vault_documents",
   "care_contacts",
+  "communication_log",
 ] as const;
 
 export type CarePacketSection = (typeof carePacketSections)[number];
@@ -30,6 +31,7 @@ export const carePacketSectionLabels: Record<CarePacketSection, string> = {
   transition: "Transition checklist",
   vault_documents: "Selected Care Vault documents",
   care_contacts: "Selected care contacts & providers",
+  communication_log: "Selected care notes & communications",
 };
 
 export type PacketDocumentReference = {
@@ -54,6 +56,23 @@ export type PacketCareContact = {
   preferredContactLabel: string;
 };
 
+export type PacketCareCommunication = {
+  id: string;
+  communicationTypeLabel: string;
+  occurredAt: string;
+  personSpokenTo: string;
+  organizationName: string;
+  summary: string;
+  outcome: string;
+  followUpNeeded: boolean;
+  followUpAt: string | null;
+  notes: string;
+  priorityLabel: string;
+  tag: string;
+  linkedContactName: string;
+  linkedContactRole: string;
+};
+
 export type CarePacketBuildInput = {
   packetType: CarePacketType;
   generatedAt: string;
@@ -73,6 +92,7 @@ export type CarePacketBuildInput = {
   transitionCompleted: number[];
   selectedDocuments: PacketDocumentReference[];
   careContacts: PacketCareContact[];
+  careCommunications: PacketCareCommunication[];
   selectedSections: CarePacketSection[];
   observationLimit: number;
   receiverNote: string;
@@ -285,6 +305,52 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
       : paragraph("No care contacts selected.");
 
     blocks.push(section("Care contacts & providers", body));
+  }
+
+  if (selected.has("communication_log")) {
+    const body = input.careCommunications.length
+      ? input.careCommunications
+          .map((communication) => {
+            const details = [
+              `${communication.communicationTypeLabel} · ${formattedDate(
+                communication.occurredAt,
+              )}`,
+              communication.linkedContactName
+                ? `Linked provider: ${communication.linkedContactName}${
+                    communication.linkedContactRole
+                      ? ` · ${communication.linkedContactRole}`
+                      : ""
+                  }`
+                : "",
+              communication.personSpokenTo
+                ? `Person spoken to: ${communication.personSpokenTo}`
+                : "",
+              communication.organizationName
+                ? `Organization: ${communication.organizationName}`
+                : "",
+              `Summary: ${communication.summary}`,
+              communication.outcome ? `Outcome: ${communication.outcome}` : "",
+              `Priority: ${communication.priorityLabel}${
+                communication.tag ? ` · ${communication.tag}` : ""
+              }`,
+              communication.followUpNeeded
+                ? `Follow-up: ${
+                    communication.followUpAt
+                      ? formattedDate(communication.followUpAt)
+                      : "Needed; date not recorded"
+                  }`
+                : "",
+              communication.notes ? `Caregiver notes: ${communication.notes}` : "",
+            ].filter(Boolean);
+
+            return `<article class="observation"><ul>${details
+              .map(item)
+              .join("")}</ul></article>`;
+          })
+          .join("")
+      : paragraph("No communication entries selected.");
+
+    blocks.push(section("Care notes & communication history", body));
   }
 
   if (selected.has("transition")) {
