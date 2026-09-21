@@ -4,6 +4,7 @@ import {
   completeCarePacketExport,
   failCarePacketExport,
   loadCarePacketSupportingData,
+  packetCareCommunicationReference,
   packetCareContactReference,
   packetDocumentReference,
   startCarePacketExport,
@@ -19,6 +20,7 @@ import {
 } from "../carePacketHelpers";
 import { transitionSteps } from "../content";
 import { careContactCategoryLabels, type CareContact } from "../careContacts";
+import { careCommunicationTypeLabels, type CareCommunication } from "../careCommunications";
 import type { CareDocument } from "../documents";
 import { documentCategoryLabels, formatDocumentBytes } from "../documentHelpers";
 import { printHtmlResource } from "../printing";
@@ -104,6 +106,7 @@ function SectionToggle({
     transition: "Hospital-to-home checklist status.",
     vault_documents: "A checklist of selected private documents to bring separately.",
     care_contacts: "Only the doctors, services, or organizations you select.",
+    communication_log: "Only the caregiver communication entries you select.",
   };
 
   return (
@@ -142,8 +145,10 @@ export function CarePacketScreen() {
   const [reminders, setReminders] = useState<CareReminder[]>([]);
   const [documents, setDocuments] = useState<CareDocument[]>([]);
   const [contacts, setContacts] = useState<CareContact[]>([]);
+  const [communications, setCommunications] = useState<CareCommunication[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
+  const [selectedCommunicationIds, setSelectedCommunicationIds] = useState<string[]>([]);
   const [history, setHistory] = useState<CarePacketExportRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -166,12 +171,18 @@ export function CarePacketScreen() {
       setReminders(data.reminders);
       setDocuments(data.documents);
       setContacts(data.contacts);
+      setCommunications(data.communications);
       setHistory(data.history);
       setSelectedDocumentIds((current) =>
         current.filter((id) => data.documents.some((document) => document.id === id)),
       );
       setSelectedContactIds((current) =>
         current.filter((id) => data.contacts.some((contact) => contact.id === id)),
+      );
+      setSelectedCommunicationIds((current) =>
+        current.filter((id) =>
+          data.communications.some((communication) => communication.id === id),
+        ),
       );
     } catch (error) {
       setMessage(
@@ -217,6 +228,28 @@ export function CarePacketScreen() {
     [contacts, selectedContactIds],
   );
 
+  const contactsById = useMemo(
+    () => new Map(contacts.map((contact) => [contact.id, contact])),
+    [contacts],
+  );
+
+  const selectedCommunications = useMemo(
+    () =>
+      communications
+        .filter((communication) =>
+          selectedCommunicationIds.includes(communication.id),
+        )
+        .map((communication) =>
+          packetCareCommunicationReference(
+            communication,
+            communication.contactId
+              ? contactsById.get(communication.contactId)
+              : undefined,
+          ),
+        ),
+    [communications, contactsById, selectedCommunicationIds],
+  );
+
   function toggleSection(section: CarePacketSection, enabled: boolean) {
     setSelectedSections((current) => {
       if (enabled) return current.includes(section) ? current : [...current, section];
@@ -228,6 +261,9 @@ export function CarePacketScreen() {
     }
     if (section === "care_contacts" && !enabled) {
       setSelectedContactIds([]);
+    }
+    if (section === "communication_log" && !enabled) {
+      setSelectedCommunicationIds([]);
     }
   }
 
@@ -247,6 +283,14 @@ export function CarePacketScreen() {
     );
   }
 
+  function toggleCommunication(communicationId: string) {
+    setSelectedCommunicationIds((current) =>
+      current.includes(communicationId)
+        ? current.filter((id) => id !== communicationId)
+        : [...current, communicationId],
+    );
+  }
+
   async function exportPacket() {
     if (!careRecipientId || !recipient || viewer || exporting) return;
     if (!selectedSections.length) {
@@ -257,6 +301,16 @@ export function CarePacketScreen() {
     if (selectedSet.has("care_contacts") && selectedContactIds.length === 0) {
       setMessage(
         "Choose at least one care contact, or turn off the care contacts section.",
+      );
+      return;
+    }
+
+    if (
+      selectedSet.has("communication_log") &&
+      selectedCommunicationIds.length === 0
+    ) {
+      setMessage(
+        "Choose at least one communication entry, or turn off the communication log section.",
       );
       return;
     }
@@ -282,6 +336,7 @@ export function CarePacketScreen() {
         sections: selectedSections,
         selectedDocumentIds,
         selectedContactIds,
+        selectedCommunicationIds,
         observationLimit,
       });
       packetId = started.packetId;
@@ -300,6 +355,7 @@ export function CarePacketScreen() {
         transitionCompleted: state.transition,
         selectedDocuments,
         careContacts: selectedContacts,
+        careCommunications: selectedCommunications,
         selectedSections,
         observationLimit,
         receiverNote,
@@ -419,6 +475,7 @@ export function CarePacketScreen() {
           "reminders",
           "transition",
           "care_contacts",
+          "communication_log",
           "vault_documents",
         ] as CarePacketSection[]
       ).map((section) => (
@@ -473,7 +530,7 @@ export function CarePacketScreen() {
 
       {selectedSet.has("care_contacts") && (
         <>
-          <Section title="3. Care contacts to include" />
+          <Section title="Care contacts to include" />
           <Card style={{ backgroundColor: C.lavender }}>
             <Txt>
               Select only the providers relevant to this visit or handoff. The
@@ -539,11 +596,100 @@ export function CarePacketScreen() {
         </>
       )}
 
+      {selectedSet.has("communication_log") && (
+        <>
+          <Section title="Communication entries to include" />
+          <Card style={{ backgroundColor: C.lavender }}>
+            <Txt>
+              Choose only the conversations that matter for this handoff or
+              visit. Unselected notes stay inside the care profile.
+            </Txt>
+          </Card>
+
+          {communications.length ? (
+            communications.map((communication) => {
+              const selected = selectedCommunicationIds.includes(
+                communication.id,
+              );
+              const linked = communication.contactId
+                ? contactsById.get(communication.contactId)
+                : null;
+
+              return (
+                <Pressable
+                  key={communication.id}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: selected }}
+                  disabled={exporting}
+                  onPress={() => toggleCommunication(communication.id)}
+                  style={[
+                    S.card,
+                    {
+                      borderColor: selected ? C.purple : C.line,
+                      backgroundColor: selected ? "#F6F0F8" : C.white,
+                      opacity: exporting ? 0.6 : 1,
+                    },
+                  ]}
+                >
+                  <View style={S.between}>
+                    <View style={{ flex: 1, gap: 5 }}>
+                      <Text style={S.h3}>{communication.summary}</Text>
+                      <Txt style={S.small}>
+                        {careCommunicationTypeLabels[
+                          communication.communicationType
+                        ]}{" · "}
+                        {new Date(communication.occurredAt).toLocaleString()}
+                      </Txt>
+                      {Boolean(
+                        linked ||
+                          communication.personSpokenTo ||
+                          communication.organizationName,
+                      ) && (
+                        <Text style={S.small}>
+                          {[
+                            linked?.providerName,
+                            communication.personSpokenTo,
+                            communication.organizationName,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </Text>
+                      )}
+                      {communication.followUpNeeded && (
+                        <Text style={[S.small, { color: C.purple }]}>
+                          Follow-up needed
+                          {communication.followUpAt
+                            ? ` · ${new Date(
+                                communication.followUpAt,
+                              ).toLocaleString()}`
+                            : ""}
+                        </Text>
+                      )}
+                    </View>
+                    <Icon
+                      name={selected ? "checkmark-circle" : "ellipse-outline"}
+                      color={selected ? C.purple : C.muted}
+                    />
+                  </View>
+                </Pressable>
+              );
+            })
+          ) : (
+            <Card>
+              <Icon name="chatbubbles-outline" />
+              <Text style={S.h3}>No communication entries saved yet.</Text>
+              <Txt>
+                Add caregiver notes and provider conversations in the
+                communication log before including them in a packet.
+              </Txt>
+            </Card>
+          )}
+        </>
+      )}
+
       {selectedSet.has("vault_documents") && (
         <>
-          <Section
-            title={`${selectedSet.has("care_contacts") ? "4" : "3"}. Documents to bring or share separately`}
-          />
+          <Section title="Documents to bring or share separately" />
           <Card style={{ backgroundColor: C.lavender }}>
             <Txt>
               Selected documents are listed in the packet as an attachment
@@ -589,13 +735,7 @@ export function CarePacketScreen() {
         </>
       )}
 
-      <Section
-        title={`${
-          3 +
-          Number(selectedSet.has("care_contacts")) +
-          Number(selectedSet.has("vault_documents"))
-        }. Optional note`}
-      />
+      <Section title="Optional note" />
       <Field
         label="Note for the receiving caregiver or healthcare team"
         value={receiverNote}
@@ -625,6 +765,12 @@ export function CarePacketScreen() {
         )}
         {selectedSet.has("care_contacts") && (
           <Txt>{selectedContactIds.length} care contact(s) included.</Txt>
+        )}
+        {selectedSet.has("communication_log") && (
+          <Txt>
+            {selectedCommunicationIds.length} communication entr
+            {selectedCommunicationIds.length === 1 ? "y" : "ies"} included.
+          </Txt>
         )}
         {selectedSet.has("vault_documents") && (
           <Txt>{selectedDocumentIds.length} vault document(s) listed separately.</Txt>
