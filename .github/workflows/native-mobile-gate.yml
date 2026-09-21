@@ -1,0 +1,28 @@
+name: Native mobile gate
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  prebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit
+
+      - name: Expo config
+        run: npx expo config --type public
+
+      - name: Native prebuild
+        run: npx expo prebuild --no-install --clean
