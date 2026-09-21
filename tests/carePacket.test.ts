@@ -10,7 +10,6 @@ function baseInput(): CarePacketBuildInput {
   return {
     packetType: "visit",
     generatedAt: "2026-09-22T00:30:00.000Z",
-    caregiverName: "Caregiver <Name>",
     careRecipient: {
       displayName: "Loved & One",
       relationship: "Parent",
@@ -122,7 +121,6 @@ test("packet includes only explicitly selected sections", () => {
 test("packet escapes user-entered HTML-sensitive content", () => {
   const html = buildCarePacketHtml(baseInput());
 
-  assert.match(html, /Caregiver &lt;Name&gt;/);
   assert.match(html, /Loved &amp; One/);
   assert.match(html, /Please review &lt;carefully&gt; &amp; confirm/);
   assert.doesNotMatch(html, /<carefully>/);
