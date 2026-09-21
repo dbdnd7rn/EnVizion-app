@@ -1,4 +1,5 @@
 import { loadCareDocuments, type CareDocument } from "./documents";
+import { loadCareContacts, careContactCategoryLabels, preferredContactMethodLabels, type CareContact } from "./careContacts";
 import { documentCategoryLabels, formatDocumentBytes } from "./documentHelpers";
 import { loadCareReminders } from "./reminders";
 import type { CareReminder } from "./reminderHelpers";
@@ -6,6 +7,7 @@ import type {
   CarePacketSection,
   CarePacketType,
   PacketDocumentReference,
+  PacketCareContact,
 } from "./carePacketHelpers";
 import { supabase } from "./supabase";
 
@@ -21,6 +23,7 @@ export type CarePacketExportRecord = {
   packetType: CarePacketType;
   includedSections: CarePacketSection[];
   selectedDocumentIds: string[];
+  selectedContactIds: string[];
   observationLimit: number;
   status: "started" | "completed" | "failed";
   startedAt: string;
@@ -34,6 +37,7 @@ function mapExport(row: any): CarePacketExportRecord {
     packetType: row.packet_type as CarePacketType,
     includedSections: (row.included_sections ?? []) as CarePacketSection[],
     selectedDocumentIds: row.selected_document_ids ?? [],
+    selectedContactIds: row.selected_contact_ids ?? [],
     observationLimit: Number(row.observation_limit ?? 5),
     status: row.status,
     startedAt: row.started_at,
@@ -54,15 +58,35 @@ export function packetDocumentReference(
   };
 }
 
+export function packetCareContactReference(
+  contact: CareContact,
+): PacketCareContact {
+  return {
+    id: contact.id,
+    providerName: contact.providerName,
+    organizationName: contact.organizationName,
+    specialty: contact.specialty,
+    phone: contact.phone,
+    email: contact.email,
+    address: contact.address,
+    officeHours: contact.officeHours,
+    notes: contact.notes,
+    categoryLabel: careContactCategoryLabels[contact.category],
+    preferredContactLabel:
+      preferredContactMethodLabels[contact.preferredContactMethod],
+  };
+}
+
 export async function loadCarePacketSupportingData(
   careRecipientId: string,
 ): Promise<{
   recipient: CarePacketRecipient;
   reminders: CareReminder[];
   documents: CareDocument[];
+  contacts: CareContact[];
   history: CarePacketExportRecord[];
 }> {
-  const [recipientResult, reminders, documents, historyResult] = await Promise.all([
+  const [recipientResult, reminders, documents, contacts, historyResult] = await Promise.all([
     supabase
       .from("care_recipients")
       .select(
@@ -72,10 +96,11 @@ export async function loadCarePacketSupportingData(
       .single(),
     loadCareReminders(careRecipientId),
     loadCareDocuments(careRecipientId),
+    loadCareContacts(careRecipientId),
     supabase
       .from("care_packet_exports")
       .select(
-        "id, packet_type, included_sections, selected_document_ids, observation_limit, status, started_at, completed_at, failed_at",
+        "id, packet_type, included_sections, selected_document_ids, selected_contact_ids, observation_limit, status, started_at, completed_at, failed_at",
       )
       .eq("care_recipient_id", careRecipientId)
       .order("started_at", { ascending: false })
@@ -96,6 +121,7 @@ export async function loadCarePacketSupportingData(
     },
     reminders,
     documents,
+    contacts,
     history: (historyResult.data ?? []).map(mapExport),
   };
 }
@@ -115,6 +141,7 @@ export async function startCarePacketExport(input: {
   packetType: CarePacketType;
   sections: CarePacketSection[];
   selectedDocumentIds: string[];
+  selectedContactIds: string[];
   observationLimit: number;
 }) {
   return invokePacket<{ packetId: string; startedAt: string }>({
@@ -123,6 +150,7 @@ export async function startCarePacketExport(input: {
     packetType: input.packetType,
     sections: input.sections,
     selectedDocumentIds: input.selectedDocumentIds,
+    selectedContactIds: input.selectedContactIds,
     observationLimit: input.observationLimit,
   });
 }
