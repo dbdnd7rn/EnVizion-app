@@ -228,6 +228,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareCalendar")}
           />
           <Row
+            title="Care Document Vault"
+            subtitle="Keep important care papers private and close"
+            icon="folder-open-outline"
+            onPress={() => n.navigate("CareDocuments")}
+          />
+          <Row
             title="Prepare for your next visit"
             subtitle={`${state.appointment.title}${state.appointment.date ? ` · ${state.appointment.date}` : ""} · ${state.questions.length} questions`}
             icon="calendar-outline"
@@ -392,6 +398,12 @@ export function ToolkitScreen() {
           subtitle="Shared prompts, appointment planning, and care tasks"
           icon="notifications-outline"
           onPress={() => n.navigate("CareCalendar")}
+        />
+        <Row
+          title="Care Document Vault"
+          subtitle="Private discharge papers, care plans, insurance files, and more"
+          icon="folder-open-outline"
+          onPress={() => n.navigate("CareDocuments")}
         />
         <Row
           title="Walking Through the Transition"
