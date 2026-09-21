@@ -880,6 +880,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Care contacts & providers"
+        subtitle="Doctors, specialists, pharmacy, insurance, and care services"
+        icon="call-outline"
+        onPress={() => n.navigate("CareContacts")}
+      />
+
+      <Row
         title="Account, privacy & data"
         subtitle="Password, exports, consent and deletion controls"
         icon="shield-checkmark-outline"
