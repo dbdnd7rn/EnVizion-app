@@ -1,4 +1,4 @@
-import { escapeHtml } from "./domain";
+import { escapeHtml, trackerFields } from "./domain";
 import type { Appointment, Entry } from "./domain";
 import type { Medication, MedicationRecord } from "./medications";
 import type { CareReminder } from "./reminderHelpers";
@@ -82,13 +82,19 @@ function formattedDate(value: string) {
 }
 
 function observationLines(entry: Entry) {
-  const lines = Object.entries(entry.values)
-    .filter(([, value]) => String(value ?? "").trim())
-    .map(([key, value]) => `${key}: ${value}`);
+  const fields = trackerFields[entry.kind]
+    .filter((field) => String(entry.values[field.key] ?? "").trim())
+    .map(
+      (field) =>
+        `${field.label}: ${String(entry.values[field.key] ?? "").trim()}`,
+    );
+
+  const notes = String(entry.values.notes ?? "").trim();
 
   return [
     `${entry.kind} · ${formattedDate(entry.recordedAt)}`,
-    ...lines,
+    ...fields,
+    ...(notes ? [`Notes: ${notes}`] : []),
   ];
 }
 
