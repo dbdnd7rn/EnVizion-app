@@ -405,10 +405,30 @@ export function CareTasksScreen() {
     return members;
   }, [currentUserId, roster, state.accessRole, state.name]);
 
-  const memberById = useMemo(
-    () => new Map(assignableMembers.map((member) => [member.userId, member])),
-    [assignableMembers],
-  );
+  const memberById = useMemo(() => {
+    const members = roster?.members ?? [];
+    const map = new Map(members.map((member) => [member.userId, member]));
+
+    if (
+      currentUserId &&
+      state.accessRole !== "viewer" &&
+      !map.has(currentUserId)
+    ) {
+      map.set(currentUserId, {
+        userId: currentUserId,
+        displayName: state.name || "Me",
+        email: "",
+        role: state.accessRole,
+        status: "active",
+        invitedAt: null,
+        acceptedAt: null,
+        revokedAt: null,
+        isCurrentUser: true,
+      } as CareTeamMember);
+    }
+
+    return map;
+  }, [currentUserId, roster, state.accessRole, state.name]);
 
   const contactsById = useMemo(
     () => new Map(contacts.map((contact) => [contact.id, contact])),
