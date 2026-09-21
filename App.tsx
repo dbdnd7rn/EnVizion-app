@@ -25,6 +25,7 @@ import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
 import { CareCalendarScreen } from "./src/screens/CareCalendarScreen";
 import { CareDocumentsScreen } from "./src/screens/CareDocumentsScreen";
 import { CareContactsScreen } from "./src/screens/CareContactsScreen";
+import { CareCommunicationLogScreen } from "./src/screens/CareCommunicationLogScreen";
 import { CarePacketScreen } from "./src/screens/CarePacketScreen";
 import {
   AssistantScreen,
@@ -229,6 +230,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareContacts"
             component={CareContactsScreen}
             options={{ title: "Care contacts & providers" }}
+          />
+          <Stack.Screen
+            name="CareCommunicationLog"
+            component={CareCommunicationLogScreen}
+            options={{ title: "Care notes & communication log" }}
           />
           <Stack.Screen
             name="CarePacket"
