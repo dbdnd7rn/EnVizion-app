@@ -1,7 +1,7 @@
-import { escapeHtml, trackerFields } from "./domain";
+import { escapeHtml, trackerFields } from "./domain.ts";
 import type { Appointment, Entry } from "./domain";
-import type { Medication, MedicationRecord } from "./medications";
-import type { CareReminder } from "./reminderHelpers";
+import type { Medication, MedicationRecord } from "./medications.ts";
+import type { CareReminder } from "./reminderHelpers.ts";
 
 export const carePacketSections = [
   "profile",
