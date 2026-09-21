@@ -193,6 +193,30 @@ export function StaffWorkspaceScreen() {
         </View>
       </Card>
 
+      <Card
+        onPress={() => n.navigate("NotificationSettings")}
+        label="Open notification preferences"
+        style={{ flexDirection: "row", alignItems: "center", gap: 14 }}
+      >
+        <View
+          style={{
+            width: 46,
+            height: 46,
+            borderRadius: 14,
+            backgroundColor: C.lavender,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name="notifications-outline" />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={S.h3}>Notification preferences</Text>
+          <Txt>Push updates, quiet hours, and staff alert categories.</Txt>
+        </View>
+        <Icon name="chevron-forward" color="#A092A6" size={17} />
+      </Card>
+
       {member.role === "admin" && (
         <Card
           onPress={() => n.navigate("StaffManagement")}

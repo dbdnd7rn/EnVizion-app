@@ -108,6 +108,13 @@ export function NotificationsScreen() {
         </View>
       </View>
 
+      <Button
+        title="Notification preferences"
+        secondary
+        icon="settings-outline"
+        onPress={() => n.navigate("NotificationSettings")}
+      />
+
       {Boolean(message) && (
         <Card style={{ backgroundColor: C.redBg }}>
           <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>

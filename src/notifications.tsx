@@ -8,6 +8,12 @@ import React, {
 } from "react";
 import { Pressable, Text, View } from "react-native";
 import { supabase } from "./supabase";
+import { loadNotificationPreferences } from "./notificationPreferences";
+import {
+  configureNativeNotificationBehavior,
+  registerNativePush,
+  setNativeBadgeCount,
+} from "./nativePush";
 import { C, Icon, S } from "./ui";
 
 export type NotificationRecord = {
@@ -76,6 +82,8 @@ export function NotificationsProvider({
   }, []);
 
   useEffect(() => {
+    void configureNativeNotificationBehavior();
+
     let active = true;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
@@ -92,6 +100,15 @@ export function NotificationsProvider({
       await refresh();
 
       if (!active) return;
+
+      try {
+        const preferences = await loadNotificationPreferences();
+        if (preferences.pushEnabled) {
+          void registerNativePush(false);
+        }
+      } catch {
+        // Native push registration should never block in-app notifications.
+      }
 
       channel = supabase
         .channel(`notifications:${user.id}`)
@@ -165,16 +182,22 @@ export function NotificationsProvider({
     );
   }, []);
 
+  const unreadCount = items.filter((item) => !item.readAt).length;
+
+  useEffect(() => {
+    void setNativeBadgeCount(unreadCount);
+  }, [unreadCount]);
+
   const value = useMemo<NotificationsContextValue>(
     () => ({
       items,
-      unreadCount: items.filter((item) => !item.readAt).length,
+      unreadCount,
       loading,
       refresh,
       markRead,
       markAllRead,
     }),
-    [items, loading, markAllRead, markRead, refresh],
+    [items, loading, markAllRead, markRead, refresh, unreadCount],
   );
 
   return (

@@ -886,6 +886,13 @@ export function ProfileScreen() {
         onPress={() => n.navigate("PrivacyData")}
       />
 
+      <Row
+        title="Notification preferences"
+        subtitle="Push updates, quiet hours, and alert categories"
+        icon="notifications-outline"
+        onPress={() => n.navigate("NotificationSettings")}
+      />
+
       <Card>
         <View style={S.between}>
           <Text style={[S.h3, { flex: 1 }]}>
