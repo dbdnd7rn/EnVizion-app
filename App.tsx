@@ -21,6 +21,7 @@ import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { AuthProvider, AuthScreen, PasswordRecoveryScreen, useAuth } from "./src/auth";
 import { CareProvider } from "./src/store";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
+import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
 import {
   AssistantScreen,
   HandoffScreen,
@@ -203,6 +204,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="Tracker"
             component={TrackerScreen}
             options={{ title: "Daily care" }}
+          />
+          <Stack.Screen
+            name="Insights"
+            component={CareInsightsScreen}
+            options={{ title: "Care timeline & insights" }}
           />
           <Stack.Screen
             name="Assistant"
