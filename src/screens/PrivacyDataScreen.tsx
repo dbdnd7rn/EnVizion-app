@@ -152,7 +152,8 @@ export function PrivacyDataScreen() {
           Care-profile exports are owner-only so a collaborator cannot create a
           portable copy of another family’s complete care record. The export
           includes Care Vault metadata, care contacts, communication history,
-          and packet workflow history, but never permanent public file links.
+          shared care tasks and completion history, and packet workflow history,
+          but never permanent public file links.
         </Txt>
         <Button
           title={busy === "care-export" ? "Preparing care export…" : "Download active care profile"}
@@ -202,8 +203,8 @@ export function PrivacyDataScreen() {
           This permanently removes the owned care profile and its care
           observations, medications, dose history, appointments, questions,
           transition checklist, private Care Vault files, care contacts,
-          communication history, packet workflow history, care-sharing records
-          and care activity history.
+          communication history, shared care tasks and completion history,
+          packet workflow history, care-sharing records and care activity history.
         </Txt>
         <Txt style={S.small}>
           Support and coaching requests are detached from the deleted care
