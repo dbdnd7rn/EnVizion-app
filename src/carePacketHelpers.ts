@@ -41,7 +41,6 @@ export type PacketDocumentReference = {
 export type CarePacketBuildInput = {
   packetType: CarePacketType;
   generatedAt: string;
-  caregiverName: string;
   careRecipient: {
     displayName: string;
     relationship: string;
@@ -313,7 +312,6 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
   <div class="meta">${escapeHtml(recipientLabel)} · Generated ${escapeHtml(
     formattedDate(input.generatedAt),
   )}</div>
-  ${input.caregiverName.trim() ? `<div class="meta">Prepared by ${escapeHtml(input.caregiverName)}</div>` : ""}
 </header>
 ${receiverNote}
 ${blocks.join("")}
