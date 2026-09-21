@@ -18,6 +18,7 @@ import {
   type ReminderType,
 } from "../reminders";
 import { supabase } from "../supabase";
+import { addReminderToDeviceCalendar } from "../deviceCalendar";
 import { useCare } from "../store";
 import {
   Button,
@@ -210,6 +211,21 @@ function ReminderCard({
           </Txt>
         </View>
       </View>
+
+      {!inactive && (
+        <Button
+          title="Add next occurrence to device calendar"
+          secondary
+          icon="calendar-outline"
+          disabled={busy}
+          onPress={() =>
+            void run(
+              () => addReminderToDeviceCalendar(reminder),
+              "Calendar window opened.",
+            )
+          }
+        />
+      )}
 
       {!readOnly && !inactive && (
         <>
