@@ -5,7 +5,7 @@ import {
   reminderLocalParts,
   reminderStatus,
   type CareReminder,
-} from "../src/reminders.ts";
+} from "../src/reminderHelpers.ts";
 
 function reminder(overrides: Partial<CareReminder> = {}): CareReminder {
   return {
