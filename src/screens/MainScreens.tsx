@@ -216,6 +216,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("Summary")}
           />
           <Row
+            title="Care timeline & insights"
+            subtitle="Visual trends, activity, and preparation progress"
+            icon="analytics-outline"
+            onPress={() => n.navigate("Insights")}
+          />
+          <Row
             title="Prepare for your next visit"
             subtitle={`${state.appointment.title}${state.appointment.date ? ` · ${state.appointment.date}` : ""} · ${state.questions.length} questions`}
             icon="calendar-outline"
@@ -354,6 +360,12 @@ export function ToolkitScreen() {
         subtitle="Observations, medicines, and visit questions"
         icon="document-text-outline"
         onPress={() => n.navigate("Summary")}
+      />
+      <Row
+        title="Care timeline & insights"
+        subtitle="Visual trends and recent care activity"
+        icon="analytics-outline"
+        onPress={() => n.navigate("Insights")}
       />
       <Section title="Plan & prepare" />
       <View style={{ gap: 10 }}>
