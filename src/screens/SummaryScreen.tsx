@@ -11,6 +11,7 @@ export function SummaryScreen() {
   const n = useNav();
   const [message, setMessage] = useState("");
   const [printing, setPrinting] = useState(false);
+  const viewer = state.accessRole === "viewer";
   const doses = state.medicationRecords.filter(
     (record) => !record.correctedAt,
   ).length;
@@ -36,7 +37,7 @@ export function SummaryScreen() {
       <Button
         title={printing ? "Preparing summary…" : "Print or save care summary"}
         icon="print-outline"
-        disabled={printing}
+        disabled={printing || viewer}
         onPress={async () => {
           setPrinting(true);
           setMessage("");
@@ -56,6 +57,22 @@ export function SummaryScreen() {
             setPrinting(false);
           }
         }}
+      />
+      {viewer && (
+        <Card style={{ backgroundColor: C.lavender }}>
+          <Text style={S.h3}>Viewer access is read-only.</Text>
+          <Txt>
+            You can review this shared summary in EnVizion, but portable
+            print/PDF exports are limited to the Owner and Caregiver roles.
+          </Txt>
+        </Card>
+      )}
+      <Button
+        title="Build a focused handoff / visit packet"
+        secondary
+        icon="reader-outline"
+        disabled={viewer}
+        onPress={() => n.navigate("CarePacket")}
       />
       {Boolean(message) && (
         <Text accessibilityRole="alert" style={S.body}>

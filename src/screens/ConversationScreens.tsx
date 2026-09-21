@@ -502,6 +502,13 @@ export function HandoffScreen() {
         onPress={() => n.navigate("TeamConversation")}
       />
 
+      <Button
+        title="Prepare a caregiver handoff packet"
+        secondary
+        icon="reader-outline"
+        onPress={() => n.navigate("CarePacket")}
+      />
+
       <Safety onPress={() => n.navigate("Emergency")} />
       <Txt style={S.small}>
         Support messaging is not an emergency service. For urgent medical help,
