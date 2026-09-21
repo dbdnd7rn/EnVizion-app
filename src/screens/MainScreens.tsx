@@ -222,6 +222,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("Insights")}
           />
           <Row
+            title="Reminders & care calendar"
+            subtitle="Keep upcoming care tasks visible"
+            icon="notifications-outline"
+            onPress={() => n.navigate("CareCalendar")}
+          />
+          <Row
             title="Prepare for your next visit"
             subtitle={`${state.appointment.title}${state.appointment.date ? ` · ${state.appointment.date}` : ""} · ${state.questions.length} questions`}
             icon="calendar-outline"
@@ -380,6 +386,12 @@ export function ToolkitScreen() {
           subtitle="Bring your questions and observations"
           icon="calendar-outline"
           onPress={() => n.navigate("Appointments")}
+        />
+        <Row
+          title="Reminders & care calendar"
+          subtitle="Shared prompts, appointment planning, and care tasks"
+          icon="notifications-outline"
+          onPress={() => n.navigate("CareCalendar")}
         />
         <Row
           title="Walking Through the Transition"

@@ -8,6 +8,7 @@ function iconFor(item: NotificationRecord) {
   if (item.kind.includes("reply")) return "chatbubble-ellipses-outline";
   if (item.kind.includes("coaching")) return "people-outline";
   if (item.kind.includes("support")) return "heart-outline";
+  if (item.kind.includes("reminder")) return "alarm-outline";
   return "notifications-outline";
 }
 
@@ -49,6 +50,11 @@ export function NotificationsScreen() {
 
       if (item.entityType === "care_recipient") {
         n.navigate("CareTeam");
+        return;
+      }
+
+      if (item.entityType === "care_reminder") {
+        n.navigate("CareCalendar");
       }
     } catch (error) {
       setMessage(
@@ -120,8 +126,8 @@ export function NotificationsScreen() {
           <Icon name="notifications-off-outline" size={30} />
           <Text style={S.h3}>No notifications yet.</Text>
           <Txt>
-            Support replies, request updates, and new staff work will appear
-            here automatically.
+            Support replies, care reminders, request updates, and new staff
+            work will appear here automatically.
           </Txt>
         </Card>
       ) : (

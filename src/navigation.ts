@@ -15,6 +15,7 @@ export type RootStack = {
   Medications: undefined;
   Summary: undefined;
   Insights: undefined;
+  CareCalendar: undefined;
   Assistant: undefined;
   Handoff: undefined;
   TeamConversation: undefined;
