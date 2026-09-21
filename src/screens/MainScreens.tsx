@@ -234,6 +234,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareDocuments")}
           />
           <Row
+            title="Handoff & visit packet"
+            subtitle="Create a focused PDF with only the care details you choose"
+            icon="reader-outline"
+            onPress={() => n.navigate("CarePacket")}
+          />
+          <Row
             title="Prepare for your next visit"
             subtitle={`${state.appointment.title}${state.appointment.date ? ` · ${state.appointment.date}` : ""} · ${state.questions.length} questions`}
             icon="calendar-outline"
@@ -404,6 +410,12 @@ export function ToolkitScreen() {
           subtitle="Private discharge papers, care plans, insurance files, and more"
           icon="folder-open-outline"
           onPress={() => n.navigate("CareDocuments")}
+        />
+        <Row
+          title="Handoff & visit packet"
+          subtitle="Build a privacy-controlled PDF for a visit or caregiver handoff"
+          icon="reader-outline"
+          onPress={() => n.navigate("CarePacket")}
         />
         <Row
           title="Walking Through the Transition"
