@@ -22,6 +22,7 @@ export type CareReminder = {
   notifyScope: ReminderNotifyScope;
   completedAt: string | null;
   dismissedAt: string | null;
+  snoozedUntil: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -40,6 +41,7 @@ function mapReminder(row: any): CareReminder {
     notifyScope: row.notify_scope as ReminderNotifyScope,
     completedAt: row.completed_at ?? null,
     dismissedAt: row.dismissed_at ?? null,
+    snoozedUntil: row.snoozed_until ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -90,7 +92,7 @@ export function reminderStatus(reminder: CareReminder, now = new Date()) {
   if (reminder.completedAt) return "completed" as const;
   if (reminder.dismissedAt) return "dismissed" as const;
 
-  const due = new Date(reminder.scheduledFor);
+  const due = new Date(reminder.snoozedUntil ?? reminder.scheduledFor);
   if (Number.isFinite(due.getTime()) && due.getTime() <= now.getTime()) {
     return "due" as const;
   }
@@ -102,7 +104,7 @@ export async function loadCareReminders(careRecipientId: string) {
   const { data, error } = await supabase
     .from("care_reminders")
     .select(
-      "id, care_recipient_id, created_by, title, note, reminder_type, scheduled_for, timezone, recurrence, notify_scope, completed_at, dismissed_at, created_at, updated_at",
+      "id, care_recipient_id, created_by, title, note, reminder_type, scheduled_for, timezone, recurrence, notify_scope, completed_at, dismissed_at, snoozed_until, created_at, updated_at",
     )
     .eq("care_recipient_id", careRecipientId)
     .order("scheduled_for", { ascending: true });
@@ -142,7 +144,7 @@ export async function createCareReminder(input: {
       notify_scope: input.notifyScope,
     })
     .select(
-      "id, care_recipient_id, created_by, title, note, reminder_type, scheduled_for, timezone, recurrence, notify_scope, completed_at, dismissed_at, created_at, updated_at",
+      "id, care_recipient_id, created_by, title, note, reminder_type, scheduled_for, timezone, recurrence, notify_scope, completed_at, dismissed_at, snoozed_until, created_at, updated_at",
     )
     .single();
 
@@ -174,10 +176,11 @@ export async function updateCareReminder(
       notify_scope: values.notifyScope,
       completed_at: null,
       dismissed_at: null,
+      snoozed_until: null,
     })
     .eq("id", reminderId)
     .select(
-      "id, care_recipient_id, created_by, title, note, reminder_type, scheduled_for, timezone, recurrence, notify_scope, completed_at, dismissed_at, created_at, updated_at",
+      "id, care_recipient_id, created_by, title, note, reminder_type, scheduled_for, timezone, recurrence, notify_scope, completed_at, dismissed_at, snoozed_until, created_at, updated_at",
     )
     .single();
 
@@ -191,7 +194,8 @@ export async function snoozeCareReminder(reminderId: string, minutes: number) {
   const { error } = await supabase
     .from("care_reminders")
     .update({
-      scheduled_for: value,
+      snoozed_until: value,
+      last_fired_for: null,
       completed_at: null,
       dismissed_at: null,
     })
