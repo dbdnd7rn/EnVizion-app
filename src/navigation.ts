@@ -18,6 +18,7 @@ export type RootStack = {
   CareCalendar: undefined;
   CareDocuments: undefined;
   CareContacts: undefined;
+  CareCommunicationLog: undefined;
   CarePacket: undefined;
   Assistant: undefined;
   Handoff: undefined;
