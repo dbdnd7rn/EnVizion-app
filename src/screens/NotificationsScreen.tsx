@@ -61,10 +61,16 @@ export function NotificationsScreen() {
         return;
       }
 
-      if (
-        item.entityType === "care_task" ||
-        item.entityType === "care_shift_handoff"
-      ) {
+      if (item.entityType === "care_task") {
+        if (item.kind.includes("assignment") || item.kind.includes("assigned")) {
+          n.navigate("CareTasks");
+        } else {
+          n.navigate("CareShiftBoard");
+        }
+        return;
+      }
+
+      if (item.entityType === "care_shift_handoff") {
         n.navigate("CareShiftBoard");
         return;
       }
