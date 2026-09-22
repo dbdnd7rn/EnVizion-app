@@ -1110,6 +1110,13 @@ export function CareTasksScreen() {
         </>
       )}
 
+      <Button
+        title="Open today’s caregiver shift board"
+        secondary
+        icon="people-outline"
+        onPress={() => n.navigate("CareShiftBoard")}
+      />
+
       <Section title="Shared care plan" action="Refresh" onPress={() => void refresh()} />
 
       <View style={[S.input, S.row]}>
