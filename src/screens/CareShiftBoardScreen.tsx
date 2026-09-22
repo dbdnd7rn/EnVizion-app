@@ -18,6 +18,27 @@ import {
   type CareTeamMember,
   type CareTeamRoster,
 } from "../careTeam";
+import { loadCareAgendaData, type CareAgendaData } from "../careAgenda";
+import {
+  loadCareCommunications,
+  type CareCommunication,
+} from "../careCommunications";
+import { detectCoordinationConflicts } from "../careCoordinationConflicts";
+import {
+  loadCoordinationWorkflow,
+  type CoordinationWorkflowData,
+} from "../careCoordinationWorkflow";
+import { currentActionableConflicts } from "../careCoordinationWorkflowHelpers";
+import { nextDashboardAppointment } from "../careDashboardHelpers";
+import {
+  handoffAppointmentSnapshot,
+  handoffBriefingCounts,
+  handoffCommunicationActivity,
+  handoffCoordinationActivity,
+  handoffFollowUps,
+  handoffMedicationActivity,
+  handoffWindowStart,
+} from "../shiftBriefingHelpers";
 import {
   createCareShiftHandoff,
   loadCareShiftHandoffs,
@@ -33,7 +54,11 @@ import {
   shiftTaskBucket,
   type ShiftTaskBucket,
 } from "../shiftBoardHelpers";
-import { loadCareSchedule, type CareShift } from "../careSchedule";
+import {
+  loadCareSchedule,
+  type CareShift,
+  type CaregiverAvailability,
+} from "../careSchedule";
 import { uncoveredUpcomingTasks } from "../careScheduleHelpers";
 import {
   loadShiftAttendance,
@@ -135,8 +160,22 @@ export function CareShiftBoardScreen() {
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
   const [handoffs, setHandoffs] = useState<CareShiftHandoff[]>([]);
   const [shifts, setShifts] = useState<CareShift[]>([]);
+  const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
   const [attendance, setAttendance] = useState<CareShiftAttendance[]>([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
+  const [agenda, setAgenda] = useState<CareAgendaData>({
+    appointments: [],
+    tasks: [],
+    shifts: [],
+    handoffs: [],
+    followUps: [],
+  });
+  const [communications, setCommunications] = useState<CareCommunication[]>([]);
+  const [workflow, setWorkflow] = useState<CoordinationWorkflowData>({
+    resolutions: [],
+    comments: [],
+    history: [],
+  });
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -155,7 +194,17 @@ export function CareShiftBoardScreen() {
       setCompletions([]);
       setHandoffs([]);
       setShifts([]);
+      setAvailability([]);
       setAttendance([]);
+      setAgenda({
+        appointments: [],
+        tasks: [],
+        shifts: [],
+        handoffs: [],
+        followUps: [],
+      });
+      setCommunications([]);
+      setWorkflow({ resolutions: [], comments: [], history: [] });
       setLoading(false);
       return;
     }
@@ -163,6 +212,11 @@ export function CareShiftBoardScreen() {
     setLoading(true);
     try {
       const userId = await currentCareTaskUserId();
+      const rangeStart = new Date();
+      rangeStart.setHours(0, 0, 0, 0);
+      const rangeEnd = new Date(rangeStart);
+      rangeEnd.setDate(rangeEnd.getDate() + 7);
+
       const [
         taskRows,
         completionRows,
@@ -170,6 +224,9 @@ export function CareShiftBoardScreen() {
         handoffRows,
         schedule,
         attendanceRows,
+        agendaRows,
+        communicationRows,
+        workflowRows,
       ] = await Promise.all([
         loadCareTasks(careRecipientId),
         loadCareTaskCompletions(careRecipientId),
@@ -177,6 +234,13 @@ export function CareShiftBoardScreen() {
         loadCareShiftHandoffs(careRecipientId),
         loadCareSchedule(careRecipientId),
         loadShiftAttendance(careRecipientId),
+        loadCareAgendaData({
+          careRecipientId,
+          rangeStartIso: rangeStart.toISOString(),
+          rangeEndIso: rangeEnd.toISOString(),
+        }),
+        loadCareCommunications(careRecipientId),
+        loadCoordinationWorkflow(careRecipientId),
       ]);
 
       setCurrentUserId(userId);
@@ -185,7 +249,11 @@ export function CareShiftBoardScreen() {
       setRoster(team);
       setHandoffs(handoffRows);
       setShifts(schedule.shifts);
+      setAvailability(schedule.availability);
       setAttendance(attendanceRows);
+      setAgenda(agendaRows);
+      setCommunications(communicationRows);
+      setWorkflow(workflowRows);
     } catch (error) {
       setMessage(
         error instanceof Error
