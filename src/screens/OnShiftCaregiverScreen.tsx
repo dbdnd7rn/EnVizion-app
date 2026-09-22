@@ -26,6 +26,17 @@ import {
   type CareTaskCompletion,
 } from "../careTasks";
 import {
+  claimCareTask,
+  loadCareTaskAssignments,
+  respondCareTaskAssignment,
+} from "../careTaskAssignments";
+import {
+  latestTaskAssignments,
+  pendingAssignmentForUser,
+  taskAssignmentLabel,
+  type CareTaskAssignment,
+} from "../careTaskAssignmentHelpers";
+import {
   loadCareTeam,
   type CareTeamMember,
   type CareTeamRoster,
@@ -142,11 +153,19 @@ function MemberChoice({
 function TaskCard({
   task,
   busy,
+  assignmentLabel,
+  completionDisabled = false,
+  claimable = false,
   onComplete,
+  onClaim,
 }: {
   task: CareTask;
   busy: boolean;
+  assignmentLabel?: string;
+  completionDisabled?: boolean;
+  claimable?: boolean;
   onComplete: () => void;
+  onClaim?: () => void;
 }) {
   const bucket = shiftTaskBucket(task);
   const urgent = bucket === "overdue" || bucket === "due_soon";
@@ -194,11 +213,30 @@ function TaskCard({
       </View>
 
       {Boolean(task.details) && <Txt>{task.details}</Txt>}
-
+      {Boolean(assignmentLabel) && (
+        <View style={[S.pill, { alignSelf: "flex-start" }]}>
+          <Text style={S.small}>{assignmentLabel}</Text>
+        </View>
+      )}
+      {claimable && onClaim && (
+        <Button
+          title="Claim task"
+          secondary
+          disabled={busy}
+          icon="hand-left-outline"
+          onPress={onClaim}
+        />
+      )}
       <Button
-        title={busy ? "Completing…" : "Mark complete"}
+        title={
+          completionDisabled
+            ? "Respond to assignment first"
+            : busy
+              ? "Completing…"
+              : "Mark complete"
+        }
         secondary
-        disabled={busy}
+        disabled={busy || completionDisabled}
         icon="checkmark-outline"
         onPress={onComplete}
       />
@@ -216,6 +254,7 @@ export function OnShiftCaregiverScreen() {
   const [notes, setNotes] = useState<CaregiverShiftSessionNote[]>([]);
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
+  const [assignments, setAssignments] = useState<CareTaskAssignment[]>([]);
   const [shifts, setShifts] = useState<CareShift[]>([]);
   const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
   const [attendance, setAttendance] = useState<CareShiftAttendance[]>([]);
@@ -268,6 +307,7 @@ export function OnShiftCaregiverScreen() {
 
       if (!activeSession) {
         setNotes([]);
+        setAssignments([]);
         setLoading(false);
         return;
       }
@@ -280,6 +320,7 @@ export function OnShiftCaregiverScreen() {
       const [
         taskRows,
         completionRows,
+        assignmentRows,
         schedule,
         attendanceRows,
         agendaRows,
@@ -291,6 +332,7 @@ export function OnShiftCaregiverScreen() {
       ] = await Promise.all([
         loadCareTasks(careRecipientId),
         loadCareTaskCompletions(careRecipientId),
+        loadCareTaskAssignments(careRecipientId),
         loadCareSchedule(careRecipientId),
         loadShiftAttendance(careRecipientId),
         loadCareAgendaData({
@@ -307,6 +349,7 @@ export function OnShiftCaregiverScreen() {
 
       setTasks(taskRows);
       setCompletions(completionRows);
+      setAssignments(assignmentRows);
       setShifts(schedule.shifts);
       setAvailability(schedule.availability);
       setAttendance(attendanceRows);
@@ -339,6 +382,7 @@ export function OnShiftCaregiverScreen() {
       "caregiver_shift_session_notes",
       "care_tasks",
       "care_task_completions",
+      "care_task_assignments",
       "care_shifts",
       "care_shift_attendance",
       "care_communications",
@@ -394,6 +438,22 @@ export function OnShiftCaregiverScreen() {
   const responsibilities = useMemo(
     () => onShiftResponsibilities(tasks, currentUserId),
     [currentUserId, tasks],
+  );
+
+  const latestAssignmentByTask = useMemo(
+    () => latestTaskAssignments(assignments),
+    [assignments],
+  );
+
+  const pendingMine = useMemo(
+    () =>
+      tasks.filter((task) =>
+        pendingAssignmentForUser(
+          latestAssignmentByTask.get(task.id),
+          currentUserId,
+        ),
+      ),
+    [currentUserId, latestAssignmentByTask, tasks],
   );
 
   const shiftCompletions = useMemo(
@@ -481,6 +541,56 @@ export function OnShiftCaregiverScreen() {
     () => handoffAppointmentSnapshot(nextAppointment),
     [nextAppointment],
   );
+
+  async function respondToAssignment(
+    assignment: CareTaskAssignment,
+    response: "accepted" | "declined",
+  ) {
+    if (!careRecipientId || readOnly || busyId) return;
+
+    setBusyId(`assignment-${assignment.id}`);
+    setMessage("");
+    try {
+      await respondCareTaskAssignment({
+        assignmentId: assignment.id,
+        response,
+      });
+      await refresh();
+      setMessage(
+        response === "accepted"
+          ? "Task assignment accepted."
+          : "Task declined and returned to shared work.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not update this task assignment.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function claim(task: CareTask) {
+    if (!careRecipientId || readOnly || busyId || task.assignedTo) return;
+
+    setBusyId(`claim-${task.id}`);
+    setMessage("");
+    try {
+      await claimCareTask(careRecipientId, task.id);
+      await refresh();
+      setMessage("Shared task claimed and accepted.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not claim this task.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   async function complete(task: CareTask) {
     if (!careRecipientId || !session || readOnly || busyId) return;
@@ -749,6 +859,50 @@ export function OnShiftCaregiverScreen() {
         ))}
       </View>
 
+      {pendingMine.length > 0 && (
+        <>
+          <Section title="Assignments waiting for your response" />
+          {pendingMine.slice(0, 6).map((task) => {
+            const assignment = latestAssignmentByTask.get(task.id)!;
+            return (
+              <Card key={assignment.id} style={{ backgroundColor: "#FFF9F2" }}>
+                <View style={S.between}>
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text style={S.h3}>{task.title}</Text>
+                    <Txt style={S.small}>
+                      Due {new Date(task.dueAt).toLocaleString()}
+                    </Txt>
+                  </View>
+                  <View style={S.pill}>
+                    <Text style={S.small}>Pending</Text>
+                  </View>
+                </View>
+                <Txt>
+                  Confirm that you are taking responsibility for this task, or
+                  return it to shared work for reassignment.
+                </Txt>
+                <Button
+                  title="Accept assignment"
+                  icon="checkmark-circle-outline"
+                  disabled={Boolean(busyId)}
+                  onPress={() =>
+                    void respondToAssignment(assignment, "accepted")
+                  }
+                />
+                <Button
+                  title="Decline & return to shared work"
+                  secondary
+                  disabled={Boolean(busyId)}
+                  onPress={() =>
+                    void respondToAssignment(assignment, "declined")
+                  }
+                />
+              </Card>
+            );
+          })}
+        </>
+      )}
+
       {responsibilities.urgent.length > 0 && (
         <>
           <Section title="Needs attention during this shift" />
@@ -756,7 +910,17 @@ export function OnShiftCaregiverScreen() {
             <TaskCard
               key={task.id}
               task={task}
-              busy={busyId === task.id}
+              busy={busyId === task.id || busyId === `claim-${task.id}`}
+              assignmentLabel={taskAssignmentLabel(
+                latestAssignmentByTask.get(task.id),
+                task.assignedTo,
+              )}
+              completionDisabled={pendingAssignmentForUser(
+                latestAssignmentByTask.get(task.id),
+                currentUserId,
+              )}
+              claimable={!task.assignedTo}
+              onClaim={() => void claim(task)}
               onComplete={() => void complete(task)}
             />
           ))}
@@ -769,7 +933,17 @@ export function OnShiftCaregiverScreen() {
           <TaskCard
             key={task.id}
             task={task}
-            busy={busyId === task.id}
+            busy={busyId === task.id || busyId === `claim-${task.id}`}
+            assignmentLabel={taskAssignmentLabel(
+              latestAssignmentByTask.get(task.id),
+              task.assignedTo,
+            )}
+            completionDisabled={pendingAssignmentForUser(
+              latestAssignmentByTask.get(task.id),
+              currentUserId,
+            )}
+            claimable={!task.assignedTo}
+            onClaim={() => void claim(task)}
             onComplete={() => void complete(task)}
           />
         ))
@@ -785,7 +959,17 @@ export function OnShiftCaregiverScreen() {
           <TaskCard
             key={task.id}
             task={task}
-            busy={busyId === task.id}
+            busy={busyId === task.id || busyId === `claim-${task.id}`}
+            assignmentLabel={taskAssignmentLabel(
+              latestAssignmentByTask.get(task.id),
+              task.assignedTo,
+            )}
+            completionDisabled={pendingAssignmentForUser(
+              latestAssignmentByTask.get(task.id),
+              currentUserId,
+            )}
+            claimable={!task.assignedTo}
+            onClaim={() => void claim(task)}
             onComplete={() => void complete(task)}
           />
         ))
