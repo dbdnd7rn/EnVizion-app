@@ -908,6 +908,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Care coordination analytics"
+        subtitle="Weekly workload, attendance, completed tasks, and coverage gaps"
+        icon="bar-chart-outline"
+        onPress={() => n.navigate("CareAnalytics")}
+      />
+
+      <Row
         title="Care tasks & shared care plan"
         subtitle="Responsibilities, assignments, due dates, and completion history"
         icon="checkbox-outline"
