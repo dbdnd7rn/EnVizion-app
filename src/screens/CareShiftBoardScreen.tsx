@@ -621,7 +621,7 @@ export function CareShiftBoardScreen() {
       setHandoffNote("");
       setHandoffTo(null);
       await refresh();
-      setMessage("End-of-shift handoff saved and shared.");
+      setMessage("Caregiver shift briefing saved and shared.");
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -650,7 +650,7 @@ export function CareShiftBoardScreen() {
       <Heading
         eyebrow="TODAY · CAREGIVER SHIFT BOARD"
         title="See what needs attention, who owns it, and what changed."
-        body="A focused command center for today’s shared responsibilities, reassignment, completion, and caregiver handoff."
+        body="A focused command center for today’s responsibilities, coverage, and Caregiver Handoff 2.0 shift briefings."
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
@@ -717,7 +717,7 @@ export function CareShiftBoardScreen() {
         {!readOnly && (
           <View style={{ flex: 1 }}>
             <Button
-              title="End-shift handoff"
+              title="Create shift briefing"
               icon="swap-horizontal-outline"
               onPress={openHandoff}
             />
@@ -835,7 +835,7 @@ export function CareShiftBoardScreen() {
 
       {handoffOpen && !readOnly && (
         <>
-          <Section title="Create end-of-shift handoff" />
+          <Section title="Create Caregiver Handoff 2.0 briefing" />
           <Card>
             <Field
               label="Handoff label"
@@ -873,23 +873,69 @@ export function CareShiftBoardScreen() {
             ))}
 
             <Card style={{ backgroundColor: "#F8F4F9" }}>
-              <Text style={S.h3}>Snapshot included automatically</Text>
+              <View style={S.between}>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={S.h3}>Shift briefing preview</Text>
+                  <Txt style={S.small}>
+                    Since {new Date(briefingWindowStart).toLocaleString()}
+                  </Txt>
+                </View>
+                <Icon name="reader-outline" />
+              </View>
+
               <Txt>
-                {openTasks.length} open task{openTasks.length === 1 ? "" : "s"} ·{" "}
-                {todaysCompletions.length} completion
-                {todaysCompletions.length === 1 ? "" : "s"} today.
+                {briefingCounts.openTasks} unfinished task
+                {briefingCounts.openTasks === 1 ? "" : "s"} ·{" "}
+                {briefingCounts.completedTasks} completed today
               </Txt>
+              <Txt>
+                {briefingCounts.medications} medication activit
+                {briefingCounts.medications === 1 ? "y" : "ies"} ·{" "}
+                {briefingCounts.communications} new communication
+                {briefingCounts.communications === 1 ? "" : "s"}
+              </Txt>
+              <Txt>
+                {briefingCounts.coordination} unresolved coordination item
+                {briefingCounts.coordination === 1 ? "" : "s"} ·{" "}
+                {briefingCounts.followUps} follow-up
+                {briefingCounts.followUps === 1 ? "" : "s"}
+              </Txt>
+              <Txt>
+                {briefingCounts.hasNextAppointment
+                  ? `Next visit: ${nextAppointmentSnapshot?.title} · ${new Date(
+                      nextAppointmentSnapshot!.startsAt,
+                    ).toLocaleString()}`
+                  : "No upcoming appointment is currently recorded."}
+              </Txt>
+
+              {communicationSnapshot.slice(0, 2).map((item) => (
+                <Txt key={item.id} style={S.small}>
+                  • Communication: {item.summary}
+                </Txt>
+              ))}
+              {coordinationSnapshot.slice(0, 2).map((item) => (
+                <Txt key={item.id} style={S.small}>
+                  • Coordination: {item.title}
+                </Txt>
+              ))}
+              {followUpSnapshot.slice(0, 2).map((item) => (
+                <Txt key={item.id} style={S.small}>
+                  • Follow-up: {item.summary} ·{" "}
+                  {new Date(item.followUpAt).toLocaleString()}
+                </Txt>
+              ))}
+
               <Txt style={S.small}>
-                This is a point-in-time handoff snapshot. The live care plan
-                remains the source for current task status.
+                Saving freezes this point-in-time briefing. The live care plan
+                remains the source for current status after the handoff.
               </Txt>
             </Card>
 
             <Button
               title={
                 busyId === "handoff"
-                  ? "Saving handoff…"
-                  : "Save and share handoff"
+                  ? "Saving briefing…"
+                  : "Save and share shift briefing"
               }
               disabled={busyId === "handoff" || !shiftLabel.trim()}
               onPress={() => void saveHandoff()}
