@@ -16,6 +16,7 @@ import {
   reopenCoordinationConflict,
   resolveCoordinationConflict,
   snoozeCoordinationConflict,
+  syncCoordinationConflicts,
   type CoordinationHistoryEvent,
   type CoordinationResolution,
   type CoordinationWorkflowData,
@@ -516,7 +517,7 @@ export function CareCoordinationInboxScreen() {
     setLoading(true);
 
     try {
-      const [agendaRows, scheduleRows, team, workflowRows] = await Promise.all([
+      const [agendaRows, scheduleRows, team] = await Promise.all([
         loadCareAgendaData({
           careRecipientId,
           rangeStartIso: range.startIso,
@@ -524,8 +525,21 @@ export function CareCoordinationInboxScreen() {
         }),
         loadCareSchedule(careRecipientId),
         loadCareTeam(careRecipientId),
-        loadCoordinationWorkflow(careRecipientId),
       ]);
+
+      const detected = detectCoordinationConflicts({
+        agenda: agendaRows,
+        shifts: scheduleRows.shifts,
+        availability: scheduleRows.availability,
+        rangeStart: range.startIso,
+        rangeEnd: range.endIso,
+      });
+
+      if (!readOnly) {
+        await syncCoordinationConflicts(careRecipientId, detected);
+      }
+
+      const workflowRows = await loadCoordinationWorkflow(careRecipientId);
 
       setAgenda(agendaRows);
       setSchedule(scheduleRows);
@@ -540,7 +554,7 @@ export function CareCoordinationInboxScreen() {
     } finally {
       setLoading(false);
     }
-  }, [careRecipientId, range.endIso, range.startIso]);
+  }, [careRecipientId, range.endIso, range.startIso, readOnly]);
 
   useEffect(() => {
     void refresh();
@@ -855,7 +869,7 @@ export function CareCoordinationInboxScreen() {
       <Heading
         eyebrow="NEEDS COORDINATION"
         title="Catch care-plan collisions—and make it clear who is handling them."
-        body="The inbox checks the next seven days, while the family workflow adds assignment, comments, snooze, resolution, and a durable change history."
+        body="The inbox checks the next seven days, tracks current conflicts for escalation, and adds assignment, comments, snooze, resolution, and a durable change history."
       />
 
       <Card
