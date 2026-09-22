@@ -234,6 +234,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareAnalytics")}
           />
           <Row
+            title="Needs coordination"
+            subtitle="Catch scheduling conflicts, uncovered tasks, and care-plan collisions"
+            icon="warning-outline"
+            onPress={() => n.navigate("CareCoordinationInbox")}
+          />
+          <Row
             title="Care tasks & shared care plan"
             subtitle="Assign responsibilities, due dates, and follow-ups"
             icon="checkbox-outline"
@@ -446,6 +452,12 @@ export function ToolkitScreen() {
           subtitle="Weekly workload, attendance, tasks, and coverage trends"
           icon="bar-chart-outline"
           onPress={() => n.navigate("CareAnalytics")}
+        />
+        <Row
+          title="Needs coordination"
+          subtitle="Overlaps, uncovered work, appointment clashes, and long care days"
+          icon="warning-outline"
+          onPress={() => n.navigate("CareCoordinationInbox")}
         />
         <Row
           title="Care tasks & shared care plan"
