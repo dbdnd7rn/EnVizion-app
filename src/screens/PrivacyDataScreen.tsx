@@ -154,8 +154,10 @@ export function PrivacyDataScreen() {
           includes Care Vault metadata, care contacts, communication history,
           shared care tasks and completion history, caregiver availability,
           scheduled shifts, check-in and attendance history, swap requests,
-          recorded coverage-gap events, caregiver shift handoffs, coordination
-          assignments, family coordination comments, resolution history, and
+          recorded coverage-gap events, caregiver shift briefings (including
+          frozen task, medication, communication, coordination, follow-up, and
+          next-visit snapshots), coordination assignments, family coordination
+          comments, resolution history, and
           packet workflow history, but never permanent public file links. Weekly
           coordination PDF content is generated on demand; only its generation
           event is kept in the care audit history.
@@ -211,7 +213,8 @@ export function PrivacyDataScreen() {
           communication history, shared care tasks and completion history,
           caregiver availability, scheduled shifts, check-in and attendance
           history, swap requests, coverage-gap history, caregiver shift
-          handoffs, coordination assignments, family coordination comments,
+          briefings and their frozen snapshots, coordination assignments, family
+          coordination comments,
           resolution history, packet workflow history, care-sharing records and
           care activity history.
         </Txt>
