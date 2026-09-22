@@ -9,14 +9,39 @@ import {
   type CoordinationConflict,
   type CoordinationConflictKind,
 } from "../careCoordinationConflicts";
+import {
+  addCoordinationComment,
+  assignCoordinationConflict,
+  loadCoordinationWorkflow,
+  reopenCoordinationConflict,
+  resolveCoordinationConflict,
+  snoozeCoordinationConflict,
+  type CoordinationHistoryEvent,
+  type CoordinationResolution,
+  type CoordinationWorkflowData,
+} from "../careCoordinationWorkflow";
+import {
+  coordinationHandlingLabel,
+  coordinationHistoryActionLabel,
+  currentActionableConflicts,
+  currentResolvedConflicts,
+  currentSnoozedConflicts,
+  effectiveCoordinationStatus,
+  resolutionMap,
+} from "../careCoordinationWorkflowHelpers";
 import { loadCareSchedule } from "../careSchedule";
-import { loadCareTeam, type CareTeamRoster } from "../careTeam";
+import {
+  loadCareTeam,
+  type CareTeamMember,
+  type CareTeamRoster,
+} from "../careTeam";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
 import {
   Button,
   C,
   Card,
+  Field,
   Heading,
   Icon,
   Page,
@@ -50,14 +75,23 @@ function conflictIcon(kind: CoordinationConflictKind) {
 
 function ConflictCard({
   conflict,
+  resolution,
   caregiverName,
-  onResolve,
+  commentCount,
+  readOnly,
+  onManage,
+  onOpenSource,
 }: {
   conflict: CoordinationConflict;
+  resolution: CoordinationResolution | null;
   caregiverName: (userId: string | null) => string;
-  onResolve: () => void;
+  commentCount: number;
+  readOnly: boolean;
+  onManage: () => void;
+  onOpenSource: () => void;
 }) {
   const urgent = conflict.priority === "time_sensitive";
+  const handling = coordinationHandlingLabel(resolution, caregiverName);
 
   return (
     <Card
@@ -89,9 +123,7 @@ function ConflictCard({
             <View
               style={[
                 S.pill,
-                {
-                  backgroundColor: urgent ? C.redBg : C.lavender,
-                },
+                { backgroundColor: urgent ? C.redBg : C.lavender },
               ]}
             >
               <Text
@@ -113,19 +145,329 @@ function ConflictCard({
           <Txt style={S.small}>
             {coordinationConflictKindLabels[conflict.kind]} ·{" "}
             {new Date(conflict.startsAt).toLocaleString()}
-            {conflict.caregiverId
-              ? ` · ${caregiverName(conflict.caregiverId)}`
-              : ""}
           </Txt>
+
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
+            <View
+              style={[
+                S.pill,
+                {
+                  backgroundColor: resolution?.assignedTo
+                    ? "#EAF4EF"
+                    : "#F3EFF5",
+                },
+              ]}
+            >
+              <Txt style={S.small}>{handling}</Txt>
+            </View>
+            <View style={[S.pill, { backgroundColor: "#F3EFF5" }]}>
+              <Txt style={S.small}>
+                {commentCount} comment{commentCount === 1 ? "" : "s"}
+              </Txt>
+            </View>
+          </View>
         </View>
       </View>
 
       <Button
-        title="Resolve here"
+        title={readOnly ? "View coordination" : "Manage coordination"}
+        secondary
+        icon="people-outline"
+        onPress={onManage}
+      />
+      <Button
+        title="Open source record"
         secondary
         icon="arrow-forward-outline"
-        onPress={onResolve}
+        onPress={onOpenSource}
       />
+    </Card>
+  );
+}
+
+function HistoryList({
+  history,
+  caregiverName,
+}: {
+  history: CoordinationHistoryEvent[];
+  caregiverName: (userId: string | null) => string;
+}) {
+  if (!history.length) {
+    return <Txt style={S.small}>No workflow changes have been recorded yet.</Txt>;
+  }
+
+  return (
+    <View style={{ gap: 8 }}>
+      {history
+        .slice()
+        .reverse()
+        .slice(0, 12)
+        .map((event) => (
+          <View key={event.id} style={{ gap: 2 }}>
+            <Text style={[S.h3, { fontSize: 13 }]}>
+              {coordinationHistoryActionLabel(event.action)}
+              {event.action === "assigned" && event.assignedTo
+                ? ` to ${caregiverName(event.assignedTo)}`
+                : ""}
+            </Text>
+            <Txt style={S.small}>
+              {event.actorUserId
+                ? caregiverName(event.actorUserId)
+                : "Former care-team member"}{" "}
+              · {new Date(event.createdAt).toLocaleString()}
+              {event.snoozedUntil
+                ? ` · Until ${new Date(event.snoozedUntil).toLocaleString()}`
+                : ""}
+            </Txt>
+          </View>
+        ))}
+    </View>
+  );
+}
+
+function WorkflowPanel({
+  conflict,
+  resolution,
+  comments,
+  history,
+  assignableMembers,
+  caregiverName,
+  readOnly,
+  busy,
+  commentDraft,
+  onCommentDraft,
+  onAssign,
+  onSnooze,
+  onResolve,
+  onReopen,
+  onComment,
+  onClose,
+}: {
+  conflict: CoordinationConflict;
+  resolution: CoordinationResolution | null;
+  comments: CoordinationWorkflowData["comments"];
+  history: CoordinationWorkflowData["history"];
+  assignableMembers: CareTeamMember[];
+  caregiverName: (userId: string | null) => string;
+  readOnly: boolean;
+  busy: boolean;
+  commentDraft: string;
+  onCommentDraft: (value: string) => void;
+  onAssign: (userId: string | null) => void;
+  onSnooze: (until: Date) => void;
+  onResolve: () => void;
+  onReopen: () => void;
+  onComment: () => void;
+  onClose: () => void;
+}) {
+  const effectiveStatus = effectiveCoordinationStatus(resolution);
+  const activeSnooze =
+    resolution?.status === "snoozed" &&
+    resolution.snoozedUntil &&
+    new Date(resolution.snoozedUntil).getTime() > Date.now();
+
+  const tomorrowMorning = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    date.setHours(9, 0, 0, 0);
+    return date;
+  };
+
+  return (
+    <Card style={{ borderColor: "#CDB8D6", backgroundColor: "#FBF8FC" }}>
+      <View style={S.between}>
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={S.eyebrow}>COORDINATION WORKFLOW</Text>
+          <Text style={S.h2}>{conflict.title}</Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Close coordination workflow"
+          onPress={onClose}
+          style={{ minHeight: 44, minWidth: 44, alignItems: "flex-end" }}
+        >
+          <Icon name="close-outline" />
+        </Pressable>
+      </View>
+
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        <View style={[S.pill, { backgroundColor: "#EAF4EF" }]}>
+          <Txt style={S.small}>
+            {resolution?.assignedTo
+              ? coordinationHandlingLabel(resolution, caregiverName)
+              : "Unassigned"}
+          </Txt>
+        </View>
+        <View style={[S.pill, { backgroundColor: C.lavender }]}>
+          <Txt style={S.small}>
+            {activeSnooze
+              ? `Snoozed until ${new Date(
+                  resolution!.snoozedUntil!,
+                ).toLocaleString()}`
+              : effectiveStatus === "resolved"
+                ? "Resolved"
+                : resolution?.status === "snoozed"
+                  ? "Snooze ended · open again"
+                  : "Open"}
+          </Txt>
+        </View>
+      </View>
+
+      {!readOnly && (
+        <>
+          <Section title="Who is handling this?" />
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            <Pressable
+              accessibilityRole="radio"
+              accessibilityState={{ selected: !resolution?.assignedTo }}
+              disabled={busy}
+              onPress={() => onAssign(null)}
+              style={[
+                S.pill,
+                {
+                  minHeight: 40,
+                  justifyContent: "center",
+                  backgroundColor: !resolution?.assignedTo
+                    ? C.purple
+                    : C.lavender,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  S.small,
+                  {
+                    color: !resolution?.assignedTo ? C.white : C.deep,
+                    fontFamily: "DMSans_600SemiBold",
+                  },
+                ]}
+              >
+                Unassigned
+              </Text>
+            </Pressable>
+
+            {assignableMembers.map((member) => {
+              const selected = resolution?.assignedTo === member.userId;
+              return (
+                <Pressable
+                  key={member.userId}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  disabled={busy}
+                  onPress={() => onAssign(member.userId)}
+                  style={[
+                    S.pill,
+                    {
+                      minHeight: 40,
+                      justifyContent: "center",
+                      backgroundColor: selected ? C.purple : C.lavender,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      S.small,
+                      {
+                        color: selected ? C.white : C.deep,
+                        fontFamily: "DMSans_600SemiBold",
+                      },
+                    ]}
+                  >
+                    {member.isCurrentUser
+                      ? `${member.displayName || "Me"} (me)`
+                      : member.displayName || "Caregiver"}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Section title="Pause or finish" />
+          <View style={{ flexDirection: "row", gap: 9, flexWrap: "wrap" }}>
+            <View style={{ flex: 1, minWidth: 150 }}>
+              <Button
+                title="Snooze 2 hours"
+                secondary
+                disabled={busy}
+                icon="time-outline"
+                onPress={() =>
+                  onSnooze(new Date(Date.now() + 2 * 60 * 60_000))
+                }
+              />
+            </View>
+            <View style={{ flex: 1, minWidth: 150 }}>
+              <Button
+                title="Tomorrow 9 AM"
+                secondary
+                disabled={busy}
+                icon="alarm-outline"
+                onPress={() => onSnooze(tomorrowMorning())}
+              />
+            </View>
+          </View>
+
+          {effectiveStatus === "resolved" ? (
+            <Button
+              title="Reopen coordination item"
+              secondary
+              disabled={busy}
+              icon="refresh-outline"
+              onPress={onReopen}
+            />
+          ) : (
+            <Button
+              title="Mark resolved"
+              disabled={busy}
+              icon="checkmark-circle-outline"
+              onPress={onResolve}
+            />
+          )}
+
+          <Section title="Family comment" />
+          <Field
+            label="Add context for the care team"
+            value={commentDraft}
+            onChange={onCommentDraft}
+            multiline
+          />
+          <Button
+            title={busy ? "Saving…" : "Add comment"}
+            secondary
+            disabled={busy || !commentDraft.trim()}
+            icon="chatbubble-outline"
+            onPress={onComment}
+          />
+        </>
+      )}
+
+      <Section title="Conversation" />
+      {!comments.length ? (
+        <Txt style={S.small}>No family comments yet.</Txt>
+      ) : (
+        comments.map((comment) => (
+          <View key={comment.id} style={{ gap: 3 }}>
+            <Text style={[S.h3, { fontSize: 13 }]}>
+              {comment.authorUserId
+                ? caregiverName(comment.authorUserId)
+                : "Former care-team member"}
+            </Text>
+            <Txt>{comment.body}</Txt>
+            <Txt style={S.small}>
+              {new Date(comment.createdAt).toLocaleString()}
+            </Txt>
+          </View>
+        ))
+      )}
+
+      <Section title="Resolution history" />
+      <HistoryList history={history} caregiverName={caregiverName} />
+
+      {readOnly && (
+        <Txt style={S.small}>
+          Viewer access can read coordination status, comments, and history but
+          cannot assign, snooze, resolve, reopen, or add comments.
+        </Txt>
+      )}
     </Card>
   );
 }
@@ -134,6 +476,7 @@ export function CareCoordinationInboxScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
+  const readOnly = state.accessRole === "viewer";
 
   const [agenda, setAgenda] = useState<CareAgendaData>({
     appointments: [],
@@ -146,10 +489,20 @@ export function CareCoordinationInboxScreen() {
     ReturnType<typeof loadCareSchedule>
   > | null>(null);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
+  const [workflow, setWorkflow] = useState<CoordinationWorkflowData>({
+    resolutions: [],
+    comments: [],
+    history: [],
+  });
   const [filters, setFilters] = useState<CoordinationConflictKind[]>([
     ...coordinationConflictKinds,
   ]);
+  const [selectedWorkflowKey, setSelectedWorkflowKey] = useState<string | null>(
+    null,
+  );
+  const [commentDraft, setCommentDraft] = useState("");
   const [loading, setLoading] = useState(true);
+  const [workflowBusy, setWorkflowBusy] = useState(false);
   const [message, setMessage] = useState("");
 
   const range = useMemo(() => horizon(), []);
@@ -161,10 +514,9 @@ export function CareCoordinationInboxScreen() {
     }
 
     setLoading(true);
-    setMessage("");
 
     try {
-      const [agendaRows, scheduleRows, team] = await Promise.all([
+      const [agendaRows, scheduleRows, team, workflowRows] = await Promise.all([
         loadCareAgendaData({
           careRecipientId,
           rangeStartIso: range.startIso,
@@ -172,11 +524,13 @@ export function CareCoordinationInboxScreen() {
         }),
         loadCareSchedule(careRecipientId),
         loadCareTeam(careRecipientId),
+        loadCoordinationWorkflow(careRecipientId),
       ]);
 
       setAgenda(agendaRows);
       setSchedule(scheduleRows);
       setRoster(team);
+      setWorkflow(workflowRows);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -247,6 +601,36 @@ export function CareCoordinationInboxScreen() {
         },
         () => void refresh(),
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_coordination_resolutions",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_coordination_comments",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_coordination_history",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
       .subscribe();
 
     return () => {
@@ -255,7 +639,20 @@ export function CareCoordinationInboxScreen() {
   }, [careRecipientId, refresh]);
 
   const memberMap = useMemo(
-    () => new Map((roster?.members ?? []).map((member) => [member.userId, member])),
+    () =>
+      new Map(
+        (roster?.members ?? []).map((member) => [member.userId, member]),
+      ),
+    [roster],
+  );
+
+  const assignableMembers = useMemo(
+    () =>
+      (roster?.members ?? []).filter(
+        (member) =>
+          member.status === "active" &&
+          (member.role === "owner" || member.role === "caregiver"),
+      ),
     [roster],
   );
 
@@ -282,16 +679,75 @@ export function CareCoordinationInboxScreen() {
     [agenda, range.endIso, range.startIso, schedule],
   );
 
-  const visible = useMemo(() => {
-    const selected = new Set(filters);
-    return conflicts.filter((conflict) => selected.has(conflict.kind));
-  }, [conflicts, filters]);
+  const conflictMap = useMemo(
+    () => new Map(conflicts.map((conflict) => [conflict.id, conflict])),
+    [conflicts],
+  );
+  const resolutionsByConflict = useMemo(
+    () => resolutionMap(workflow.resolutions),
+    [workflow.resolutions],
+  );
 
-  const timeSensitive = visible.filter(
+  const actionable = useMemo(
+    () => currentActionableConflicts(conflicts, workflow.resolutions),
+    [conflicts, workflow.resolutions],
+  );
+  const snoozed = useMemo(
+    () => currentSnoozedConflicts(conflicts, workflow.resolutions),
+    [conflicts, workflow.resolutions],
+  );
+  const resolvedCurrent = useMemo(
+    () => currentResolvedConflicts(conflicts, workflow.resolutions),
+    [conflicts, workflow.resolutions],
+  );
+
+  const selectedKinds = useMemo(() => new Set(filters), [filters]);
+  const visibleActionable = actionable.filter((conflict) =>
+    selectedKinds.has(conflict.kind),
+  );
+  const visibleSnoozed = snoozed.filter((conflict) =>
+    selectedKinds.has(conflict.kind),
+  );
+  const timeSensitive = visibleActionable.filter(
     (conflict) => conflict.priority === "time_sensitive",
   );
-  const review = visible.filter((conflict) => conflict.priority === "review");
-  const counts = coordinationConflictCounts(conflicts);
+  const review = visibleActionable.filter(
+    (conflict) => conflict.priority === "review",
+  );
+  const counts = coordinationConflictCounts(actionable);
+
+  const resolvedHistory = useMemo(
+    () =>
+      workflow.resolutions
+        .filter(
+          (row) =>
+            row.status === "resolved" && selectedKinds.has(row.conflictKind),
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.resolvedAt ?? b.updatedAt).getTime() -
+            new Date(a.resolvedAt ?? a.updatedAt).getTime(),
+        )
+        .slice(0, 12),
+    [selectedKinds, workflow.resolutions],
+  );
+
+  const selectedConflict = selectedWorkflowKey
+    ? conflictMap.get(selectedWorkflowKey) ?? null
+    : null;
+  const selectedResolution = selectedWorkflowKey
+    ? resolutionsByConflict.get(selectedWorkflowKey) ?? null
+    : null;
+  const selectedComments = selectedWorkflowKey
+    ? workflow.comments.filter(
+        (comment) => comment.conflictKey === selectedWorkflowKey,
+      )
+    : [];
+  const selectedHistory = selectedWorkflowKey
+    ? workflow.history.filter(
+        (event) => event.conflictKey === selectedWorkflowKey,
+      )
+    : [];
 
   function toggleFilter(kind: CoordinationConflictKind) {
     setFilters((current) =>
@@ -301,7 +757,84 @@ export function CareCoordinationInboxScreen() {
     );
   }
 
-  function resolve(conflict: CoordinationConflict) {
+  function openWorkflow(conflict: CoordinationConflict) {
+    setSelectedWorkflowKey(conflict.id);
+    setCommentDraft("");
+  }
+
+  async function runWorkflowAction(
+    action: () => Promise<unknown>,
+    success: string,
+  ) {
+    if (readOnly || workflowBusy) return;
+    setWorkflowBusy(true);
+    setMessage("");
+    try {
+      await action();
+      await refresh();
+      setMessage(success);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not update this coordination item.",
+      );
+    } finally {
+      setWorkflowBusy(false);
+    }
+  }
+
+  async function assignSelected(userId: string | null) {
+    if (!careRecipientId || !selectedConflict) return;
+    await runWorkflowAction(
+      () =>
+        assignCoordinationConflict(
+          careRecipientId,
+          selectedConflict,
+          userId,
+        ),
+      userId
+        ? `Assigned to ${caregiverName(userId)}.`
+        : "Assignment cleared.",
+    );
+  }
+
+  async function snoozeSelected(until: Date) {
+    if (!careRecipientId || !selectedConflict) return;
+    await runWorkflowAction(
+      () =>
+        snoozeCoordinationConflict(careRecipientId, selectedConflict, until),
+      `Snoozed until ${until.toLocaleString()}.`,
+    );
+  }
+
+  async function resolveSelected() {
+    if (!careRecipientId || !selectedConflict) return;
+    await runWorkflowAction(
+      () => resolveCoordinationConflict(careRecipientId, selectedConflict),
+      "Coordination item marked resolved.",
+    );
+  }
+
+  async function reopenSelected() {
+    if (!careRecipientId || !selectedConflict) return;
+    await runWorkflowAction(
+      () => reopenCoordinationConflict(careRecipientId, selectedConflict),
+      "Coordination item reopened.",
+    );
+  }
+
+  async function commentSelected() {
+    if (!careRecipientId || !selectedConflict || !commentDraft.trim()) return;
+    const body = commentDraft;
+    await runWorkflowAction(
+      () => addCoordinationComment(careRecipientId, selectedConflict, body),
+      "Family comment added.",
+    );
+    setCommentDraft("");
+  }
+
+  function openSource(conflict: CoordinationConflict) {
     n.navigate(conflict.fixTarget);
   }
 
@@ -321,8 +854,8 @@ export function CareCoordinationInboxScreen() {
     <Page>
       <Heading
         eyebrow="NEEDS COORDINATION"
-        title="Catch schedule and care-plan collisions before they become confusion."
-        body="EnVizion checks the next seven days for overlapping shifts, exact-time appointment double-booking, uncovered tasks, assigned-unavailable conflicts, close appointment follow-ups, and long scheduled caregiver days."
+        title="Catch care-plan collisions—and make it clear who is handling them."
+        body="The inbox checks the next seven days, while the family workflow adds assignment, comments, snooze, resolution, and a durable change history."
       />
 
       <Card
@@ -347,10 +880,11 @@ export function CareCoordinationInboxScreen() {
         >
           {counts.total
             ? `${counts.total} item${counts.total === 1 ? "" : "s"} need coordination`
-            : "No coordination conflicts detected"}
+            : "No active coordination conflicts detected"}
         </Text>
         <Txt style={{ color: counts.timeSensitive ? "#E9DDED" : C.ink }}>
-          {counts.timeSensitive} time-sensitive · {counts.review} review
+          {counts.timeSensitive} time-sensitive · {counts.review} review ·{" "}
+          {snoozed.length} snoozed
         </Txt>
       </Card>
 
@@ -362,7 +896,22 @@ export function CareCoordinationInboxScreen() {
         </Card>
       )}
 
-      <Section title="Filter inbox" action="Refresh" onPress={() => void refresh()} />
+      {readOnly && (
+        <Card style={{ backgroundColor: C.lavender }}>
+          <Icon name="eye-outline" />
+          <Text style={S.h3}>Viewer access is read-only.</Text>
+          <Txt>
+            You can see who is handling an issue, family comments, and resolution
+            history, but only Owners and Caregivers can change workflow state.
+          </Txt>
+        </Card>
+      )}
+
+      <Section
+        title="Filter inbox"
+        action="Refresh"
+        onPress={() => void refresh()}
+      />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         {coordinationConflictKinds.map((kind) => {
           const selected = filters.includes(kind);
@@ -398,15 +947,41 @@ export function CareCoordinationInboxScreen() {
         })}
       </View>
 
+      {selectedConflict && (
+        <WorkflowPanel
+          conflict={selectedConflict}
+          resolution={selectedResolution}
+          comments={selectedComments}
+          history={selectedHistory}
+          assignableMembers={assignableMembers}
+          caregiverName={caregiverName}
+          readOnly={readOnly}
+          busy={workflowBusy}
+          commentDraft={commentDraft}
+          onCommentDraft={setCommentDraft}
+          onAssign={(userId) => void assignSelected(userId)}
+          onSnooze={(until) => void snoozeSelected(until)}
+          onResolve={() => void resolveSelected()}
+          onReopen={() => void reopenSelected()}
+          onComment={() => void commentSelected()}
+          onClose={() => {
+            setSelectedWorkflowKey(null);
+            setCommentDraft("");
+          }}
+        />
+      )}
+
       {loading ? (
         <Card>
           <ActivityIndicator color={C.purple} />
-          <Txt>Checking the shared care plan…</Txt>
+          <Txt>Checking the shared care plan and family workflow…</Txt>
         </Card>
-      ) : !visible.length ? (
+      ) : !visibleActionable.length && !visibleSnoozed.length ? (
         <Card style={{ backgroundColor: "#EAF4EF" }}>
           <Icon name="checkmark-circle-outline" size={30} />
-          <Text style={S.h3}>Nothing in the selected filters needs coordination.</Text>
+          <Text style={S.h3}>
+            Nothing in the selected filters needs active coordination.
+          </Text>
           <Txt>
             This is a planning check, not emergency monitoring. Keep using the
             care team’s normal communication channels for urgent changes.
@@ -421,8 +996,16 @@ export function CareCoordinationInboxScreen() {
                 <ConflictCard
                   key={conflict.id}
                   conflict={conflict}
+                  resolution={resolutionsByConflict.get(conflict.id) ?? null}
                   caregiverName={caregiverName}
-                  onResolve={() => resolve(conflict)}
+                  commentCount={
+                    workflow.comments.filter(
+                      (comment) => comment.conflictKey === conflict.id,
+                    ).length
+                  }
+                  readOnly={readOnly}
+                  onManage={() => openWorkflow(conflict)}
+                  onOpenSource={() => openSource(conflict)}
                 />
               ))}
             </>
@@ -435,12 +1018,119 @@ export function CareCoordinationInboxScreen() {
                 <ConflictCard
                   key={conflict.id}
                   conflict={conflict}
+                  resolution={resolutionsByConflict.get(conflict.id) ?? null}
                   caregiverName={caregiverName}
-                  onResolve={() => resolve(conflict)}
+                  commentCount={
+                    workflow.comments.filter(
+                      (comment) => comment.conflictKey === conflict.id,
+                    ).length
+                  }
+                  readOnly={readOnly}
+                  onManage={() => openWorkflow(conflict)}
+                  onOpenSource={() => openSource(conflict)}
                 />
               ))}
             </>
           )}
+
+          {visibleSnoozed.length > 0 && (
+            <>
+              <Section title="Snoozed" />
+              {visibleSnoozed.map((conflict) => {
+                const resolution =
+                  resolutionsByConflict.get(conflict.id) ?? null;
+                return (
+                  <Card key={conflict.id} style={{ backgroundColor: "#F7F2F8" }}>
+                    <View style={S.row}>
+                      <Icon name="time-outline" />
+                      <View style={{ flex: 1, gap: 4 }}>
+                        <Text style={S.h3}>{conflict.title}</Text>
+                        <Txt>
+                          {resolution?.snoozedUntil
+                            ? `Hidden from the active inbox until ${new Date(
+                                resolution.snoozedUntil,
+                              ).toLocaleString()}.`
+                            : "Snoozed"}
+                        </Txt>
+                        <Txt style={S.small}>
+                          {coordinationHandlingLabel(
+                            resolution,
+                            caregiverName,
+                          )}
+                        </Txt>
+                      </View>
+                    </View>
+                    <Button
+                      title={readOnly ? "View coordination" : "Manage or bring back"}
+                      secondary
+                      onPress={() => openWorkflow(conflict)}
+                    />
+                  </Card>
+                );
+              })}
+            </>
+          )}
+        </>
+      )}
+
+      {resolvedHistory.length > 0 && (
+        <>
+          <Section title="Resolved recently" />
+          {resolvedHistory.map((resolution) => {
+            const currentConflict =
+              conflictMap.get(resolution.conflictKey) ?? null;
+            const currentComments = workflow.comments.filter(
+              (comment) => comment.conflictKey === resolution.conflictKey,
+            );
+            return (
+              <Card key={resolution.id} style={{ backgroundColor: "#F4F1F4" }}>
+                <View style={S.row}>
+                  <Icon name="checkmark-circle-outline" color={C.green} />
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text style={S.h3}>{resolution.conflictTitle}</Text>
+                    <Txt style={S.small}>
+                      Resolved{" "}
+                      {resolution.resolvedAt
+                        ? new Date(resolution.resolvedAt).toLocaleString()
+                        : new Date(resolution.updatedAt).toLocaleString()}
+                      {resolution.resolvedBy
+                        ? ` · by ${caregiverName(resolution.resolvedBy)}`
+                        : ""}
+                    </Txt>
+                    <Txt style={S.small}>
+                      {coordinationHandlingLabel(
+                        resolution,
+                        caregiverName,
+                      )}{" "}
+                      · {currentComments.length} comment
+                      {currentComments.length === 1 ? "" : "s"}
+                    </Txt>
+                    {!currentConflict && (
+                      <Txt style={S.small}>
+                        The source conflict is no longer detected in the current
+                        seven-day care plan.
+                      </Txt>
+                    )}
+                  </View>
+                </View>
+
+                {currentConflict ? (
+                  <Button
+                    title={readOnly ? "View resolution history" : "View or reopen"}
+                    secondary
+                    onPress={() => openWorkflow(currentConflict)}
+                  />
+                ) : (
+                  <HistoryList
+                    history={workflow.history.filter(
+                      (event) => event.conflictKey === resolution.conflictKey,
+                    )}
+                    caregiverName={caregiverName}
+                  />
+                )}
+              </Card>
+            );
+          })}
         </>
       )}
 
@@ -453,6 +1143,10 @@ export function CareCoordinationInboxScreen() {
           day flag appears above 12 scheduled hours in one local day. These are
           coordination heuristics, not clinical, employment, or performance
           judgments.
+        </Txt>
+        <Txt style={S.small}>
+          Workflow comments can contain sensitive family context. They remain
+          inside this care profile and follow the same shared-care access rules.
         </Txt>
       </Card>
 
