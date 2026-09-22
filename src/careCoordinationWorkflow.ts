@@ -215,10 +215,26 @@ async function updateResolution(
     conflict,
   );
 
+  const expiredSnooze =
+    resolution.status === "snoozed" &&
+    resolution.snoozedUntil &&
+    new Date(resolution.snoozedUntil).getTime() <= Date.now();
+
+  const normalizedPatch =
+    expiredSnooze && !Object.prototype.hasOwnProperty.call(patch, "status")
+      ? {
+          status: "open",
+          snoozed_until: null,
+          resolved_at: null,
+          resolved_by: null,
+          ...patch,
+        }
+      : patch;
+
   const result = await supabase
     .from("care_coordination_resolutions")
     .update({
-      ...patch,
+      ...normalizedPatch,
       updated_at: new Date().toISOString(),
     })
     .eq("id", resolution.id)
