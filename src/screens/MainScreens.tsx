@@ -228,6 +228,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareShiftBoard")}
           />
           <Row
+            title="Care coordination analytics"
+            subtitle="See this week’s caregiver workload and coverage picture"
+            icon="bar-chart-outline"
+            onPress={() => n.navigate("CareAnalytics")}
+          />
+          <Row
             title="Care tasks & shared care plan"
             subtitle="Assign responsibilities, due dates, and follow-ups"
             icon="checkbox-outline"
@@ -434,6 +440,12 @@ export function ToolkitScreen() {
           subtitle="Plan shifts, check-ins, attendance, swaps, and uncovered responsibilities"
           icon="calendar-outline"
           onPress={() => n.navigate("CareSchedule")}
+        />
+        <Row
+          title="Care coordination analytics"
+          subtitle="Weekly workload, attendance, tasks, and coverage trends"
+          icon="bar-chart-outline"
+          onPress={() => n.navigate("CareAnalytics")}
         />
         <Row
           title="Care tasks & shared care plan"
