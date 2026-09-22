@@ -204,44 +204,7 @@ export function CareShiftBoardScreen() {
   const [takeoverNote, setTakeoverNote] = useState("");
 
   const refresh = useCallback(async () => {
-    async function acceptTakeover() {
-    if (
-      !careRecipientId ||
-      !pendingTakeover ||
-      readOnly ||
-      busyId
-    ) {
-      return;
-    }
-
-    setBusyId(`takeover:${pendingTakeover.id}`);
-    setMessage("");
-    try {
-      const acknowledgement = await acceptCareShiftHandoff({
-        careRecipientId,
-        handoffId: pendingTakeover.id,
-        note: takeoverNote,
-      });
-
-      setTakeoverNote("");
-      await refresh();
-      setMessage(
-        `Takeover confirmed at ${new Date(
-          acknowledgement.acceptedAt,
-        ).toLocaleString()}. Existing task ownership was preserved.`,
-      );
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not confirm this caregiver takeover.",
-      );
-    } finally {
-      setBusyId(null);
-    }
-  }
-
-  if (!careRecipientId) {
+    if (!careRecipientId) {
       setTasks([]);
       setCompletions([]);
       setHandoffs([]);
@@ -764,6 +727,43 @@ export function CareShiftBoardScreen() {
         error instanceof Error
           ? error.message
           : "We could not save this handoff.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function acceptTakeover() {
+    if (
+      !careRecipientId ||
+      !pendingTakeover ||
+      readOnly ||
+      busyId
+    ) {
+      return;
+    }
+
+    setBusyId(`takeover:${pendingTakeover.id}`);
+    setMessage("");
+    try {
+      const acknowledgement = await acceptCareShiftHandoff({
+        careRecipientId,
+        handoffId: pendingTakeover.id,
+        note: takeoverNote,
+      });
+
+      setTakeoverNote("");
+      await refresh();
+      setMessage(
+        `Takeover confirmed at ${new Date(
+          acknowledgement.acceptedAt,
+        ).toLocaleString()}. Existing task ownership was preserved.`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not confirm this caregiver takeover.",
       );
     } finally {
       setBusyId(null);
