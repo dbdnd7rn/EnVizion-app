@@ -127,8 +127,7 @@ export function CareAnalyticsScreen() {
     const active =
       roster?.members.filter(
         (member) =>
-          member.role === "owner" ||
-          member.role === "caregiver" ||
+          (member.role === "owner" || member.role === "caregiver") &&
           member.status !== "revoked",
       ) ?? [];
 
