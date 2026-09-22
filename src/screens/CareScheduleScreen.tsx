@@ -915,7 +915,7 @@ export function CareScheduleScreen() {
                 </Txt>
               )}
 
-              {Boolean(shift.note) && <Txt>{shift.note}</Txt>
+              {Boolean(shift.note) && <Txt>{shift.note}</Txt>}
 
               {fit === "conflict" && (
                 <Txt style={{ color: C.rose }}>
