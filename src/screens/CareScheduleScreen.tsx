@@ -16,7 +16,6 @@ import {
   type CaregiverAvailability,
 } from "../careSchedule";
 import {
-  activeCaregiversOnDuty,
   shiftAvailabilityFit,
   uncoveredUpcomingTasks,
   upcomingScheduledShifts,
@@ -382,7 +381,6 @@ export function CareScheduleScreen() {
     [shifts],
   );
 
-  const onDuty = useMemo(() => activeCaregiversOnDuty(shifts), [shifts]);
   const actualCoverage = useMemo(
     () => actualCoverageNow(shifts, attendance),
     [attendance, shifts],
@@ -657,7 +655,7 @@ export function CareScheduleScreen() {
       <Heading
         eyebrow="AVAILABILITY & SHIFT SCHEDULING"
         title="Plan who is available before care work becomes urgent."
-        body="Coordinate caregiver availability, scheduled shifts, coverage gaps, and shift swaps for this care profile."
+        body="Coordinate caregiver availability, scheduled shifts, real check-ins, attendance history, coverage gaps, and shift swaps for this care profile."
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
@@ -687,8 +685,8 @@ export function CareScheduleScreen() {
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
-            You can see availability, shifts, coverage gaps, and swap status,
-            but cannot change the schedule.
+            You can see availability, shifts, check-in status, attendance,
+            coverage gaps, and swap status, but cannot change the schedule.
           </Txt>
         </Card>
       )}
