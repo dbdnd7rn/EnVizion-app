@@ -8,6 +8,7 @@ function iconFor(item: NotificationRecord) {
   if (item.kind.includes("reply")) return "chatbubble-ellipses-outline";
   if (item.kind.includes("coaching")) return "people-outline";
   if (item.kind.includes("support")) return "heart-outline";
+  if (item.kind.includes("coordination")) return "warning-outline";
   if (item.kind.includes("task") || item.kind.includes("shift")) return "checkbox-outline";
   if (item.kind.includes("reminder")) return "alarm-outline";
   if (item.kind.includes("document")) return "folder-open-outline";
@@ -73,6 +74,14 @@ export function NotificationsScreen() {
         item.entityType === "care_shift_swap"
       ) {
         n.navigate("CareSchedule");
+        return;
+      }
+
+      if (
+        item.entityType === "care_coordination_resolution" ||
+        item.entityType === "care_coordination_digest"
+      ) {
+        n.navigate("CareCoordinationInbox");
         return;
       }
 
