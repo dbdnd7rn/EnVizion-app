@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import type { CareTask, CareTaskCompletion } from "./careTasks";
+import type { Medication, MedicationRecord } from "./medications";
 import type {
   HandoffAppointmentSnapshot,
   HandoffCommunicationSnapshot,
@@ -124,6 +125,52 @@ export async function createCareShiftHandoff(input: {
 
   if (error) throw error;
   return mapHandoff(data);
+}
+
+export async function loadHandoffMedicationRecords(
+  careRecipientId: string,
+): Promise<MedicationRecord[]> {
+  const [medicationsResult, recordsResult] = await Promise.all([
+    supabase
+      .from("medications")
+      .select("id, name, instructions, time_label")
+      .eq("care_recipient_id", careRecipientId),
+    supabase
+      .from("medication_records")
+      .select("id, medication_id, recorded_at, corrected_at")
+      .eq("care_recipient_id", careRecipientId)
+      .order("recorded_at", { ascending: false })
+      .limit(250),
+  ]);
+
+  if (medicationsResult.error) throw medicationsResult.error;
+  if (recordsResult.error) throw recordsResult.error;
+
+  const medicationById = new Map<string, Medication>(
+    (medicationsResult.data ?? []).map((row) => [
+      row.id,
+      {
+        id: row.id,
+        name: row.name,
+        instructions: row.instructions ?? "",
+        time: row.time_label ?? "",
+      },
+    ]),
+  );
+
+  return (recordsResult.data ?? [])
+    .map((row) => {
+      const medication = medicationById.get(row.medication_id);
+      if (!medication) return null;
+
+      return {
+        id: row.id,
+        medication,
+        recordedAt: row.recorded_at,
+        ...(row.corrected_at ? { correctedAt: row.corrected_at } : {}),
+      };
+    })
+    .filter((row): row is MedicationRecord => Boolean(row));
 }
 
 export async function reassignCareTask(
