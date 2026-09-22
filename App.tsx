@@ -30,6 +30,7 @@ import { CareTasksScreen } from "./src/screens/CareTasksScreen";
 import { CareShiftBoardScreen } from "./src/screens/CareShiftBoardScreen";
 import { CareScheduleScreen } from "./src/screens/CareScheduleScreen";
 import { CareAnalyticsScreen } from "./src/screens/CareAnalyticsScreen";
+import { CareCoordinationInboxScreen } from "./src/screens/CareCoordinationInboxScreen";
 import { CarePacketScreen } from "./src/screens/CarePacketScreen";
 import {
   AssistantScreen,
@@ -259,6 +260,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareAnalytics"
             component={CareAnalyticsScreen}
             options={{ title: "Care coordination analytics" }}
+          />
+          <Stack.Screen
+            name="CareCoordinationInbox"
+            component={CareCoordinationInboxScreen}
+            options={{ title: "Needs coordination" }}
           />
           <Stack.Screen
             name="CarePacket"
