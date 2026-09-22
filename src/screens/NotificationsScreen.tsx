@@ -68,6 +68,14 @@ export function NotificationsScreen() {
         return;
       }
 
+      if (
+        item.entityType === "care_shift" ||
+        item.entityType === "care_shift_swap"
+      ) {
+        n.navigate("CareSchedule");
+        return;
+      }
+
       if (item.entityType === "care_document") {
         n.navigate("CareDocuments");
       }
