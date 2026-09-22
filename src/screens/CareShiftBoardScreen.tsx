@@ -757,8 +757,9 @@ export function CareShiftBoardScreen() {
       setMessage(
         `Takeover confirmed at ${new Date(
           acknowledgement.acceptedAt,
-        ).toLocaleString()}. Existing task ownership was preserved.`,
+        ).toLocaleString()}. Your active caregiver shift has started and existing task ownership was preserved.`,
       );
+      n.navigate("OnShiftCaregiver");
     } catch (error) {
       setMessage(
         error instanceof Error
