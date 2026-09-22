@@ -204,7 +204,44 @@ export function CareShiftBoardScreen() {
   const [takeoverNote, setTakeoverNote] = useState("");
 
   const refresh = useCallback(async () => {
-    if (!careRecipientId) {
+    async function acceptTakeover() {
+    if (
+      !careRecipientId ||
+      !pendingTakeover ||
+      readOnly ||
+      busyId
+    ) {
+      return;
+    }
+
+    setBusyId(`takeover:${pendingTakeover.id}`);
+    setMessage("");
+    try {
+      const acknowledgement = await acceptCareShiftHandoff({
+        careRecipientId,
+        handoffId: pendingTakeover.id,
+        note: takeoverNote,
+      });
+
+      setTakeoverNote("");
+      await refresh();
+      setMessage(
+        `Takeover confirmed at ${new Date(
+          acknowledgement.acceptedAt,
+        ).toLocaleString()}. Existing task ownership was preserved.`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not confirm this caregiver takeover.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (!careRecipientId) {
       setTasks([]);
       setCompletions([]);
       setHandoffs([]);
@@ -560,6 +597,33 @@ export function CareShiftBoardScreen() {
       openTasks,
       todaysCompletions,
     ],
+  );
+
+  const acknowledgementMap = useMemo(
+    () =>
+      new Map(
+        acknowledgements.map((acknowledgement) => [
+          acknowledgement.handoffId,
+          acknowledgement,
+        ]),
+      ),
+    [acknowledgements],
+  );
+
+  const pendingTakeover = useMemo(
+    () =>
+      latestAcceptableHandoff({
+        handoffs,
+        acknowledgements,
+        currentUserId,
+        readOnly,
+      }),
+    [acknowledgements, currentUserId, handoffs, readOnly],
+  );
+
+  const takeoverWork = useMemo(
+    () => takeoverResponsibilities(tasks, currentUserId),
+    [currentUserId, tasks],
   );
 
   const coverage = useMemo(() => {
