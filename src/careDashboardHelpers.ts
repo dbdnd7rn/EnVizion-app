@@ -60,7 +60,7 @@ export function nextDashboardAppointment(
           appointment: AgendaAppointment;
           startsAt: string;
         } =>
-          Boolean(row.startsAt) &&
+          row.startsAt !== null &&
           new Date(row.startsAt).getTime() >= nowMs,
       )
       .sort(
