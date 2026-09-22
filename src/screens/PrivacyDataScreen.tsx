@@ -157,7 +157,8 @@ export function PrivacyDataScreen() {
           recorded coverage-gap events, caregiver shift briefings (including
           frozen task, medication, communication, coordination, follow-up, and
           next-visit snapshots), caregiver takeover acknowledgements and acceptance
-          notes, coordination assignments, family coordination
+          notes, active/completed caregiver shift sessions, append-only shift notes,
+          coordination assignments, family coordination
           comments, resolution history, and
           packet workflow history, but never permanent public file links. Weekly
           coordination PDF content is generated on demand; only its generation
@@ -215,8 +216,8 @@ export function PrivacyDataScreen() {
           caregiver availability, scheduled shifts, check-in and attendance
           history, swap requests, coverage-gap history, caregiver shift
           briefings and their frozen snapshots, caregiver takeover acknowledgements
-          and acceptance notes, coordination assignments, family coordination
-          comments,
+          and acceptance notes, caregiver shift sessions and append-only shift
+          notes, coordination assignments, family coordination comments,
           resolution history, packet workflow history, care-sharing records and
           care activity history.
         </Txt>
