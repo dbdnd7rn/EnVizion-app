@@ -787,7 +787,7 @@ export function CareShiftBoardScreen() {
       <Heading
         eyebrow="TODAY · CAREGIVER SHIFT BOARD"
         title="See what needs attention, who owns it, and what changed."
-        body="A focused command center for today’s responsibilities, coverage, and Caregiver Handoff 2.0 shift briefings."
+        body="A focused command center for today’s responsibilities, Caregiver Handoff 2.0 briefings, and an immutable caregiver takeover chain."
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
@@ -836,8 +836,9 @@ export function CareShiftBoardScreen() {
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
-            You can follow today’s coverage and handoffs, but only an Owner or
-            Caregiver can complete, reassign, or create shift handoffs.
+            You can follow today’s coverage, briefings, and takeover history,
+            but only an Owner or Caregiver can complete work, create handoffs,
+            or acknowledge a caregiver takeover.
           </Txt>
         </Card>
       )}
@@ -1464,6 +1465,42 @@ export function CareShiftBoardScreen() {
             </View>
 
             {Boolean(handoff.note) && <Txt>{handoff.note}</Txt>}
+
+            {acknowledgementMap.get(handoff.id) ? (
+              <Card style={{ backgroundColor: "#EAF4EF", padding: 13 }}>
+                <View style={S.row}>
+                  <Icon name="checkmark-done-outline" color={C.green} size={20} />
+                  <View style={{ flex: 1, gap: 3 }}>
+                    <Text style={[S.h3, { fontSize: 13 }]}>
+                      Takeover accepted
+                    </Text>
+                    <Txt style={S.small}>
+                      {memberName(handoff.createdBy)} →{" "}
+                      {memberName(
+                        acknowledgementMap.get(handoff.id)?.acceptedBy ?? null,
+                      )}{" "}
+                      ·{" "}
+                      {new Date(
+                        acknowledgementMap.get(handoff.id)!.acceptedAt,
+                      ).toLocaleString()}
+                    </Txt>
+                    {Boolean(acknowledgementMap.get(handoff.id)?.note) && (
+                      <Txt>
+                        {acknowledgementMap.get(handoff.id)?.note}
+                      </Txt>
+                    )}
+                  </View>
+                </View>
+              </Card>
+            ) : (
+              <Txt style={S.small}>
+                Awaiting takeover acknowledgement
+                {handoff.handoffTo
+                  ? ` from ${memberName(handoff.handoffTo)}`
+                  : " from an active Owner or Caregiver"}
+                .
+              </Txt>
+            )}
 
             <Txt style={S.small}>
               {handoff.briefingVersion >= 2 ? "Shift briefing" : "Snapshot"} ·{" "}
