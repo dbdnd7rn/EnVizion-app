@@ -11,6 +11,7 @@ export function canAcceptHandoff(input: {
   readOnly: boolean;
 }) {
   if (input.readOnly || !input.currentUserId) return false;
+  if (!input.handoff.requiresAcknowledgement) return false;
   if (input.acknowledgement) return false;
   if (input.handoff.createdBy === input.currentUserId) return false;
 
