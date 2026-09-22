@@ -901,6 +901,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Caregiver availability & schedule"
+        subtitle="Availability windows, shifts, swap requests, and coverage gaps"
+        icon="calendar-outline"
+        onPress={() => n.navigate("CareSchedule")}
+      />
+
+      <Row
         title="Care tasks & shared care plan"
         subtitle="Responsibilities, assignments, due dates, and completion history"
         icon="checkbox-outline"
