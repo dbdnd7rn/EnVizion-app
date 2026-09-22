@@ -17,6 +17,7 @@ function handoff(overrides: Record<string, unknown> = {}) {
     openTaskSnapshot: [],
     completedTaskSnapshot: [],
     briefingVersion: 2,
+    requiresAcknowledgement: true,
     briefingWindowStart: "2026-09-22T08:00:00.000Z",
     medicationActivitySnapshot: [],
     communicationSnapshot: [],
@@ -44,6 +45,19 @@ test("direct handoff can only be accepted by the intended incoming caregiver", (
     canAcceptHandoff({
       handoff: value,
       currentUserId: "someone-else",
+      readOnly: false,
+    }),
+    false,
+  );
+});
+
+test("historical handoffs do not suddenly require takeover acknowledgement", () => {
+  const value = handoff({ requiresAcknowledgement: false });
+
+  assert.equal(
+    canAcceptHandoff({
+      handoff: value,
+      currentUserId: "incoming",
       readOnly: false,
     }),
     false,
