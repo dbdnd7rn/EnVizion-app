@@ -29,6 +29,7 @@ export type CareShiftHandoff = {
   openTaskSnapshot: Array<Record<string, unknown>>;
   completedTaskSnapshot: Array<Record<string, unknown>>;
   briefingVersion: number;
+  requiresAcknowledgement: boolean;
   briefingWindowStart: string | null;
   medicationActivitySnapshot: HandoffMedicationSnapshot[];
   communicationSnapshot: HandoffCommunicationSnapshot[];
@@ -53,6 +54,7 @@ function mapHandoff(row: any): CareShiftHandoff {
       ? row.completed_task_snapshot
       : [],
     briefingVersion: Number(row.briefing_version ?? 1),
+    requiresAcknowledgement: Boolean(row.requires_acknowledgement),
     briefingWindowStart: row.briefing_window_start ?? null,
     medicationActivitySnapshot: Array.isArray(row.medication_activity_snapshot)
       ? row.medication_activity_snapshot
@@ -79,7 +81,7 @@ export async function loadCareShiftHandoffs(careRecipientId: string) {
   const { data, error } = await supabase
     .from("care_shift_handoffs")
     .select(
-      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, created_at",
+      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, requires_acknowledgement, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, created_at",
     )
     .eq("care_recipient_id", careRecipientId)
     .order("created_at", { ascending: false })
@@ -189,6 +191,7 @@ export async function createCareShiftHandoff(input: {
       open_task_snapshot: input.openTaskSnapshot,
       completed_task_snapshot: input.completedTaskSnapshot,
       briefing_version: 2,
+      requires_acknowledgement: true,
       briefing_window_start: input.briefingWindowStart,
       medication_activity_snapshot: input.medicationActivitySnapshot,
       communication_snapshot: input.communicationSnapshot,
@@ -197,7 +200,7 @@ export async function createCareShiftHandoff(input: {
       follow_up_snapshot: input.followUpSnapshot,
     })
     .select(
-      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, created_at",
+      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, requires_acknowledgement, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, created_at",
     )
     .single();
 
