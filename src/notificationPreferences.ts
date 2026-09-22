@@ -7,6 +7,8 @@ export type NotificationPreferences = {
   coachingPush: boolean;
   careTeamPush: boolean;
   taskPush: boolean;
+  coordinationPush: boolean;
+  coordinationDigestEnabled: boolean;
   quietHoursEnabled: boolean;
   quietStart: string;
   quietEnd: string;
@@ -29,6 +31,8 @@ function defaults(): NotificationPreferences {
     coachingPush: true,
     careTeamPush: true,
     taskPush: true,
+    coordinationPush: true,
+    coordinationDigestEnabled: false,
     quietHoursEnabled: false,
     quietStart: "22:00",
     quietEnd: "07:00",
@@ -44,6 +48,9 @@ function mapRow(row: any): NotificationPreferences {
     coachingPush: Boolean(row.coaching_push),
     careTeamPush: Boolean(row.care_team_push),
     taskPush: row.task_push === undefined ? true : Boolean(row.task_push),
+    coordinationPush:
+      row.coordination_push === undefined ? true : Boolean(row.coordination_push),
+    coordinationDigestEnabled: Boolean(row.coordination_digest_enabled),
     quietHoursEnabled: Boolean(row.quiet_hours_enabled),
     quietStart: String(row.quiet_start ?? "22:00").slice(0, 5),
     quietEnd: String(row.quiet_end ?? "07:00").slice(0, 5),
@@ -62,7 +69,7 @@ export async function loadNotificationPreferences() {
   const { data, error } = await supabase
     .from("notification_preferences")
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .eq("user_id", user.id)
     .maybeSingle();
@@ -81,13 +88,15 @@ export async function loadNotificationPreferences() {
       coaching_push: initial.coachingPush,
       care_team_push: initial.careTeamPush,
       task_push: initial.taskPush,
+      coordination_push: initial.coordinationPush,
+      coordination_digest_enabled: initial.coordinationDigestEnabled,
       quiet_hours_enabled: initial.quietHoursEnabled,
       quiet_start: initial.quietStart,
       quiet_end: initial.quietEnd,
       timezone: initial.timezone,
     })
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .single();
 
@@ -115,13 +124,15 @@ export async function saveNotificationPreferences(
       coaching_push: next.coachingPush,
       care_team_push: next.careTeamPush,
       task_push: next.taskPush,
+      coordination_push: next.coordinationPush,
+      coordination_digest_enabled: next.coordinationDigestEnabled,
       quiet_hours_enabled: next.quietHoursEnabled,
       quiet_start: next.quietHoursEnabled ? next.quietStart : null,
       quiet_end: next.quietHoursEnabled ? next.quietEnd : null,
       timezone: next.timezone || notificationTimezone(),
     })
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .single();
 
