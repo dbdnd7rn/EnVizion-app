@@ -697,6 +697,12 @@ export function CareScheduleScreen() {
         icon="arrow-back-outline"
         onPress={() => n.navigate("CareShiftBoard")}
       />
+      <Button
+        title="Weekly care coordination analytics"
+        secondary
+        icon="bar-chart-outline"
+        onPress={() => n.navigate("CareAnalytics")}
+      />
 
       <Section title="Coverage gaps · next 7 days" />
       {!coverageGaps.length ? (
