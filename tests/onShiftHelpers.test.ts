@@ -43,11 +43,7 @@ test("on-shift responsibilities separate mine from shared work", () => {
 });
 
 test("on-shift urgent work only includes overdue or due-soon mine/shared tasks", () => {
-  const realNow = Date.now;
-  Date.now = () => new Date("2026-09-22T12:00:00.000Z").getTime();
-
-  try {
-    const result = onShiftResponsibilities(
+  const result = onShiftResponsibilities(
       [
         {
           id: "mine-overdue",
@@ -69,15 +65,13 @@ test("on-shift urgent work only includes overdue or due-soon mine/shared tasks",
         },
       ] as any,
       "caregiver-1",
+      new Date("2026-09-22T12:00:00.000Z"),
     );
 
-    assert.deepEqual(
-      result.urgent.map((task) => task.id),
-      ["mine-overdue", "shared-soon"],
-    );
-  } finally {
-    Date.now = realNow;
-  }
+  assert.deepEqual(
+    result.urgent.map((task) => task.id),
+    ["mine-overdue", "shared-soon"],
+  );
 });
 
 test("on-shift completion history starts at takeover time", () => {
