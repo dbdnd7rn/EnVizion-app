@@ -9,6 +9,16 @@ import type {
   HandoffMedicationSnapshot,
 } from "./shiftBriefingHelpers";
 
+export type CareShiftHandoffAcknowledgement = {
+  id: string;
+  careRecipientId: string;
+  handoffId: string;
+  acceptedBy: string;
+  note: string;
+  acceptedAt: string;
+  createdAt: string;
+};
+
 export type CareShiftHandoff = {
   id: string;
   careRecipientId: string;
@@ -77,6 +87,74 @@ export async function loadCareShiftHandoffs(careRecipientId: string) {
 
   if (error) throw error;
   return (data ?? []).map(mapHandoff);
+}
+
+export async function loadCareShiftHandoffAcknowledgements(
+  careRecipientId: string,
+): Promise<CareShiftHandoffAcknowledgement[]> {
+  const { data, error } = await supabase
+    .from("care_shift_handoff_acknowledgements")
+    .select(
+      "id, care_recipient_id, handoff_id, accepted_by, note, accepted_at, created_at",
+    )
+    .eq("care_recipient_id", careRecipientId)
+    .order("accepted_at", { ascending: false })
+    .limit(60);
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    careRecipientId: row.care_recipient_id,
+    handoffId: row.handoff_id,
+    acceptedBy: row.accepted_by,
+    note: row.note ?? "",
+    acceptedAt: row.accepted_at,
+    createdAt: row.created_at,
+  }));
+}
+
+export async function acceptCareShiftHandoff(input: {
+  careRecipientId: string;
+  handoffId: string;
+  note: string;
+}): Promise<CareShiftHandoffAcknowledgement> {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) throw new Error("Please sign in again.");
+
+  const { data, error } = await supabase
+    .from("care_shift_handoff_acknowledgements")
+    .insert({
+      care_recipient_id: input.careRecipientId,
+      handoff_id: input.handoffId,
+      accepted_by: user.id,
+      note: input.note.trim().slice(0, 2000) || null,
+    })
+    .select(
+      "id, care_recipient_id, handoff_id, accepted_by, note, accepted_at, created_at",
+    )
+    .single();
+
+  if (error) {
+    if (String(error.code) === "23505") {
+      throw new Error("This handoff has already been accepted.");
+    }
+    throw error;
+  }
+
+  return {
+    id: data.id,
+    careRecipientId: data.care_recipient_id,
+    handoffId: data.handoff_id,
+    acceptedBy: data.accepted_by,
+    note: data.note ?? "",
+    acceptedAt: data.accepted_at,
+    createdAt: data.created_at,
+  };
 }
 
 export async function createCareShiftHandoff(input: {
