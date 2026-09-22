@@ -33,6 +33,11 @@ import {
   shiftTaskBucket,
   type ShiftTaskBucket,
 } from "../shiftBoardHelpers";
+import { loadCareSchedule, type CareShift } from "../careSchedule";
+import {
+  activeCaregiversOnDuty,
+  uncoveredUpcomingTasks,
+} from "../careScheduleHelpers";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
 import {
@@ -123,6 +128,7 @@ export function CareShiftBoardScreen() {
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
   const [handoffs, setHandoffs] = useState<CareShiftHandoff[]>([]);
+  const [shifts, setShifts] = useState<CareShift[]>([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -141,6 +147,7 @@ export function CareShiftBoardScreen() {
       setTasks([]);
       setCompletions([]);
       setHandoffs([]);
+      setShifts([]);
       setLoading(false);
       return;
     }
@@ -148,18 +155,21 @@ export function CareShiftBoardScreen() {
     setLoading(true);
     try {
       const userId = await currentCareTaskUserId();
-      const [taskRows, completionRows, team, handoffRows] = await Promise.all([
-        loadCareTasks(careRecipientId),
-        loadCareTaskCompletions(careRecipientId),
-        loadCareTeam(careRecipientId),
-        loadCareShiftHandoffs(careRecipientId),
-      ]);
+      const [taskRows, completionRows, team, handoffRows, schedule] =
+        await Promise.all([
+          loadCareTasks(careRecipientId),
+          loadCareTaskCompletions(careRecipientId),
+          loadCareTeam(careRecipientId),
+          loadCareShiftHandoffs(careRecipientId),
+          loadCareSchedule(careRecipientId),
+        ]);
 
       setCurrentUserId(userId);
       setTasks(taskRows);
       setCompletions(completionRows);
       setRoster(team);
       setHandoffs(handoffRows);
+      setShifts(schedule.shifts);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -206,6 +216,16 @@ export function CareShiftBoardScreen() {
           event: "*",
           schema: "public",
           table: "care_shift_handoffs",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shifts",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
         () => void refresh(),
@@ -275,6 +295,12 @@ export function CareShiftBoardScreen() {
   const counts = useMemo(
     () => shiftBoardCounts(tasks, completions, currentUserId),
     [completions, currentUserId, tasks],
+  );
+
+  const onDuty = useMemo(() => activeCaregiversOnDuty(shifts), [shifts]);
+  const coverageGaps = useMemo(
+    () => uncoveredUpcomingTasks(tasks, shifts),
+    [shifts, tasks],
   );
 
   const coverage = useMemo(() => {
@@ -506,6 +532,34 @@ export function CareShiftBoardScreen() {
           </View>
         )}
       </View>
+
+      <Button
+        title="Availability & shift schedule"
+        secondary
+        icon="calendar-outline"
+        onPress={() => n.navigate("CareSchedule")}
+      />
+
+      <Card
+        style={{
+          backgroundColor: coverageGaps.length ? "#FFF9F2" : "#EAF4EF",
+        }}
+      >
+        <Icon
+          name={coverageGaps.length ? "warning-outline" : "shield-checkmark-outline"}
+          color={coverageGaps.length ? C.rose : C.purple}
+        />
+        <Text style={S.h3}>
+          {onDuty.length
+            ? `${onDuty.length} caregiver${onDuty.length === 1 ? "" : "s"} on duty now`
+            : "No scheduled caregiver is on duty right now"}
+        </Text>
+        <Txt>
+          {coverageGaps.length
+            ? `${coverageGaps.length} upcoming task${coverageGaps.length === 1 ? "" : "s"} have no matching scheduled coverage in the next 7 days.`
+            : "Every upcoming task in the next 7 days has matching scheduled coverage."}
+        </Txt>
+      </Card>
 
       {handoffOpen && !readOnly && (
         <>
