@@ -36,6 +36,17 @@ import {
   type CareTaskInput,
 } from "../careTasks";
 import {
+  claimCareTask,
+  loadCareTaskAssignments,
+  respondCareTaskAssignment,
+} from "../careTaskAssignments";
+import {
+  latestTaskAssignments,
+  pendingAssignmentForUser,
+  taskAssignmentLabel,
+  type CareTaskAssignment,
+} from "../careTaskAssignmentHelpers";
+import {
   loadCareTeam,
   type CareTeamMember,
   type CareTeamRoster,
@@ -277,6 +288,7 @@ export function CareTasksScreen() {
 
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
+  const [assignments, setAssignments] = useState<CareTaskAssignment[]>([]);
   const [contacts, setContacts] = useState<CareContact[]>([]);
   const [communications, setCommunications] = useState<CareCommunication[]>([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
@@ -300,6 +312,7 @@ export function CareTasksScreen() {
     if (!careRecipientId) {
       setTasks([]);
       setCompletions([]);
+      setAssignments([]);
       setLoading(false);
       return;
     }
@@ -308,10 +321,17 @@ export function CareTasksScreen() {
     setMessage("");
     try {
       const userId = await currentCareTaskUserId();
-      const [taskRows, completionRows, contactRows, communicationRows, team] =
-        await Promise.all([
+      const [
+        taskRows,
+        completionRows,
+        assignmentRows,
+        contactRows,
+        communicationRows,
+        team,
+      ] = await Promise.all([
           loadCareTasks(careRecipientId),
           loadCareTaskCompletions(careRecipientId),
+          loadCareTaskAssignments(careRecipientId),
           loadCareContacts(careRecipientId),
           loadCareCommunications(careRecipientId),
           loadCareTeam(careRecipientId),
@@ -320,6 +340,7 @@ export function CareTasksScreen() {
       setCurrentUserId(userId);
       setTasks(taskRows);
       setCompletions(completionRows);
+      setAssignments(assignmentRows);
       setContacts(contactRows);
       setCommunications(communicationRows);
       setRoster(team);
@@ -364,6 +385,16 @@ export function CareTasksScreen() {
           event: "*",
           schema: "public",
           table: "care_task_completions",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_task_assignments",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
         () => void refresh(),
@@ -451,6 +482,11 @@ export function CareTasksScreen() {
   const tasksById = useMemo(
     () => new Map(tasks.map((task) => [task.id, task])),
     [tasks],
+  );
+
+  const latestAssignmentByTask = useMemo(
+    () => latestTaskAssignments(assignments),
+    [assignments],
   );
 
   const visibleTasks = useMemo(() => {
@@ -708,6 +744,56 @@ export function CareTasksScreen() {
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "We could not delete this task.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function respondToAssignment(
+    assignment: CareTaskAssignment,
+    response: "accepted" | "declined",
+  ) {
+    if (readOnly || busy) return;
+
+    setBusy(true);
+    setMessage("");
+    try {
+      await respondCareTaskAssignment({
+        assignmentId: assignment.id,
+        response,
+      });
+      await refresh();
+      setMessage(
+        response === "accepted"
+          ? "Task assignment accepted."
+          : "Task declined and returned to shared work.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not update this task assignment.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function claim(task: CareTask) {
+    if (!careRecipientId || readOnly || busy || task.assignedTo) return;
+
+    setBusy(true);
+    setMessage("");
+    try {
+      await claimCareTask(careRecipientId, task.id);
+      await refresh();
+      setMessage("Task claimed. Your assignment is recorded as accepted.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not claim this shared task.",
       );
     } finally {
       setBusy(false);
@@ -1181,6 +1267,11 @@ export function CareTasksScreen() {
           const assignee = task.assignedTo
             ? memberById.get(task.assignedTo)
             : null;
+          const assignment = latestAssignmentByTask.get(task.id);
+          const pendingMine = pendingAssignmentForUser(
+            assignment,
+            currentUserId,
+          );
           const contact = task.contactId
             ? contactsById.get(task.contactId)
             : null;
@@ -1271,6 +1362,65 @@ export function CareTasksScreen() {
                     : assignee.displayName || "Caregiver"
                   : "shared care team"}
               </Txt>
+              <View
+                style={[
+                  S.pill,
+                  {
+                    alignSelf: "flex-start",
+                    backgroundColor:
+                      assignment?.status === "pending"
+                        ? "#FFF1E5"
+                        : assignment?.status === "accepted"
+                          ? "#EAF4EF"
+                          : C.lavender,
+                  },
+                ]}
+              >
+                <Text style={[S.small, { color: C.deep }]}>
+                  {taskAssignmentLabel(assignment, task.assignedTo)}
+                </Text>
+              </View>
+
+              {!readOnly &&
+                task.status === "open" &&
+                pendingMine &&
+                assignment && (
+                  <Card style={{ backgroundColor: "#FFF9F2" }}>
+                    <Text style={S.h3}>This task was assigned to you.</Text>
+                    <Txt style={S.small}>
+                      Accept it to confirm ownership, or decline it to return the
+                      task to shared care work for reassignment.
+                    </Txt>
+                    <Button
+                      title="Accept assignment"
+                      icon="checkmark-circle-outline"
+                      disabled={busy}
+                      onPress={() =>
+                        void respondToAssignment(assignment, "accepted")
+                      }
+                    />
+                    <Button
+                      title="Decline & return to shared work"
+                      secondary
+                      disabled={busy}
+                      onPress={() =>
+                        void respondToAssignment(assignment, "declined")
+                      }
+                    />
+                  </Card>
+                )}
+
+              {!readOnly &&
+                task.status === "open" &&
+                !task.assignedTo && (
+                  <Button
+                    title="Claim this shared task"
+                    secondary
+                    icon="hand-left-outline"
+                    disabled={busy}
+                    onPress={() => void claim(task)}
+                  />
+                )}
 
               {medication && (
                 <Card style={{ backgroundColor: "#F8F4F9", padding: 14 }}>
@@ -1340,7 +1490,7 @@ export function CareTasksScreen() {
                 </View>
               )}
 
-              {!readOnly && task.status === "open" && (
+              {!readOnly && task.status === "open" && !pendingMine && (
                 <>
                   {completingId === task.id ? (
                     <Card style={{ backgroundColor: C.lavender }}>
