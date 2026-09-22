@@ -915,6 +915,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Needs coordination"
+        subtitle="Review schedule overlaps, uncovered tasks, and planning conflicts"
+        icon="warning-outline"
+        onPress={() => n.navigate("CareCoordinationInbox")}
+      />
+
+      <Row
         title="Care tasks & shared care plan"
         subtitle="Responsibilities, assignments, due dates, and completion history"
         icon="checkbox-outline"
