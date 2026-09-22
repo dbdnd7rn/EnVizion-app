@@ -240,8 +240,8 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareTasks")}
           />
           <Row
-            title="Reminders & care calendar"
-            subtitle="Keep alerts and scheduled prompts visible"
+            title="Family care calendar & agenda"
+            subtitle="Appointments, shifts, tasks, reminders, follow-ups, and handoffs"
             icon="notifications-outline"
             onPress={() => n.navigate("CareCalendar")}
           />
@@ -454,8 +454,8 @@ export function ToolkitScreen() {
           onPress={() => n.navigate("CareTasks")}
         />
         <Row
-          title="Reminders & care calendar"
-          subtitle="Shared alerts, appointment prompts, and scheduled reminders"
+          title="Family care calendar & agenda"
+          subtitle="One day and week view across the shared care plan"
           icon="notifications-outline"
           onPress={() => n.navigate("CareCalendar")}
         />
