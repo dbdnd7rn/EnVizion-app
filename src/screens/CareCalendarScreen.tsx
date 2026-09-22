@@ -19,6 +19,21 @@ import {
 } from "../reminders";
 import { supabase } from "../supabase";
 import { addReminderToDeviceCalendar } from "../deviceCalendar";
+import { loadCareAgendaData, type CareAgendaData } from "../careAgenda";
+import {
+  agendaByDay,
+  agendaCategories,
+  agendaCategoryLabels,
+  agendaRange,
+  buildAgendaEvents,
+  isAgendaEventPast,
+  nextAgendaEvent,
+  visibleAgendaEvents,
+  type AgendaCategory,
+  type AgendaEvent,
+  type AgendaView,
+} from "../careAgendaHelpers";
+import { loadCareTeam, type CareTeamRoster } from "../careTeam";
 import { useCare } from "../store";
 import {
   Button,
@@ -46,6 +61,16 @@ const typeIcons: Record<ReminderType, string> = {
   appointment: "calendar-outline",
   transition: "home-outline",
   medication_record: "medical-outline",
+};
+
+const agendaIcons: Record<AgendaCategory, string> = {
+  appointment: "calendar-outline",
+  task: "checkbox-outline",
+  shift: "people-outline",
+  reminder: "notifications-outline",
+  medication: "medical-outline",
+  follow_up: "chatbubbles-outline",
+  handoff: "swap-horizontal-outline",
 };
 
 function defaultLocalParts(offsetMinutes = 60) {
@@ -322,6 +347,19 @@ export function CareCalendarScreen() {
   const n = useNav();
   const { state } = useCare();
   const [items, setItems] = useState<CareReminder[]>([]);
+  const [agendaData, setAgendaData] = useState<CareAgendaData>({
+    appointments: [],
+    tasks: [],
+    shifts: [],
+    handoffs: [],
+    followUps: [],
+  });
+  const [roster, setRoster] = useState<CareTeamRoster | null>(null);
+  const [agendaView, setAgendaView] = useState<AgendaView>("day");
+  const [agendaOffset, setAgendaOffset] = useState(0);
+  const [agendaFilters, setAgendaFilters] = useState<AgendaCategory[]>([
+    ...agendaCategories,
+  ]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -341,17 +379,40 @@ export function CareCalendarScreen() {
   const readOnly = state.accessRole === "viewer";
   const careRecipientId = state.careRecipientId;
   const timezone = detectedTimezone();
+  const range = useMemo(
+    () => agendaRange(agendaView, new Date(), agendaOffset),
+    [agendaOffset, agendaView],
+  );
 
   const refresh = useCallback(async () => {
     if (!careRecipientId) {
       setItems([]);
+      setAgendaData({
+        appointments: [],
+        tasks: [],
+        shifts: [],
+        handoffs: [],
+        followUps: [],
+      });
+      setRoster(null);
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      setItems(await loadCareReminders(careRecipientId));
+      const [reminders, agenda, team] = await Promise.all([
+        loadCareReminders(careRecipientId),
+        loadCareAgendaData({
+          careRecipientId,
+          rangeStartIso: range.startIso,
+          rangeEndIso: range.endIso,
+        }),
+        loadCareTeam(careRecipientId),
+      ]);
+      setItems(reminders);
+      setAgendaData(agenda);
+      setRoster(team);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -361,7 +422,7 @@ export function CareCalendarScreen() {
     } finally {
       setLoading(false);
     }
-  }, [careRecipientId]);
+  }, [careRecipientId, range.endIso, range.startIso]);
 
   useEffect(() => {
     void refresh();
@@ -371,7 +432,7 @@ export function CareCalendarScreen() {
     if (!careRecipientId) return;
 
     const channel = supabase
-      .channel(`care-reminders:${careRecipientId}`)
+      .channel(`care-agenda:${careRecipientId}`)
       .on(
         "postgres_changes",
         {
@@ -382,12 +443,116 @@ export function CareCalendarScreen() {
         },
         () => void refresh(),
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_tasks",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shifts",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shift_handoffs",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_communications",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "appointments",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
       .subscribe();
 
     return () => {
       void supabase.removeChannel(channel);
     };
   }, [careRecipientId, refresh]);
+
+  const memberMap = useMemo(
+    () => new Map((roster?.members ?? []).map((member) => [member.userId, member])),
+    [roster],
+  );
+
+  function caregiverName(userId: string | null) {
+    if (!userId) return "Shared care team";
+    const member = memberMap.get(userId);
+    if (!member) return "Caregiver";
+    return member.isCurrentUser
+      ? `${member.displayName || "Me"} (me)`
+      : member.displayName || "Caregiver";
+  }
+
+  const agendaEvents = useMemo(
+    () =>
+      buildAgendaEvents({
+        data: agendaData,
+        reminders: items,
+        medications: state.medications,
+        rangeStart: range.start,
+        rangeEnd: range.end,
+        caregiverName,
+      }),
+    [agendaData, items, memberMap, range.end, range.start, state.medications],
+  );
+
+  const visibleEvents = useMemo(
+    () => visibleAgendaEvents(agendaEvents, agendaFilters),
+    [agendaEvents, agendaFilters],
+  );
+  const groupedAgenda = useMemo(() => agendaByDay(visibleEvents), [visibleEvents]);
+  const nextEvent = useMemo(
+    () => nextAgendaEvent(visibleEvents),
+    [visibleEvents],
+  );
+
+  function toggleAgendaFilter(category: AgendaCategory) {
+    setAgendaFilters((current) =>
+      current.includes(category)
+        ? current.filter((item) => item !== category)
+        : [...current, category],
+    );
+  }
+
+  function openAgendaEvent(event: AgendaEvent) {
+    if (event.category === "appointment") n.navigate("Appointments");
+    else if (event.category === "task") n.navigate("CareTasks");
+    else if (event.category === "shift") n.navigate("CareSchedule");
+    else if (event.category === "medication") n.navigate("Medications");
+    else if (event.category === "follow_up") n.navigate("CareCommunicationLog");
+    else if (event.category === "handoff") n.navigate("CareShiftBoard");
+  }
 
   const active = useMemo(
     () =>
@@ -525,9 +690,9 @@ export function CareCalendarScreen() {
   return (
     <Page>
       <Heading
-        eyebrow="REMINDERS & CARE CALENDAR"
-        title="Keep the next step visible."
-        body="Shared planning for appointments, care transitions, general tasks, and optional medication-record prompts."
+        eyebrow="FAMILY CARE CALENDAR + DAILY AGENDA"
+        title="See the whole care day in one place."
+        body="Appointments, caregiver shifts, shared tasks, reminders, communication follow-ups, handoffs, and caregiver-entered medication-list times come together in one coordinated timeline."
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
@@ -536,8 +701,238 @@ export function CareCalendarScreen() {
           {state.careRecipientName || "Care profile"}
         </Text>
         <Txt style={{ color: "#E9DDED" }}>
-          {active.length} active reminder{active.length === 1 ? "" : "s"} ·{" "}
+          {visibleEvents.length} timeline item{visibleEvents.length === 1 ? "" : "s"} ·{" "}
           {state.accessRole === "viewer" ? "Viewer · read-only" : "Shared care editing"}
+        </Txt>
+      </Card>
+
+      <Section title="Unified care agenda" />
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={{ flex: 1 }}>
+          <Button
+            title="Day"
+            secondary={agendaView !== "day"}
+            icon="today-outline"
+            onPress={() => {
+              setAgendaView("day");
+              setAgendaOffset(0);
+            }}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            title="Week"
+            secondary={agendaView !== "week"}
+            icon="calendar-outline"
+            onPress={() => {
+              setAgendaView("week");
+              setAgendaOffset(0);
+            }}
+          />
+        </View>
+      </View>
+
+      <Card>
+        <View style={S.between}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setAgendaOffset((value) => value - 1)}
+            style={{ minHeight: 44, minWidth: 44, justifyContent: "center" }}
+          >
+            <Icon name="chevron-back-outline" />
+          </Pressable>
+          <View style={{ flex: 1, alignItems: "center", gap: 2 }}>
+            <Text style={S.h3}>{range.label}</Text>
+            <Txt style={S.small}>
+              {agendaView === "day" ? "Daily timeline" : "Monday–Sunday overview"}
+            </Txt>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setAgendaOffset((value) => value + 1)}
+            style={{ minHeight: 44, minWidth: 44, alignItems: "flex-end", justifyContent: "center" }}
+          >
+            <Icon name="chevron-forward-outline" />
+          </Pressable>
+        </View>
+        {agendaOffset !== 0 && (
+          <Button
+            title={agendaView === "day" ? "Back to today" : "Back to this week"}
+            secondary
+            onPress={() => setAgendaOffset(0)}
+          />
+        )}
+      </Card>
+
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+        {agendaCategories.map((category) => {
+          const selected = agendaFilters.includes(category);
+          return (
+            <Pressable
+              key={category}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: selected }}
+              onPress={() => toggleAgendaFilter(category)}
+              style={[
+                S.pill,
+                {
+                  minHeight: 40,
+                  paddingHorizontal: 11,
+                  justifyContent: "center",
+                  backgroundColor: selected ? C.purple : C.lavender,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  S.small,
+                  {
+                    color: selected ? C.white : C.deep,
+                    fontFamily: "DMSans_600SemiBold",
+                  },
+                ]}
+              >
+                {agendaCategoryLabels[category]}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Section title="What happens next?" />
+      {nextEvent ? (
+        <Card style={{ backgroundColor: "#EAF4EF" }}>
+          <View style={S.row}>
+            <Icon name={agendaIcons[nextEvent.category]} size={26} />
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={S.eyebrow}>{nextEvent.sourceLabel.toUpperCase()}</Text>
+              <Text style={S.h2}>{nextEvent.title}</Text>
+              <Txt>
+                {new Date(nextEvent.startsAt).toLocaleString()}
+                {nextEvent.endsAt
+                  ? ` → ${new Date(nextEvent.endsAt).toLocaleTimeString([], {
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}`
+                  : ""}
+              </Txt>
+              {Boolean(nextEvent.subtitle) && <Txt style={S.small}>{nextEvent.subtitle}</Txt>}
+            </View>
+          </View>
+          {nextEvent.category !== "reminder" && (
+            <Button
+              title="Open details"
+              secondary
+              onPress={() => openAgendaEvent(nextEvent)}
+            />
+          )}
+        </Card>
+      ) : (
+        <Card>
+          <Icon name="checkmark-circle-outline" />
+          <Text style={S.h3}>Nothing else is scheduled in this view.</Text>
+          <Txt>Move forward or change the filters to see more of the care plan.</Txt>
+        </Card>
+      )}
+
+      <Section title={agendaView === "day" ? "Daily timeline" : "Weekly timeline"} />
+      {loading && !visibleEvents.length ? (
+        <Card>
+          <ActivityIndicator color={C.purple} />
+          <Txt>Bringing the care timeline together…</Txt>
+        </Card>
+      ) : !visibleEvents.length ? (
+        <Card>
+          <Icon name="calendar-clear-outline" size={30} />
+          <Text style={S.h3}>No timeline items match this view.</Text>
+        </Card>
+      ) : (
+        Array.from(groupedAgenda.entries()).map(([dayKey, events]) => (
+          <View key={dayKey} style={{ gap: 10 }}>
+            {agendaView === "week" && (
+              <Text style={[S.h3, { marginTop: 6 }]}>
+                {new Date(`${dayKey}T12:00:00`).toLocaleDateString(undefined, {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </Text>
+            )}
+            {events.map((event) => {
+              const past = isAgendaEventPast(event);
+              return (
+                <Card
+                  key={event.id}
+                  style={{
+                    opacity: past && !event.completed ? 0.72 : 1,
+                    backgroundColor: event.completed ? "#F4F1F4" : C.white,
+                  }}
+                >
+                  <View style={{ flexDirection: "row", gap: 12 }}>
+                    <View
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 13,
+                        backgroundColor: C.lavender,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Icon name={agendaIcons[event.category]} size={21} />
+                    </View>
+                    <View style={{ flex: 1, gap: 4 }}>
+                      <View style={S.between}>
+                        <Text style={[S.h3, { flex: 1 }]}>{event.title}</Text>
+                        <View style={[S.pill, { backgroundColor: event.completed ? "#E3E0E4" : C.lavender }]}>
+                          <Txt style={S.small}>
+                            {event.completed ? "Completed" : past ? "Past" : "Upcoming"}
+                          </Txt>
+                        </View>
+                      </View>
+                      <Txt style={S.small}>
+                        {event.allDay
+                          ? "Date recorded · time not set"
+                          : new Date(event.startsAt).toLocaleTimeString([], {
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}
+                        {event.endsAt
+                          ? ` – ${new Date(event.endsAt).toLocaleTimeString([], {
+                              hour: "numeric",
+                              minute: "2-digit",
+                            })}`
+                          : ""}{" "}
+                        · {event.sourceLabel}
+                      </Txt>
+                      {Boolean(event.subtitle) && <Txt>{event.subtitle}</Txt>}
+                    </View>
+                  </View>
+                  {event.category !== "reminder" && (
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={() => openAgendaEvent(event)}
+                      style={{ minHeight: 42, justifyContent: "center" }}
+                    >
+                      <Text style={[S.h3, { color: C.purple, fontSize: 12 }]}>
+                        Open {event.sourceLabel.toLowerCase()} →
+                      </Text>
+                    </Pressable>
+                  )}
+                </Card>
+              );
+            })}
+          </View>
+        ))
+      )}
+
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Icon name="medical-outline" />
+        <Text style={S.h3}>Medication times are copied from the caregiver list.</Text>
+        <Txt>
+          They are shown for organization only and are not prescribing instructions,
+          dose recommendations, or confirmation that medication should be taken.
+          Follow the pharmacy label and the healthcare team’s plan.
         </Txt>
       </Card>
 
