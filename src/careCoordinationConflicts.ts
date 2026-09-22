@@ -3,7 +3,7 @@ import type {
   CareShift,
   CaregiverAvailability,
 } from "./careSchedule";
-import { intervalsOverlap } from "./careScheduleHelpers";
+import { intervalsOverlap } from "./careScheduleHelpers.ts";
 
 export const coordinationConflictKinds = [
   "shift_overlap",
