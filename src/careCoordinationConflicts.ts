@@ -146,7 +146,7 @@ export function detectCoordinationConflicts(input: {
       );
 
       conflicts.push({
-        id: `shift_overlap:${[a.id, b.id].sort().join(":")}`,
+        id: `shift_overlap:${[a.id, b.id].sort().join(":")}:${a.startsAt}:${a.endsAt}:${b.startsAt}:${b.endsAt}`,
         kind: "shift_overlap",
         priority: "time_sensitive",
         title: "One caregiver is scheduled in two overlapping shifts",
@@ -189,7 +189,7 @@ export function detectCoordinationConflicts(input: {
           b.appointment.id,
         ]
           .sort()
-          .join(":")}`,
+          .join(":")}:${a.iso}`,
         kind: "appointment_double_booking",
         priority: "time_sensitive",
         title: "Two appointments share the same recorded time",
@@ -249,7 +249,7 @@ export function detectCoordinationConflicts(input: {
     if (!unavailable) continue;
 
     conflicts.push({
-      id: `assigned_unavailable:${task.id}:${unavailable.id}`,
+      id: `assigned_unavailable:${task.id}:${task.dueAt}:${unavailable.id}:${unavailable.startsAt}:${unavailable.endsAt}`,
       kind: "assigned_unavailable",
       priority: due <= now.getTime() + 24 * 60 * 60_000 ? "time_sensitive" : "review",
       title: "A task is due while its assigned caregiver is unavailable",
@@ -277,7 +277,7 @@ export function detectCoordinationConflicts(input: {
       if (delta > 60 * 60_000) continue;
 
       conflicts.push({
-        id: `follow_up_collision:${followUp.id}:${item.appointment.id}`,
+        id: `follow_up_collision:${followUp.id}:${followUp.followUpAt}:${item.appointment.id}:${item.iso}`,
         kind: "follow_up_collision",
         priority: "review",
         title: "A follow-up sits close to an appointment",
