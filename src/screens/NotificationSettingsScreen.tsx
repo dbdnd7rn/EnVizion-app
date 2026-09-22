@@ -268,6 +268,15 @@ export function NotificationSettingsScreen() {
           void persist({ ...prefs, careTeamPush: value })
         }
       />
+      <PreferenceSwitch
+        title="Care task & shift alerts"
+        body="Assignments, due-soon tasks, overdue tasks, owner escalations, and caregiver handoffs."
+        value={prefs.taskPush}
+        disabled={busy}
+        onChange={(value) =>
+          void persist({ ...prefs, taskPush: value })
+        }
+      />
 
       <Section title="Quiet hours" />
       <PreferenceSwitch
