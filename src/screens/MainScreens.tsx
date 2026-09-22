@@ -6,6 +6,7 @@ import type { RootStack } from "../navigation";
 import { useCare } from "../store";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
+import { FamilyCareDashboard } from "../components/FamilyCareDashboard";
 import {
   Brand,
   Button,
@@ -91,6 +92,20 @@ export function HomeScreen() {
               : "Your care tools and support, together."}
           </Txt>
         </View>
+
+        <FamilyCareDashboard
+          careRecipientId={state.careRecipientId}
+          careRecipientName={state.careRecipientName}
+          accessRole={state.accessRole}
+          medicationRecords={state.medicationRecords}
+          onOpenSchedule={() => n.navigate("CareSchedule")}
+          onOpenAppointments={() => n.navigate("Appointments")}
+          onOpenTasks={() => n.navigate("CareTasks")}
+          onOpenMedications={() => n.navigate("Medications")}
+          onOpenCommunications={() => n.navigate("CareCommunicationLog")}
+          onOpenCoordination={() => n.navigate("CareCoordinationInbox")}
+        />
+
         <Card
           onPress={() => n.navigate("Assistant")}
           label="Ask EnVizion Assistant"
@@ -169,7 +184,7 @@ export function HomeScreen() {
         </Card>
         <View style={{ gap: 12 }}>
           <Section
-            title="Today, together"
+            title="Daily care shortcuts"
             action="My toolkit"
             onPress={() => n.navigate("Main", { screen: "Toolkit" })}
           />
