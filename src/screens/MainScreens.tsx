@@ -431,7 +431,7 @@ export function ToolkitScreen() {
         />
         <Row
           title="Caregiver availability & schedule"
-          subtitle="Plan shifts, availability, swaps, and uncovered responsibilities"
+          subtitle="Plan shifts, check-ins, attendance, swaps, and uncovered responsibilities"
           icon="calendar-outline"
           onPress={() => n.navigate("CareSchedule")}
         />
