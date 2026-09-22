@@ -1,6 +1,6 @@
 import type { CareTask, CareTaskCompletion } from "./careTasks";
 import type { CaregiverShiftSession } from "./onShiftCaregiver";
-import { shiftTaskBucket } from "./shiftBoardHelpers";
+import { shiftTaskBucket } from "./shiftBoardHelpers.ts";
 
 export function onShiftResponsibilities(
   tasks: CareTask[],
