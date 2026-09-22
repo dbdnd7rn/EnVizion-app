@@ -1466,41 +1466,46 @@ export function CareShiftBoardScreen() {
 
             {Boolean(handoff.note) && <Txt>{handoff.note}</Txt>}
 
-            {acknowledgementMap.get(handoff.id) ? (
-              <Card style={{ backgroundColor: "#EAF4EF", padding: 13 }}>
-                <View style={S.row}>
-                  <Icon name="checkmark-done-outline" color={C.green} size={20} />
-                  <View style={{ flex: 1, gap: 3 }}>
-                    <Text style={[S.h3, { fontSize: 13 }]}>
-                      Takeover accepted
-                    </Text>
-                    <Txt style={S.small}>
-                      {memberName(handoff.createdBy)} →{" "}
-                      {memberName(
-                        acknowledgementMap.get(handoff.id)?.acceptedBy ?? null,
-                      )}{" "}
-                      ·{" "}
-                      {new Date(
-                        acknowledgementMap.get(handoff.id)!.acceptedAt,
-                      ).toLocaleString()}
-                    </Txt>
-                    {Boolean(acknowledgementMap.get(handoff.id)?.note) && (
-                      <Txt>
-                        {acknowledgementMap.get(handoff.id)?.note}
+            {handoff.requiresAcknowledgement &&
+              (acknowledgementMap.get(handoff.id) ? (
+                <Card style={{ backgroundColor: "#EAF4EF", padding: 13 }}>
+                  <View style={S.row}>
+                    <Icon
+                      name="checkmark-done-outline"
+                      color={C.green}
+                      size={20}
+                    />
+                    <View style={{ flex: 1, gap: 3 }}>
+                      <Text style={[S.h3, { fontSize: 13 }]}>
+                        Takeover accepted
+                      </Text>
+                      <Txt style={S.small}>
+                        {memberName(handoff.createdBy)} →{" "}
+                        {memberName(
+                          acknowledgementMap.get(handoff.id)?.acceptedBy ?? null,
+                        )}{" "}
+                        ·{" "}
+                        {new Date(
+                          acknowledgementMap.get(handoff.id)!.acceptedAt,
+                        ).toLocaleString()}
                       </Txt>
-                    )}
+                      {Boolean(acknowledgementMap.get(handoff.id)?.note) && (
+                        <Txt>
+                          {acknowledgementMap.get(handoff.id)?.note}
+                        </Txt>
+                      )}
+                    </View>
                   </View>
-                </View>
-              </Card>
-            ) : (
-              <Txt style={S.small}>
-                Awaiting takeover acknowledgement
-                {handoff.handoffTo
-                  ? ` from ${memberName(handoff.handoffTo)}`
-                  : " from an active Owner or Caregiver"}
-                .
-              </Txt>
-            )}
+                </Card>
+              ) : (
+                <Txt style={S.small}>
+                  Awaiting takeover acknowledgement
+                  {handoff.handoffTo
+                    ? ` from ${memberName(handoff.handoffTo)}`
+                    : " from an active Owner or Caregiver"}
+                  .
+                </Txt>
+              ))}
 
             <Txt style={S.small}>
               {handoff.briefingVersion >= 2 ? "Shift briefing" : "Snapshot"} ·{" "}
