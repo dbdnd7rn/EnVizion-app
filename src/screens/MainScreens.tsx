@@ -243,6 +243,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareShiftBoard")}
           />
           <Row
+            title="On-shift caregiver mode"
+            subtitle="Focused workspace after you accept a caregiver takeover"
+            icon="pulse-outline"
+            onPress={() => n.navigate("OnShiftCaregiver")}
+          />
+          <Row
             title="Care coordination analytics"
             subtitle="See this week’s caregiver workload and coverage picture"
             icon="bar-chart-outline"
@@ -455,6 +461,12 @@ export function ToolkitScreen() {
           subtitle="Coverage, due work, reassignment, and shift handoffs"
           icon="people-outline"
           onPress={() => n.navigate("CareShiftBoard")}
+        />
+        <Row
+          title="On-shift caregiver mode"
+          subtitle="My work, shared work, notes, care context, and shift closeout"
+          icon="pulse-outline"
+          onPress={() => n.navigate("OnShiftCaregiver")}
         />
         <Row
           title="Caregiver availability & schedule"
