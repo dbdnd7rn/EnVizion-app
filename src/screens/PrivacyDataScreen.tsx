@@ -154,8 +154,10 @@ export function PrivacyDataScreen() {
           includes Care Vault metadata, care contacts, communication history,
           shared care tasks and completion history, caregiver availability,
           scheduled shifts, check-in and attendance history, swap requests,
-          caregiver shift handoffs, and packet workflow history, but never
-          permanent public file links.
+          recorded coverage-gap events, caregiver shift handoffs, and packet
+          workflow history, but never permanent public file links. Weekly
+          coordination PDF content is generated on demand; only its generation
+          event is kept in the care audit history.
         </Txt>
         <Button
           title={busy === "care-export" ? "Preparing care export…" : "Download active care profile"}
@@ -207,8 +209,9 @@ export function PrivacyDataScreen() {
           transition checklist, private Care Vault files, care contacts,
           communication history, shared care tasks and completion history,
           caregiver availability, scheduled shifts, check-in and attendance
-          history, swap requests, caregiver shift handoffs, packet workflow
-          history, care-sharing records and care activity history.
+          history, swap requests, coverage-gap history, caregiver shift
+          handoffs, packet workflow history, care-sharing records and care
+          activity history.
         </Txt>
         <Txt style={S.small}>
           Support and coaching requests are detached from the deleted care
