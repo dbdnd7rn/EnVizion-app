@@ -1331,7 +1331,7 @@ export function CareTasksScreen() {
                   <Text style={S.h2}>{task.title}</Text>
                 </View>
 
-                {!readOnly && task.status === "open" && (
+                {!readOnly && task.status === "open" && !pendingMine && (
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Edit care task"
