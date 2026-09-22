@@ -5,6 +5,7 @@ import { shiftTaskBucket } from "./shiftBoardHelpers";
 export function onShiftResponsibilities(
   tasks: CareTask[],
   currentUserId: string | null,
+  now = new Date(),
 ) {
   const open = tasks.filter((task) => task.status === "open");
   const mine = currentUserId
@@ -15,7 +16,7 @@ export function onShiftResponsibilities(
   const urgent = [...mine, ...shared]
     .filter((task, index, rows) => rows.findIndex((row) => row.id === task.id) === index)
     .filter((task) => {
-      const bucket = shiftTaskBucket(task);
+      const bucket = shiftTaskBucket(task, now);
       return bucket === "overdue" || bucket === "due_soon";
     })
     .sort(
