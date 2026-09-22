@@ -277,6 +277,35 @@ export function NotificationSettingsScreen() {
           void persist({ ...prefs, taskPush: value })
         }
       />
+      <PreferenceSwitch
+        title="Coordination alerts"
+        body="Assignments, family comments, resolved or reopened items, expired snoozes, and one-time unassigned time-sensitive escalations."
+        value={prefs.coordinationPush}
+        disabled={busy}
+        onChange={(value) =>
+          void persist({ ...prefs, coordinationPush: value })
+        }
+      />
+
+      <Section title="Coordination digest" />
+      <PreferenceSwitch
+        title="Daily coordination digest"
+        body="Create one quiet in-app digest around 8:00 AM in your notification timezone when active coordination work exists. Push delivery follows your Coordination alerts and quiet-hours settings."
+        value={prefs.coordinationDigestEnabled}
+        disabled={busy}
+        onChange={(value) =>
+          void persist(
+            {
+              ...prefs,
+              coordinationDigestEnabled: value,
+              timezone: notificationTimezone(),
+            },
+            value
+              ? "Daily coordination digest enabled for around 8:00 AM local time."
+              : "Daily coordination digest disabled.",
+          )
+        }
+      />
 
       <Section title="Quiet hours" />
       <PreferenceSwitch
