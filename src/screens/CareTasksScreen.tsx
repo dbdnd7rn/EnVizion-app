@@ -69,6 +69,7 @@ import {
   Section,
   Txt,
 } from "../ui";
+import { useNav } from "./MainScreens";
 
 type TaskFilter =
   | "all"
@@ -269,6 +270,7 @@ function statusBackground(status: ReturnType<typeof careTaskDisplayStatus>) {
 }
 
 export function CareTasksScreen() {
+  const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
   const readOnly = state.accessRole === "viewer";
