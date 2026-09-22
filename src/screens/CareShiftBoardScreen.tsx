@@ -1202,20 +1202,82 @@ export function CareShiftBoardScreen() {
             {Boolean(handoff.note) && <Txt>{handoff.note}</Txt>}
 
             <Txt style={S.small}>
-              Snapshot: {handoff.openTaskSnapshot.length} open ·{" "}
-              {handoff.completedTaskSnapshot.length} completed that day
+              {handoff.briefingVersion >= 2 ? "Shift briefing" : "Snapshot"} ·{" "}
+              {handoff.openTaskSnapshot.length} unfinished ·{" "}
+              {handoff.completedTaskSnapshot.length} completed
+              {handoff.briefingVersion >= 2
+                ? ` · ${handoff.medicationActivitySnapshot.length} medication · ${handoff.communicationSnapshot.length} communication · ${handoff.coordinationSnapshot.length} coordination · ${handoff.followUpSnapshot.length} follow-up`
+                : ""}
             </Txt>
 
-            {handoff.openTaskSnapshot.slice(0, 4).map((item, index) => (
+            {handoff.briefingVersion >= 2 && handoff.briefingWindowStart && (
+              <Txt style={S.small}>
+                Briefing window started{" "}
+                {new Date(handoff.briefingWindowStart).toLocaleString()}.
+              </Txt>
+            )}
+
+            {handoff.nextAppointmentSnapshot && (
+              <Card style={{ backgroundColor: "#F8F4F9", padding: 13 }}>
+                <View style={S.row}>
+                  <Icon name="calendar-outline" size={18} />
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text style={[S.h3, { fontSize: 13 }]}>
+                      Next visit · {handoff.nextAppointmentSnapshot.title}
+                    </Text>
+                    <Txt style={S.small}>
+                      {new Date(
+                        handoff.nextAppointmentSnapshot.startsAt,
+                      ).toLocaleString()}
+                      {handoff.nextAppointmentSnapshot.location
+                        ? ` · ${handoff.nextAppointmentSnapshot.location}`
+                        : ""}
+                    </Txt>
+                  </View>
+                </View>
+              </Card>
+            )}
+
+            {handoff.openTaskSnapshot.slice(0, 3).map((item, index) => (
               <Txt key={String(item.id ?? index)} style={S.small}>
-                • {String(item.title ?? "Care task")} ·{" "}
+                • Unfinished: {String(item.title ?? "Care task")} ·{" "}
                 {String(item.assigneeName ?? "Shared care team")}
               </Txt>
             ))}
-            {handoff.openTaskSnapshot.length > 4 && (
+
+            {handoff.medicationActivitySnapshot.slice(0, 3).map((item) => (
+              <Txt key={item.id} style={S.small}>
+                • Medication record: {item.medicationName} ·{" "}
+                {new Date(item.recordedAt).toLocaleString()}
+                {item.correctedAt ? " · corrected/withdrawn" : ""}
+              </Txt>
+            ))}
+
+            {handoff.communicationSnapshot.slice(0, 3).map((item) => (
+              <Txt key={item.id} style={S.small}>
+                • Communication: {item.summary}
+                {item.organizationName ? ` · ${item.organizationName}` : ""}
+              </Txt>
+            ))}
+
+            {handoff.coordinationSnapshot.slice(0, 3).map((item) => (
+              <Txt key={item.id} style={S.small}>
+                • Coordination: {item.title}
+                {item.priority === "time_sensitive" ? " · time-sensitive" : ""}
+              </Txt>
+            ))}
+
+            {handoff.followUpSnapshot.slice(0, 3).map((item) => (
+              <Txt key={item.id} style={S.small}>
+                • Needs follow-up: {item.summary} ·{" "}
+                {new Date(item.followUpAt).toLocaleString()}
+              </Txt>
+            ))}
+
+            {handoff.openTaskSnapshot.length > 3 && (
               <Txt style={S.small}>
-                + {handoff.openTaskSnapshot.length - 4} more open task
-                {handoff.openTaskSnapshot.length - 4 === 1 ? "" : "s"}
+                + {handoff.openTaskSnapshot.length - 3} more unfinished task
+                {handoff.openTaskSnapshot.length - 3 === 1 ? "" : "s"}
               </Txt>
             )}
           </Card>
@@ -1225,8 +1287,10 @@ export function CareShiftBoardScreen() {
           <Icon name="swap-horizontal-outline" />
           <Text style={S.h3}>No caregiver handoffs yet.</Text>
           <Txt>
-            End-of-shift handoffs capture a point-in-time snapshot of open work
-            and what the team completed that day.
+            Caregiver Handoff 2.0 freezes unfinished work, recent medication
+            activity, communication, coordination, follow-ups, and the next
+            recorded appointment so the incoming caregiver can review one
+            point-in-time briefing.
           </Txt>
         </Card>
       )}
