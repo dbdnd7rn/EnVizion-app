@@ -28,6 +28,7 @@ import { CareContactsScreen } from "./src/screens/CareContactsScreen";
 import { CareCommunicationLogScreen } from "./src/screens/CareCommunicationLogScreen";
 import { CareTasksScreen } from "./src/screens/CareTasksScreen";
 import { CareShiftBoardScreen } from "./src/screens/CareShiftBoardScreen";
+import { CareScheduleScreen } from "./src/screens/CareScheduleScreen";
 import { CarePacketScreen } from "./src/screens/CarePacketScreen";
 import {
   AssistantScreen,
@@ -247,6 +248,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareShiftBoard"
             component={CareShiftBoardScreen}
             options={{ title: "Caregiver shift board" }}
+          />
+          <Stack.Screen
+            name="CareSchedule"
+            component={CareScheduleScreen}
+            options={{ title: "Caregiver availability & schedule" }}
           />
           <Stack.Screen
             name="CarePacket"
