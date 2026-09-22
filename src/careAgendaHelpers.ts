@@ -159,25 +159,26 @@ function reminderOccurrences(
 
 export function parseMedicationTime(value: string) {
   const text = value.trim();
-  const match24 = /(?:^|\s)([01]?\d|2[0-3]):([0-5]\d)(?:\s|$)/.exec(text);
-  if (match24) {
-    return {
-      hour: Number(match24[1]),
-      minute: Number(match24[2]),
-    };
-  }
 
   const match12 = /(?:^|\s)(1[0-2]|0?\d)(?::([0-5]\d))?\s*(am|pm)(?:\s|$)/i.exec(
     text,
   );
-  if (!match12) return null;
+  if (match12) {
+    let hour = Number(match12[1]) % 12;
+    if (match12[3].toLowerCase() === "pm") hour += 12;
 
-  let hour = Number(match12[1]) % 12;
-  if (match12[3].toLowerCase() === "pm") hour += 12;
+    return {
+      hour,
+      minute: Number(match12[2] ?? 0),
+    };
+  }
+
+  const match24 = /(?:^|\s)([01]?\d|2[0-3]):([0-5]\d)(?:\s|$)/.exec(text);
+  if (!match24) return null;
 
   return {
-    hour,
-    minute: Number(match12[2] ?? 0),
+    hour: Number(match24[1]),
+    minute: Number(match24[2]),
   };
 }
 
