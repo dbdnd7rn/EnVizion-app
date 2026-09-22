@@ -894,6 +894,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Today & caregiver shift board"
+        subtitle="Today’s coverage, overdue responsibilities, and caregiver handoffs"
+        icon="people-outline"
+        onPress={() => n.navigate("CareShiftBoard")}
+      />
+
+      <Row
         title="Care tasks & shared care plan"
         subtitle="Responsibilities, assignments, due dates, and completion history"
         icon="checkbox-outline"
