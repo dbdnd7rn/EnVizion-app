@@ -40,14 +40,21 @@ import {
   handoffWindowStart,
 } from "../shiftBriefingHelpers";
 import {
+  acceptCareShiftHandoff,
   createCareShiftHandoff,
+  loadCareShiftHandoffAcknowledgements,
   loadCareShiftHandoffs,
   loadHandoffMedicationRecords,
   openTasksForShift,
   reassignCareTask,
   todayCompletions,
   type CareShiftHandoff,
+  type CareShiftHandoffAcknowledgement,
 } from "../shiftBoard";
+import {
+  latestAcceptableHandoff,
+  takeoverResponsibilities,
+} from "../shiftTakeoverHelpers";
 import {
   shiftBoardCounts,
   shiftSnapshotCompletion,
@@ -160,6 +167,9 @@ export function CareShiftBoardScreen() {
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
   const [handoffs, setHandoffs] = useState<CareShiftHandoff[]>([]);
+  const [acknowledgements, setAcknowledgements] = useState<
+    CareShiftHandoffAcknowledgement[]
+  >([]);
   const [shifts, setShifts] = useState<CareShift[]>([]);
   const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
   const [attendance, setAttendance] = useState<CareShiftAttendance[]>([]);
@@ -191,12 +201,14 @@ export function CareShiftBoardScreen() {
   const [handoffTo, setHandoffTo] = useState<string | null>(null);
   const [shiftLabel, setShiftLabel] = useState(defaultShiftLabel());
   const [handoffNote, setHandoffNote] = useState("");
+  const [takeoverNote, setTakeoverNote] = useState("");
 
   const refresh = useCallback(async () => {
     if (!careRecipientId) {
       setTasks([]);
       setCompletions([]);
       setHandoffs([]);
+      setAcknowledgements([]);
       setShifts([]);
       setAvailability([]);
       setAttendance([]);
@@ -227,6 +239,7 @@ export function CareShiftBoardScreen() {
         completionRows,
         team,
         handoffRows,
+        acknowledgementRows,
         schedule,
         attendanceRows,
         agendaRows,
@@ -238,6 +251,7 @@ export function CareShiftBoardScreen() {
         loadCareTaskCompletions(careRecipientId),
         loadCareTeam(careRecipientId),
         loadCareShiftHandoffs(careRecipientId),
+        loadCareShiftHandoffAcknowledgements(careRecipientId),
         loadCareSchedule(careRecipientId),
         loadShiftAttendance(careRecipientId),
         loadCareAgendaData({
@@ -255,6 +269,7 @@ export function CareShiftBoardScreen() {
       setCompletions(completionRows);
       setRoster(team);
       setHandoffs(handoffRows);
+      setAcknowledgements(acknowledgementRows);
       setShifts(schedule.shifts);
       setAvailability(schedule.availability);
       setAttendance(attendanceRows);
@@ -308,6 +323,16 @@ export function CareShiftBoardScreen() {
           event: "*",
           schema: "public",
           table: "care_shift_handoffs",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shift_handoff_acknowledgements",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
         () => void refresh(),
