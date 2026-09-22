@@ -222,6 +222,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("Insights")}
           />
           <Row
+            title="Today & caregiver shift board"
+            subtitle="See who owns today’s work, overdue tasks, and handoffs"
+            icon="people-outline"
+            onPress={() => n.navigate("CareShiftBoard")}
+          />
+          <Row
             title="Care tasks & shared care plan"
             subtitle="Assign responsibilities, due dates, and follow-ups"
             icon="checkbox-outline"
@@ -416,6 +422,12 @@ export function ToolkitScreen() {
           subtitle="Bring your questions and observations"
           icon="calendar-outline"
           onPress={() => n.navigate("Appointments")}
+        />
+        <Row
+          title="Today & caregiver shift board"
+          subtitle="Coverage, due work, reassignment, and shift handoffs"
+          icon="people-outline"
+          onPress={() => n.navigate("CareShiftBoard")}
         />
         <Row
           title="Care tasks & shared care plan"
