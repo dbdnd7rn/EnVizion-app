@@ -400,6 +400,95 @@ export function CareShiftBoardScreen() {
     [shifts, tasks],
   );
 
+  const coordinationConflicts = useMemo(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+
+    return detectCoordinationConflicts({
+      agenda,
+      shifts,
+      availability,
+      rangeStart: start.toISOString(),
+      rangeEnd: end.toISOString(),
+    });
+  }, [agenda, availability, shifts]);
+
+  const actionableCoordination = useMemo(
+    () =>
+      currentActionableConflicts(
+        coordinationConflicts,
+        workflow.resolutions,
+      ),
+    [coordinationConflicts, workflow.resolutions],
+  );
+
+  const nextAppointment = useMemo(
+    () => nextDashboardAppointment(agenda.appointments),
+    [agenda.appointments],
+  );
+
+  const briefingWindowStart = useMemo(
+    () => handoffWindowStart(handoffs),
+    [handoffs],
+  );
+
+  const medicationActivitySnapshot = useMemo(
+    () =>
+      handoffMedicationActivity(
+        state.medicationRecords,
+        briefingWindowStart,
+      ),
+    [briefingWindowStart, state.medicationRecords],
+  );
+
+  const communicationSnapshot = useMemo(
+    () =>
+      handoffCommunicationActivity(
+        communications,
+        briefingWindowStart,
+      ),
+    [briefingWindowStart, communications],
+  );
+
+  const coordinationSnapshot = useMemo(
+    () => handoffCoordinationActivity(actionableCoordination),
+    [actionableCoordination],
+  );
+
+  const nextAppointmentSnapshot = useMemo(
+    () => handoffAppointmentSnapshot(nextAppointment),
+    [nextAppointment],
+  );
+
+  const followUpSnapshot = useMemo(
+    () => handoffFollowUps(communications),
+    [communications],
+  );
+
+  const briefingCounts = useMemo(
+    () =>
+      handoffBriefingCounts({
+        openTasks,
+        completedTasks: todaysCompletions,
+        medications: medicationActivitySnapshot,
+        communications: communicationSnapshot,
+        coordination: coordinationSnapshot,
+        followUps: followUpSnapshot,
+        nextAppointment: nextAppointmentSnapshot,
+      }),
+    [
+      communicationSnapshot,
+      coordinationSnapshot,
+      followUpSnapshot,
+      medicationActivitySnapshot,
+      nextAppointmentSnapshot,
+      openTasks,
+      todaysCompletions,
+    ],
+  );
+
   const coverage = useMemo(() => {
     const rows = members.map((member) => {
       const assigned = openTasks.filter(
@@ -520,6 +609,12 @@ export function CareShiftBoardScreen() {
         note: handoffNote,
         openTaskSnapshot: openSnapshot,
         completedTaskSnapshot: completedSnapshot,
+        briefingWindowStart,
+        medicationActivitySnapshot,
+        communicationSnapshot,
+        coordinationSnapshot,
+        nextAppointmentSnapshot,
+        followUpSnapshot,
       });
 
       setHandoffOpen(false);
