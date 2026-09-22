@@ -13,7 +13,7 @@ export type CareShiftHandoffAcknowledgement = {
   id: string;
   careRecipientId: string;
   handoffId: string;
-  acceptedBy: string;
+  acceptedBy: string | null;
   note: string;
   acceptedAt: string;
   createdAt: string;
@@ -109,7 +109,7 @@ export async function loadCareShiftHandoffAcknowledgements(
     id: row.id,
     careRecipientId: row.care_recipient_id,
     handoffId: row.handoff_id,
-    acceptedBy: row.accepted_by,
+    acceptedBy: row.accepted_by ?? null,
     note: row.note ?? "",
     acceptedAt: row.accepted_at,
     createdAt: row.created_at,
@@ -152,7 +152,7 @@ export async function acceptCareShiftHandoff(input: {
     id: data.id,
     careRecipientId: data.care_recipient_id,
     handoffId: data.handoff_id,
-    acceptedBy: data.accepted_by,
+    acceptedBy: data.accepted_by ?? null,
     note: data.note ?? "",
     acceptedAt: data.accepted_at,
     createdAt: data.created_at,
