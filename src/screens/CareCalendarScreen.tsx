@@ -1149,6 +1149,13 @@ export function CareCalendarScreen() {
         ))
       )}
 
+      <Button
+        title="Check what needs coordination"
+        secondary
+        icon="warning-outline"
+        onPress={() => n.navigate("CareCoordinationInbox")}
+      />
+
       <Card style={{ backgroundColor: C.lavender }}>
         <Text style={S.h3}>About reminder notifications</Text>
         <Txt>
