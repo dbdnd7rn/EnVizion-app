@@ -87,7 +87,7 @@ export async function loadNotificationPreferences() {
       timezone: initial.timezone,
     })
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .single();
 
@@ -121,7 +121,7 @@ export async function saveNotificationPreferences(
       timezone: next.timezone || notificationTimezone(),
     })
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .single();
 
