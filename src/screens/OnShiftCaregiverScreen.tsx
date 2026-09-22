@@ -66,6 +66,11 @@ import {
   onShiftElapsedMinutes,
   onShiftResponsibilities,
 } from "../onShiftHelpers";
+import {
+  buildOnShiftActivityTimeline,
+  onShiftActivityCounts,
+  type OnShiftActivity,
+} from "../onShiftActivityHelpers";
 import type { MedicationRecord } from "../medications";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
@@ -237,6 +242,7 @@ export function OnShiftCaregiverScreen() {
   const [quickNote, setQuickNote] = useState("");
 
   const [ending, setEnding] = useState(false);
+  const [reviewedUrgentCloseout, setReviewedUrgentCloseout] = useState(false);
   const [handoffTo, setHandoffTo] = useState<string | null>(null);
   const [shiftLabel, setShiftLabel] = useState(defaultShiftLabel());
   const [endNote, setEndNote] = useState("");
@@ -395,6 +401,26 @@ export function OnShiftCaregiverScreen() {
     [completions, session],
   );
 
+  const activityTimeline = useMemo(
+    () =>
+      session
+        ? buildOnShiftActivityTimeline({
+            session,
+            notes,
+            taskCompletions: completions,
+            tasks,
+            medicationRecords,
+            communications,
+          })
+        : [],
+    [communications, completions, medicationRecords, notes, session, tasks],
+  );
+
+  const activityCounts = useMemo(
+    () => onShiftActivityCounts(activityTimeline),
+    [activityTimeline],
+  );
+
   const coverage = useMemo(
     () => actualCoverageNow(shifts, attendance),
     [attendance, shifts],
@@ -536,6 +562,7 @@ export function OnShiftCaregiverScreen() {
       });
 
       setEnding(false);
+      setReviewedUrgentCloseout(false);
       setEndNote("");
       setHandoffTo(null);
       setMessage(
@@ -668,6 +695,59 @@ export function OnShiftCaregiverScreen() {
           </Text>
         </Card>
       )}
+
+      <Section title="Quick care actions" />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+        {[
+          {
+            title: "Record observation",
+            subtitle: "Vitals or care journal",
+            icon: "pulse-outline",
+            onPress: () => n.navigate("Tracker", { kind: "Vitals" }),
+          },
+          {
+            title: "Medication log",
+            subtitle: "Record or review entries",
+            icon: "medical-outline",
+            onPress: () => n.navigate("Medications"),
+          },
+          {
+            title: "Log communication",
+            subtitle: "Calls, messages & follow-ups",
+            icon: "chatbox-ellipses-outline",
+            onPress: () => n.navigate("CareCommunicationLog"),
+          },
+          {
+            title: "Care tasks",
+            subtitle: "Create or reassign work",
+            icon: "checkmark-done-outline",
+            onPress: () => n.navigate("CareTasks"),
+          },
+          {
+            title: "Coordination inbox",
+            subtitle: "Resolve schedule conflicts",
+            icon: "git-merge-outline",
+            onPress: () => n.navigate("CareCoordinationInbox"),
+          },
+          {
+            title: "Emergency help",
+            subtitle: "Open urgent support guidance",
+            icon: "alert-circle-outline",
+            onPress: () => n.navigate("Emergency"),
+          },
+        ].map((action) => (
+          <Card
+            key={action.title}
+            onPress={action.onPress}
+            label={action.title}
+            style={{ flex: 1, minWidth: 210 }}
+          >
+            <Icon name={action.icon} />
+            <Text style={S.h3}>{action.title}</Text>
+            <Txt style={S.small}>{action.subtitle}</Txt>
+          </Card>
+        ))}
+      </View>
 
       {responsibilities.urgent.length > 0 && (
         <>
@@ -819,7 +899,40 @@ export function OnShiftCaregiverScreen() {
         </Card>
       </View>
 
-      <Section title="Quick shift notes" />
+      <Section title="What happened this shift" />
+      <Card style={{ backgroundColor: "#F8F4F9" }}>
+        <View style={S.between}>
+          <View style={{ flex: 1 }}>
+            <Text style={S.h3}>{activityCounts.total} recorded shift events</Text>
+            <Txt style={S.small}>
+              {activityCounts.task_completed} task ·{" "}
+              {activityCounts.medication_recorded + activityCounts.medication_corrected} medication ·{" "}
+              {activityCounts.communication} communication ·{" "}
+              {activityCounts.shift_note} note
+            </Txt>
+          </View>
+          <Icon name="time-outline" />
+        </View>
+      </Card>
+
+      {activityTimeline.slice(0, 12).map((item: OnShiftActivity) => (
+        <Card key={item.id}>
+          <View style={S.between}>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={S.h3}>{item.title}</Text>
+              {Boolean(item.detail) && <Txt>{item.detail}</Txt>}
+            </View>
+            <Text style={S.small}>
+              {new Date(item.occurredAt).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
+          </View>
+        </Card>
+      ))}
+
+            <Section title="Quick shift notes" />
       <Card>
         <Field
           label="Add a shift note"
@@ -854,6 +967,7 @@ export function OnShiftCaregiverScreen() {
             setShiftLabel(defaultShiftLabel());
             setEndNote("");
             setHandoffTo(null);
+            setReviewedUrgentCloseout(false);
             setEnding(true);
           }}
         />
@@ -894,6 +1008,52 @@ export function OnShiftCaregiverScreen() {
                 />
               ))}
 
+            {responsibilities.urgent.length > 0 && (
+              <Card
+                style={{
+                  backgroundColor: "#FFF9F8",
+                  borderColor: "#E8BDC3",
+                }}
+              >
+                <Text style={[S.h3, { color: C.rose }]}>
+                  Outstanding time-sensitive work
+                </Text>
+                <Txt>
+                  {responsibilities.urgent.length} overdue or due-soon task
+                  {responsibilities.urgent.length === 1 ? "" : "s"} will remain open for the next caregiver.
+                </Txt>
+                {responsibilities.urgent.slice(0, 5).map((task) => (
+                  <Txt key={task.id} style={S.small}>
+                    • {task.title} · due {new Date(task.dueAt).toLocaleString()}
+                  </Txt>
+                ))}
+                <Pressable
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: reviewedUrgentCloseout }}
+                  disabled={busyId === "end-shift"}
+                  onPress={() =>
+                    setReviewedUrgentCloseout((value) => !value)
+                  }
+                  style={[S.row, { minHeight: 44 }]}
+                >
+                  <Icon
+                    name={
+                      reviewedUrgentCloseout
+                        ? "checkmark-circle"
+                        : "ellipse-outline"
+                    }
+                    color={reviewedUrgentCloseout ? C.green : C.muted}
+                  />
+                  <Text style={[S.body, { flex: 1 }]}>
+                    I reviewed this outstanding work for handoff.
+                  </Text>
+                </Pressable>
+                <Txt style={S.small}>
+                  Add a handoff note below so the next caregiver can see what remains.
+                </Txt>
+              </Card>
+            )}
+
             <Card style={{ backgroundColor: "#F8F4F9" }}>
               <Text style={S.h3}>Closeout preview</Text>
               <Txt>
@@ -918,7 +1078,11 @@ export function OnShiftCaregiverScreen() {
                   ? "Ending shift…"
                   : "End shift & create next briefing"
               }
-              disabled={Boolean(busyId)}
+              disabled={
+                Boolean(busyId) ||
+                (responsibilities.urgent.length > 0 &&
+                  (!reviewedUrgentCloseout || !endNote.trim()))
+              }
               icon="checkmark-done-outline"
               onPress={() => void endShift()}
             />
@@ -926,7 +1090,10 @@ export function OnShiftCaregiverScreen() {
               title="Keep working"
               secondary
               disabled={Boolean(busyId)}
-              onPress={() => setEnding(false)}
+              onPress={() => {
+                setReviewedUrgentCloseout(false);
+                setEnding(false);
+              }}
             />
           </Card>
         </>
