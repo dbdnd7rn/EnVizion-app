@@ -568,6 +568,12 @@ export function CareShiftBoardScreen() {
         icon="calendar-outline"
         onPress={() => n.navigate("CareSchedule")}
       />
+      <Button
+        title="Weekly care coordination analytics"
+        secondary
+        icon="bar-chart-outline"
+        onPress={() => n.navigate("CareAnalytics")}
+      />
 
       <Card
         style={{
