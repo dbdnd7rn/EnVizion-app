@@ -6,6 +6,7 @@ export type NotificationPreferences = {
   supportPush: boolean;
   coachingPush: boolean;
   careTeamPush: boolean;
+  taskPush: boolean;
   quietHoursEnabled: boolean;
   quietStart: string;
   quietEnd: string;
@@ -27,6 +28,7 @@ function defaults(): NotificationPreferences {
     supportPush: true,
     coachingPush: true,
     careTeamPush: true,
+    taskPush: true,
     quietHoursEnabled: false,
     quietStart: "22:00",
     quietEnd: "07:00",
@@ -41,6 +43,7 @@ function mapRow(row: any): NotificationPreferences {
     supportPush: Boolean(row.support_push),
     coachingPush: Boolean(row.coaching_push),
     careTeamPush: Boolean(row.care_team_push),
+    taskPush: row.task_push === undefined ? true : Boolean(row.task_push),
     quietHoursEnabled: Boolean(row.quiet_hours_enabled),
     quietStart: String(row.quiet_start ?? "22:00").slice(0, 5),
     quietEnd: String(row.quiet_end ?? "07:00").slice(0, 5),
@@ -59,7 +62,7 @@ export async function loadNotificationPreferences() {
   const { data, error } = await supabase
     .from("notification_preferences")
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .eq("user_id", user.id)
     .maybeSingle();
@@ -77,6 +80,7 @@ export async function loadNotificationPreferences() {
       support_push: initial.supportPush,
       coaching_push: initial.coachingPush,
       care_team_push: initial.careTeamPush,
+      task_push: initial.taskPush,
       quiet_hours_enabled: initial.quietHoursEnabled,
       quiet_start: initial.quietStart,
       quiet_end: initial.quietEnd,
@@ -110,6 +114,7 @@ export async function saveNotificationPreferences(
       support_push: next.supportPush,
       coaching_push: next.coachingPush,
       care_team_push: next.careTeamPush,
+      task_push: next.taskPush,
       quiet_hours_enabled: next.quietHoursEnabled,
       quiet_start: next.quietHoursEnabled ? next.quietStart : null,
       quiet_end: next.quietHoursEnabled ? next.quietEnd : null,
