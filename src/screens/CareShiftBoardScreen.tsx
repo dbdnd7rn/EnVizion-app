@@ -42,6 +42,7 @@ import {
 import {
   createCareShiftHandoff,
   loadCareShiftHandoffs,
+  loadHandoffMedicationRecords,
   openTasksForShift,
   reassignCareTask,
   todayCompletions,
@@ -171,6 +172,9 @@ export function CareShiftBoardScreen() {
     followUps: [],
   });
   const [communications, setCommunications] = useState<CareCommunication[]>([]);
+  const [handoffMedicationRecords, setHandoffMedicationRecords] = useState(
+    state.medicationRecords,
+  );
   const [workflow, setWorkflow] = useState<CoordinationWorkflowData>({
     resolutions: [],
     comments: [],
@@ -204,6 +208,7 @@ export function CareShiftBoardScreen() {
         followUps: [],
       });
       setCommunications([]);
+      setHandoffMedicationRecords([]);
       setWorkflow({ resolutions: [], comments: [], history: [] });
       setLoading(false);
       return;
@@ -226,6 +231,7 @@ export function CareShiftBoardScreen() {
         attendanceRows,
         agendaRows,
         communicationRows,
+        medicationRows,
         workflowRows,
       ] = await Promise.all([
         loadCareTasks(careRecipientId),
@@ -240,6 +246,7 @@ export function CareShiftBoardScreen() {
           rangeEndIso: rangeEnd.toISOString(),
         }),
         loadCareCommunications(careRecipientId),
+        loadHandoffMedicationRecords(careRecipientId),
         loadCoordinationWorkflow(careRecipientId),
       ]);
 
@@ -253,6 +260,7 @@ export function CareShiftBoardScreen() {
       setAttendance(attendanceRows);
       setAgenda(agendaRows);
       setCommunications(communicationRows);
+      setHandoffMedicationRecords(medicationRows);
       setWorkflow(workflowRows);
     } catch (error) {
       setMessage(
@@ -437,10 +445,10 @@ export function CareShiftBoardScreen() {
   const medicationActivitySnapshot = useMemo(
     () =>
       handoffMedicationActivity(
-        state.medicationRecords,
+        handoffMedicationRecords,
         briefingWindowStart,
       ),
-    [briefingWindowStart, state.medicationRecords],
+    [briefingWindowStart, handoffMedicationRecords],
   );
 
   const communicationSnapshot = useMemo(
