@@ -842,6 +842,133 @@ export function CareShiftBoardScreen() {
         </Card>
       )}
 
+      {pendingTakeover && (
+        <>
+          <Section title="Handoff waiting for your acknowledgement" />
+          <Card
+            style={{
+              borderColor: "#D7C3E1",
+              backgroundColor: "#FBF8FC",
+            }}
+          >
+            <View style={S.between}>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={S.eyebrow}>CAREGIVER TAKEOVER</Text>
+                <Text style={S.h2}>{pendingTakeover.shiftLabel}</Text>
+                <Txt style={S.small}>
+                  From {memberName(pendingTakeover.createdBy)} ·{" "}
+                  {new Date(pendingTakeover.createdAt).toLocaleString()}
+                </Txt>
+              </View>
+              <Icon name="hand-left-outline" size={28} />
+            </View>
+
+            {Boolean(pendingTakeover.note) && (
+              <Card style={{ backgroundColor: C.white, padding: 13 }}>
+                <Text style={[S.h3, { fontSize: 13 }]}>Outgoing caregiver note</Text>
+                <Txt>{pendingTakeover.note}</Txt>
+              </Card>
+            )}
+
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                <Txt style={S.small}>
+                  {pendingTakeover.openTaskSnapshot.length} unfinished
+                </Txt>
+              </View>
+              <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                <Txt style={S.small}>
+                  {pendingTakeover.medicationActivitySnapshot.length} medication
+                </Txt>
+              </View>
+              <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                <Txt style={S.small}>
+                  {pendingTakeover.communicationSnapshot.length} communication
+                </Txt>
+              </View>
+              <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                <Txt style={S.small}>
+                  {pendingTakeover.coordinationSnapshot.length} coordination
+                </Txt>
+              </View>
+            </View>
+
+            {pendingTakeover.nextAppointmentSnapshot && (
+              <Txt>
+                Next recorded visit:{" "}
+                <Text style={S.h3}>
+                  {pendingTakeover.nextAppointmentSnapshot.title}
+                </Text>{" "}
+                ·{" "}
+                {new Date(
+                  pendingTakeover.nextAppointmentSnapshot.startsAt,
+                ).toLocaleString()}
+              </Txt>
+            )}
+
+            <Card style={{ backgroundColor: C.white }}>
+              <View style={S.between}>
+                <Text style={S.h3}>Your live responsibilities now</Text>
+                <Icon name="checkbox-outline" size={20} />
+              </View>
+              <Txt>
+                {takeoverWork.mine.length} assigned to you ·{" "}
+                {takeoverWork.shared.length} shared / unassigned
+              </Txt>
+
+              {takeoverWork.mine.slice(0, 4).map((task) => (
+                <Txt key={task.id} style={S.small}>
+                  • Yours: {task.title} · due{" "}
+                  {new Date(task.dueAt).toLocaleString()}
+                </Txt>
+              ))}
+
+              {takeoverWork.shared.slice(0, 4).map((task) => (
+                <Txt key={task.id} style={S.small}>
+                  • Shared: {task.title} · due{" "}
+                  {new Date(task.dueAt).toLocaleString()}
+                </Txt>
+              ))}
+
+              {!takeoverWork.mine.length && !takeoverWork.shared.length && (
+                <Txt style={S.small}>
+                  No open responsibilities are currently assigned to you or left
+                  shared.
+                </Txt>
+              )}
+
+              <Txt style={S.small}>
+                Accepting this handoff records the takeover only. It does not
+                reassign tasks that already belong to another caregiver.
+              </Txt>
+            </Card>
+
+            <Field
+              label="Acknowledgement note (optional)"
+              value={takeoverNote}
+              onChange={(value) => setTakeoverNote(value.slice(0, 2000))}
+              multiline
+            />
+
+            <Button
+              title={
+                busyId === `takeover:${pendingTakeover.id}`
+                  ? "Confirming takeover…"
+                  : "I’ve reviewed this briefing · Accept takeover"
+              }
+              disabled={Boolean(busyId)}
+              icon="checkmark-circle-outline"
+              onPress={() => void acceptTakeover()}
+            />
+
+            <Txt style={S.small}>
+              Your acceptance time is recorded by EnVizion when you confirm.
+              The acknowledgement cannot be edited or deleted from the app.
+            </Txt>
+          </Card>
+        </>
+      )}
+
       <View style={{ flexDirection: "row", gap: 10 }}>
         <View style={{ flex: 1 }}>
           <Button
