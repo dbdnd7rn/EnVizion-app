@@ -10,6 +10,7 @@ export type CoordinationResolution = {
   conflictKind: CoordinationConflict["kind"];
   conflictTitle: string;
   conflictStartsAt: string;
+  conflictPriority: CoordinationConflict["priority"];
   status: CoordinationResolutionStatus;
   assignedTo: string | null;
   snoozedUntil: string | null;
@@ -64,6 +65,7 @@ function mapResolution(row: any): CoordinationResolution {
     conflictKind: row.conflict_kind,
     conflictTitle: row.conflict_title,
     conflictStartsAt: row.conflict_starts_at,
+    conflictPriority: row.conflict_priority ?? "review",
     status: row.status,
     assignedTo: row.assigned_to ?? null,
     snoozedUntil: row.snoozed_until ?? null,
@@ -119,7 +121,7 @@ export async function loadCoordinationWorkflow(
     supabase
       .from("care_coordination_resolutions")
       .select(
-        "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
+        "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, conflict_priority, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
       )
       .eq("care_recipient_id", careRecipientId)
       .order("updated_at", { ascending: false })
@@ -160,7 +162,7 @@ export async function ensureCoordinationResolution(
   const existing = await supabase
     .from("care_coordination_resolutions")
     .select(
-      "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
+      "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, conflict_priority, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
     )
     .eq("care_recipient_id", careRecipientId)
     .eq("conflict_key", conflict.id)
@@ -178,11 +180,12 @@ export async function ensureCoordinationResolution(
       conflict_kind: conflict.kind,
       conflict_title: conflict.title,
       conflict_starts_at: conflict.startsAt,
+      conflict_priority: conflict.priority,
       status: "open",
       created_by: userId,
     })
     .select(
-      "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
+      "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, conflict_priority, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
     )
     .single();
 
@@ -191,7 +194,7 @@ export async function ensureCoordinationResolution(
       const raced = await supabase
         .from("care_coordination_resolutions")
         .select(
-          "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
+          "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, conflict_priority, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
         )
         .eq("care_recipient_id", careRecipientId)
         .eq("conflict_key", conflict.id)
@@ -240,7 +243,7 @@ async function updateResolution(
     .eq("id", resolution.id)
     .eq("care_recipient_id", careRecipientId)
     .select(
-      "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
+      "id, care_recipient_id, conflict_key, conflict_kind, conflict_title, conflict_starts_at, conflict_priority, status, assigned_to, snoozed_until, resolved_at, resolved_by, created_by, created_at, updated_at",
     )
     .single();
 
@@ -299,6 +302,78 @@ export function reopenCoordinationConflict(
     resolved_at: null,
     resolved_by: null,
   });
+}
+
+export async function syncCoordinationConflicts(
+  careRecipientId: string,
+  conflicts: CoordinationConflict[],
+) {
+  if (!conflicts.length) return;
+
+  const userId = await currentUserId();
+  const { data: existing, error: existingError } = await supabase
+    .from("care_coordination_resolutions")
+    .select("conflict_key, conflict_priority, conflict_title, conflict_starts_at")
+    .eq("care_recipient_id", careRecipientId)
+    .in("conflict_key", conflicts.map((conflict) => conflict.id));
+
+  if (existingError) throw existingError;
+
+  const existingMap = new Map(
+    (existing ?? []).map((row) => [row.conflict_key, row]),
+  );
+
+  const missing = conflicts.filter(
+    (conflict) => !existingMap.has(conflict.id),
+  );
+
+  if (missing.length) {
+    const { error: insertError } = await supabase
+      .from("care_coordination_resolutions")
+      .upsert(
+        missing.map((conflict) => ({
+          care_recipient_id: careRecipientId,
+          conflict_key: conflict.id,
+          conflict_kind: conflict.kind,
+          conflict_title: conflict.title,
+          conflict_starts_at: conflict.startsAt,
+          conflict_priority: conflict.priority,
+          status: "open",
+          created_by: userId,
+        })),
+        {
+          onConflict: "care_recipient_id,conflict_key",
+          ignoreDuplicates: true,
+        },
+      );
+
+    if (insertError) throw insertError;
+  }
+
+  for (const conflict of conflicts) {
+    const row = existingMap.get(conflict.id);
+    if (
+      !row ||
+      (row.conflict_priority === conflict.priority &&
+        row.conflict_title === conflict.title &&
+        row.conflict_starts_at === conflict.startsAt)
+    ) {
+      continue;
+    }
+
+    const { error: updateError } = await supabase
+      .from("care_coordination_resolutions")
+      .update({
+        conflict_priority: conflict.priority,
+        conflict_title: conflict.title,
+        conflict_starts_at: conflict.startsAt,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("care_recipient_id", careRecipientId)
+      .eq("conflict_key", conflict.id);
+
+    if (updateError) throw updateError;
+  }
 }
 
 export async function addCoordinationComment(
