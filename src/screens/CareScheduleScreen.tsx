@@ -37,6 +37,18 @@ import {
   reminderLocalParts,
 } from "../reminders";
 import { supabase } from "../supabase";
+import {
+  endShiftAttendance,
+  loadShiftAttendance,
+  startShiftAttendance,
+  type CareShiftAttendance,
+} from "../shiftAttendance";
+import {
+  actualCoverageNow,
+  attendanceDurationMinutes,
+  attendanceForShift,
+  shiftAttendanceState,
+} from "../shiftAttendanceHelpers";
 import { useCare } from "../store";
 import {
   Button,
@@ -163,6 +175,23 @@ function fitBackground(fit: ReturnType<typeof shiftAvailabilityFit>) {
   return "#F0ECEF";
 }
 
+function attendanceCopy(state: ReturnType<typeof shiftAttendanceState>) {
+  if (state === "ready") return "Ready to check in";
+  if (state === "late_no_checkin") return "No check-in";
+  if (state === "active") return "Checked in";
+  if (state === "active_late") return "Checked in late";
+  if (state === "completed") return "Completed";
+  return "Upcoming";
+}
+
+function attendanceBackground(state: ReturnType<typeof shiftAttendanceState>) {
+  if (state === "late_no_checkin") return C.redBg;
+  if (state === "active" || state === "completed") return "#EAF4EF";
+  if (state === "active_late") return "#FFF1E5";
+  if (state === "ready") return C.lavender;
+  return "#F0ECEF";
+}
+
 export function CareScheduleScreen() {
   const n = useNav();
   const { state } = useCare();
@@ -174,6 +203,7 @@ export function CareScheduleScreen() {
   const [shifts, setShifts] = useState<CareShift[]>([]);
   const [swaps, setSwaps] = useState<CareShiftSwapRequest[]>([]);
   const [tasks, setTasks] = useState<CareTask[]>([]);
+  const [attendance, setAttendance] = useState<CareShiftAttendance[]>([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -190,6 +220,9 @@ export function CareScheduleScreen() {
   const [swapShift, setSwapShift] = useState<CareShift | null>(null);
   const [swapTo, setSwapTo] = useState<string | null>(null);
   const [swapMessage, setSwapMessage] = useState("");
+  const [checkoutAttendance, setCheckoutAttendance] =
+    useState<CareShiftAttendance | null>(null);
+  const [checkoutNote, setCheckoutNote] = useState("");
 
   const refresh = useCallback(async () => {
     if (!careRecipientId) {
@@ -201,16 +234,18 @@ export function CareScheduleScreen() {
     setMessage("");
     try {
       const userId = await currentCareTaskUserId();
-      const [schedule, team, taskRows] = await Promise.all([
+      const [schedule, team, taskRows, attendanceRows] = await Promise.all([
         loadCareSchedule(careRecipientId),
         loadCareTeam(careRecipientId),
         loadCareTasks(careRecipientId),
+        loadShiftAttendance(careRecipientId),
       ]);
 
       setCurrentUserId(userId);
       setAvailability(schedule.availability);
       setShifts(schedule.shifts);
       setSwaps(schedule.swaps);
+      setAttendance(attendanceRows);
       setRoster(team);
 
       const defaultCaregiver =
@@ -283,6 +318,16 @@ export function CareScheduleScreen() {
         },
         () => void refresh(),
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shift_attendance",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
       .subscribe();
 
     return () => {
@@ -338,6 +383,10 @@ export function CareScheduleScreen() {
   );
 
   const onDuty = useMemo(() => activeCaregiversOnDuty(shifts), [shifts]);
+  const actualCoverage = useMemo(
+    () => actualCoverageNow(shifts, attendance),
+    [attendance, shifts],
+  );
 
   const coverageGaps = useMemo(
     () => uncoveredUpcomingTasks(tasks, shifts),
@@ -487,6 +536,56 @@ export function CareScheduleScreen() {
     }
   }
 
+  async function startShift(shift: CareShift) {
+    if (!careRecipientId || busy || shift.caregiverId !== currentUserId) return;
+    setBusy(`checkin:${shift.id}`);
+    setMessage("");
+    try {
+      const row = await startShiftAttendance({
+        careRecipientId,
+        shiftId: shift.id,
+        note: "",
+      });
+      await refresh();
+      setMessage(
+        row.lateMinutes > 0
+          ? `Checked in · ${row.lateMinutes} minute${row.lateMinutes === 1 ? "" : "s"} after scheduled start.`
+          : "Checked in. Your shift is now active.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "We could not start this shift.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function endShift() {
+    if (!careRecipientId || !checkoutAttendance || busy) return;
+    setBusy(`checkout:${checkoutAttendance.id}`);
+    setMessage("");
+    try {
+      await endShiftAttendance({
+        careRecipientId,
+        attendanceId: checkoutAttendance.id,
+        note: checkoutNote,
+      });
+      setCheckoutAttendance(null);
+      setCheckoutNote("");
+      await refresh();
+      setMessage(
+        "Shift ended. EnVizion created the next caregiver handoff automatically.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "We could not end this shift.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function submitSwap() {
     if (!careRecipientId || !swapShift || !swapTo || busy) return;
     setBusy("swap");
@@ -562,15 +661,16 @@ export function CareScheduleScreen() {
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E7CFEF" }]}>COVERAGE NOW</Text>
+        <Text style={[S.eyebrow, { color: "#E7CFEF" }]}>ACTUAL COVERAGE NOW</Text>
         <Text style={[S.h2, { color: C.white }]}>
-          {onDuty.length
-            ? `${onDuty.length} caregiver${onDuty.length === 1 ? "" : "s"} on duty`
-            : "No caregiver shift is active right now"}
+          {actualCoverage.scheduledNow.length
+            ? `${actualCoverage.checkedInNow.length}/${actualCoverage.scheduledNow.length} scheduled caregiver${actualCoverage.scheduledNow.length === 1 ? "" : "s"} checked in`
+            : "No caregiver shift is scheduled right now"}
         </Text>
         <Txt style={{ color: "#E9DDED" }}>
-          {coverageGaps.length} upcoming task
-          {coverageGaps.length === 1 ? "" : "s"} without matching scheduled coverage
+          {actualCoverage.missingCheckIn.length
+            ? `${actualCoverage.missingCheckIn.length} active shift${actualCoverage.missingCheckIn.length === 1 ? "" : "s"} still need check-in confirmation.`
+            : `${coverageGaps.length} upcoming task${coverageGaps.length === 1 ? "" : "s"} without matching scheduled coverage.`}
         </Txt>
       </Card>
 
@@ -720,11 +820,25 @@ export function CareScheduleScreen() {
       ) : upcomingShifts.length ? (
         upcomingShifts.map((shift) => {
           const fit = shiftAvailabilityFit(shift, availability);
+          const attendanceItem = attendanceForShift(shift.id, attendance);
+          const attendanceState = shiftAttendanceState(
+            shift,
+            attendanceItem,
+          );
           const canManage =
             !readOnly && (owner || shift.caregiverId === currentUserId);
           const canSwap =
+            !attendanceItem &&
             shift.caregiverId === currentUserId &&
             members.some((member) => member.userId !== currentUserId);
+          const canStart =
+            !attendanceItem &&
+            shift.caregiverId === currentUserId &&
+            (attendanceState === "ready" ||
+              attendanceState === "late_no_checkin");
+          const canEnd =
+            attendanceItem?.status === "active" &&
+            attendanceItem.caregiverId === currentUserId;
 
           return (
             <Card key={shift.id}>
@@ -756,7 +870,48 @@ export function CareScheduleScreen() {
                 {new Date(shift.startsAt).toLocaleString()} →{" "}
                 {new Date(shift.endsAt).toLocaleString()}
               </Txt>
-              {Boolean(shift.note) && <Txt>{shift.note}</Txt>}
+
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                <View
+                  style={[
+                    S.pill,
+                    { backgroundColor: attendanceBackground(attendanceState) },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      S.small,
+                      {
+                        color:
+                          attendanceState === "late_no_checkin"
+                            ? C.rose
+                            : C.deep,
+                        fontFamily: "DMSans_600SemiBold",
+                      },
+                    ]}
+                  >
+                    {attendanceCopy(attendanceState)}
+                  </Text>
+                </View>
+                {attendanceItem?.lateMinutes ? (
+                  <View style={[S.pill, { backgroundColor: "#FFF1E5" }]}>
+                    <Text style={[S.small, { color: C.deep }]}>
+                      {attendanceItem.lateMinutes} min late
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+
+              {attendanceItem && (
+                <Txt style={S.small}>
+                  Checked in {new Date(attendanceItem.checkedInAt).toLocaleString()}
+                  {attendanceItem.checkedOutAt
+                    ? ` · Ended ${new Date(attendanceItem.checkedOutAt).toLocaleString()}`
+                    : ` · ${attendanceDurationMinutes(attendanceItem)} min active`}
+                </Txt>
+              )}
+
+              {Boolean(shift.note) && <Txt>{shift.note}</Txt>
 
               {fit === "conflict" && (
                 <Txt style={{ color: C.rose }}>
@@ -765,7 +920,71 @@ export function CareScheduleScreen() {
                 </Txt>
               )}
 
-              {canManage && (
+              {attendanceState === "late_no_checkin" && (
+                <Txt style={{ color: C.rose }}>
+                  No “I’m here” confirmation has been recorded more than 15
+                  minutes after the scheduled start.
+                </Txt>
+              )}
+
+              {canStart && (
+                <Button
+                  title={
+                    busy === `checkin:${shift.id}`
+                      ? "Checking in…"
+                      : "I’m here · Start shift"
+                  }
+                  icon="checkmark-circle-outline"
+                  disabled={Boolean(busy)}
+                  onPress={() => void startShift(shift)}
+                />
+              )}
+
+              {canEnd && attendanceItem && (
+                <Button
+                  title="End shift"
+                  secondary
+                  icon="log-out-outline"
+                  disabled={Boolean(busy)}
+                  onPress={() => {
+                    setCheckoutAttendance(attendanceItem);
+                    setCheckoutNote("");
+                  }}
+                />
+              )}
+
+              {checkoutAttendance?.shiftId === shift.id && canEnd && (
+                <Card style={{ backgroundColor: C.lavender }}>
+                  <Text style={S.h3}>End shift & hand off care</Text>
+                  <Txt style={S.small}>
+                    Your clock-out time is stamped by EnVizion. This note is
+                    carried into the automatic caregiver handoff.
+                  </Txt>
+                  <Field
+                    label="Clock-out / handoff note"
+                    value={checkoutNote}
+                    onChange={(value) => setCheckoutNote(value.slice(0, 2000))}
+                    multiline
+                  />
+                  <Button
+                    title={
+                      busy === `checkout:${attendanceItem.id}`
+                        ? "Ending shift…"
+                        : "Confirm end shift"
+                    }
+                    disabled={Boolean(busy)}
+                    onPress={() => void endShift()}
+                  />
+                  <Button
+                    title="Keep shift active"
+                    secondary
+                    disabled={Boolean(busy)}
+                    onPress={() => setCheckoutAttendance(null)}
+                  />
+                </Card>
+              )}
+
+              {canManage && !attendanceItem && (
                 <View style={{ flexDirection: "row", gap: 9 }}>
                   {canSwap && (
                     <View style={{ flex: 1 }}>
@@ -841,6 +1060,56 @@ export function CareScheduleScreen() {
             Add a shift so EnVizion can compare upcoming task due times with
             actual caregiver coverage.
           </Txt>
+        </Card>
+      )}
+
+      <Section title="Recent shift attendance" />
+      {attendance.length ? (
+        attendance.slice(0, 20).map((item) => {
+          const shift = shiftMap.get(item.shiftId);
+          return (
+            <Card key={item.id}>
+              <View style={S.between}>
+                <View style={{ flex: 1, gap: 4 }}>
+                  <Text style={S.h3}>{shift?.label || "Caregiver shift"}</Text>
+                  <Txt>{memberName(item.caregiverId)}</Txt>
+                </View>
+                <View
+                  style={[
+                    S.pill,
+                    {
+                      backgroundColor:
+                        item.status === "active" ? "#EAF4EF" : C.lavender,
+                    },
+                  ]}
+                >
+                  <Text style={[S.small, { color: C.deep }]}>
+                    {item.status === "active" ? "Checked in" : "Completed"}
+                  </Text>
+                </View>
+              </View>
+              <Txt style={S.small}>
+                Check-in {new Date(item.checkedInAt).toLocaleString()}
+                {item.checkedOutAt
+                  ? ` · Check-out ${new Date(item.checkedOutAt).toLocaleString()}`
+                  : ""}
+              </Txt>
+              <Txt style={S.small}>
+                Actual attendance: {attendanceDurationMinutes(item)} min
+                {item.lateMinutes
+                  ? ` · ${item.lateMinutes} min late`
+                  : " · On time"}
+              </Txt>
+              {Boolean(item.checkOutNote) && <Txt>{item.checkOutNote}</Txt>}
+              {item.automaticHandoffId && (
+                <Txt style={S.small}>Automatic caregiver handoff created.</Txt>
+              )}
+            </Card>
+          );
+        })
+      ) : (
+        <Card>
+          <Txt>No caregiver check-ins have been recorded yet.</Txt>
         </Card>
       )}
 
