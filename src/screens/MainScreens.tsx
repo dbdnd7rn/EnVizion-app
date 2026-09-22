@@ -430,6 +430,12 @@ export function ToolkitScreen() {
           onPress={() => n.navigate("CareShiftBoard")}
         />
         <Row
+          title="Caregiver availability & schedule"
+          subtitle="Plan shifts, availability, swaps, and uncovered responsibilities"
+          icon="calendar-outline"
+          onPress={() => n.navigate("CareSchedule")}
+        />
+        <Row
           title="Care tasks & shared care plan"
           subtitle="Assign responsibilities and track what the care team completes"
           icon="checkbox-outline"
