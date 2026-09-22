@@ -34,10 +34,16 @@ import {
   type ShiftTaskBucket,
 } from "../shiftBoardHelpers";
 import { loadCareSchedule, type CareShift } from "../careSchedule";
+import { uncoveredUpcomingTasks } from "../careScheduleHelpers";
 import {
-  activeCaregiversOnDuty,
-  uncoveredUpcomingTasks,
-} from "../careScheduleHelpers";
+  loadShiftAttendance,
+  type CareShiftAttendance,
+} from "../shiftAttendance";
+import {
+  actualCoverageNow,
+  attendanceDurationMinutes,
+  attendanceForShift,
+} from "../shiftAttendanceHelpers";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
 import {
@@ -129,6 +135,7 @@ export function CareShiftBoardScreen() {
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
   const [handoffs, setHandoffs] = useState<CareShiftHandoff[]>([]);
   const [shifts, setShifts] = useState<CareShift[]>([]);
+  const [attendance, setAttendance] = useState<CareShiftAttendance[]>([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -148,6 +155,7 @@ export function CareShiftBoardScreen() {
       setCompletions([]);
       setHandoffs([]);
       setShifts([]);
+      setAttendance([]);
       setLoading(false);
       return;
     }
@@ -155,14 +163,21 @@ export function CareShiftBoardScreen() {
     setLoading(true);
     try {
       const userId = await currentCareTaskUserId();
-      const [taskRows, completionRows, team, handoffRows, schedule] =
-        await Promise.all([
-          loadCareTasks(careRecipientId),
-          loadCareTaskCompletions(careRecipientId),
-          loadCareTeam(careRecipientId),
-          loadCareShiftHandoffs(careRecipientId),
-          loadCareSchedule(careRecipientId),
-        ]);
+      const [
+        taskRows,
+        completionRows,
+        team,
+        handoffRows,
+        schedule,
+        attendanceRows,
+      ] = await Promise.all([
+        loadCareTasks(careRecipientId),
+        loadCareTaskCompletions(careRecipientId),
+        loadCareTeam(careRecipientId),
+        loadCareShiftHandoffs(careRecipientId),
+        loadCareSchedule(careRecipientId),
+        loadShiftAttendance(careRecipientId),
+      ]);
 
       setCurrentUserId(userId);
       setTasks(taskRows);
@@ -170,6 +185,7 @@ export function CareShiftBoardScreen() {
       setRoster(team);
       setHandoffs(handoffRows);
       setShifts(schedule.shifts);
+      setAttendance(attendanceRows);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -226,6 +242,16 @@ export function CareShiftBoardScreen() {
           event: "*",
           schema: "public",
           table: "care_shifts",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shift_attendance",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
         () => void refresh(),
@@ -297,7 +323,10 @@ export function CareShiftBoardScreen() {
     [completions, currentUserId, tasks],
   );
 
-  const onDuty = useMemo(() => activeCaregiversOnDuty(shifts), [shifts]);
+  const actualCoverage = useMemo(
+    () => actualCoverageNow(shifts, attendance),
+    [attendance, shifts],
+  );
   const coverageGaps = useMemo(
     () => uncoveredUpcomingTasks(tasks, shifts),
     [shifts, tasks],
@@ -542,24 +571,98 @@ export function CareShiftBoardScreen() {
 
       <Card
         style={{
-          backgroundColor: coverageGaps.length ? "#FFF9F2" : "#EAF4EF",
+          backgroundColor:
+            actualCoverage.missingCheckIn.length || coverageGaps.length
+              ? "#FFF9F2"
+              : "#EAF4EF",
         }}
       >
         <Icon
-          name={coverageGaps.length ? "warning-outline" : "shield-checkmark-outline"}
-          color={coverageGaps.length ? C.rose : C.purple}
+          name={
+            actualCoverage.missingCheckIn.length || coverageGaps.length
+              ? "warning-outline"
+              : "shield-checkmark-outline"
+          }
+          color={
+            actualCoverage.missingCheckIn.length || coverageGaps.length
+              ? C.rose
+              : C.purple
+          }
         />
         <Text style={S.h3}>
-          {onDuty.length
-            ? `${onDuty.length} caregiver${onDuty.length === 1 ? "" : "s"} on duty now`
-            : "No scheduled caregiver is on duty right now"}
+          {actualCoverage.scheduledNow.length
+            ? `${actualCoverage.checkedInNow.length}/${actualCoverage.scheduledNow.length} scheduled caregiver${actualCoverage.scheduledNow.length === 1 ? "" : "s"} checked in now`
+            : "No caregiver shift is scheduled right now"}
         </Text>
         <Txt>
-          {coverageGaps.length
-            ? `${coverageGaps.length} upcoming task${coverageGaps.length === 1 ? "" : "s"} have no matching scheduled coverage in the next 7 days.`
-            : "Every upcoming task in the next 7 days has matching scheduled coverage."}
+          {actualCoverage.missingCheckIn.length
+            ? `${actualCoverage.missingCheckIn.length} active shift${actualCoverage.missingCheckIn.length === 1 ? "" : "s"} still have no “I’m here” confirmation.`
+            : coverageGaps.length
+              ? `${coverageGaps.length} upcoming task${coverageGaps.length === 1 ? "" : "s"} have no matching scheduled coverage in the next 7 days.`
+              : "Scheduled and actual coverage are aligned right now."}
         </Txt>
       </Card>
+
+      {actualCoverage.scheduledNow.length > 0 && (
+        <>
+          <Section title="Actual shift attendance now" />
+          {actualCoverage.scheduledNow.map((shift) => {
+            const item = attendanceForShift(shift.id, attendance);
+            const checkedIn = Boolean(item?.status === "active");
+            return (
+              <Card
+                key={shift.id}
+                style={{
+                  borderColor: checkedIn ? C.line : "#E8BDC3",
+                  backgroundColor: checkedIn ? C.white : "#FFF9F8",
+                }}
+              >
+                <View style={S.between}>
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text style={S.h3}>{shift.label}</Text>
+                    <Txt>{memberName(shift.caregiverId)}</Txt>
+                  </View>
+                  <View
+                    style={[
+                      S.pill,
+                      {
+                        backgroundColor: checkedIn ? "#EAF4EF" : C.redBg,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        S.small,
+                        {
+                          color: checkedIn ? C.deep : C.rose,
+                          fontFamily: "DMSans_600SemiBold",
+                        },
+                      ]}
+                    >
+                      {checkedIn ? "Checked in" : "No check-in"}
+                    </Text>
+                  </View>
+                </View>
+                {item && (
+                  <Txt style={S.small}>
+                    Since {new Date(item.checkedInAt).toLocaleTimeString()} ·{" "}
+                    {attendanceDurationMinutes(item)} min active
+                    {item.lateMinutes
+                      ? ` · ${item.lateMinutes} min late`
+                      : " · On time"}
+                  </Txt>
+                )}
+                {!item && (
+                  <Txt style={{ color: C.rose }}>
+                    Verify actual coverage directly if this shift has already
+                    started.
+                  </Txt>
+                )}
+              </Card>
+            );
+          })}
+        </>
+      )}
 
       {handoffOpen && !readOnly && (
         <>
