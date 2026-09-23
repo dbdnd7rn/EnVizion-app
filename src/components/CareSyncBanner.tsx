@@ -13,7 +13,8 @@ export function CareSyncBanner() {
     refresh,
   } = useCare();
 
-  if (!state.hydrated || syncStatus === "synced") return null;
+  if (syncStatus === "synced") return null;
+  if (syncStatus === "loading" && !state.hydrated) return null;
 
   return (
     <Card
