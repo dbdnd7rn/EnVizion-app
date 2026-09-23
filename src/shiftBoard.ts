@@ -15,6 +15,9 @@ export type CareShiftHandoffAcknowledgement = {
   handoffId: string;
   acceptedBy: string | null;
   note: string;
+  concernFlagged: boolean;
+  concernText: string;
+  reviewedUrgentItems: boolean;
   acceptedAt: string;
   createdAt: string;
 };
@@ -36,6 +39,9 @@ export type CareShiftHandoff = {
   coordinationSnapshot: HandoffCoordinationSnapshot[];
   nextAppointmentSnapshot: HandoffAppointmentSnapshot | null;
   followUpSnapshot: HandoffFollowUpSnapshot[];
+  carePlanSnapshot: Array<Record<string, unknown>>;
+  transitionSnapshot: Record<string, unknown> | null;
+  medicationReconciliationSnapshot: Record<string, unknown> | null;
   createdAt: string;
 };
 
@@ -73,6 +79,18 @@ function mapHandoff(row: any): CareShiftHandoff {
     followUpSnapshot: Array.isArray(row.follow_up_snapshot)
       ? row.follow_up_snapshot
       : [],
+    carePlanSnapshot: Array.isArray(row.care_plan_snapshot)
+      ? row.care_plan_snapshot
+      : [],
+    transitionSnapshot:
+      row.transition_snapshot && typeof row.transition_snapshot === "object"
+        ? row.transition_snapshot
+        : null,
+    medicationReconciliationSnapshot:
+      row.medication_reconciliation_snapshot &&
+      typeof row.medication_reconciliation_snapshot === "object"
+        ? row.medication_reconciliation_snapshot
+        : null,
     createdAt: row.created_at,
   };
 }
@@ -81,7 +99,7 @@ export async function loadCareShiftHandoffs(careRecipientId: string) {
   const { data, error } = await supabase
     .from("care_shift_handoffs")
     .select(
-      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, requires_acknowledgement, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, created_at",
+      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, requires_acknowledgement, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, care_plan_snapshot, transition_snapshot, medication_reconciliation_snapshot, created_at",
     )
     .eq("care_recipient_id", careRecipientId)
     .order("created_at", { ascending: false })
@@ -97,7 +115,7 @@ export async function loadCareShiftHandoffAcknowledgements(
   const { data, error } = await supabase
     .from("care_shift_handoff_acknowledgements")
     .select(
-      "id, care_recipient_id, handoff_id, accepted_by, note, accepted_at, created_at",
+      "id, care_recipient_id, handoff_id, accepted_by, note, concern_flagged, concern_text, reviewed_urgent_items, accepted_at, created_at",
     )
     .eq("care_recipient_id", careRecipientId)
     .order("accepted_at", { ascending: false })
@@ -111,6 +129,12 @@ export async function loadCareShiftHandoffAcknowledgements(
     handoffId: row.handoff_id,
     acceptedBy: row.accepted_by ?? null,
     note: row.note ?? "",
+    concernFlagged: Boolean(row.concern_flagged),
+    concernText: row.concern_text ?? "",
+    reviewedUrgentItems:
+      row.reviewed_urgent_items === undefined
+        ? true
+        : Boolean(row.reviewed_urgent_items),
     acceptedAt: row.accepted_at,
     createdAt: row.created_at,
   }));
@@ -120,6 +144,9 @@ export async function acceptCareShiftHandoff(input: {
   careRecipientId: string;
   handoffId: string;
   note: string;
+  concernFlagged?: boolean;
+  concernText?: string;
+  reviewedUrgentItems?: boolean;
 }): Promise<CareShiftHandoffAcknowledgement> {
   const {
     data: { user },
@@ -135,9 +162,17 @@ export async function acceptCareShiftHandoff(input: {
       handoff_id: input.handoffId,
       accepted_by: user.id,
       note: input.note.trim().slice(0, 2000) || null,
+      concern_flagged: Boolean(input.concernFlagged),
+      concern_text: input.concernFlagged
+        ? input.concernText?.trim().slice(0, 2000) || input.note.trim().slice(0, 2000) || null
+        : null,
+      reviewed_urgent_items:
+        input.reviewedUrgentItems === undefined
+          ? true
+          : Boolean(input.reviewedUrgentItems),
     })
     .select(
-      "id, care_recipient_id, handoff_id, accepted_by, note, accepted_at, created_at",
+      "id, care_recipient_id, handoff_id, accepted_by, note, concern_flagged, concern_text, reviewed_urgent_items, accepted_at, created_at",
     )
     .single();
 
@@ -154,6 +189,12 @@ export async function acceptCareShiftHandoff(input: {
     handoffId: data.handoff_id,
     acceptedBy: data.accepted_by ?? null,
     note: data.note ?? "",
+    concernFlagged: Boolean(data.concern_flagged),
+    concernText: data.concern_text ?? "",
+    reviewedUrgentItems:
+      data.reviewed_urgent_items === undefined
+        ? true
+        : Boolean(data.reviewed_urgent_items),
     acceptedAt: data.accepted_at,
     createdAt: data.created_at,
   };
@@ -200,7 +241,7 @@ export async function createCareShiftHandoff(input: {
       follow_up_snapshot: input.followUpSnapshot,
     })
     .select(
-      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, requires_acknowledgement, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, created_at",
+      "id, care_recipient_id, created_by, handoff_to, shift_label, note, open_task_snapshot, completed_task_snapshot, briefing_version, requires_acknowledgement, briefing_window_start, medication_activity_snapshot, communication_snapshot, coordination_snapshot, next_appointment_snapshot, follow_up_snapshot, care_plan_snapshot, transition_snapshot, medication_reconciliation_snapshot, created_at",
     )
     .single();
 
