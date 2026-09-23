@@ -1,4 +1,8 @@
 import { supabase } from "./supabase";
+import {
+  loadCareSchedule,
+  type CareShift,
+} from "./careSchedule";
 import type {
   CaregiverShiftSession,
   CaregiverShiftSessionNote,
@@ -20,6 +24,7 @@ export type CareContinuityData = {
   handoffs: CareShiftHandoff[];
   acknowledgements: CareShiftHandoffAcknowledgement[];
   attendance: CareShiftAttendance[];
+  shifts: CareShift[];
 };
 
 function mapSession(row: any): CaregiverShiftSession {
@@ -58,6 +63,7 @@ export async function loadCareContinuityData(
     handoffs,
     acknowledgements,
     attendance,
+    schedule,
   ] = await Promise.all([
     supabase
       .from("caregiver_shift_sessions")
@@ -78,6 +84,7 @@ export async function loadCareContinuityData(
     loadCareShiftHandoffs(careRecipientId),
     loadCareShiftHandoffAcknowledgements(careRecipientId),
     loadShiftAttendance(careRecipientId),
+    loadCareSchedule(careRecipientId),
   ]);
 
   if (sessionsResult.error) throw sessionsResult.error;
@@ -89,5 +96,6 @@ export async function loadCareContinuityData(
     handoffs,
     acknowledgements,
     attendance,
+    shifts: schedule.shifts,
   };
 }
