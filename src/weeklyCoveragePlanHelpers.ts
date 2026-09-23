@@ -126,6 +126,48 @@ export function defaultWeeklyApprovalDeadlineIso(
   return new Date(target).toISOString();
 }
 
+export function weeklyApprovalNudgeState(
+  approvalDeadlineAt: string | null,
+  now = new Date(),
+) {
+  if (!approvalDeadlineAt) return null;
+
+  const deadline = new Date(approvalDeadlineAt).getTime();
+  const current = now.getTime();
+  if (!Number.isFinite(deadline) || !Number.isFinite(current)) return null;
+
+  const remainingMs = deadline - current;
+  if (remainingMs <= 0) {
+    return {
+      stage: "expired" as const,
+      remainingMs,
+      label: "Response deadline reached",
+    };
+  }
+
+  if (remainingMs <= 60 * 60_000) {
+    return {
+      stage: "one_hour" as const,
+      remainingMs,
+      label: "Final 1-hour reminder window",
+    };
+  }
+
+  if (remainingMs <= 6 * 60 * 60_000) {
+    return {
+      stage: "six_hours" as const,
+      remainingMs,
+      label: "6-hour reminder window",
+    };
+  }
+
+  return {
+    stage: "scheduled" as const,
+    remainingMs,
+    label: "Automatic reminders at 6 hours and 1 hour",
+  };
+}
+
 export function weeklyCoverageResponseCounts(
   statuses: Array<
     "proposed" | "pending" | "accepted" | "declined" | "open_coverage" | "cancelled"
