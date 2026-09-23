@@ -153,7 +153,8 @@ export function PrivacyDataScreen() {
           portable copy of another family’s complete care record. The export
           includes Care Vault metadata, care contacts, communication history,
           shared care tasks and completion history, caregiver availability
-          windows and recurring weekly availability rules, scheduled shifts,
+          windows and recurring weekly availability rules, recurring required-care
+          windows, scheduled shifts,
           check-in and attendance history, swap requests,
           recorded coverage-gap events, open caregiver coverage requests and
           caregiver responses, caregiver shift briefings (including
@@ -232,7 +233,7 @@ export function PrivacyDataScreen() {
           transition checklist, private Care Vault files, care contacts,
           communication history, shared care tasks and completion history,
           caregiver availability windows and recurring weekly availability
-          rules, scheduled shifts, check-in and attendance
+          rules, recurring required-care windows, scheduled shifts, check-in and attendance
           history, swap requests, coverage-gap history, open caregiver
           coverage requests and responses, caregiver shift briefings and their
           frozen snapshots, caregiver takeover acknowledgements
