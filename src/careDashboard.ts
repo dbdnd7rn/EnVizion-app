@@ -16,6 +16,21 @@ import { currentActionableConflicts } from "./careCoordinationWorkflowHelpers";
 import { loadCareSchedule } from "./careSchedule";
 import { loadCareTasks } from "./careTasks";
 import { loadCareTeam } from "./careTeam";
+import { loadCarePlan } from "./carePlan";
+import { carePlanTodaySummary } from "./carePlanHelpers";
+import { loadCareDocuments } from "./documents";
+import {
+  familyCommunicationCurrentUserId,
+  loadFamilyCommunicationCenter,
+} from "./familyCommunication";
+import { familyCommunicationSummary } from "./familyCommunicationHelpers";
+import { loadMedicationManagement } from "./medicationManagement";
+import { loadCareTransitionWorkspace } from "./careTransition";
+import {
+  ownerDocumentStatus,
+  ownerReconciliationStatus,
+} from "./ownerDashboardHelpers";
+import { supabase } from "./supabase";
 
 export async function loadFamilyCareDashboard(
   careRecipientId: string,
@@ -26,8 +41,21 @@ export async function loadFamilyCareDashboard(
   const end = new Date(start);
   end.setDate(end.getDate() + 7);
 
-  const [agenda, schedule, tasks, communications, workflow, roster] =
-    await Promise.all([
+  const [
+    agenda,
+    schedule,
+    tasks,
+    communications,
+    workflow,
+    roster,
+    carePlan,
+    documents,
+    familyCenter,
+    currentUserId,
+    medicationData,
+    transitionData,
+    emergencyResult,
+  ] = await Promise.all([
       loadCareAgendaData({
         careRecipientId,
         rangeStartIso: start.toISOString(),
@@ -38,7 +66,20 @@ export async function loadFamilyCareDashboard(
       loadCareCommunications(careRecipientId),
       loadCoordinationWorkflow(careRecipientId),
       loadCareTeam(careRecipientId),
+      loadCarePlan(careRecipientId),
+      loadCareDocuments(careRecipientId, { includeArchived: true }),
+      loadFamilyCommunicationCenter(careRecipientId),
+      familyCommunicationCurrentUserId(),
+      loadMedicationManagement(careRecipientId),
+      loadCareTransitionWorkspace(careRecipientId),
+      supabase
+        .from("care_emergency_profiles")
+        .select("last_reviewed_at")
+        .eq("care_recipient_id", careRecipientId)
+        .maybeSingle(),
     ]);
+
+  if (emergencyResult.error) throw emergencyResult.error;
 
   const conflicts = detectCoordinationConflicts({
     agenda,
@@ -65,6 +106,27 @@ export async function loadFamilyCareDashboard(
     now,
     limit: 5,
   });
+
+  const carePlanSummary = carePlanTodaySummary(
+    carePlan.items,
+    carePlan.completions,
+    now,
+  );
+  const familySummary = familyCommunicationSummary(
+    familyCenter.updates,
+    familyCenter.acknowledgements,
+    currentUserId,
+  );
+  const documentStatus = ownerDocumentStatus(documents, now);
+  const latestReconciliation =
+    medicationData.reconciliations[0] ?? null;
+  const reconciliationStatus = ownerReconciliationStatus(
+    latestReconciliation?.createdAt ?? null,
+    now,
+  );
+  const openTransitionFollowUps = transitionData.followUps.filter(
+    (followUp) => followUp.status === "open",
+  );
 
   const memberMap = new Map(
     roster.members.map((member) => [member.userId, member]),
@@ -111,6 +173,25 @@ export async function loadFamilyCareDashboard(
     ),
     attention,
     caregiverName,
+    ownerSummary: {
+      carePlan: carePlanSummary,
+      family: familySummary,
+      documents: documentStatus,
+      medication: {
+        activeCount: medicationData.medications.filter(
+          (medication) => medication.active,
+        ).length,
+        reconciliationLabel: reconciliationStatus.label,
+        reconciliationNeedsReview: reconciliationStatus.needsReview,
+      },
+      transition: {
+        active: transitionData.plan?.status === "active",
+        openFollowUps: openTransitionFollowUps.length,
+      },
+      emergency: {
+        lastReviewedAt: emergencyResult.data?.last_reviewed_at ?? null,
+      },
+    },
   };
 }
 
