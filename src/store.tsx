@@ -55,6 +55,7 @@ type Action =
     }
   | { type: "correct-med"; id: string; at: string }
   | { type: "edit-med"; medication: Medication }
+  | { type: "remove-med"; id: string }
   | {
       type: "add-med";
       medication: Medication;
@@ -191,6 +192,14 @@ function reducer(state: State, action: Action): State {
         ...state,
         medications: [...state.medications, action.medication],
       };
+    case "remove-med": {
+      const { [action.id]: _removed, ...remainingMeds } = state.meds;
+      return {
+        ...state,
+        medications: state.medications.filter((m) => m.id !== action.id),
+        meds: remainingMeds,
+      };
+    }
     case "transition":
       return {
         ...state,
