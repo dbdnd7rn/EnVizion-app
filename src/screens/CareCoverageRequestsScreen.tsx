@@ -104,6 +104,7 @@ function blankDraft(startsAt?: string, endsAt?: string): Draft {
 
 function statusCopy(request: CareCoverageRequest, now = new Date()) {
   if (request.status === "filled") return "Filled";
+  if (request.status === "reserved") return "Reserved for weekly approval";
   if (request.status === "cancelled") return "Cancelled";
   if (coverageRequestWindowState(request, now) === "ended") return "Expired";
   if (coverageRequestWindowState(request, now) === "active") return "Open now";
@@ -113,6 +114,7 @@ function statusCopy(request: CareCoverageRequest, now = new Date()) {
 function statusBackground(request: CareCoverageRequest, now = new Date()) {
   const label = statusCopy(request, now);
   if (label === "Filled") return "#EAF4EF";
+  if (label === "Reserved for weekly approval") return "#F0E8F3";
   if (label === "Open now") return "#FFF1E5";
   if (label === "Open") return C.lavender;
   return "#F1EDEF";
@@ -443,6 +445,11 @@ export function CareCoverageRequestsScreen({ route }: Props) {
           <Text style={S.eyebrow}>OPEN</Text>
           <Text style={S.h2}>{counts.open}</Text>
           <Txt style={S.small}>Coverage requests</Txt>
+        </Card>
+        <Card style={{ flex: 1, minWidth: 130 }}>
+          <Text style={S.eyebrow}>RESERVED</Text>
+          <Text style={S.h2}>{counts.reserved}</Text>
+          <Txt style={S.small}>Weekly approval</Txt>
         </Card>
         <Card style={{ flex: 1, minWidth: 130 }}>
           <Text style={S.eyebrow}>FILLED</Text>
@@ -817,6 +824,28 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                     </Txt>
                   )}
                 </>
+              )}
+
+              {request.status === "reserved" && (
+                <Card style={{ backgroundColor: "#F0E8F3" }}>
+                  <View style={S.row}>
+                    <Icon name="checkmark-done-outline" color={C.purple} />
+                    <View style={{ flex: 1, gap: 3 }}>
+                      <Text style={S.h3}>Reserved for weekly approval</Text>
+                      <Txt style={S.small}>
+                        The care owner included this window in a published weekly
+                        plan. The selected caregiver can accept or decline it
+                        there. Backup matching resumes automatically if they
+                        decline.
+                      </Txt>
+                    </View>
+                  </View>
+                  <Button
+                    title="Open weekly coverage approval"
+                    secondary
+                    onPress={() => n.navigate("WeeklyCoveragePlan")}
+                  />
+                </Card>
               )}
 
               {request.status === "filled" && (
