@@ -883,6 +883,12 @@ export function CareScheduleScreen() {
         onPress={() => n.navigate("CareAnalytics")}
       />
       <Button
+        title="Recurring care coverage requirements"
+        secondary
+        icon="time-outline"
+        onPress={() => n.navigate("CareCoverageRequirements")}
+      />
+      <Button
         title="Smart Coverage Planner"
         secondary
         icon="sparkles-outline"
