@@ -99,3 +99,54 @@ export function orderedCoverageRequests(
     return time(b.updatedAt) - time(a.updatedAt);
   });
 }
+
+
+export type CoverageEscalationStage = 0 | 1 | 2 | 3;
+
+export function coverageEscalationStage(
+  request: Pick<CareCoverageRequest, "status" | "startsAt" | "endsAt">,
+  now = new Date(),
+): CoverageEscalationStage {
+  if (request.status !== "open") return 0;
+
+  const current = now.getTime();
+  const start = time(request.startsAt);
+  const end = time(request.endsAt);
+
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= current) {
+    return 0;
+  }
+
+  const remaining = start - current;
+  if (remaining <= 60 * 60_000) return 3;
+  if (remaining <= 4 * 60 * 60_000) return 2;
+  if (remaining <= 12 * 60 * 60_000) return 1;
+  return 0;
+}
+
+export function coverageEscalationLabel(stage: CoverageEscalationStage) {
+  if (stage === 3) return "Stage 3 · urgent backup broadcast";
+  if (stage === 2) return "Stage 2 · matching available caregivers";
+  if (stage === 1) return "Stage 1 · preferred backup caregivers";
+  return "Open Coverage · staged escalation not active yet";
+}
+
+export function coverageWindowCountdownLabel(
+  request: Pick<CareCoverageRequest, "startsAt" | "endsAt">,
+  now = new Date(),
+) {
+  const current = now.getTime();
+  const start = time(request.startsAt);
+  const end = time(request.endsAt);
+
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return "Time unavailable";
+  if (end <= current) return "Coverage window ended";
+
+  const target = start > current ? start : end;
+  const minutes = Math.max(0, Math.ceil((target - current) / 60_000));
+  const label = coverageRequestDurationLabel(minutes);
+
+  return start > current
+    ? `Starts in ${label}`
+    : `Coverage active · ${label} remaining`;
+}
