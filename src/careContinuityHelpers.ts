@@ -53,7 +53,7 @@ export function buildCareContinuityTimeline(input: {
 
   for (const session of input.sessions) {
     events.push({
-      id: \`session-start:\${session.id}\`,
+      id: `session-start:${session.id}`,
       kind: "session_started",
       at: session.startedAt,
       actorUserId: session.caregiverId,
@@ -65,7 +65,7 @@ export function buildCareContinuityTimeline(input: {
 
     if (session.endedAt) {
       events.push({
-        id: \`session-end:\${session.id}\`,
+        id: `session-end:${session.id}`,
         kind: "session_ended",
         at: session.endedAt,
         actorUserId: session.caregiverId,
@@ -81,7 +81,7 @@ export function buildCareContinuityTimeline(input: {
 
   for (const note of input.notes) {
     events.push({
-      id: \`note:\${note.id}\`,
+      id: `note:${note.id}`,
       kind: "shift_note",
       at: note.createdAt,
       actorUserId: note.createdBy,
@@ -94,7 +94,7 @@ export function buildCareContinuityTimeline(input: {
 
   for (const handoff of input.handoffs) {
     events.push({
-      id: \`handoff:\${handoff.id}\`,
+      id: `handoff:${handoff.id}`,
       kind: "handoff_created",
       at: handoff.createdAt,
       actorUserId: handoff.createdBy,
@@ -109,7 +109,7 @@ export function buildCareContinuityTimeline(input: {
 
   for (const acknowledgement of input.acknowledgements) {
     events.push({
-      id: \`handoff-ack:\${acknowledgement.id}\`,
+      id: `handoff-ack:${acknowledgement.id}`,
       kind: "handoff_acknowledged",
       at: acknowledgement.acceptedAt,
       actorUserId: acknowledgement.acceptedBy,
@@ -124,7 +124,7 @@ export function buildCareContinuityTimeline(input: {
 
   for (const item of input.attendance) {
     events.push({
-      id: \`attendance-in:\${item.id}\`,
+      id: `attendance-in:${item.id}`,
       kind: "attendance_checkin",
       at: item.checkedInAt,
       actorUserId: item.caregiverId,
@@ -132,7 +132,7 @@ export function buildCareContinuityTimeline(input: {
       title: "Scheduled shift check-in",
       detail: [
         item.lateMinutes > 0
-          ? \`\${item.lateMinutes} min after scheduled start\`
+          ? `${item.lateMinutes} min after scheduled start`
           : "On time",
         clean(item.checkInNote),
       ]
@@ -143,7 +143,7 @@ export function buildCareContinuityTimeline(input: {
 
     if (item.checkedOutAt) {
       events.push({
-        id: \`attendance-out:\${item.id}\`,
+        id: `attendance-out:${item.id}`,
         kind: "attendance_checkout",
         at: item.checkedOutAt,
         actorUserId: item.caregiverId,
