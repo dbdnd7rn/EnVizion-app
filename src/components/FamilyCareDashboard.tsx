@@ -104,6 +104,11 @@ export function FamilyCareDashboard({
   onOpenMedications,
   onOpenCommunications,
   onOpenCoordination,
+  onOpenCarePlan,
+  onOpenDocuments,
+  onOpenFamilyCommunication,
+  onOpenTransition,
+  onOpenEmergency,
 }: {
   careRecipientId: string | null;
   careRecipientName: string;
@@ -115,6 +120,11 @@ export function FamilyCareDashboard({
   onOpenMedications: () => void;
   onOpenCommunications: () => void;
   onOpenCoordination: () => void;
+  onOpenCarePlan: () => void;
+  onOpenDocuments: () => void;
+  onOpenFamilyCommunication: () => void;
+  onOpenTransition: () => void;
+  onOpenEmergency: () => void;
 }) {
   const [snapshot, setSnapshot] =
     useState<FamilyCareDashboardSnapshot | null>(null);
@@ -288,6 +298,156 @@ export function FamilyCareDashboard({
               : "Caregiver access · shared family care picture"}
         </Text>
       </Card>
+
+      {accessRole === "owner" && snapshot?.ownerSummary && (
+        <>
+          <Section title="Owner command center" />
+          <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+            <Card
+              onPress={onOpenCarePlan}
+              label="Today's care plan"
+              style={{ flex: 1, minWidth: 220 }}
+            >
+              <View style={S.between}>
+                <Icon name="list-outline" size={23} />
+                <Text style={[S.small, { color: C.purple }]}>Today</Text>
+              </View>
+              <Text style={S.h3}>
+                {snapshot.ownerSummary.carePlan.completed}/
+                {snapshot.ownerSummary.carePlan.total} routines complete
+              </Text>
+              <Txt style={S.small}>
+                {snapshot.ownerSummary.carePlan.remaining
+                  ? `${snapshot.ownerSummary.carePlan.remaining} remaining today`
+                  : snapshot.ownerSummary.carePlan.total
+                    ? "Today’s recurring plan is complete."
+                    : "No recurring routines scheduled today."}
+              </Txt>
+            </Card>
+
+            <Card
+              onPress={onOpenMedications}
+              label="Medication reconciliation"
+              style={{ flex: 1, minWidth: 220 }}
+            >
+              <View style={S.between}>
+                <Icon name="git-compare-outline" size={23} />
+                {snapshot.ownerSummary.medication.reconciliationNeedsReview && (
+                  <View style={[S.pill, { backgroundColor: "#FFF1E5" }]}>
+                    <Text style={[S.small, { color: C.rose }]}>Review</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={S.h3}>
+                {snapshot.ownerSummary.medication.reconciliationLabel}
+              </Text>
+              <Txt style={S.small}>
+                {snapshot.ownerSummary.medication.activeCount} active medication
+                {snapshot.ownerSummary.medication.activeCount === 1 ? "" : "s"}
+              </Txt>
+            </Card>
+
+            <Card
+              onPress={onOpenFamilyCommunication}
+              label="Family updates"
+              style={{ flex: 1, minWidth: 220 }}
+            >
+              <View style={S.between}>
+                <Icon name="chatbubbles-outline" size={23} />
+                <Text
+                  style={[
+                    S.small,
+                    {
+                      color: snapshot.ownerSummary.family.needsMyAcknowledgement
+                        ? C.rose
+                        : C.purple,
+                    },
+                  ]}
+                >
+                  {snapshot.ownerSummary.family.needsMyAcknowledgement} needs you
+                </Text>
+              </View>
+              <Text style={S.h3}>
+                {snapshot.ownerSummary.family.total} recent family update
+                {snapshot.ownerSummary.family.total === 1 ? "" : "s"}
+              </Text>
+              <Txt style={S.small}>
+                {snapshot.ownerSummary.family.important} marked important
+              </Txt>
+            </Card>
+
+            <Card
+              onPress={onOpenTransition}
+              label="Hospital-to-home transition"
+              style={{ flex: 1, minWidth: 220 }}
+            >
+              <View style={S.between}>
+                <Icon name="home-outline" size={23} />
+                <Text style={[S.small, { color: C.purple }]}>
+                  {snapshot.ownerSummary.transition.active ? "Active" : "No active plan"}
+                </Text>
+              </View>
+              <Text style={S.h3}>
+                {snapshot.ownerSummary.transition.openFollowUps} open follow-up
+                {snapshot.ownerSummary.transition.openFollowUps === 1 ? "" : "s"}
+              </Text>
+              <Txt style={S.small}>
+                Discharge plan and follow-up readiness
+              </Txt>
+            </Card>
+
+            <Card
+              onPress={onOpenEmergency}
+              label="Emergency information"
+              style={{ flex: 1, minWidth: 220 }}
+            >
+              <View style={S.between}>
+                <Icon name="alert-circle-outline" size={23} />
+                <Text style={[S.small, { color: C.purple }]}>Preparedness</Text>
+              </View>
+              <Text style={S.h3}>
+                {snapshot.ownerSummary.emergency.lastReviewedAt
+                  ? "Emergency information reviewed"
+                  : "Emergency review still needed"}
+              </Text>
+              <Txt style={S.small}>
+                {snapshot.ownerSummary.emergency.lastReviewedAt
+                  ? dateTimeLabel(snapshot.ownerSummary.emergency.lastReviewedAt)
+                  : "Open the center to confirm quick-reference information."}
+              </Txt>
+            </Card>
+
+            <Card
+              onPress={onOpenDocuments}
+              label="Care Document Vault"
+              style={{ flex: 1, minWidth: 220 }}
+            >
+              <View style={S.between}>
+                <Icon name="folder-open-outline" size={23} />
+                <Text
+                  style={[
+                    S.small,
+                    {
+                      color: snapshot.ownerSummary.documents.reviewAttention
+                        ? C.rose
+                        : C.purple,
+                    },
+                  ]}
+                >
+                  {snapshot.ownerSummary.documents.reviewAttention} need review
+                </Text>
+              </View>
+              <Text style={S.h3}>
+                {snapshot.ownerSummary.documents.keyDocuments} key document
+                {snapshot.ownerSummary.documents.keyDocuments === 1 ? "" : "s"}
+              </Text>
+              <Txt style={S.small}>
+                Quick-reference and review-due records
+              </Txt>
+            </Card>
+          </View>
+        </>
+      )}
 
       <Section title="What needs attention now" />
       {snapshot?.attention.length ? (
