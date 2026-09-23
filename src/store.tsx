@@ -1,7 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useState } from "react";
+import { AppState } from "react-native";
 import type { Appointment, Entry } from "./domain";
 import { loadCareData, type CareSnapshot } from "./backend";
 import type { CareRole } from "./careTeam";
+import type { CareSyncStatus } from "./careResilience";
 import {
   conversationReducer,
   initialConversation,
@@ -235,21 +237,36 @@ const Context = createContext<{
   dispatch: React.Dispatch<Action>;
   refresh: () => Promise<void>;
   loading: boolean;
+  syncStatus: CareSyncStatus;
+  lastSyncedAt: string | null;
+  syncError: string;
 } | null>(null);
 
 export function CareProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initial);
   const [loading, setLoading] = useState(true);
+  const [syncStatus, setSyncStatus] = useState<CareSyncStatus>("loading");
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
+  const [syncError, setSyncError] = useState("");
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    setSyncStatus((current) => (current === "synced" ? current : "loading"));
     try {
       const snapshot = await loadCareData();
       if (snapshot) {
         dispatch({ type: "hydrate-care", snapshot });
       }
-    } catch {
-      // Keep the app usable if the network is temporarily unavailable.
+      setLastSyncedAt(new Date().toISOString());
+      setSyncError("");
+      setSyncStatus("synced");
+    } catch (error) {
+      setSyncError(
+        error instanceof Error
+          ? error.message
+          : "Live care data could not be refreshed.",
+      );
+      setSyncStatus("stale");
     } finally {
       setLoading(false);
     }
@@ -259,8 +276,27 @@ export function CareProvider({ children }: { children: React.ReactNode }) {
     void refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        void refresh();
+      }
+    });
+    return () => subscription.remove();
+  }, [refresh]);
+
   return (
-    <Context.Provider value={{ state, dispatch, refresh, loading }}>
+    <Context.Provider
+      value={{
+        state,
+        dispatch,
+        refresh,
+        loading,
+        syncStatus,
+        lastSyncedAt,
+        syncError,
+      }}
+    >
       {children}
     </Context.Provider>
   );
