@@ -79,6 +79,7 @@ import {
 } from "../shiftAttendanceHelpers";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
+import { useCarePresence } from "../CarePresenceProvider";
 import {
   Button,
   C,
@@ -161,8 +162,24 @@ function MemberChoice({
 export function CareShiftBoardScreen() {
   const n = useNav();
   const { state } = useCare();
+  const { setActivity } = useCarePresence();
   const careRecipientId = state.careRecipientId;
   const readOnly = state.accessRole === "viewer";
+
+  useEffect(() => {
+    setActivity({
+      mode: "handoff_review",
+      screenKey: "shift_board",
+      sessionId: null,
+    });
+    return () => {
+      setActivity({
+        mode: "workspace",
+        screenKey: "care_workspace",
+        sessionId: null,
+      });
+    };
+  }, [setActivity]);
 
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
