@@ -9,9 +9,9 @@ const pilot: any = {
 
 const operations: any = {
   openDiagnostics: 0,
-  failedPackets24h: 0,
-  failedPushes24h: 0,
-  staleSupport48h: 0,
+  failedPacketExports24h: 0,
+  pushDeliveryErrors24h: 0,
+  staleSupportRequests: 0,
 };
 
 test("launch readiness is ready when operational signals are clear", () => {
@@ -31,7 +31,7 @@ test("launch readiness is ready when operational signals are clear", () => {
 test("launch readiness blocks on packet failures", () => {
   const result = launchReadiness({
     pilot,
-    operations: { ...operations, failedPackets24h: 1 },
+    operations: { ...operations, failedPacketExports24h: 1 },
     publishedRequiredDocuments: 3,
   });
 
