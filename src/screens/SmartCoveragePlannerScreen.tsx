@@ -392,6 +392,12 @@ export function SmartCoveragePlannerScreen() {
 
       <View style={{ gap: 9 }}>
         <Button
+          title="Review & publish weekly coverage"
+          secondary
+          icon="checkmark-done-outline"
+          onPress={() => n.navigate("WeeklyCoveragePlan")}
+        />
+        <Button
           title="Recurring care coverage requirements"
           secondary
           icon="time-outline"
