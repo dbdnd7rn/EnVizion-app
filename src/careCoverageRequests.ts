@@ -1,6 +1,10 @@
 import { supabase } from "./supabase";
 
-export type CareCoverageRequestStatus = "open" | "filled" | "cancelled";
+export type CareCoverageRequestStatus =
+  | "open"
+  | "reserved"
+  | "filled"
+  | "cancelled";
 export type CareCoverageResponseValue = "accepted" | "declined";
 
 export type CareCoverageRequest = {
