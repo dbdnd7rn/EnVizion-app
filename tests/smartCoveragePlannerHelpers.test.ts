@@ -328,6 +328,20 @@ test("planner summary separates ready, review, and blocked needs", () => {
         "2026-09-26T15:00:00Z",
         "2026-09-26T19:00:00Z",
       ),
+      availability(
+        "blocked-ready",
+        "ready-user",
+        "unavailable",
+        "2026-09-26T15:00:00Z",
+        "2026-09-26T19:00:00Z",
+      ),
+      availability(
+        "blocked-review",
+        "review-user",
+        "unavailable",
+        "2026-09-26T15:00:00Z",
+        "2026-09-26T19:00:00Z",
+      ),
     ],
     recurringAvailability: [],
     shifts: [
