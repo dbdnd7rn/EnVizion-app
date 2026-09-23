@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import {
   deleteCareRecipientData,
@@ -8,6 +8,13 @@ import {
   exportCareRecipientData,
 } from "../accountData";
 import { useAuth } from "../auth";
+import { submitTechnicalDiagnostic } from "../diagnostics";
+import {
+  loadSessionSecuritySummary,
+  sessionExpiryLabel,
+  signOutOtherDevices,
+  type SessionSecuritySummary,
+} from "../sessionSecurity";
 import { useCare } from "../store";
 import {
   Button,
@@ -35,17 +42,39 @@ function safeFilename(value: string) {
 export function PrivacyDataScreen() {
   const n = useNav();
   const { user, requestPasswordReset } = useAuth();
-  const { state, refresh } = useCare();
+  const {
+    state,
+    refresh,
+    syncStatus,
+    lastSyncedAt,
+    syncError,
+  } = useCare();
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [careConfirmation, setCareConfirmation] = useState("");
   const [deleteWord, setDeleteWord] = useState("");
   const [deleteEmail, setDeleteEmail] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
+  const [sessionSummary, setSessionSummary] =
+    useState<SessionSecuritySummary | null>(null);
 
   const isOwner = state.accessRole === "owner";
   const hasCareProfile = Boolean(state.careRecipientId);
   const accountEmail = user?.email ?? "";
+
+  useEffect(() => {
+    let active = true;
+    void loadSessionSecuritySummary()
+      .then((summary) => {
+        if (active) setSessionSummary(summary);
+      })
+      .catch(() => {
+        if (active) setSessionSummary(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function run(
     key: string,
@@ -102,6 +131,30 @@ export function PrivacyDataScreen() {
           Password changes are completed through a secure recovery link and
           sign you out when finished.
         </Txt>
+        {sessionSummary?.active && (
+          <Txt style={S.small}>
+            {sessionExpiryLabel(sessionSummary.expiresAt)}
+          </Txt>
+        )}
+        <Button
+          title={
+            busy === "other-sessions"
+              ? "Revoking other sessions…"
+              : "Sign out other devices"
+          }
+          secondary
+          disabled={busy !== null}
+          icon="log-out-outline"
+          onPress={() =>
+            void run(
+              "other-sessions",
+              async () => {
+                await signOutOtherDevices();
+              },
+              "Other signed-in devices have been revoked. This device stays signed in.",
+            )
+          }
+        />
         <Button
           title={busy === "password" ? "Sending link…" : "Send password reset link"}
           secondary
@@ -114,6 +167,54 @@ export function PrivacyDataScreen() {
                 if (error) throw new Error(error);
               },
               "If this account can receive recovery email, a password-reset link has been sent.",
+            )
+          }
+        />
+      </Card>
+
+      <Section title="Technical diagnostics" />
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Icon name="pulse-outline" size={28} />
+        <Text style={S.h3}>Send privacy-minimized diagnostics</Text>
+        <Txt>
+          Send EnVizion operations a technical status report if the app is
+          failing to refresh or behave normally.
+        </Txt>
+        <Txt style={S.small}>
+          The report includes app/platform information, connection state and
+          last-sync timing. It does not include medication names, observations,
+          document contents, appointment notes, family messages or other care
+          record content.
+        </Txt>
+        <Button
+          title={
+            busy === "diagnostic"
+              ? "Sending diagnostics…"
+              : "Send technical diagnostics"
+          }
+          secondary
+          disabled={busy !== null}
+          icon="bug-outline"
+          onPress={() =>
+            void run(
+              "diagnostic",
+              async () => {
+                await submitTechnicalDiagnostic({
+                  careRecipientId: state.careRecipientId,
+                  area: "client_connectivity",
+                  summary:
+                    syncStatus === "stale"
+                      ? "Client reported stale care-data connection state"
+                      : "Client requested technical diagnostics review",
+                  details: {
+                    syncStatus,
+                    lastSyncedAt,
+                    hasSyncError: Boolean(syncError),
+                    accessRole: state.accessRole,
+                  },
+                });
+              },
+              "Technical diagnostics sent to EnVizion operations.",
             )
           }
         />
