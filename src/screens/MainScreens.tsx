@@ -7,6 +7,7 @@ import { useCare } from "../store";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
 import { FamilyCareDashboard } from "../components/FamilyCareDashboard";
+import { CareSyncBanner } from "../components/CareSyncBanner";
 import {
   Brand,
   Button,
@@ -81,6 +82,8 @@ export function HomeScreen() {
             </Pressable>
           </View>
         </View>
+        <CareSyncBanner />
+
         <View style={{ gap: 7 }}>
           <Text style={S.eyebrow}>YOUR CARE COMPANION</Text>
           <Text style={[S.title, { fontFamily: "DMSans_600SemiBold" }]}>
