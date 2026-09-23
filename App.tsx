@@ -35,6 +35,7 @@ import { CareAnalyticsScreen } from "./src/screens/CareAnalyticsScreen";
 import { CareCoordinationInboxScreen } from "./src/screens/CareCoordinationInboxScreen";
 import { CareContinuityScreen } from "./src/screens/CareContinuityScreen";
 import { CareCoverageRequestsScreen } from "./src/screens/CareCoverageRequestsScreen";
+import { CoverageInsightsScreen } from "./src/screens/CoverageInsightsScreen";
 import { SmartCoveragePlannerScreen } from "./src/screens/SmartCoveragePlannerScreen";
 import { WeeklyCoveragePlanScreen } from "./src/screens/WeeklyCoveragePlanScreen";
 import { CareCoverageRequirementsScreen } from "./src/screens/CareCoverageRequirementsScreen";
@@ -298,6 +299,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="SmartCoveragePlanner"
             component={SmartCoveragePlannerScreen}
             options={{ title: "Smart Coverage Planner" }}
+          />
+          <Stack.Screen
+            name="CoverageInsights"
+            component={CoverageInsightsScreen}
+            options={{ title: "Caregiver coverage insights" }}
           />
           <Stack.Screen
             name="CareCoverageRequests"
