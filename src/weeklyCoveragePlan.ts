@@ -87,6 +87,7 @@ function mapSlot(row: any): CareWeeklyCoverageSlot {
     respondedAt: row.responded_at ?? null,
     shiftId: row.shift_id ?? null,
     coverageRequestId: row.coverage_request_id ?? null,
+    timedOutAt: row.timed_out_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
