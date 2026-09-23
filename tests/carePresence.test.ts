@@ -5,7 +5,7 @@ import {
   presenceModeLabel,
   presenceScreenLabel,
   type CareWorkspacePresence,
-} from "../src/carePresence.ts";
+} from "../src/carePresenceHelpers.ts";
 
 function row(lastSeenAt: string): CareWorkspacePresence {
   return {
