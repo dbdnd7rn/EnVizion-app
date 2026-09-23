@@ -104,6 +104,11 @@ export function HomeScreen() {
           onOpenMedications={() => n.navigate("Medications")}
           onOpenCommunications={() => n.navigate("CareCommunicationLog")}
           onOpenCoordination={() => n.navigate("CareCoordinationInbox")}
+          onOpenCarePlan={() => n.navigate("CarePlan")}
+          onOpenDocuments={() => n.navigate("CareDocuments")}
+          onOpenFamilyCommunication={() => n.navigate("FamilyCommunication")}
+          onOpenTransition={() => n.navigate("Transition")}
+          onOpenEmergency={() => n.navigate("Emergency")}
         />
 
         <Card
@@ -188,24 +193,12 @@ export function HomeScreen() {
             action="My toolkit"
             onPress={() => n.navigate("Main", { screen: "Toolkit" })}
           />
-          <View style={S.between}>
-            <Txt style={{ fontSize: 12 }}>Your care routine</Txt>
-            <Text style={[S.small, { color: C.purple }]}>
-              {completed} of 2 complete
-            </Text>
-          </View>
-          <View
-            style={{ height: 4, backgroundColor: "#E9E0ED", borderRadius: 4 }}
-          >
-            <View
-              style={{
-                height: 4,
-                width: `${(completed / 2) * 100}%`,
-                backgroundColor: C.purple,
-                borderRadius: 4,
-              }}
-            />
-          </View>
+          <Row
+            title="Open today’s care plan"
+            subtitle="See recurring routines and what remains today"
+            icon="list-outline"
+            onPress={() => n.navigate("CarePlan")}
+          />
           <View style={{ flexDirection: "row", gap: 12 }}>
             <QuickCard
               title="Record health"
@@ -297,14 +290,20 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareContacts")}
           />
           <Row
-            title="Care notes & communication log"
-            subtitle="Track calls, updates, outcomes, and follow-ups"
+            title="Family communication"
+            subtitle="Share care-team updates and track acknowledgements"
             icon="chatbubbles-outline"
+            onPress={() => n.navigate("FamilyCommunication")}
+          />
+          <Row
+            title="Provider & insurance communication"
+            subtitle="Track calls, portal messages, outcomes, and follow-ups"
+            icon="document-text-outline"
             onPress={() => n.navigate("CareCommunicationLog")}
           />
           <Row
-            title="Handoff & visit packet"
-            subtitle="Create a focused PDF with only the care details you choose"
+            title="Care packet & printable summary"
+            subtitle="Build visit, handoff, or emergency information PDFs"
             icon="reader-outline"
             onPress={() => n.navigate("CarePacket")}
           />
@@ -559,16 +558,28 @@ export function ToolkitScreen() {
           onPress={() => n.navigate("CareContacts")}
         />
         <Row
-          title="Care notes & communication log"
-          subtitle="Calls, messages, hospital updates, decisions, and follow-ups"
+          title="Family communication center"
+          subtitle="Share family care updates and track acknowledgements"
           icon="chatbubbles-outline"
+          onPress={() => n.navigate("FamilyCommunication")}
+        />
+        <Row
+          title="Provider & insurance communication"
+          subtitle="Calls, portal messages, hospital updates, decisions, and follow-ups"
+          icon="document-text-outline"
           onPress={() => n.navigate("CareCommunicationLog")}
         />
         <Row
-          title="Handoff & visit packet"
-          subtitle="Build a privacy-controlled PDF for a visit or caregiver handoff"
+          title="Care packet & printable summary"
+          subtitle="Build privacy-controlled visit, handoff, and emergency PDFs"
           icon="reader-outline"
           onPress={() => n.navigate("CarePacket")}
+        />
+        <Row
+          title="Emergency Information Center"
+          subtitle="Quick contacts, key records, medication reconciliation, and preparedness"
+          icon="alert-circle-outline"
+          onPress={() => n.navigate("Emergency")}
         />
         <Row
           title="Hospital-to-home transition"
