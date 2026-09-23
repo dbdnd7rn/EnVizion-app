@@ -20,6 +20,7 @@ import {
 import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { AuthProvider, AuthScreen, PasswordRecoveryScreen, useAuth } from "./src/auth";
 import { CareProvider } from "./src/store";
+import { CarePresenceProvider } from "./src/CarePresenceProvider";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
 import { CareCalendarScreen } from "./src/screens/CareCalendarScreen";
@@ -32,6 +33,7 @@ import { OnShiftCaregiverScreen } from "./src/screens/OnShiftCaregiverScreen";
 import { CareScheduleScreen } from "./src/screens/CareScheduleScreen";
 import { CareAnalyticsScreen } from "./src/screens/CareAnalyticsScreen";
 import { CareCoordinationInboxScreen } from "./src/screens/CareCoordinationInboxScreen";
+import { CareContinuityScreen } from "./src/screens/CareContinuityScreen";
 import { CarePacketScreen } from "./src/screens/CarePacketScreen";
 import {
   AssistantScreen,
@@ -174,6 +176,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <NotificationsProvider>
       <CareProvider>
+        <CarePresenceProvider>
         <NavigationContainer
         theme={{
           ...DefaultTheme,
@@ -271,6 +274,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareCoordinationInbox"
             component={CareCoordinationInboxScreen}
             options={{ title: "Needs coordination" }}
+          />
+          <Stack.Screen
+            name="CareContinuity"
+            component={CareContinuityScreen}
+            options={{ title: "Live care team & continuity" }}
           />
           <Stack.Screen
             name="CarePacket"
@@ -374,6 +382,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           />
         </Stack.Navigator>
       </NavigationContainer>
+        </CarePresenceProvider>
       </CareProvider>
     </NotificationsProvider>
   );
