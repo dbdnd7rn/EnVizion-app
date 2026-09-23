@@ -21,6 +21,7 @@ import {
   type ProgramDocumentType,
 } from "../pilot";
 import { getStaffMembership } from "../staff";
+import { launchReadiness } from "../launchReadiness";
 import {
   Button,
   C,
@@ -155,6 +156,16 @@ export function PilotAdminScreen() {
     [documents],
   );
 
+  const readiness = useMemo(
+    () =>
+      launchReadiness({
+        pilot: summary,
+        operations,
+        publishedRequiredDocuments: currentDocuments.length,
+      }),
+    [currentDocuments.length, operations, summary],
+  );
+
   async function run(
     key: string,
     task: () => Promise<string | void>,
@@ -255,6 +266,64 @@ export function PilotAdminScreen() {
 
       {operations && (
         <>
+          <Section title="Launch readiness" />
+          <Card
+            style={{
+              backgroundColor:
+                readiness.level === "ready"
+                  ? "#E8F1ED"
+                  : readiness.level === "blocked"
+                    ? C.redBg
+                    : "#FFF9F2",
+            }}
+          >
+            <View style={S.between}>
+              <View style={{ flex: 1 }}>
+                <Text style={S.eyebrow}>RELEASE SIGNAL</Text>
+                <Text style={S.h2}>
+                  {readiness.level === "ready"
+                    ? "Operational signals are clear"
+                    : readiness.level === "blocked"
+                      ? "Release blockers need attention"
+                      : "Review before wider rollout"}
+                </Text>
+              </View>
+              <Icon
+                name={
+                  readiness.level === "ready"
+                    ? "checkmark-circle-outline"
+                    : readiness.level === "blocked"
+                      ? "close-circle-outline"
+                      : "warning-outline"
+                }
+                color={
+                  readiness.level === "ready"
+                    ? C.green
+                    : readiness.level === "blocked"
+                      ? C.rose
+                      : C.purple
+                }
+                size={30}
+              />
+            </View>
+            {!readiness.issues.length ? (
+              <Txt>
+                Consent, packet export, support aging, push delivery and
+                diagnostics currently show no release-readiness issues.
+              </Txt>
+            ) : (
+              readiness.issues.map((issue) => (
+                <Txt key={issue} style={S.small}>
+                  • {issue}
+                </Txt>
+              ))
+            )}
+            <Txt style={S.small}>
+              This is an operational checklist, not a clinical-safety,
+              regulatory, legal, or compliance certification.
+            </Txt>
+          </Card>
+
           <Section title="Production operations" />
           <Card style={{ backgroundColor: C.lavender }}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
