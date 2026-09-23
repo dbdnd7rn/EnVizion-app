@@ -133,6 +133,7 @@ test("backup matching ranks preferred then available then unspecified", () => {
       availability("a1", "caregiver-a", "preferred"),
       availability("a2", "caregiver-b", "available"),
     ],
+    recurringAvailability: [],
     shifts: [],
     responses: [],
   });
@@ -165,6 +166,7 @@ test("explicit unavailable overlap overrides a preferred availability window", (
         "2026-09-23T21:30:00.000Z",
       ),
     ],
+    recurringAvailability: [],
     shifts: [],
     responses: [],
   });
@@ -177,6 +179,7 @@ test("existing scheduled shift takes precedence over availability match", () => 
     request: request(),
     members: [member("caregiver-a", "Amina")],
     availability: [availability("a1", "caregiver-a", "preferred")],
+    recurringAvailability: [],
     shifts: [shift("shift-1", "caregiver-a")],
     responses: [],
   });
@@ -196,6 +199,7 @@ test("declined caregiver stays visible but is removed from escalation targets", 
       availability("a1", "caregiver-a", "preferred"),
       availability("a2", "caregiver-b", "available"),
     ],
+    recurringAvailability: [],
     shifts: [],
     responses: [
       {
@@ -235,6 +239,7 @@ test("escalation stages widen backup targets without including conflicts", () =>
       availability("a3", "unavailable", "unavailable"),
       availability("a4", "busy", "preferred"),
     ],
+    recurringAvailability: [],
     shifts: [shift("shift-busy", "busy")],
     responses: [],
   });
