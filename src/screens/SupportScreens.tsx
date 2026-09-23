@@ -936,6 +936,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Accessibility & display"
+        subtitle="Text scaling, reduced motion, screen-reader support, and touch targets"
+        icon="accessibility-outline"
+        onPress={() => n.navigate("Accessibility")}
+      />
+
+      <Row
         title="Notification preferences"
         subtitle="Push updates, quiet hours, and alert categories"
         icon="notifications-outline"
