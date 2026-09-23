@@ -58,6 +58,7 @@ export type RootStack = {
   Resources: undefined;
   Profile: undefined;
   PrivacyData: undefined;
+  Accessibility: undefined;
   CareTeam: undefined;
   Notifications: undefined;
   NotificationSettings: undefined;
