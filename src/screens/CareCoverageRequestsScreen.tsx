@@ -56,12 +56,14 @@ type Draft = {
 
 function defaultWindow(startsAt?: string, endsAt?: string) {
   const fallbackStart = new Date(Date.now() + 30 * 60_000);
-  const fallbackEnd = new Date(fallbackStart.getTime() + 2 * 60 * 60_000);
 
   const parsedStart =
     startsAt && Number.isFinite(new Date(startsAt).getTime())
       ? startsAt
       : fallbackStart.toISOString();
+  const fallbackEnd = new Date(
+    new Date(parsedStart).getTime() + 2 * 60 * 60_000,
+  );
   const parsedEnd =
     endsAt &&
     Number.isFinite(new Date(endsAt).getTime()) &&
