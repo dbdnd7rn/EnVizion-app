@@ -155,6 +155,31 @@ export async function respondCareCoverageRequest(input: {
   };
 }
 
+export async function assignCareCoverageRequest(input: {
+  requestId: string;
+  caregiverId: string;
+  note?: string;
+}) {
+  const { data, error } = await supabase.rpc("assign_care_coverage_request", {
+    p_request_id: input.requestId,
+    p_caregiver_id: input.caregiverId,
+    p_note: input.note?.trim() || null,
+  });
+
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row?.request_id || !row?.caregiver_id || !row?.shift_id) {
+    throw new Error("Coverage assignment was not completed.");
+  }
+
+  return {
+    requestId: String(row.request_id),
+    caregiverId: String(row.caregiver_id),
+    shiftId: String(row.shift_id),
+    requestStatus: String(row.request_status) as CareCoverageRequestStatus,
+  };
+}
+
 export async function cancelCareCoverageRequest(requestId: string) {
   const { error } = await supabase.rpc("cancel_care_coverage_request", {
     p_request_id: requestId,
