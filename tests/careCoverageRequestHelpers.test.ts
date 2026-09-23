@@ -11,7 +11,7 @@ import {
 
 function request(
   id: string,
-  status: "open" | "filled" | "cancelled",
+  status: "open" | "reserved" | "filled" | "cancelled",
   startsAt: string,
   endsAt: string,
   updatedAt = "2026-09-23T08:00:00.000Z",
@@ -118,15 +118,17 @@ test("latest caregiver response wins for a request", () => {
   );
 });
 
-test("coverage request counts separate open filled and cancelled", () => {
+test("coverage request counts separate open reserved filled and cancelled", () => {
   const rows = [
     request("open", "open", "2026-09-23T11:00:00.000Z", "2026-09-23T12:00:00.000Z"),
+    request("reserved", "reserved", "2026-09-23T11:00:00.000Z", "2026-09-23T12:00:00.000Z"),
     request("filled", "filled", "2026-09-23T11:00:00.000Z", "2026-09-23T12:00:00.000Z"),
     request("cancelled", "cancelled", "2026-09-23T11:00:00.000Z", "2026-09-23T12:00:00.000Z"),
   ];
 
   assert.deepEqual(coverageRequestCounts(rows), {
     open: 1,
+    reserved: 1,
     filled: 1,
     cancelled: 1,
   });
@@ -136,6 +138,7 @@ test("request board puts claimable open windows before history", () => {
   const now = new Date("2026-09-23T10:00:00.000Z");
   const rows = [
     request("filled", "filled", "2026-09-23T08:00:00.000Z", "2026-09-23T09:00:00.000Z"),
+    request("reserved", "reserved", "2026-09-23T11:30:00.000Z", "2026-09-23T12:30:00.000Z"),
     request("later", "open", "2026-09-23T13:00:00.000Z", "2026-09-23T14:00:00.000Z"),
     request("sooner", "open", "2026-09-23T11:00:00.000Z", "2026-09-23T12:00:00.000Z"),
     request("expired", "open", "2026-09-23T08:00:00.000Z", "2026-09-23T09:00:00.000Z"),
@@ -143,6 +146,6 @@ test("request board puts claimable open windows before history", () => {
 
   assert.deepEqual(
     orderedCoverageRequests(rows, now).map((item) => item.id),
-    ["sooner", "later", "filled", "expired"],
+    ["sooner", "later", "reserved", "filled", "expired"],
   );
 });
