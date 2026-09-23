@@ -26,6 +26,12 @@ export type RootStack = {
   CareAnalytics: undefined;
   CareCoordinationInbox: undefined;
   CareContinuity: undefined;
+  CareCoverageRequests:
+    | {
+        startsAt?: string;
+        endsAt?: string;
+      }
+    | undefined;
   CarePacket: undefined;
   Assistant: undefined;
   Handoff: undefined;
