@@ -36,6 +36,7 @@ import { CareCoordinationInboxScreen } from "./src/screens/CareCoordinationInbox
 import { CareContinuityScreen } from "./src/screens/CareContinuityScreen";
 import { CareCoverageRequestsScreen } from "./src/screens/CareCoverageRequestsScreen";
 import { SmartCoveragePlannerScreen } from "./src/screens/SmartCoveragePlannerScreen";
+import { CareCoverageRequirementsScreen } from "./src/screens/CareCoverageRequirementsScreen";
 import { CarePacketScreen } from "./src/screens/CarePacketScreen";
 import {
   AssistantScreen,
@@ -281,6 +282,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareContinuity"
             component={CareContinuityScreen}
             options={{ title: "Live care team & continuity" }}
+          />
+          <Stack.Screen
+            name="CareCoverageRequirements"
+            component={CareCoverageRequirementsScreen}
+            options={{ title: "Recurring care coverage" }}
           />
           <Stack.Screen
             name="SmartCoveragePlanner"
