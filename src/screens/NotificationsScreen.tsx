@@ -75,6 +75,11 @@ export function NotificationsScreen() {
         return;
       }
 
+      if (item.entityType === "care_coverage_request") {
+        n.navigate("CareCoverageRequests");
+        return;
+      }
+
       if (
         item.entityType === "care_shift" ||
         item.entityType === "care_shift_swap"
