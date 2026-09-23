@@ -14,6 +14,13 @@ import {
   coverageForecastRiskLabel,
   type CoverageForecastRisk,
 } from "../careCoverageForecastHelpers";
+import {
+  coverageForecastWindowKey,
+  loadCoverageForecastSnoozes,
+  snoozeCoverageForecastWindow,
+  unsnoozeCoverageForecastWindow,
+  type CoverageForecastSnooze,
+} from "../careCoverageForecastAlerts";
 import { loadCareSchedule } from "../careSchedule";
 import { loadCareTeam } from "../careTeam";
 import { buildSmartCoveragePlan } from "../smartCoveragePlannerHelpers";
@@ -69,6 +76,8 @@ export function CoverageForecastScreen({ navigation }: Props) {
     Awaited<ReturnType<typeof loadCoverageOperationalInsights>>["gapPatterns"]
   >([]);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
+  const [snoozes, setSnoozes] = useState<CoverageForecastSnooze[]>([]);
+  const [busySnoozeKey, setBusySnoozeKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
@@ -90,8 +99,14 @@ export function CoverageForecastScreen({ navigation }: Props) {
         now.getTime() + (horizonDays + 1) * 24 * 60 * 60_000,
       );
 
-      const [coverage, schedule, team, requirementRows, history] =
-        await Promise.all([
+      const [
+        coverage,
+        schedule,
+        team,
+        requirementRows,
+        history,
+        snoozeRows,
+      ] = await Promise.all([
           loadCareCoverageRequests(careRecipientId),
           loadCareSchedule(careRecipientId),
           loadCareTeam(careRecipientId),
@@ -101,6 +116,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
             endsAt: end.toISOString(),
           }),
           loadCoverageOperationalInsights(careRecipientId, 180),
+          loadCoverageForecastSnoozes(careRecipientId),
         ]);
 
       const needs = buildSmartCoveragePlan({
@@ -119,6 +135,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
       setPlanNeeds(needs);
       setOccurrences(requirementRows);
       setGapPatterns(history.gapPatterns);
+      setSnoozes(snoozeRows);
       setGeneratedAt(new Date().toISOString());
     } catch (error) {
       setMessage(
@@ -145,6 +162,116 @@ export function CoverageForecastScreen({ navigation }: Props) {
     [gapPatterns, occurrences, planNeeds],
   );
   const counts = useMemo(() => coverageForecastCounts(forecast), [forecast]);
+  const snoozeMap = useMemo(
+    () =>
+      new Map(
+        snoozes.map((snooze) => [
+          coverageForecastWindowKey(
+            snooze.requirementId,
+            snooze.startsAt,
+            snooze.endsAt,
+          ),
+          snooze,
+        ]),
+      ),
+    [snoozes],
+  );
+
+  async function snoozeWindow(
+    item: (typeof forecast)[number],
+    hours: 6 | 24 | 72,
+  ) {
+    if (!careRecipientId) return;
+
+    const key = coverageForecastWindowKey(
+      item.sourceId,
+      item.startsAt,
+      item.endsAt,
+    );
+    setBusySnoozeKey(key);
+    setMessage("");
+
+    try {
+      const snoozedUntil = await snoozeCoverageForecastWindow({
+        careRecipientId,
+        requirementId: item.sourceId,
+        startsAt: item.startsAt,
+        endsAt: item.endsAt,
+        hours,
+      });
+
+      setSnoozes((current) => [
+        ...current.filter(
+          (entry) =>
+            coverageForecastWindowKey(
+              entry.requirementId,
+              entry.startsAt,
+              entry.endsAt,
+            ) !== key,
+        ),
+        {
+          requirementId: item.sourceId,
+          startsAt: item.startsAt,
+          endsAt: item.endsAt,
+          snoozedUntil,
+        },
+      ]);
+      setMessage(
+        "Forecast alerts snoozed for this care window until " +
+          new Date(snoozedUntil).toLocaleString() +
+          ".",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not snooze this forecast window.",
+      );
+    } finally {
+      setBusySnoozeKey(null);
+    }
+  }
+
+  async function resumeWindow(item: (typeof forecast)[number]) {
+    if (!careRecipientId) return;
+
+    const key = coverageForecastWindowKey(
+      item.sourceId,
+      item.startsAt,
+      item.endsAt,
+    );
+    setBusySnoozeKey(key);
+    setMessage("");
+
+    try {
+      await unsnoozeCoverageForecastWindow({
+        careRecipientId,
+        requirementId: item.sourceId,
+        startsAt: item.startsAt,
+        endsAt: item.endsAt,
+      });
+
+      setSnoozes((current) =>
+        current.filter(
+          (entry) =>
+            coverageForecastWindowKey(
+              entry.requirementId,
+              entry.startsAt,
+              entry.endsAt,
+            ) !== key,
+        ),
+      );
+      setMessage("Forecast alerts resumed for this care window.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not resume forecast alerts for this window.",
+      );
+    } finally {
+      setBusySnoozeKey(null);
+    }
+  }
 
   if (!careRecipientId) {
     return (
@@ -262,6 +389,14 @@ export function CoverageForecastScreen({ navigation }: Props) {
             onPress={() => navigation.navigate("WeeklyCoveragePlan")}
           />
         </View>
+        <View style={{ flex: 1, minWidth: 150 }}>
+          <Button
+            title="Forecast alert settings"
+            secondary
+            icon="notifications-outline"
+            onPress={() => navigation.navigate("NotificationSettings")}
+          />
+        </View>
       </View>
 
       {Boolean(message) && (
@@ -289,7 +424,16 @@ export function CoverageForecastScreen({ navigation }: Props) {
           </Txt>
         </Card>
       ) : (
-        forecast.map((item) => (
+        forecast.map((item) => {
+          const snoozeKey = coverageForecastWindowKey(
+            item.sourceId,
+            item.startsAt,
+            item.endsAt,
+          );
+          const snooze = snoozeMap.get(snoozeKey) ?? null;
+          const snoozeBusy = busySnoozeKey === snoozeKey;
+
+          return (
           <Card key={item.id}>
             <View style={S.between}>
               <View style={{ flex: 1, gap: 4 }}>
@@ -355,7 +499,54 @@ export function CoverageForecastScreen({ navigation }: Props) {
             ))}
 
             {(item.risk === "high" || item.risk === "elevated") && (
-              <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+              <>
+                {snooze ? (
+                  <Card style={{ backgroundColor: C.lavender }}>
+                    <View style={S.row}>
+                      <Icon name="notifications-off-outline" color={C.purple} />
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={S.h3}>Alerts snoozed for this window</Text>
+                        <Txt style={S.small}>
+                          Resume automatically ·{" "}
+                          {new Date(snooze.snoozedUntil).toLocaleString()}
+                        </Txt>
+                      </View>
+                    </View>
+                    <Button
+                      title={snoozeBusy ? "Resuming alerts…" : "Resume alerts"}
+                      secondary
+                      disabled={snoozeBusy}
+                      icon="notifications-outline"
+                      onPress={() => void resumeWindow(item)}
+                    />
+                  </Card>
+                ) : (
+                  <Card style={{ backgroundColor: C.white }}>
+                    <View style={S.row}>
+                      <Icon name="moon-outline" color={C.purple} />
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <Text style={S.h3}>Snooze only this forecast window</Text>
+                        <Txt style={S.small}>
+                          Other forecast windows keep alerting normally.
+                        </Txt>
+                      </View>
+                    </View>
+                    <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+                      {([6, 24, 72] as const).map((hours) => (
+                        <View key={hours} style={{ flex: 1, minWidth: 110 }}>
+                          <Button
+                            title={"Snooze " + hours + "h"}
+                            secondary
+                            disabled={snoozeBusy}
+                            onPress={() => void snoozeWindow(item, hours)}
+                          />
+                        </View>
+                      ))}
+                    </View>
+                  </Card>
+                )}
+
+                <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
                 <View style={{ flex: 1, minWidth: 145 }}>
                   <Button
                     title="Review availability"
@@ -370,9 +561,11 @@ export function CoverageForecastScreen({ navigation }: Props) {
                   />
                 </View>
               </View>
+              </>
             )}
           </Card>
-        ))
+          );
+        })
       )}
 
       {generatedAt && (
