@@ -190,3 +190,48 @@ export async function cancelCareCoverageRequest(requestId: string) {
   });
   if (error) throw error;
 }
+
+
+export type CareCoverageCommandParticipant = {
+  userId: string;
+  displayName: string;
+  firstNotifiedAt: string | null;
+  lastNotifiedAt: string | null;
+  notificationCount: number;
+  highestEscalationStage: 1 | 2 | 3 | null;
+  response: CareCoverageResponseValue | null;
+  responseNote: string;
+  respondedAt: string | null;
+  isClaimed: boolean;
+  claimedAt: string | null;
+};
+
+export async function loadCareCoverageRequestCommandCenter(
+  requestId: string,
+): Promise<CareCoverageCommandParticipant[]> {
+  const { data, error } = await supabase.rpc(
+    "care_coverage_request_command_center",
+    { p_request_id: requestId },
+  );
+
+  if (error) throw error;
+
+  return (data ?? []).map((row: any) => ({
+    userId: String(row.user_id),
+    displayName: String(row.display_name || "Caregiver"),
+    firstNotifiedAt: row.first_notified_at ?? null,
+    lastNotifiedAt: row.last_notified_at ?? null,
+    notificationCount: Number(row.notification_count ?? 0),
+    highestEscalationStage:
+      row.highest_escalation_stage == null
+        ? null
+        : (Number(row.highest_escalation_stage) as 1 | 2 | 3),
+    response: row.response
+      ? (String(row.response) as CareCoverageResponseValue)
+      : null,
+    responseNote: String(row.response_note || ""),
+    respondedAt: row.responded_at ?? null,
+    isClaimed: Boolean(row.is_claimed),
+    claimedAt: row.claimed_at ?? null,
+  }));
+}
