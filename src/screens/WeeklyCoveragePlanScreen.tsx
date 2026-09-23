@@ -21,6 +21,7 @@ import {
   buildSmartCoveragePlan,
   type SmartCoverageNeed,
 } from "../smartCoveragePlannerHelpers";
+import { localDateTimeToIso, reminderLocalParts } from "../reminderHelpers";
 import { detectedTimezone } from "../reminders";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
@@ -35,6 +36,7 @@ import {
 } from "../weeklyCoveragePlan";
 import {
   addLocalDateDays,
+  defaultWeeklyApprovalDeadlineIso,
   localMondayDate,
   weeklyCoverageDraftSlots,
   weeklyCoverageNeeds,
@@ -147,6 +149,8 @@ export function WeeklyCoveragePlanScreen() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Record<string, string | null>>({});
   const [planNote, setPlanNote] = useState("");
+  const [deadlineDate, setDeadlineDate] = useState("");
+  const [deadlineTime, setDeadlineTime] = useState("");
   const [responseNotes, setResponseNotes] = useState<Record<string, string>>({});
   const [pendingDeclineId, setPendingDeclineId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -332,7 +336,22 @@ export function WeeklyCoveragePlanScreen() {
 
     setSelected(next);
     setPlanNote(selectedPlan?.note ?? "");
-  }, [planningNeeds, selectedPlan?.id, selectedPlan?.status, selectedPlanSlots]);
+
+    const deadlineIso =
+      selectedPlan?.approvalDeadlineAt ??
+      defaultWeeklyApprovalDeadlineIso(planningNeeds);
+    const deadlineParts = deadlineIso
+      ? reminderLocalParts(deadlineIso)
+      : { date: "", time: "" };
+    setDeadlineDate(deadlineParts.date);
+    setDeadlineTime(deadlineParts.time);
+  }, [
+    planningNeeds,
+    selectedPlan?.approvalDeadlineAt,
+    selectedPlan?.id,
+    selectedPlan?.status,
+    selectedPlanSlots,
+  ]);
 
   const memberMap = useMemo(
     () =>
@@ -368,21 +387,86 @@ export function WeeklyCoveragePlanScreen() {
 
   const unassignedCount = planningNeeds.length - readyCount;
 
+  function approvalDeadlineForDraft(
+    draftSlots: ReturnType<typeof weeklyCoverageDraftSlots>,
+  ) {
+    const assignedForApproval = draftSlots.filter(
+      (slot) =>
+        Boolean(slot.caregiverId) &&
+        slot.caregiverId !== currentUserId,
+    );
+
+    if (!assignedForApproval.length) {
+      return { value: null as string | null, error: "" };
+    }
+
+    const value = localDateTimeToIso(deadlineDate, deadlineTime);
+    if (!value) {
+      return {
+        value: null as string | null,
+        error:
+          "Add a valid caregiver response deadline using YYYY-MM-DD and HH:MM.",
+      };
+    }
+
+    const deadlineMs = new Date(value).getTime();
+    const nowMs = Date.now();
+    if (!Number.isFinite(deadlineMs) || deadlineMs <= nowMs) {
+      return {
+        value: null as string | null,
+        error: "Caregiver response deadline must be in the future.",
+      };
+    }
+
+    const boundaries = assignedForApproval
+      .map((slot) => {
+        const startsAt = new Date(slot.startsAt).getTime();
+        const endsAt = new Date(slot.endsAt).getTime();
+        if (!Number.isFinite(startsAt) || !Number.isFinite(endsAt)) return NaN;
+        return startsAt > nowMs ? startsAt : endsAt;
+      })
+      .filter(Number.isFinite);
+
+    const earliestBoundary = boundaries.length
+      ? Math.min(...boundaries)
+      : NaN;
+
+    if (
+      Number.isFinite(earliestBoundary) &&
+      deadlineMs >= earliestBoundary
+    ) {
+      return {
+        value: null as string | null,
+        error:
+          "Set the approval deadline before the earliest assigned coverage window needs resolution.",
+      };
+    }
+
+    return { value, error: "" };
+  }
+
   async function saveDraft() {
     if (!careRecipientId || !owner || busy || !planningNeeds.length) return;
+
+    const draftSlots = weeklyCoverageDraftSlots(
+      planningNeeds,
+      selected,
+    );
+    const deadline = approvalDeadlineForDraft(draftSlots);
+    if (deadline.error) {
+      setMessage(deadline.error);
+      return;
+    }
 
     setBusy("save");
     setMessage("");
     try {
-      const draftSlots = weeklyCoverageDraftSlots(
-        planningNeeds,
-        selected,
-      );
       await saveWeeklyCoveragePlanDraft({
         careRecipientId,
         weekStart,
         timezone,
         note: planNote,
+        approvalDeadlineAt: deadline.value,
         slots: draftSlots,
       });
       await refresh();
@@ -401,17 +485,41 @@ export function WeeklyCoveragePlanScreen() {
   }
 
   async function publishPlan() {
-    if (!owner || !selectedPlan || selectedPlan.status !== "draft" || busy) {
+    if (
+      !careRecipientId ||
+      !owner ||
+      !selectedPlan ||
+      selectedPlan.status !== "draft" ||
+      busy
+    ) {
+      return;
+    }
+
+    const draftSlots = weeklyCoverageDraftSlots(
+      planningNeeds,
+      selected,
+    );
+    const deadline = approvalDeadlineForDraft(draftSlots);
+    if (deadline.error) {
+      setMessage(deadline.error);
       return;
     }
 
     setBusy("publish");
     setMessage("");
     try {
-      await publishWeeklyCoveragePlan(selectedPlan.id);
+      const planId = await saveWeeklyCoveragePlanDraft({
+        careRecipientId,
+        weekStart,
+        timezone,
+        note: planNote,
+        approvalDeadlineAt: deadline.value,
+        slots: draftSlots,
+      });
+      await publishWeeklyCoveragePlan(planId);
       await refresh();
       setMessage(
-        "Weekly plan published. Assigned caregivers can now accept or decline; unassigned slots were moved to Open Coverage.",
+        "Weekly plan published. Pending approvals will automatically move to Open Coverage at the response deadline.",
       );
     } catch (error) {
       setMessage(
@@ -579,6 +687,15 @@ export function WeeklyCoveragePlanScreen() {
               />
             </View>
             {Boolean(selectedPlan.note) && <Txt>{selectedPlan.note}</Txt>}
+            {selectedPlan.approvalDeadlineAt && (
+              <Txt style={S.small}>
+                Response deadline ·{" "}
+                {new Date(selectedPlan.approvalDeadlineAt).toLocaleString()}
+                {selectedPlan.approvalDeadlineProcessedAt
+                  ? " · timeout check completed"
+                  : ""}
+              </Txt>
+            )}
           </Card>
 
           {selectedPlanSlots.map((slot) => {
@@ -634,6 +751,12 @@ export function WeeklyCoveragePlanScreen() {
                 {Boolean(slot.responseNote) && (
                   <Txt style={S.small}>Response note · {slot.responseNote}</Txt>
                 )}
+                {slot.timedOutAt && (
+                  <Txt style={S.small}>
+                    Approval timed out ·{" "}
+                    {new Date(slot.timedOutAt).toLocaleString()}
+                  </Txt>
+                )}
 
                 {mine && (
                   <Card style={{ backgroundColor: "#F7F1F8" }}>
@@ -642,6 +765,15 @@ export function WeeklyCoveragePlanScreen() {
                       Accept only if you can take this entire coverage window.
                       Declining moves the slot into Open Coverage automatically.
                     </Txt>
+                    {selectedPlan.approvalDeadlineAt && (
+                      <Txt style={S.small}>
+                        Respond by{" "}
+                        {new Date(
+                          selectedPlan.approvalDeadlineAt,
+                        ).toLocaleString()}. If no response arrives by then,
+                        this reservation is released to backup caregivers.
+                      </Txt>
+                    )}
                     <Field
                       label="Optional response note"
                       value={responseNotes[slot.id] ?? ""}
@@ -723,12 +855,47 @@ export function WeeklyCoveragePlanScreen() {
               </View>
 
               {owner && (
-                <Field
-                  label="Weekly plan note · optional"
-                  value={planNote}
-                  onChange={(value) => setPlanNote(value.slice(0, 2000))}
-                  multiline
-                />
+                <>
+                  <Field
+                    label="Weekly plan note · optional"
+                    value={planNote}
+                    onChange={(value) => setPlanNote(value.slice(0, 2000))}
+                    multiline
+                  />
+                  <Card style={{ backgroundColor: "#F7F1F8" }}>
+                    <Icon name="timer-outline" />
+                    <Text style={S.h3}>Caregiver response deadline</Text>
+                    <Txt>
+                      Pending caregiver reservations automatically leave the
+                      reserved state at this cutoff, move into Open Coverage,
+                      notify backups, and join the existing escalation engine.
+                    </Txt>
+                    <View style={{ flexDirection: "row", gap: 10 }}>
+                      <View style={{ flex: 1 }}>
+                        <Field
+                          label="Deadline date · YYYY-MM-DD"
+                          value={deadlineDate}
+                          onChange={(value) =>
+                            setDeadlineDate(value.slice(0, 10))
+                          }
+                        />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Field
+                          label="Time · HH:MM"
+                          value={deadlineTime}
+                          onChange={(value) =>
+                            setDeadlineTime(value.slice(0, 5))
+                          }
+                        />
+                      </View>
+                    </View>
+                    <Txt style={S.small}>
+                      The suggested cutoff leaves time for backup coverage
+                      before the earliest assigned slot whenever possible.
+                    </Txt>
+                  </Card>
+                </>
               )}
 
               {planningNeeds.map((need: SmartCoverageNeed) => {
@@ -890,7 +1057,8 @@ export function WeeklyCoveragePlanScreen() {
                   <Txt>
                     Saving does not notify caregivers. Publishing sends the
                     approval requests and moves unassigned slots into Open
-                    Coverage.
+                    Coverage. Any unanswered assigned slot is automatically
+                    released at the response deadline.
                   </Txt>
                   <Button
                     title={
@@ -928,8 +1096,10 @@ export function WeeklyCoveragePlanScreen() {
         <Text style={S.h3}>Family coordination, not emergency monitoring.</Text>
         <Txt>
           A published plan records intended caregiver coverage. Caregivers
-          still need to accept their assigned slots, and EnVizion cannot verify
-          physical presence until the normal shift check-in workflow is used.
+          still need to accept their assigned slots. Unanswered approvals are
+          released to Open Coverage at the configured deadline, but EnVizion
+          cannot verify physical presence until the normal shift check-in
+          workflow is used.
         </Txt>
       </Card>
     </Page>
