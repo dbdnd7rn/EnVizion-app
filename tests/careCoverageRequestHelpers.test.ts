@@ -1,10 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  coverageEscalationLabel,
+  coverageEscalationStage,
   coverageRequestCounts,
   coverageRequestDurationLabel,
   coverageRequestDurationMinutes,
   coverageRequestWindowState,
+  coverageWindowCountdownLabel,
   latestCoverageResponseForUser,
   orderedCoverageRequests,
 } from "../src/careCoverageRequestHelpers.ts";
@@ -147,5 +150,63 @@ test("request board puts claimable open windows before history", () => {
   assert.deepEqual(
     orderedCoverageRequests(rows, now).map((item) => item.id),
     ["sooner", "later", "reserved", "filled", "expired"],
+  );
+});
+
+
+test("coverage escalation stage follows the 12h, 4h, and 1h windows", () => {
+  const now = new Date("2026-09-23T10:00:00.000Z");
+
+  assert.equal(
+    coverageEscalationStage(
+      request("later", "open", "2026-09-24T00:30:00.000Z", "2026-09-24T02:00:00.000Z"),
+      now,
+    ),
+    0,
+  );
+  assert.equal(
+    coverageEscalationStage(
+      request("stage-1", "open", "2026-09-23T20:00:00.000Z", "2026-09-23T22:00:00.000Z"),
+      now,
+    ),
+    1,
+  );
+  assert.equal(
+    coverageEscalationStage(
+      request("stage-2", "open", "2026-09-23T13:00:00.000Z", "2026-09-23T15:00:00.000Z"),
+      now,
+    ),
+    2,
+  );
+  assert.equal(
+    coverageEscalationStage(
+      request("stage-3", "open", "2026-09-23T10:45:00.000Z", "2026-09-23T12:00:00.000Z"),
+      now,
+    ),
+    3,
+  );
+  assert.equal(
+    coverageEscalationLabel(3),
+    "Stage 3 · urgent backup broadcast",
+  );
+});
+
+test("coverage countdown explains upcoming and active backup windows", () => {
+  const now = new Date("2026-09-23T10:00:00.000Z");
+
+  assert.equal(
+    coverageWindowCountdownLabel(
+      request("upcoming", "open", "2026-09-23T11:30:00.000Z", "2026-09-23T13:00:00.000Z"),
+      now,
+    ),
+    "Starts in 1h 30m",
+  );
+
+  assert.equal(
+    coverageWindowCountdownLabel(
+      request("active", "open", "2026-09-23T09:00:00.000Z", "2026-09-23T11:15:00.000Z"),
+      now,
+    ),
+    "Coverage active · 1h 15m remaining",
   );
 });
