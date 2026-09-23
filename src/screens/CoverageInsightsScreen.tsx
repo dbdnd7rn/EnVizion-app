@@ -139,6 +139,13 @@ export function CoverageInsightsScreen({ navigation }: Props) {
         </View>
       </View>
 
+      <Button
+        title="Proactive coverage forecast"
+        secondary
+        icon="telescope-outline"
+        onPress={() => navigation.navigate("CoverageForecast")}
+      />
+
       {Boolean(message) && (
         <Card>
           <Text accessibilityRole="alert" style={S.body}>
