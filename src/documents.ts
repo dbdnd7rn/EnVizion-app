@@ -1,6 +1,6 @@
 import * as DocumentPicker from "expo-document-picker";
 import { File } from "expo-file-system";
-import { Linking, Platform } from "react-native";
+import { Linking, Platform, Share } from "react-native";
 import {
   type DocumentCategory,
   inferDocumentMime,
@@ -19,6 +19,11 @@ export type CareDocument = {
   mimeType: string;
   sizeBytes: number;
   notes: string;
+  sourceName: string;
+  documentDate: string;
+  reviewDueOn: string;
+  isKeyDocument: boolean;
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -42,6 +47,11 @@ function mapDocument(row: any): CareDocument {
     mimeType: row.mime_type,
     sizeBytes: Number(row.size_bytes),
     notes: row.notes ?? "",
+    sourceName: row.source_name ?? "",
+    documentDate: row.document_date ?? "",
+    reviewDueOn: row.review_due_on ?? "",
+    isKeyDocument: Boolean(row.is_key_document),
+    archivedAt: row.archived_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -57,14 +67,24 @@ async function invokeVault<T>(body: Record<string, unknown>): Promise<T> {
   return data as T;
 }
 
-export async function loadCareDocuments(careRecipientId: string) {
-  const { data, error } = await supabase
+export async function loadCareDocuments(
+  careRecipientId: string,
+  options: { includeArchived?: boolean } = {},
+) {
+  let query = supabase
     .from("care_documents")
     .select(
-      "id, care_recipient_id, uploaded_by, original_name, display_name, category, mime_type, size_bytes, notes, created_at, updated_at",
+      "id, care_recipient_id, uploaded_by, original_name, display_name, category, mime_type, size_bytes, notes, source_name, document_date, review_due_on, is_key_document, archived_at, created_at, updated_at",
     )
     .eq("care_recipient_id", careRecipientId)
-    .eq("status", "ready")
+    .eq("status", "ready");
+
+  if (!options.includeArchived) {
+    query = query.is("archived_at", null);
+  }
+
+  const { data, error } = await query
+    .order("is_key_document", { ascending: false })
     .order("created_at", { ascending: false });
 
   if (error) throw error;
@@ -92,9 +112,8 @@ export async function pickCareDocument(): Promise<PickedCareDocument | null> {
   if (result.canceled || !result.assets?.[0]) return null;
 
   const asset = result.assets[0];
-  const file = Platform.OS === "web" && asset.file
-    ? asset.file
-    : new File(asset.uri);
+  const file =
+    Platform.OS === "web" && asset.file ? asset.file : new File(asset.uri);
   const sizeBytes = Number(asset.size ?? file.size ?? 0);
   const mimeType = inferDocumentMime(asset.name, asset.mimeType || file.type);
 
@@ -113,6 +132,10 @@ export async function uploadCareDocument(input: {
   displayName: string;
   category: DocumentCategory;
   notes: string;
+  sourceName?: string;
+  documentDate?: string;
+  reviewDueOn?: string;
+  isKeyDocument?: boolean;
 }) {
   let payload: File | Blob | ArrayBuffer;
   let sizeBytes = input.picked.sizeBytes;
@@ -143,6 +166,10 @@ export async function uploadCareDocument(input: {
     mimeType: input.picked.mimeType,
     sizeBytes,
     notes: input.notes.trim(),
+    sourceName: input.sourceName?.trim() || "",
+    documentDate: input.documentDate?.trim() || "",
+    reviewDueOn: input.reviewDueOn?.trim() || "",
+    isKeyDocument: Boolean(input.isKeyDocument),
   });
 
   try {
@@ -193,11 +220,39 @@ export async function openCareDocument(
   return result;
 }
 
+export async function createCareDocumentShareLink(documentId: string) {
+  return invokeVault<{
+    url: string;
+    expiresIn: number;
+    name: string;
+  }>({
+    action: "share",
+    documentId,
+  });
+}
+
+export async function shareCareDocument(documentId: string) {
+  const result = await createCareDocumentShareLink(documentId);
+  await Share.share({
+    title: result.name,
+    message:
+      `Secure Care Vault link (expires in ${Math.round(
+        result.expiresIn / 60,
+      )} minutes): ${result.url}`,
+    url: result.url,
+  });
+  return result;
+}
+
 export async function updateCareDocumentMetadata(input: {
   documentId: string;
   displayName: string;
   category: DocumentCategory;
   notes: string;
+  sourceName?: string;
+  documentDate?: string;
+  reviewDueOn?: string;
+  isKeyDocument?: boolean;
 }) {
   const result = await invokeVault<{ document: any }>({
     action: "update_metadata",
@@ -205,8 +260,23 @@ export async function updateCareDocumentMetadata(input: {
     displayName: input.displayName,
     category: input.category,
     notes: input.notes,
+    sourceName: input.sourceName?.trim() || "",
+    documentDate: input.documentDate?.trim() || "",
+    reviewDueOn: input.reviewDueOn?.trim() || "",
+    isKeyDocument: Boolean(input.isKeyDocument),
   });
 
+  return mapDocument(result.document);
+}
+
+export async function setCareDocumentArchived(
+  documentId: string,
+  archived: boolean,
+) {
+  const result = await invokeVault<{ document: any }>({
+    action: archived ? "archive" : "restore",
+    documentId,
+  });
   return mapDocument(result.document);
 }
 
