@@ -4,6 +4,9 @@ export const documentCategories = [
   "care_plan",
   "medical_record",
   "identification",
+  "advance_directive",
+  "medication_list",
+  "lab_result",
   "other",
 ] as const;
 
@@ -15,6 +18,9 @@ export const documentCategoryLabels: Record<DocumentCategory, string> = {
   care_plan: "Care plan",
   medical_record: "Medical record",
   identification: "Identification",
+  advance_directive: "Advance directive",
+  medication_list: "Medication list",
+  lab_result: "Lab result",
   other: "Other",
 };
 
@@ -55,4 +61,34 @@ export function documentIconName(mimeType: string) {
     return "document-outline";
   }
   return "attach-outline";
+}
+
+export type DocumentReviewState =
+  | "none"
+  | "future"
+  | "due_soon"
+  | "overdue";
+
+export function documentReviewState(
+  reviewDueOn: string | null | undefined,
+  now = new Date(),
+): DocumentReviewState {
+  if (!reviewDueOn) return "none";
+  const due = new Date(reviewDueOn + "T23:59:59");
+  if (!Number.isFinite(due.getTime())) return "none";
+  const diffDays = Math.ceil((due.getTime() - now.getTime()) / 86_400_000);
+  if (diffDays < 0) return "overdue";
+  if (diffDays <= 30) return "due_soon";
+  return "future";
+}
+
+export function documentReviewLabel(
+  reviewDueOn: string | null | undefined,
+  now = new Date(),
+) {
+  const state = documentReviewState(reviewDueOn, now);
+  if (state === "overdue") return "Review date passed";
+  if (state === "due_soon") return "Review due within 30 days";
+  if (state === "future") return "Review scheduled";
+  return "No review date";
 }
