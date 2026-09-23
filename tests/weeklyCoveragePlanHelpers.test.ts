@@ -7,6 +7,7 @@ import {
   weeklyCoverageDraftSlots,
   weeklyCoverageNeeds,
   weeklyApprovalNudgeState,
+  weeklyCoverageControlSummary,
   weeklyCoverageResponseCounts,
   weeklyCoverageWindow,
 } from "../src/weeklyCoveragePlanHelpers.ts";
@@ -171,4 +172,23 @@ test("weekly approval nudge state moves through scheduled, six-hour, one-hour, a
     weeklyApprovalNudgeState(deadline, new Date("2026-09-26T18:00:00Z"))?.stage,
     "expired",
   );
+});
+
+
+test("weekly approval control summary keeps timeout risk visible beside slot status", () => {
+  const summary = weeklyCoverageControlSummary([
+    { status: "accepted", timedOutAt: null },
+    { status: "pending", timedOutAt: null },
+    { status: "declined", timedOutAt: null },
+    { status: "open_coverage", timedOutAt: "2026-09-26T18:01:00Z" },
+  ]);
+
+  assert.deepEqual(summary, {
+    total: 4,
+    accepted: 1,
+    pending: 1,
+    declined: 1,
+    openCoverage: 1,
+    timedOut: 1,
+  });
 });
