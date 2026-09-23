@@ -5,15 +5,18 @@ import {
   loadPilotAdminAudit,
   loadPilotParticipants,
   loadPilotSummary,
+  loadPilotOperations,
   loadProgramDocuments,
   publishProgramDocument,
   retireProgramDocument,
   saveProgramDocument,
   updatePilotParticipant,
+  resolvePilotDiagnostic,
   type PilotAdminAudit,
   type PilotParticipant,
   type PilotStatus,
   type PilotSummary,
+  type PilotOperationsSummary,
   type ProgramDocument,
   type ProgramDocumentType,
 } from "../pilot";
@@ -85,6 +88,8 @@ function StatusPill({ status }: { status: string }) {
 
 export function PilotAdminScreen() {
   const [summary, setSummary] = useState<PilotSummary | null>(null);
+  const [operations, setOperations] =
+    useState<PilotOperationsSummary | null>(null);
   const [participants, setParticipants] = useState<PilotParticipant[]>([]);
   const [documents, setDocuments] = useState<ProgramDocument[]>([]);
   const [audit, setAudit] = useState<PilotAdminAudit[]>([]);
@@ -111,15 +116,22 @@ export function PilotAdminScreen() {
         throw new Error("Administrator access required.");
       }
 
-      const [nextSummary, nextParticipants, nextDocuments, nextAudit] =
-        await Promise.all([
-          loadPilotSummary(),
-          loadPilotParticipants(),
-          loadProgramDocuments(),
-          loadPilotAdminAudit(),
-        ]);
+      const [
+        nextSummary,
+        nextOperations,
+        nextParticipants,
+        nextDocuments,
+        nextAudit,
+      ] = await Promise.all([
+        loadPilotSummary(),
+        loadPilotOperations(),
+        loadPilotParticipants(),
+        loadProgramDocuments(),
+        loadPilotAdminAudit(),
+      ]);
 
       setSummary(nextSummary);
+      setOperations(nextOperations);
       setParticipants(nextParticipants);
       setDocuments(nextDocuments);
       setAudit(nextAudit);
@@ -238,6 +250,102 @@ export function PilotAdminScreen() {
               <Metric value={summary.totalAccounts} label="total Auth accounts" />
             </View>
           </Card>
+        </>
+      )}
+
+      {operations && (
+        <>
+          <Section title="Production operations" />
+          <Card style={{ backgroundColor: C.lavender }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+              <Metric
+                value={operations.openDiagnostics}
+                label="open diagnostics"
+              />
+              <Metric
+                value={operations.failedPacketExports24h}
+                label="failed packet exports · 24h"
+              />
+              <Metric
+                value={operations.staleSupportRequests}
+                label="support requests older than 24h"
+              />
+              <Metric
+                value={operations.pushDeliveryErrors24h}
+                label="push delivery errors · 24h"
+              />
+            </View>
+          </Card>
+
+          <Card>
+            <View style={S.row}>
+              <Icon name="shield-checkmark-outline" size={24} />
+              <View style={{ flex: 1 }}>
+                <Text style={S.h3}>Operational boundary</Text>
+                <Txt style={S.small}>
+                  These metrics intentionally use workflow status and technical
+                  diagnostics only. Medication names, observations, document
+                  contents, appointment notes and family messages are not
+                  exposed here.
+                </Txt>
+              </View>
+            </View>
+          </Card>
+
+          <Section title="Recent technical diagnostics" />
+          {!operations.recentDiagnostics.length ? (
+            <Card>
+              <Txt>No client diagnostics have been submitted.</Txt>
+            </Card>
+          ) : (
+            operations.recentDiagnostics.slice(0, 10).map((report) => (
+              <Card key={report.id}>
+                <View style={S.between}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={S.h3}>{report.summary}</Text>
+                    <Txt style={S.small}>
+                      {report.displayName} · {report.platform || "platform unavailable"}
+                      {report.appVersion ? ` · v${report.appVersion}` : ""}
+                    </Txt>
+                  </View>
+                  <StatusPill status={report.status} />
+                </View>
+                <Txt style={S.small}>
+                  {report.area.replaceAll("_", " ")} ·{" "}
+                  {new Date(report.createdAt).toLocaleString()}
+                </Txt>
+                {Object.keys(report.details).length > 0 && (
+                  <Txt style={S.small}>
+                    {Object.entries(report.details)
+                      .filter(([, value]) => value !== null && value !== "")
+                      .slice(0, 4)
+                      .map(([key, value]) =>
+                        `${key.replaceAll("_", " ")}: ${String(value)}`,
+                      )
+                      .join(" · ")}
+                  </Txt>
+                )}
+                {report.status !== "resolved" && (
+                  <Button
+                    title={
+                      busy === `diagnostic-${report.id}`
+                        ? "Resolving…"
+                        : "Mark diagnostic resolved"
+                    }
+                    secondary
+                    disabled={busy !== null}
+                    onPress={() =>
+                      void run(
+                        `diagnostic-${report.id}`,
+                        () => resolvePilotDiagnostic(report.id),
+                        "Diagnostic marked resolved.",
+                      )
+                    }
+                  />
+                )}
+              </Card>
+            ))
+          )}
         </>
       )}
 
