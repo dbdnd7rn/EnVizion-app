@@ -28,17 +28,21 @@ import { useCare } from "../store";
 import {
   currentWeeklyCoverageUserId,
   loadWeeklyCoveragePlans,
+  loadWeeklyCoverageReassignmentCandidates,
   publishWeeklyCoveragePlan,
+  reassignWeeklyCoverageSlot,
   respondWeeklyCoverageSlot,
   saveWeeklyCoveragePlanDraft,
   type CareWeeklyCoveragePlan,
   type CareWeeklyCoverageSlot,
+  type WeeklyCoverageReassignmentCandidate,
 } from "../weeklyCoveragePlan";
 import {
   addLocalDateDays,
   defaultWeeklyApprovalDeadlineIso,
   localMondayDate,
   weeklyApprovalNudgeState,
+  weeklyCoverageControlSummary,
   weeklyCoverageDraftSlots,
   weeklyCoverageNeeds,
   weeklyCoverageResponseCounts,
@@ -154,6 +158,14 @@ export function WeeklyCoveragePlanScreen() {
   const [deadlineTime, setDeadlineTime] = useState("");
   const [responseNotes, setResponseNotes] = useState<Record<string, string>>({});
   const [pendingDeclineId, setPendingDeclineId] = useState<string | null>(null);
+  const [reassignSlotId, setReassignSlotId] = useState<string | null>(null);
+  const [reassignCandidates, setReassignCandidates] = useState<
+    WeeklyCoverageReassignmentCandidate[]
+  >([]);
+  const [reassignLoading, setReassignLoading] = useState(false);
+  const [pendingReassignKey, setPendingReassignKey] = useState<string | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -396,6 +408,11 @@ export function WeeklyCoveragePlanScreen() {
     [selectedPlanSlots],
   );
 
+  const controlSummary = useMemo(
+    () => weeklyCoverageControlSummary(selectedPlanSlots),
+    [selectedPlanSlots],
+  );
+
   const readyCount = planningNeeds.filter((need) => {
     const caregiverId = Object.prototype.hasOwnProperty.call(selected, need.id)
       ? selected[need.id]
@@ -550,6 +567,87 @@ export function WeeklyCoveragePlanScreen() {
         error instanceof Error
           ? error.message
           : "We could not publish the weekly coverage plan.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function openReassignment(slot: CareWeeklyCoverageSlot) {
+    if (!owner || slot.status !== "pending" || reassignLoading || busy) return;
+
+    if (reassignSlotId === slot.id) {
+      setReassignSlotId(null);
+      setReassignCandidates([]);
+      setPendingReassignKey(null);
+      return;
+    }
+
+    setReassignSlotId(slot.id);
+    setReassignCandidates([]);
+    setPendingReassignKey(null);
+    setReassignLoading(true);
+    setMessage("");
+
+    try {
+      const candidates = await loadWeeklyCoverageReassignmentCandidates(
+        slot.id,
+      );
+      setReassignCandidates(candidates);
+      if (!candidates.length) {
+        setMessage(
+          "No other caregiver currently has recorded availability for this entire slot.",
+        );
+      }
+    } catch (error) {
+      setReassignSlotId(null);
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not load safe reassignment options.",
+      );
+    } finally {
+      setReassignLoading(false);
+    }
+  }
+
+  async function reassign(
+    slot: CareWeeklyCoverageSlot,
+    candidate: WeeklyCoverageReassignmentCandidate,
+  ) {
+    if (!owner || busy || slot.status !== "pending") return;
+
+    const key = slot.id + ":" + candidate.userId;
+    if (pendingReassignKey !== key) {
+      setPendingReassignKey(key);
+      setMessage(
+        "Tap Confirm reassignment to move this pending approval to " +
+          candidate.displayName +
+          ".",
+      );
+      return;
+    }
+
+    setBusy("reassign:" + slot.id);
+    setMessage("");
+
+    try {
+      await reassignWeeklyCoverageSlot({
+        slotId: slot.id,
+        caregiverId: candidate.userId,
+      });
+      setReassignSlotId(null);
+      setReassignCandidates([]);
+      setPendingReassignKey(null);
+      await refresh();
+      setMessage(
+        "Coverage reassigned. The previous caregiver was released and the new caregiver was notified with the same deadline.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not reassign this weekly coverage slot.",
       );
     } finally {
       setBusy(null);
@@ -740,6 +838,74 @@ export function WeeklyCoveragePlanScreen() {
             )}
           </Card>
 
+          {owner && selectedPlan.status === "published" && (
+            <>
+              <Section title="Owner approval control center" />
+              <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
+                <View style={S.between}>
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text style={[S.eyebrow, { color: "#E0C6E8" }]}>
+                      APPROVAL RISK
+                    </Text>
+                    <Text style={[S.h2, { color: C.white }]}>
+                      {controlSummary.pending === 0
+                        ? "No approvals are waiting"
+                        : approvalNudgeState?.stage === "one_hour"
+                          ? "Final response window"
+                          : approvalNudgeState?.stage === "six_hours"
+                            ? "Reminder window active"
+                            : "Approvals in progress"}
+                    </Text>
+                    <Txt style={{ color: "#E9DDED" }}>
+                      {controlSummary.pending} pending ·{" "}
+                      {controlSummary.timedOut} timed out ·{" "}
+                      {controlSummary.declined + controlSummary.openCoverage}{" "}
+                      moved to backup coverage
+                    </Txt>
+                  </View>
+                  <Icon
+                    name={
+                      approvalNudgeState?.stage === "one_hour"
+                        ? "warning-outline"
+                        : "shield-checkmark-outline"
+                    }
+                    color={
+                      approvalNudgeState?.stage === "one_hour"
+                        ? "#F6D3D3"
+                        : "#E0C6E8"
+                    }
+                    size={26}
+                  />
+                </View>
+              </Card>
+
+              <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+                <Card style={{ flex: 1, minWidth: 105 }}>
+                  <Text style={S.eyebrow}>ACCEPTED</Text>
+                  <Text style={S.h2}>{controlSummary.accepted}</Text>
+                  <Txt style={S.small}>Confirmed shifts</Txt>
+                </Card>
+                <Card style={{ flex: 1, minWidth: 105 }}>
+                  <Text style={S.eyebrow}>PENDING</Text>
+                  <Text style={S.h2}>{controlSummary.pending}</Text>
+                  <Txt style={S.small}>Need response</Txt>
+                </Card>
+                <Card style={{ flex: 1, minWidth: 105 }}>
+                  <Text style={S.eyebrow}>BACKUP</Text>
+                  <Text style={S.h2}>
+                    {controlSummary.declined + controlSummary.openCoverage}
+                  </Text>
+                  <Txt style={S.small}>Open Coverage</Txt>
+                </Card>
+                <Card style={{ flex: 1, minWidth: 105 }}>
+                  <Text style={S.eyebrow}>TIMED OUT</Text>
+                  <Text style={S.h2}>{controlSummary.timedOut}</Text>
+                  <Txt style={S.small}>Auto-released</Txt>
+                </Card>
+              </View>
+            </>
+          )}
+
           {selectedPlanSlots.map((slot) => {
             const assigned = slot.caregiverId
               ? memberMap.get(slot.caregiverId)
@@ -798,6 +964,93 @@ export function WeeklyCoveragePlanScreen() {
                     Approval timed out ·{" "}
                     {new Date(slot.timedOutAt).toLocaleString()}
                   </Txt>
+                )}
+
+                {owner && slot.status === "pending" && (
+                  <Card style={{ backgroundColor: "#F7F1F8" }}>
+                    <View style={S.between}>
+                      <View style={{ flex: 1, gap: 3 }}>
+                        <Text style={S.h3}>Owner approval controls</Text>
+                        <Txt style={S.small}>
+                          6h reminder ·{" "}
+                          {slot.approvalNudge6hAt
+                            ? "sent " +
+                              new Date(
+                                slot.approvalNudge6hAt,
+                              ).toLocaleString()
+                            : "not sent yet"}
+                        </Txt>
+                        <Txt style={S.small}>
+                          1h reminder ·{" "}
+                          {slot.approvalNudge1hAt
+                            ? "sent " +
+                              new Date(
+                                slot.approvalNudge1hAt,
+                              ).toLocaleString()
+                            : "not sent yet"}
+                        </Txt>
+                      </View>
+                      <Icon name="options-outline" color={C.purple} />
+                    </View>
+
+                    <Button
+                      title={
+                        reassignLoading && reassignSlotId === slot.id
+                          ? "Checking safe caregivers…"
+                          : reassignSlotId === slot.id
+                            ? "Close reassignment"
+                            : "Reassign before deadline"
+                      }
+                      secondary
+                      disabled={Boolean(busy) || reassignLoading}
+                      icon="swap-horizontal-outline"
+                      onPress={() => void openReassignment(slot)}
+                    />
+
+                    {reassignSlotId === slot.id &&
+                      !reassignLoading &&
+                      reassignCandidates.map((candidate) => {
+                        const key = slot.id + ":" + candidate.userId;
+                        const confirming = pendingReassignKey === key;
+
+                        return (
+                          <Card
+                            key={candidate.userId}
+                            style={{ backgroundColor: C.white }}
+                          >
+                            <View style={S.between}>
+                              <View style={{ flex: 1, gap: 2 }}>
+                                <Text style={S.h3}>
+                                  {candidate.displayName}
+                                </Text>
+                                <Txt style={S.small}>
+                                  {coverageBackupFitLabel(candidate.fit)}
+                                </Txt>
+                              </View>
+                              <Icon
+                                name={
+                                  candidate.fit === "preferred"
+                                    ? "star-outline"
+                                    : "checkmark-circle-outline"
+                                }
+                                color={C.purple}
+                              />
+                            </View>
+                            <Button
+                              title={
+                                busy === "reassign:" + slot.id
+                                  ? "Reassigning…"
+                                  : confirming
+                                    ? "Confirm reassignment"
+                                    : "Reassign to " + candidate.displayName
+                              }
+                              disabled={Boolean(busy)}
+                              onPress={() => void reassign(slot, candidate)}
+                            />
+                          </Card>
+                        );
+                      })}
+                  </Card>
                 )}
 
                 {mine && (
