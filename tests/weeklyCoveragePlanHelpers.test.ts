@@ -180,15 +180,25 @@ test("weekly approval control summary keeps timeout risk visible beside slot sta
     { status: "accepted", timedOutAt: null },
     { status: "pending", timedOutAt: null },
     { status: "declined", timedOutAt: null },
-    { status: "open_coverage", timedOutAt: "2026-09-26T18:01:00Z" },
+    {
+      status: "open_coverage",
+      timedOutAt: "2026-09-26T18:01:00Z",
+      ownerReleasedAt: null,
+    },
+    {
+      status: "open_coverage",
+      timedOutAt: null,
+      ownerReleasedAt: "2026-09-26T16:30:00Z",
+    },
   ]);
 
   assert.deepEqual(summary, {
-    total: 4,
+    total: 5,
     accepted: 1,
     pending: 1,
     declined: 1,
-    openCoverage: 1,
+    openCoverage: 2,
     timedOut: 1,
+    releasedEarly: 1,
   });
 });
