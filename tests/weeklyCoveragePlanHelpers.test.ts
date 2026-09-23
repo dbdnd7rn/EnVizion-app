@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   addLocalDateDays,
+  defaultWeeklyApprovalDeadlineIso,
   localMondayDate,
   weeklyCoverageDraftSlots,
   weeklyCoverageNeeds,
@@ -125,4 +126,26 @@ test("weekly approval response counts keep pending, declined, and open coverage 
     proposed: 1,
     cancelled: 1,
   });
+});
+
+
+test("weekly approval deadline defaults before the earliest assigned coverage window", () => {
+  const deadline = defaultWeeklyApprovalDeadlineIso(
+    [
+      need({ startsAt: "2026-09-26T18:00:00Z" }),
+      need({ startsAt: "2026-09-27T08:00:00Z" }),
+    ],
+    new Date("2026-09-25T12:00:00Z"),
+  );
+
+  assert.equal(deadline, "2026-09-26T06:00:00.000Z");
+});
+
+test("weekly approval deadline refuses a meaningless cutoff when coverage starts immediately", () => {
+  const deadline = defaultWeeklyApprovalDeadlineIso(
+    [need({ startsAt: "2026-09-25T12:01:00Z" })],
+    new Date("2026-09-25T12:00:00Z"),
+  );
+
+  assert.equal(deadline, null);
 });
