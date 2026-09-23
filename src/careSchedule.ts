@@ -26,6 +26,23 @@ export type CaregiverAvailability = {
   updatedAt: string;
 };
 
+export type CaregiverAvailabilityRule = {
+  id: string;
+  careRecipientId: string;
+  caregiverId: string;
+  createdBy: string | null;
+  daysOfWeek: number[];
+  startLocalTime: string;
+  endLocalTime: string;
+  timezone: string;
+  status: AvailabilityStatus;
+  effectiveFrom: string;
+  effectiveUntil: string | null;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type CareShift = {
   id: string;
   careRecipientId: string;
@@ -75,6 +92,25 @@ function mapAvailability(row: any): CaregiverAvailability {
   };
 }
 
+function mapAvailabilityRule(row: any): CaregiverAvailabilityRule {
+  return {
+    id: row.id,
+    careRecipientId: row.care_recipient_id,
+    caregiverId: row.caregiver_id,
+    createdBy: row.created_by ?? null,
+    daysOfWeek: (row.days_of_week ?? []).map((value: unknown) => Number(value)),
+    startLocalTime: String(row.start_local_time).slice(0, 5),
+    endLocalTime: String(row.end_local_time).slice(0, 5),
+    timezone: row.timezone,
+    status: row.availability_status as AvailabilityStatus,
+    effectiveFrom: row.effective_from,
+    effectiveUntil: row.effective_until ?? null,
+    note: row.note ?? "",
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 function mapShift(row: any): CareShift {
   return {
     id: row.id,
@@ -118,7 +154,12 @@ async function currentUserId() {
 }
 
 export async function loadCareSchedule(careRecipientId: string) {
-  const [availabilityResult, shiftsResult, swapsResult] = await Promise.all([
+  const [
+    availabilityResult,
+    recurringAvailabilityResult,
+    shiftsResult,
+    swapsResult,
+  ] = await Promise.all([
     supabase
       .from("caregiver_availability")
       .select(
@@ -126,6 +167,13 @@ export async function loadCareSchedule(careRecipientId: string) {
       )
       .eq("care_recipient_id", careRecipientId)
       .order("starts_at", { ascending: true }),
+    supabase
+      .from("caregiver_availability_rules")
+      .select(
+        "id, care_recipient_id, caregiver_id, created_by, days_of_week, start_local_time, end_local_time, timezone, availability_status, effective_from, effective_until, note, created_at, updated_at",
+      )
+      .eq("care_recipient_id", careRecipientId)
+      .order("created_at", { ascending: false }),
     supabase
       .from("care_shifts")
       .select(
@@ -144,11 +192,15 @@ export async function loadCareSchedule(careRecipientId: string) {
   ]);
 
   if (availabilityResult.error) throw availabilityResult.error;
+  if (recurringAvailabilityResult.error) throw recurringAvailabilityResult.error;
   if (shiftsResult.error) throw shiftsResult.error;
   if (swapsResult.error) throw swapsResult.error;
 
   return {
     availability: (availabilityResult.data ?? []).map(mapAvailability),
+    recurringAvailability: (recurringAvailabilityResult.data ?? []).map(
+      mapAvailabilityRule,
+    ),
     shifts: (shiftsResult.data ?? []).map(mapShift),
     swaps: (swapsResult.data ?? []).map(mapSwap),
   };
@@ -182,6 +234,59 @@ export async function createCaregiverAvailability(input: {
 
   if (error) throw error;
   return mapAvailability(data);
+}
+
+export async function createCaregiverAvailabilityRule(input: {
+  careRecipientId: string;
+  caregiverId: string;
+  daysOfWeek: number[];
+  startLocalTime: string;
+  endLocalTime: string;
+  timezone: string;
+  status: AvailabilityStatus;
+  effectiveFrom: string;
+  effectiveUntil: string | null;
+  note: string;
+}) {
+  const userId = await currentUserId();
+  const days = [...new Set(input.daysOfWeek)]
+    .filter((day) => Number.isInteger(day) && day >= 1 && day <= 7)
+    .sort((a, b) => a - b);
+
+  const { data, error } = await supabase
+    .from("caregiver_availability_rules")
+    .insert({
+      care_recipient_id: input.careRecipientId,
+      caregiver_id: input.caregiverId,
+      created_by: userId,
+      days_of_week: days,
+      start_local_time: input.startLocalTime,
+      end_local_time: input.endLocalTime,
+      timezone: input.timezone,
+      availability_status: input.status,
+      effective_from: input.effectiveFrom,
+      effective_until: input.effectiveUntil || null,
+      note: clean(input.note),
+    })
+    .select(
+      "id, care_recipient_id, caregiver_id, created_by, days_of_week, start_local_time, end_local_time, timezone, availability_status, effective_from, effective_until, note, created_at, updated_at",
+    )
+    .single();
+
+  if (error) throw error;
+  return mapAvailabilityRule(data);
+}
+
+export async function deleteCaregiverAvailabilityRule(
+  careRecipientId: string,
+  ruleId: string,
+) {
+  const { error } = await supabase
+    .from("caregiver_availability_rules")
+    .delete()
+    .eq("id", ruleId)
+    .eq("care_recipient_id", careRecipientId);
+  if (error) throw error;
 }
 
 export async function deleteCaregiverAvailability(
