@@ -2,6 +2,7 @@ import type {
   CareCoverageRequest,
   CareCoverageRequestResponse,
 } from "./careCoverageRequests";
+import type { CareCoverageRequirementOccurrence } from "./careCoverageRequirements";
 import type {
   CareShift,
   CaregiverAvailability,
@@ -16,7 +17,10 @@ import type { CareTask } from "./careTasks";
 import type { CareTeamMember } from "./careTeam";
 import type { CoverageBackupFit } from "./careCoverageMatchingHelpers";
 
-export type SmartCoverageNeedSource = "coverage_request" | "task";
+export type SmartCoverageNeedSource =
+  | "coverage_request"
+  | "coverage_requirement"
+  | "task";
 
 export type SmartCoverageCandidate = {
   userId: string;
@@ -72,6 +76,86 @@ function fullyCovered(
       time(shift.startsAt) <= start &&
       time(shift.endsAt) >= end,
   );
+}
+
+export function uncoveredRequirementSegments(input: {
+  occurrence: CareCoverageRequirementOccurrence;
+  shifts: CareShift[];
+  startsAt: string;
+  endsAt: string;
+  reservedWindows?: Array<{ startsAt: string; endsAt: string }>;
+}) {
+  const rangeStart = time(input.startsAt);
+  const rangeEnd = time(input.endsAt);
+  const occurrenceStart = time(input.occurrence.startsAt);
+  const occurrenceEnd = time(input.occurrence.endsAt);
+
+  if (
+    ![rangeStart, rangeEnd, occurrenceStart, occurrenceEnd].every(
+      Number.isFinite,
+    )
+  ) {
+    return [];
+  }
+
+  const start = Math.max(rangeStart, occurrenceStart);
+  const end = Math.min(rangeEnd, occurrenceEnd);
+  if (end <= start) return [];
+
+  const blocking = [
+    ...input.shifts
+      .filter((shift) => shift.status === "scheduled")
+      .map((shift) => ({
+        startsAt: time(shift.startsAt),
+        endsAt: time(shift.endsAt),
+      })),
+    ...(input.reservedWindows ?? []).map((window) => ({
+      startsAt: time(window.startsAt),
+      endsAt: time(window.endsAt),
+    })),
+  ]
+    .map((window) => ({
+      startsAt: Math.max(start, window.startsAt),
+      endsAt: Math.min(end, window.endsAt),
+    }))
+    .filter(
+      (window) =>
+        Number.isFinite(window.startsAt) &&
+        Number.isFinite(window.endsAt) &&
+        window.startsAt < window.endsAt,
+    )
+    .sort((a, b) => a.startsAt - b.startsAt);
+
+  const merged: Array<{ startsAt: number; endsAt: number }> = [];
+  for (const window of blocking) {
+    const last = merged[merged.length - 1];
+    if (!last || window.startsAt > last.endsAt) {
+      merged.push({ ...window });
+    } else {
+      last.endsAt = Math.max(last.endsAt, window.endsAt);
+    }
+  }
+
+  const gaps: Array<{ startsAt: string; endsAt: string }> = [];
+  let cursor = start;
+  for (const window of merged) {
+    if (window.startsAt > cursor) {
+      gaps.push({
+        startsAt: new Date(cursor).toISOString(),
+        endsAt: new Date(window.startsAt).toISOString(),
+      });
+    }
+    cursor = Math.max(cursor, window.endsAt);
+  }
+
+  if (cursor < end) {
+    gaps.push({
+      startsAt: new Date(cursor).toISOString(),
+      endsAt: new Date(end).toISOString(),
+    });
+  }
+
+  return gaps;
 }
 
 function overlappingShift(
@@ -198,6 +282,7 @@ export function rankSmartCoverageCandidates(input: {
 export function buildSmartCoveragePlan(input: {
   requests: CareCoverageRequest[];
   responses: CareCoverageRequestResponse[];
+  requirementOccurrences?: CareCoverageRequirementOccurrence[];
   tasks: CareTask[];
   members: CareTeamMember[];
   availability: CaregiverAvailability[];
@@ -272,6 +357,55 @@ export function buildSmartCoveragePlan(input: {
     },
   );
 
+  const requirementNeeds: SmartCoverageNeed[] = (
+    input.requirementOccurrences ?? []
+  ).flatMap((occurrence) =>
+    uncoveredRequirementSegments({
+      occurrence,
+      shifts: input.shifts,
+      startsAt: now.toISOString(),
+      endsAt: new Date(horizon).toISOString(),
+      reservedWindows: explicitWindows,
+    }).map((gap, index) => {
+      const candidates = rankSmartCoverageCandidates({
+        startsAt: gap.startsAt,
+        endsAt: gap.endsAt,
+        members: input.members,
+        availability: input.availability,
+        recurringAvailability: input.recurringAvailability,
+        shifts: input.shifts,
+      });
+
+      return {
+        id:
+          "requirement:" +
+          occurrence.requirementId +
+          ":" +
+          gap.startsAt +
+          ":" +
+          index,
+        source: "coverage_requirement" as const,
+        sourceId: occurrence.requirementId,
+        label: occurrence.label,
+        startsAt: gap.startsAt,
+        endsAt: gap.endsAt,
+        note: occurrence.note,
+        taskDueAt: null,
+        taskAssignedTo: null,
+        taskPriority: null,
+        exactWindow: true,
+        candidates,
+        recommendedUserId:
+          candidates.find((candidate) => candidate.assignable)?.userId ?? null,
+      };
+    }),
+  );
+
+  const requirementWindows = requirementNeeds.map((need) => ({
+    startsAt: need.startsAt,
+    endsAt: need.endsAt,
+  }));
+
   const taskNeeds: SmartCoverageNeed[] = uncoveredUpcomingTasks(
     input.tasks,
     input.shifts,
@@ -280,10 +414,26 @@ export function buildSmartCoveragePlan(input: {
   )
     .filter((task) => {
       const due = time(task.dueAt);
-      return !explicitWindows.some(
-        (window) =>
-          time(window.startsAt) <= due && due <= time(window.endsAt),
-      );
+      if (
+        explicitWindows.some(
+          (window) =>
+            time(window.startsAt) <= due && due <= time(window.endsAt),
+        )
+      ) {
+        return false;
+      }
+
+      if (
+        !task.assignedTo &&
+        requirementWindows.some(
+          (window) =>
+            time(window.startsAt) <= due && due <= time(window.endsAt),
+        )
+      ) {
+        return false;
+      }
+
+      return true;
     })
     .map((task) => {
       const startsAt = task.dueAt;
@@ -316,7 +466,7 @@ export function buildSmartCoveragePlan(input: {
       };
     });
 
-  return [...requestNeeds, ...taskNeeds].sort(
+  return [...requestNeeds, ...requirementNeeds, ...taskNeeds].sort(
     (a, b) => time(a.startsAt) - time(b.startsAt),
   );
 }
