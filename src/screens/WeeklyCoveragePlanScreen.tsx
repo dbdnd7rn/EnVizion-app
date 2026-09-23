@@ -820,6 +820,15 @@ export function WeeklyCoveragePlanScreen() {
         </View>
       </View>
 
+      {owner && (
+        <Button
+          title="Coverage insights"
+          secondary
+          icon="analytics-outline"
+          onPress={() => n.navigate("CoverageInsights")}
+        />
+      )}
+
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <Text style={[S.eyebrow, { color: "#E0C6E8" }]}>CARE WEEK</Text>
         <Text style={[S.h2, { color: C.white }]}>
