@@ -148,6 +148,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityLabel={title}
       disabled={disabled}
+      accessibilityState={{ disabled }}
       onPress={onPress}
       style={({ pressed }) => ({
         minHeight: 52,
@@ -187,6 +188,7 @@ export function Card({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityHint={label ? `Open ${label}` : undefined}
       onPress={onPress}
       style={({ pressed }) => [
         S.card,
@@ -251,6 +253,7 @@ export function Section({
         <Pressable
           onPress={onPress}
           accessibilityRole="button"
+          accessibilityLabel={`${action}: ${title}`}
           style={{ minHeight: 44, justifyContent: "center" }}
         >
           <Text style={[S.h3, { fontSize: 12, color: C.purple }]}>
@@ -277,7 +280,7 @@ export function Row({
   return (
     <Card
       onPress={onPress}
-      label={title}
+      label={subtitle ? `${title}. ${subtitle}` : title}
       style={{
         flexDirection: "row",
         alignItems: "center",
