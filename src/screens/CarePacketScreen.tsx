@@ -13,8 +13,11 @@ import {
 } from "../carePacket";
 import {
   buildCarePacketHtml,
+  carePacketDefaultSections,
   carePacketSectionLabels,
   carePacketTitle,
+  type PacketEmergencyProfile,
+  type PacketFamilyUpdate,
   type CarePacketSection,
   type CarePacketType,
 } from "../carePacketHelpers";
@@ -25,6 +28,16 @@ import type { CareDocument } from "../documents";
 import { documentCategoryLabels, formatDocumentBytes } from "../documentHelpers";
 import { printHtmlResource } from "../printing";
 import type { CareReminder } from "../reminderHelpers";
+import type { CarePlanItem } from "../carePlan";
+import type {
+  ManagedMedication,
+  ManagedMedicationRecord,
+  MedicationReconciliation,
+} from "../medicationManagement";
+import type {
+  CareTransitionFollowUp,
+  CareTransitionPlan,
+} from "../careTransition";
 import { useCare } from "../store";
 import {
   Button,
@@ -39,13 +52,8 @@ import {
   Txt,
 } from "../ui";
 
-const defaultSections: CarePacketSection[] = [
-  "profile",
-  "appointment",
-  "medications",
-  "observations",
-  "reminders",
-];
+const defaultSections: CarePacketSection[] =
+  carePacketDefaultSections("visit");
 
 function Choice({
   title,
@@ -97,16 +105,21 @@ function SectionToggle({
 }) {
   const descriptions: Record<CarePacketSection, string> = {
     profile: "Care recipient name and relationship.",
-    emergency_contact: "Saved emergency contact name and phone.",
+    emergency_contact: "Saved primary emergency contact name and phone.",
+    emergency_profile: "Preparedness details such as allergies, conditions, devices, and preferred facility.",
     appointment: "Visit details, preparation notes, and questions.",
-    medications: "Current active medication list.",
+    medications: "Current active medication list with recorded dose / route details.",
+    medication_reconciliation: "Latest point-in-time medication reconciliation snapshot.",
     medication_history: "Up to 10 recent caregiver-recorded medication entries.",
+    daily_care_plan: "Current recurring daily care routines.",
     observations: "Recent tracker entries you choose by count.",
     reminders: "Up to 10 active shared care reminders.",
     transition: "Hospital-to-home checklist status.",
+    transition_plan: "Active discharge plan, warning signs, equipment, transport, and open follow-ups.",
+    family_updates: "Up to 10 recent family care-team updates.",
     vault_documents: "A checklist of selected private documents to bring separately.",
     care_contacts: "Only the doctors, services, or organizations you select.",
-    communication_log: "Only the caregiver communication entries you select.",
+    communication_log: "Only the provider / insurer communication entries you select.",
   };
 
   return (
@@ -146,6 +159,20 @@ export function CarePacketScreen() {
   const [documents, setDocuments] = useState<CareDocument[]>([]);
   const [contacts, setContacts] = useState<CareContact[]>([]);
   const [communications, setCommunications] = useState<CareCommunication[]>([]);
+  const [carePlanItems, setCarePlanItems] = useState<CarePlanItem[]>([]);
+  const [managedMedications, setManagedMedications] = useState<ManagedMedication[]>([]);
+  const [managedMedicationRecords, setManagedMedicationRecords] =
+    useState<ManagedMedicationRecord[]>([]);
+  const [latestReconciliation, setLatestReconciliation] =
+    useState<MedicationReconciliation | null>(null);
+  const [transitionPlan, setTransitionPlan] =
+    useState<CareTransitionPlan | null>(null);
+  const [transitionFollowUps, setTransitionFollowUps] =
+    useState<CareTransitionFollowUp[]>([]);
+  const [emergencyProfile, setEmergencyProfile] =
+    useState<PacketEmergencyProfile>(null);
+  const [familyUpdates, setFamilyUpdates] =
+    useState<PacketFamilyUpdate[]>([]);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
   const [selectedCommunicationIds, setSelectedCommunicationIds] = useState<string[]>([]);
@@ -172,6 +199,14 @@ export function CarePacketScreen() {
       setDocuments(data.documents);
       setContacts(data.contacts);
       setCommunications(data.communications);
+      setCarePlanItems(data.carePlanItems);
+      setManagedMedications(data.managedMedications);
+      setManagedMedicationRecords(data.managedMedicationRecords);
+      setLatestReconciliation(data.latestReconciliation);
+      setTransitionPlan(data.transitionPlan);
+      setTransitionFollowUps(data.transitionFollowUps);
+      setEmergencyProfile(data.emergencyProfile);
+      setFamilyUpdates(data.familyUpdates);
       setHistory(data.history);
       setSelectedDocumentIds((current) =>
         current.filter((id) => data.documents.some((document) => document.id === id)),
@@ -249,6 +284,18 @@ export function CarePacketScreen() {
         ),
     [communications, contactsById, selectedCommunicationIds],
   );
+
+  function changePacketType(type: CarePacketType) {
+    setPacketType(type);
+    setSelectedSections(carePacketDefaultSections(type));
+    if (type === "emergency") {
+      setSelectedDocumentIds(
+        documents
+          .filter((document) => document.isKeyDocument)
+          .map((document) => document.id),
+      );
+    }
+  }
 
   function toggleSection(section: CarePacketSection, enabled: boolean) {
     setSelectedSections((current) => {
@@ -338,6 +385,7 @@ export function CarePacketScreen() {
         selectedContactIds,
         selectedCommunicationIds,
         observationLimit,
+        receiverNote,
       });
       packetId = started.packetId;
 
@@ -347,12 +395,51 @@ export function CarePacketScreen() {
         careRecipient: recipient,
         appointment: state.appointment,
         questions: state.questions,
-        medications: state.medications,
-        medicationRecords: state.medicationRecords,
+        medications: managedMedications,
+        medicationRecords: managedMedicationRecords,
+        medicationReconciliation: latestReconciliation
+          ? {
+              medicationCount: latestReconciliation.medicationCount,
+              note: latestReconciliation.note,
+              createdAt: latestReconciliation.createdAt,
+            }
+          : null,
+        carePlanItems: carePlanItems.map((item) => ({
+          id: item.id,
+          title: item.title,
+          category: item.category,
+          details: item.details,
+          localTime: item.localTime,
+          timezone: item.timezone,
+          daysOfWeek: item.daysOfWeek,
+          priority: item.priority,
+        })),
+        emergencyProfile,
         entries: state.entries,
         reminders,
         transitionSteps,
         transitionCompleted: state.transition,
+        transitionPlan: transitionPlan
+          ? {
+              hospitalName: transitionPlan.hospitalName,
+              dischargeDate: transitionPlan.dischargeDate,
+              dischargeSummary: transitionPlan.dischargeSummary,
+              primaryDiagnosis: transitionPlan.primaryDiagnosis,
+              medicationChanges: transitionPlan.medicationChanges,
+              followUpPlan: transitionPlan.followUpPlan,
+              equipmentPlan: transitionPlan.equipmentPlan,
+              transportPlan: transitionPlan.transportPlan,
+              warningSigns: transitionPlan.warningSigns,
+              afterHoursContact: transitionPlan.afterHoursContact,
+            }
+          : null,
+        transitionFollowUps: transitionFollowUps.map((followUp) => ({
+          title: followUp.title,
+          dueAt: followUp.dueAt,
+          provider: followUp.provider,
+          details: followUp.details,
+        })),
+        familyUpdates,
         selectedDocuments,
         careContacts: selectedContacts,
         careCommunications: selectedCommunications,
@@ -410,9 +497,9 @@ export function CarePacketScreen() {
   return (
     <Page>
       <Heading
-        eyebrow="HANDOFF & VISIT PACKET"
+        eyebrow="CARE PACKET & PRINTABLE SUMMARY"
         title="Share only what this conversation needs."
-        body="Build a focused PDF from the active care profile. Nothing is included unless you choose it."
+        body="Build a privacy-controlled Visit, Caregiver Handoff, or Emergency Information PDF from the live care profile. Nothing is included unless you choose it."
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
@@ -454,12 +541,17 @@ export function CarePacketScreen() {
         <Choice
           title="Visit preparation"
           selected={packetType === "visit"}
-          onPress={() => setPacketType("visit")}
+          onPress={() => changePacketType("visit")}
         />
         <Choice
           title="Caregiver handoff"
           selected={packetType === "handoff"}
-          onPress={() => setPacketType("handoff")}
+          onPress={() => changePacketType("handoff")}
+        />
+        <Choice
+          title="Emergency information"
+          selected={packetType === "emergency"}
+          onPress={() => changePacketType("emergency")}
         />
       </View>
 
@@ -468,12 +560,17 @@ export function CarePacketScreen() {
         [
           "profile",
           "emergency_contact",
+          "emergency_profile",
           "appointment",
           "medications",
+          "medication_reconciliation",
           "medication_history",
+          "daily_care_plan",
           "observations",
           "reminders",
           "transition",
+          "transition_plan",
+          "family_updates",
           "care_contacts",
           "communication_log",
           "vault_documents",
@@ -720,6 +817,7 @@ export function CarePacketScreen() {
                     <Txt style={S.small}>
                       {documentCategoryLabels[document.category]} ·{" "}
                       {formatDocumentBytes(document.sizeBytes)}
+                      {document.isKeyDocument ? " · Key document" : ""}
                     </Txt>
                   </View>
                 </Pressable>
@@ -743,8 +841,8 @@ export function CarePacketScreen() {
         multiline
       />
       <Txt style={S.small}>
-        This note is placed in the PDF but is not stored in the packet-history
-        recipe.
+        This note is placed in the PDF and recorded with the export recipe so
+        the care team can see what was intentionally shared.
       </Txt>
 
       <Section title="Packet preview" />
@@ -758,7 +856,13 @@ export function CarePacketScreen() {
           <Txt>{Math.min(observationLimit, state.entries.length)} recent observation(s).</Txt>
         )}
         {selectedSet.has("medications") && (
-          <Txt>{state.medications.length} active medication(s).</Txt>
+          <Txt>{managedMedications.length} active medication(s).</Txt>
+        )}
+        {selectedSet.has("daily_care_plan") && (
+          <Txt>{carePlanItems.length} active recurring care routine(s).</Txt>
+        )}
+        {selectedSet.has("family_updates") && (
+          <Txt>{Math.min(10, familyUpdates.length)} recent family update(s).</Txt>
         )}
         {selectedSet.has("reminders") && (
           <Txt>{Math.min(activeReminderCount, 10)} active reminder(s).</Txt>
