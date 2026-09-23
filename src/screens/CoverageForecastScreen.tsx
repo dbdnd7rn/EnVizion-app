@@ -21,6 +21,15 @@ import {
   unsnoozeCoverageForecastWindow,
   type CoverageForecastSnooze,
 } from "../careCoverageForecastAlerts";
+import {
+  loadCoverageForecastResolutionHistory,
+  type CoverageForecastResolution,
+} from "../careCoverageForecastResolution";
+import {
+  forecastResolutionCounts,
+  forecastResolutionStateLabel,
+  forecastResolutionTypeLabel,
+} from "../careCoverageForecastResolutionHelpers";
 import { loadCareSchedule } from "../careSchedule";
 import { loadCareTeam } from "../careTeam";
 import { buildSmartCoveragePlan } from "../smartCoveragePlannerHelpers";
@@ -77,6 +86,9 @@ export function CoverageForecastScreen({ navigation }: Props) {
   >([]);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [snoozes, setSnoozes] = useState<CoverageForecastSnooze[]>([]);
+  const [resolutionHistory, setResolutionHistory] = useState<
+    CoverageForecastResolution[]
+  >([]);
   const [busySnoozeKey, setBusySnoozeKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -106,6 +118,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
         requirementRows,
         history,
         snoozeRows,
+        resolutionRows,
       ] = await Promise.all([
           loadCareCoverageRequests(careRecipientId),
           loadCareSchedule(careRecipientId),
@@ -117,6 +130,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
           }),
           loadCoverageOperationalInsights(careRecipientId, 180),
           loadCoverageForecastSnoozes(careRecipientId),
+          loadCoverageForecastResolutionHistory(careRecipientId, 180),
         ]);
 
       const needs = buildSmartCoveragePlan({
@@ -136,6 +150,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
       setOccurrences(requirementRows);
       setGapPatterns(history.gapPatterns);
       setSnoozes(snoozeRows);
+      setResolutionHistory(resolutionRows);
       setGeneratedAt(new Date().toISOString());
     } catch (error) {
       setMessage(
@@ -162,6 +177,10 @@ export function CoverageForecastScreen({ navigation }: Props) {
     [gapPatterns, occurrences, planNeeds],
   );
   const counts = useMemo(() => coverageForecastCounts(forecast), [forecast]);
+  const resolutionCounts = useMemo(
+    () => forecastResolutionCounts(resolutionHistory),
+    [resolutionHistory],
+  );
   const snoozeMap = useMemo(
     () =>
       new Map(
@@ -347,6 +366,63 @@ export function CoverageForecastScreen({ navigation }: Props) {
           <Txt style={S.small}>Multiple options</Txt>
         </Card>
       </View>
+
+      <Section title="Resolution tracking" />
+      <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+        <Card style={{ flex: 1, minWidth: 120 }}>
+          <Text style={S.eyebrow}>SECURED</Text>
+          <Text style={S.h2}>{resolutionCounts.resolved}</Text>
+          <Txt style={S.small}>forecast gaps resolved</Txt>
+        </Card>
+        <Card style={{ flex: 1, minWidth: 120 }}>
+          <Text style={S.eyebrow}>IN PROGRESS</Text>
+          <Text style={S.h2}>{resolutionCounts.in_progress}</Text>
+          <Txt style={S.small}>assignment / Open Coverage</Txt>
+        </Card>
+        <Card style={{ flex: 1, minWidth: 120 }}>
+          <Text style={S.eyebrow}>IMPROVED</Text>
+          <Text style={S.h2}>{resolutionCounts.improved}</Text>
+          <Txt style={S.small}>availability improved</Txt>
+        </Card>
+      </View>
+
+      {resolutionHistory.length > 0 && (
+        <Card style={{ backgroundColor: "#F8F4F9" }}>
+          <Text style={S.h3}>Recent forecast outcomes</Text>
+          {resolutionHistory.slice(0, 6).map((entry) => (
+            <View
+              key={entry.alertId}
+              style={{
+                paddingVertical: 8,
+                borderBottomWidth: 1,
+                borderBottomColor: C.line,
+                gap: 3,
+              }}
+            >
+              <View style={S.between}>
+                <Text style={[S.h3, { flex: 1, fontSize: 13 }]}>
+                  {entry.label}
+                </Text>
+                <Text style={S.small}>
+                  {forecastResolutionStateLabel(entry.currentState)}
+                </Text>
+              </View>
+              <Txt style={S.small}>
+                {new Date(entry.startsAt).toLocaleString()} ·{" "}
+                {forecastResolutionTypeLabel(entry.resolutionType)}
+              </Txt>
+              {Boolean(entry.resolutionSummary) && (
+                <Txt style={S.small}>{entry.resolutionSummary}</Txt>
+              )}
+              {entry.resolvedAt && (
+                <Txt style={S.small}>
+                  Secured · {new Date(entry.resolvedAt).toLocaleString()}
+                </Txt>
+              )}
+            </View>
+          ))}
+        </Card>
+      )}
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <View style={S.row}>
