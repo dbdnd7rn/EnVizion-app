@@ -420,7 +420,6 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                       startDate: value,
                     }))
                   }
-                  placeholder="2026-09-23"
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -433,7 +432,6 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                       startTime: value,
                     }))
                   }
-                  placeholder="14:00"
                 />
               </View>
             </View>
@@ -448,7 +446,6 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                       endDate: value,
                     }))
                   }
-                  placeholder="2026-09-23"
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -461,7 +458,6 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                       endTime: value,
                     }))
                   }
-                  placeholder="16:00"
                 />
               </View>
             </View>
