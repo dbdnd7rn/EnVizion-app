@@ -9,6 +9,9 @@ export type NotificationPreferences = {
   taskPush: boolean;
   coordinationPush: boolean;
   coordinationDigestEnabled: boolean;
+  coverageForecastAlertsEnabled: boolean;
+  coverageForecastAlertLevel: "high" | "elevated";
+  coverageForecastHorizonDays: 3 | 7 | 14 | 21;
   quietHoursEnabled: boolean;
   quietStart: string;
   quietEnd: string;
@@ -33,6 +36,9 @@ function defaults(): NotificationPreferences {
     taskPush: true,
     coordinationPush: true,
     coordinationDigestEnabled: false,
+    coverageForecastAlertsEnabled: true,
+    coverageForecastAlertLevel: "elevated",
+    coverageForecastHorizonDays: 7,
     quietHoursEnabled: false,
     quietStart: "22:00",
     quietEnd: "07:00",
@@ -51,6 +57,18 @@ function mapRow(row: any): NotificationPreferences {
     coordinationPush:
       row.coordination_push === undefined ? true : Boolean(row.coordination_push),
     coordinationDigestEnabled: Boolean(row.coordination_digest_enabled),
+    coverageForecastAlertsEnabled:
+      row.coverage_forecast_alerts_enabled === undefined
+        ? true
+        : Boolean(row.coverage_forecast_alerts_enabled),
+    coverageForecastAlertLevel:
+      row.coverage_forecast_alert_level === "high" ? "high" : "elevated",
+    coverageForecastHorizonDays:
+      row.coverage_forecast_horizon_days === 3 ||
+      row.coverage_forecast_horizon_days === 14 ||
+      row.coverage_forecast_horizon_days === 21
+        ? row.coverage_forecast_horizon_days
+        : 7,
     quietHoursEnabled: Boolean(row.quiet_hours_enabled),
     quietStart: String(row.quiet_start ?? "22:00").slice(0, 5),
     quietEnd: String(row.quiet_end ?? "07:00").slice(0, 5),
@@ -69,7 +87,7 @@ export async function loadNotificationPreferences() {
   const { data, error } = await supabase
     .from("notification_preferences")
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, coverage_forecast_alerts_enabled, coverage_forecast_alert_level, coverage_forecast_horizon_days, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .eq("user_id", user.id)
     .maybeSingle();
@@ -90,13 +108,16 @@ export async function loadNotificationPreferences() {
       task_push: initial.taskPush,
       coordination_push: initial.coordinationPush,
       coordination_digest_enabled: initial.coordinationDigestEnabled,
+      coverage_forecast_alerts_enabled: initial.coverageForecastAlertsEnabled,
+      coverage_forecast_alert_level: initial.coverageForecastAlertLevel,
+      coverage_forecast_horizon_days: initial.coverageForecastHorizonDays,
       quiet_hours_enabled: initial.quietHoursEnabled,
       quiet_start: initial.quietStart,
       quiet_end: initial.quietEnd,
       timezone: initial.timezone,
     })
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, coverage_forecast_alerts_enabled, coverage_forecast_alert_level, coverage_forecast_horizon_days, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .single();
 
@@ -126,13 +147,16 @@ export async function saveNotificationPreferences(
       task_push: next.taskPush,
       coordination_push: next.coordinationPush,
       coordination_digest_enabled: next.coordinationDigestEnabled,
+      coverage_forecast_alerts_enabled: next.coverageForecastAlertsEnabled,
+      coverage_forecast_alert_level: next.coverageForecastAlertLevel,
+      coverage_forecast_horizon_days: next.coverageForecastHorizonDays,
       quiet_hours_enabled: next.quietHoursEnabled,
       quiet_start: next.quietHoursEnabled ? next.quietStart : null,
       quiet_end: next.quietHoursEnabled ? next.quietEnd : null,
       timezone: next.timezone || notificationTimezone(),
     })
     .select(
-      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, quiet_hours_enabled, quiet_start, quiet_end, timezone",
+      "push_enabled, reminder_push, support_push, coaching_push, care_team_push, task_push, coordination_push, coordination_digest_enabled, coverage_forecast_alerts_enabled, coverage_forecast_alert_level, coverage_forecast_horizon_days, quiet_hours_enabled, quiet_start, quiet_end, timezone",
     )
     .single();
 
