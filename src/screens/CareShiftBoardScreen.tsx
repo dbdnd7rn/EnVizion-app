@@ -750,7 +750,7 @@ export function CareShiftBoardScreen() {
     }
   }
 
-  async function acceptTakeover() {
+  async function acceptTakeover(flagConcern = false) {
     if (
       !careRecipientId ||
       !pendingTakeover ||
@@ -767,14 +767,21 @@ export function CareShiftBoardScreen() {
         careRecipientId,
         handoffId: pendingTakeover.id,
         note: takeoverNote,
+        concernFlagged: flagConcern,
+        concernText: flagConcern ? takeoverNote : "",
+        reviewedUrgentItems: true,
       });
 
       setTakeoverNote("");
       await refresh();
       setMessage(
-        `Takeover confirmed at ${new Date(
-          acknowledgement.acceptedAt,
-        ).toLocaleString()}. Your active caregiver shift has started and existing task ownership was preserved.`,
+        flagConcern
+          ? `Takeover confirmed with a flagged concern at ${new Date(
+              acknowledgement.acceptedAt,
+            ).toLocaleString()}. Your active caregiver shift has started and the concern remains visible in handoff history.`
+          : `Takeover confirmed at ${new Date(
+              acknowledgement.acceptedAt,
+            ).toLocaleString()}. Your active caregiver shift has started and existing task ownership was preserved.`,
       );
       n.navigate("OnShiftCaregiver");
     } catch (error) {
@@ -925,6 +932,105 @@ export function CareShiftBoardScreen() {
               </Txt>
             )}
 
+            {pendingTakeover.carePlanSnapshot.length > 0 && (
+              <Card style={{ backgroundColor: "#F8F4F9" }}>
+                <View style={S.row}>
+                  <Icon name="list-outline" size={20} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={S.h3}>Daily care plan carried into this handoff</Text>
+                    <Txt style={S.small}>
+                      {pendingTakeover.carePlanSnapshot.length} active routine
+                      {pendingTakeover.carePlanSnapshot.length === 1 ? "" : "s"}
+                    </Txt>
+                  </View>
+                </View>
+                {pendingTakeover.carePlanSnapshot.slice(0, 5).map((item, index) => (
+                  <Txt key={String(item.id ?? index)} style={S.small}>
+                    • {String(item.title ?? "Care routine")}
+                    {item.local_time ? " · " + String(item.local_time).slice(0, 5) : ""}
+                    {item.priority === "important" ? " · Important" : ""}
+                  </Txt>
+                ))}
+              </Card>
+            )}
+
+            {pendingTakeover.transitionSnapshot && (
+              <Card style={{ backgroundColor: "#FFF9F2" }}>
+                <View style={S.row}>
+                  <Icon name="home-outline" size={20} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={S.h3}>Active hospital-to-home context</Text>
+                    <Txt style={S.small}>
+                      {String(
+                        pendingTakeover.transitionSnapshot.hospital_name ??
+                          "Transition plan",
+                      )}
+                      {pendingTakeover.transitionSnapshot.discharge_date
+                        ? " · Discharge " +
+                          String(pendingTakeover.transitionSnapshot.discharge_date)
+                        : ""}
+                    </Txt>
+                  </View>
+                </View>
+                {Boolean(pendingTakeover.transitionSnapshot.warning_signs) && (
+                  <Txt>
+                    Warning signs:{" "}
+                    {String(pendingTakeover.transitionSnapshot.warning_signs)}
+                  </Txt>
+                )}
+                {Array.isArray(
+                  pendingTakeover.transitionSnapshot.open_followups,
+                ) && (
+                  <Txt style={S.small}>
+                    {
+                      (pendingTakeover.transitionSnapshot.open_followups as unknown[])
+                        .length
+                    }{" "}
+                    open transition follow-up
+                    {(pendingTakeover.transitionSnapshot.open_followups as unknown[])
+                      .length === 1
+                      ? ""
+                      : "s"}
+                  </Txt>
+                )}
+              </Card>
+            )}
+
+            {pendingTakeover.medicationReconciliationSnapshot && (
+              <Card style={{ backgroundColor: "#EAF4EF" }}>
+                <View style={S.row}>
+                  <Icon name="git-compare-outline" size={20} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={S.h3}>Medication reconciliation on file</Text>
+                    <Txt style={S.small}>
+                      {Number(
+                        pendingTakeover.medicationReconciliationSnapshot
+                          .medication_count ?? 0,
+                      )}{" "}
+                      medications ·{" "}
+                      {pendingTakeover.medicationReconciliationSnapshot.created_at
+                        ? new Date(
+                            String(
+                              pendingTakeover.medicationReconciliationSnapshot
+                                .created_at,
+                            ),
+                          ).toLocaleString()
+                        : "time not available"}
+                    </Txt>
+                  </View>
+                </View>
+                {Boolean(
+                  pendingTakeover.medicationReconciliationSnapshot.note,
+                ) && (
+                  <Txt>
+                    {String(
+                      pendingTakeover.medicationReconciliationSnapshot.note,
+                    )}
+                  </Txt>
+                )}
+              </Card>
+            )}
+
             <Card style={{ backgroundColor: C.white }}>
               <View style={S.between}>
                 <Text style={S.h3}>Your live responsibilities now</Text>
@@ -977,7 +1083,15 @@ export function CareShiftBoardScreen() {
               }
               disabled={Boolean(busyId)}
               icon="checkmark-circle-outline"
-              onPress={() => void acceptTakeover()}
+              onPress={() => void acceptTakeover(false)}
+            />
+
+            <Button
+              title="Accept takeover & flag this note as a concern"
+              secondary
+              icon="flag-outline"
+              disabled={Boolean(busyId) || !takeoverNote.trim()}
+              onPress={() => void acceptTakeover(true)}
             />
 
             <Txt style={S.small}>
@@ -1512,6 +1626,17 @@ export function CareShiftBoardScreen() {
                           {acknowledgementMap.get(handoff.id)?.note}
                         </Txt>
                       )}
+                      {acknowledgementMap.get(handoff.id)?.concernFlagged && (
+                        <Card style={{ backgroundColor: "#FFF1E5", padding: 10 }}>
+                          <Text style={[S.h3, { fontSize: 12 }]}>
+                            Incoming caregiver flagged a concern
+                          </Text>
+                          <Txt style={S.small}>
+                            {acknowledgementMap.get(handoff.id)?.concernText ||
+                              "See acknowledgement note."}
+                          </Txt>
+                        </Card>
+                      )}
                     </View>
                   </View>
                 </Card>
@@ -1526,7 +1651,11 @@ export function CareShiftBoardScreen() {
               ))}
 
             <Txt style={S.small}>
-              {handoff.briefingVersion >= 2 ? "Shift briefing" : "Snapshot"} ·{" "}
+              {handoff.briefingVersion >= 3
+                ? "Handoff 3.0"
+                : handoff.briefingVersion >= 2
+                  ? "Shift briefing"
+                  : "Snapshot"} ·{" "}
               {handoff.openTaskSnapshot.length} unfinished ·{" "}
               {handoff.completedTaskSnapshot.length} completed
               {handoff.briefingVersion >= 2
