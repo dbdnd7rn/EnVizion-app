@@ -36,6 +36,7 @@ import { CareCoordinationInboxScreen } from "./src/screens/CareCoordinationInbox
 import { CareContinuityScreen } from "./src/screens/CareContinuityScreen";
 import { CareCoverageRequestsScreen } from "./src/screens/CareCoverageRequestsScreen";
 import { CoverageInsightsScreen } from "./src/screens/CoverageInsightsScreen";
+import { CoverageForecastScreen } from "./src/screens/CoverageForecastScreen";
 import { SmartCoveragePlannerScreen } from "./src/screens/SmartCoveragePlannerScreen";
 import { WeeklyCoveragePlanScreen } from "./src/screens/WeeklyCoveragePlanScreen";
 import { CareCoverageRequirementsScreen } from "./src/screens/CareCoverageRequirementsScreen";
@@ -304,6 +305,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CoverageInsights"
             component={CoverageInsightsScreen}
             options={{ title: "Caregiver coverage insights" }}
+          />
+          <Stack.Screen
+            name="CoverageForecast"
+            component={CoverageForecastScreen}
+            options={{ title: "Proactive coverage forecast" }}
           />
           <Stack.Screen
             name="CareCoverageRequests"
