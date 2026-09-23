@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
+  loadCareCoverageRequestCommandCenter,
   loadCareCoverageRequests,
+  type CareCoverageCommandParticipant,
   type CareCoverageRequest,
   type CareCoverageRequestResponse,
 } from "../careCoverageRequests";
@@ -10,6 +12,11 @@ import {
   type CareCoverageRequirementOccurrence,
 } from "../careCoverageRequirements";
 import { coverageBackupFitLabel } from "../careCoverageMatchingHelpers";
+import {
+  coverageEscalationLabel,
+  coverageEscalationStage,
+  coverageWindowCountdownLabel,
+} from "../careCoverageRequestHelpers";
 import {
   loadCareSchedule,
   type CareShift,
@@ -141,6 +148,9 @@ export function WeeklyCoveragePlanScreen() {
   const [weekOffset, setWeekOffset] = useState(0);
   const [requests, setRequests] = useState<CareCoverageRequest[]>([]);
   const [responses, setResponses] = useState<CareCoverageRequestResponse[]>([]);
+  const [commandCenterByRequest, setCommandCenterByRequest] = useState<
+    Record<string, CareCoverageCommandParticipant[]>
+  >({});
   const [occurrences, setOccurrences] = useState<
     CareCoverageRequirementOccurrence[]
   >([]);
@@ -212,8 +222,43 @@ export function WeeklyCoveragePlanScreen() {
           }),
         ]);
 
+      let nextCommandCenters: Record<
+        string,
+        CareCoverageCommandParticipant[]
+      > = {};
+
+      if (owner) {
+        const activePlan = planForWeek(weekly.plans, weekStart);
+        const requestIds = Array.from(
+          new Set(
+            weekly.slots
+              .filter(
+                (slot) =>
+                  slot.planId === activePlan?.id && slot.coverageRequestId,
+              )
+              .map((slot) => slot.coverageRequestId)
+              .filter((id): id is string => Boolean(id)),
+          ),
+        );
+
+        const commandEntries = await Promise.all(
+          requestIds.map(async (requestId) => {
+            try {
+              const rows =
+                await loadCareCoverageRequestCommandCenter(requestId);
+              return [requestId, rows] as const;
+            } catch {
+              return [requestId, []] as const;
+            }
+          }),
+        );
+
+        nextCommandCenters = Object.fromEntries(commandEntries);
+      }
+
       setRequests(coverage.requests);
       setResponses(coverage.responses);
+      setCommandCenterByRequest(nextCommandCenters);
       setAvailability(schedule.availability);
       setRecurringAvailability(schedule.recurringAvailability);
       setShifts(schedule.shifts);
@@ -231,7 +276,7 @@ export function WeeklyCoveragePlanScreen() {
     } finally {
       setLoading(false);
     }
-  }, [careRecipientId, window.endsAt, window.startsAt]);
+  }, [careRecipientId, owner, weekStart, window.endsAt, window.startsAt]);
 
   useEffect(() => {
     void refresh();
@@ -295,17 +340,10 @@ export function WeeklyCoveragePlanScreen() {
   );
 
   useEffect(() => {
-    if (
-      selectedPlan?.status !== "published" ||
-      !selectedPlan.approvalDeadlineAt
-    ) {
-      return;
-    }
-
     setClockMs(Date.now());
     const timer = setInterval(() => setClockMs(Date.now()), 60_000);
     return () => clearInterval(timer);
-  }, [selectedPlan?.approvalDeadlineAt, selectedPlan?.status]);
+  }, []);
 
   const approvalNudgeState = useMemo(
     () =>
@@ -401,6 +439,11 @@ export function WeeklyCoveragePlanScreen() {
         ]),
       ),
     [roster],
+  );
+
+  const requestMap = useMemo(
+    () => new Map(requests.map((request) => [request.id, request])),
+    [requests],
   );
 
   const responseCounts = useMemo(
@@ -966,6 +1009,18 @@ export function WeeklyCoveragePlanScreen() {
               slot.status === "pending" &&
               slot.caregiverId === currentUserId &&
               !viewer;
+            const backupRequest = slot.coverageRequestId
+              ? requestMap.get(slot.coverageRequestId) ?? null
+              : null;
+            const commandParticipants = slot.coverageRequestId
+              ? commandCenterByRequest[slot.coverageRequestId] ?? []
+              : [];
+            const currentEscalationStage = backupRequest
+              ? coverageEscalationStage(
+                  backupRequest,
+                  new Date(clockMs),
+                )
+              : 0;
 
             return (
               <Card key={slot.id}>
@@ -1242,6 +1297,176 @@ export function WeeklyCoveragePlanScreen() {
                       disabled={Boolean(busy)}
                       onPress={() => void respond(slot, "declined")}
                     />
+                  </Card>
+                )}
+
+                {owner && backupRequest && (
+                  <Card
+                    style={{
+                      backgroundColor:
+                        backupRequest.status === "filled"
+                          ? "#EAF4EF"
+                          : "#F7F1F8",
+                    }}
+                  >
+                    <View style={S.between}>
+                      <View style={{ flex: 1, gap: 3 }}>
+                        <Text style={S.eyebrow}>
+                          BACKUP RESPONSE COMMAND CENTER
+                        </Text>
+                        <Text style={S.h3}>
+                          {backupRequest.status === "filled"
+                            ? "Coverage secured"
+                            : backupRequest.status === "cancelled"
+                              ? "Backup request closed"
+                              : coverageEscalationLabel(
+                                  currentEscalationStage,
+                                )}
+                        </Text>
+                        <Txt style={S.small}>
+                          {coverageWindowCountdownLabel(
+                            backupRequest,
+                            new Date(clockMs),
+                          )}
+                        </Txt>
+                      </View>
+                      <Icon
+                        name={
+                          backupRequest.status === "filled"
+                            ? "shield-checkmark-outline"
+                            : currentEscalationStage === 3
+                              ? "alarm-outline"
+                              : "radio-outline"
+                        }
+                        color={
+                          backupRequest.status === "filled"
+                            ? C.green
+                            : currentEscalationStage === 3
+                              ? C.rose
+                              : C.purple
+                        }
+                      />
+                    </View>
+
+                    <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+                      <View style={[S.pill, { backgroundColor: C.white }]}>
+                        <Txt style={S.small}>
+                          {commandParticipants.filter(
+                            (item) => item.firstNotifiedAt,
+                          ).length} notified
+                        </Txt>
+                      </View>
+                      <View style={[S.pill, { backgroundColor: C.white }]}>
+                        <Txt style={S.small}>
+                          {commandParticipants.filter(
+                            (item) => item.response === "declined",
+                          ).length} declined
+                        </Txt>
+                      </View>
+                      <View style={[S.pill, { backgroundColor: C.white }]}>
+                        <Txt style={S.small}>
+                          {commandParticipants.filter(
+                            (item) => item.isClaimed,
+                          ).length} secured
+                        </Txt>
+                      </View>
+                    </View>
+
+                    {!commandParticipants.length ? (
+                      <Txt style={S.small}>
+                        No backup caregiver activity has been recorded yet.
+                        The live escalation engine will add contacts here as
+                        notifications are sent.
+                      </Txt>
+                    ) : (
+                      commandParticipants.map((participant) => (
+                        <Card
+                          key={participant.userId}
+                          style={{ backgroundColor: C.white }}
+                        >
+                          <View style={S.between}>
+                            <View style={{ flex: 1, gap: 2 }}>
+                              <Text style={S.h3}>
+                                {participant.displayName}
+                              </Text>
+                              <Txt style={S.small}>
+                                {participant.isClaimed
+                                  ? "Secured coverage"
+                                  : participant.response === "declined"
+                                    ? "Declined"
+                                    : participant.response === "accepted"
+                                      ? "Accepted"
+                                      : participant.firstNotifiedAt
+                                        ? "Notified · awaiting response"
+                                        : "Backup activity recorded"}
+                              </Txt>
+                            </View>
+                            <Icon
+                              name={
+                                participant.isClaimed
+                                  ? "checkmark-circle-outline"
+                                  : participant.response === "declined"
+                                    ? "close-circle-outline"
+                                    : "notifications-outline"
+                              }
+                              color={
+                                participant.isClaimed
+                                  ? C.green
+                                  : participant.response === "declined"
+                                    ? C.rose
+                                    : C.purple
+                              }
+                            />
+                          </View>
+
+                          {participant.firstNotifiedAt && (
+                            <Txt style={S.small}>
+                              First notified ·{" "}
+                              {new Date(
+                                participant.firstNotifiedAt,
+                              ).toLocaleString()}
+                              {participant.notificationCount > 1
+                                ? " · " +
+                                  participant.notificationCount +
+                                  " notifications"
+                                : ""}
+                            </Txt>
+                          )}
+
+                          {participant.highestEscalationStage && (
+                            <Txt style={S.small}>
+                              Highest escalation reached · Stage{" "}
+                              {participant.highestEscalationStage}
+                            </Txt>
+                          )}
+
+                          {participant.respondedAt && (
+                            <Txt style={S.small}>
+                              Responded ·{" "}
+                              {new Date(
+                                participant.respondedAt,
+                              ).toLocaleString()}
+                            </Txt>
+                          )}
+
+                          {participant.isClaimed &&
+                            participant.claimedAt && (
+                              <Txt style={S.small}>
+                                Coverage secured ·{" "}
+                                {new Date(
+                                  participant.claimedAt,
+                                ).toLocaleString()}
+                              </Txt>
+                            )}
+
+                          {Boolean(participant.responseNote) && (
+                            <Txt style={S.small}>
+                              Response note · {participant.responseNote}
+                            </Txt>
+                          )}
+                        </Card>
+                      ))
+                    )}
                   </Card>
                 )}
 
