@@ -42,21 +42,21 @@ export function launchReadiness(input: {
     issues.push("Some active pilot users are not current on required documents");
   }
 
-  if (input.operations.failedPackets24h > 0) {
+  if (input.operations.failedPacketExports24h > 0) {
     issues.push(
-      `${input.operations.failedPackets24h} care packet export failure${input.operations.failedPackets24h === 1 ? "" : "s"} in the last 24 hours`,
+      `${input.operations.failedPacketExports24h} care packet export failure${input.operations.failedPacketExports24h === 1 ? "" : "s"} in the last 24 hours`,
     );
   }
 
-  if (input.operations.failedPushes24h > 5) {
+  if (input.operations.pushDeliveryErrors24h > 5) {
     issues.push(
-      `${input.operations.failedPushes24h} failed push attempts in the last 24 hours`,
+      `${input.operations.pushDeliveryErrors24h} failed push attempts in the last 24 hours`,
     );
   }
 
-  if (input.operations.staleSupport48h > 0) {
+  if (input.operations.staleSupportRequests > 0) {
     issues.push(
-      `${input.operations.staleSupport48h} support request${input.operations.staleSupport48h === 1 ? "" : "s"} open longer than 48 hours`,
+      `${input.operations.staleSupportRequests} support request${input.operations.staleSupportRequests === 1 ? "" : "s"} open longer than 48 hours`,
     );
   }
 
@@ -67,7 +67,7 @@ export function launchReadiness(input: {
   }
 
   const hardBlock =
-    input.operations.failedPackets24h > 0 ||
+    input.operations.failedPacketExports24h > 0 ||
     (
       input.pilot.activePilot > 0 &&
       input.pilot.activeConsentComplete < input.pilot.activePilot
