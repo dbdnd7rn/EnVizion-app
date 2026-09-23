@@ -31,6 +31,7 @@ import {
   loadWeeklyCoverageReassignmentCandidates,
   publishWeeklyCoveragePlan,
   reassignWeeklyCoverageSlot,
+  releaseWeeklyCoverageSlotToBackups,
   respondWeeklyCoverageSlot,
   saveWeeklyCoveragePlanDraft,
   type CareWeeklyCoveragePlan,
@@ -166,6 +167,8 @@ export function WeeklyCoveragePlanScreen() {
   const [pendingReassignKey, setPendingReassignKey] = useState<string | null>(
     null,
   );
+  const [pendingReleaseId, setPendingReleaseId] = useState<string | null>(null);
+  const [releaseNotes, setReleaseNotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -654,6 +657,49 @@ export function WeeklyCoveragePlanScreen() {
     }
   }
 
+  async function releaseToBackups(slot: CareWeeklyCoverageSlot) {
+    if (!owner || busy || slot.status !== "pending") return;
+
+    if (pendingReleaseId !== slot.id) {
+      setPendingReleaseId(slot.id);
+      setReassignSlotId(null);
+      setReassignCandidates([]);
+      setPendingReassignKey(null);
+      setMessage(
+        "Review the emergency release note, then tap Confirm release to backups. This stops waiting for the assigned caregiver immediately.",
+      );
+      return;
+    }
+
+    setBusy("release:" + slot.id);
+    setMessage("");
+
+    try {
+      await releaseWeeklyCoverageSlotToBackups({
+        slotId: slot.id,
+        note: releaseNotes[slot.id] ?? "",
+      });
+      setPendingReleaseId(null);
+      setReleaseNotes((current) => {
+        const next = { ...current };
+        delete next[slot.id];
+        return next;
+      });
+      await refresh();
+      setMessage(
+        "Coverage released to backups. The pending caregiver was released, Open Coverage was activated, and backup escalation was checked immediately.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not release this weekly coverage slot to backups.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function respond(
     slot: CareWeeklyCoverageSlot,
     response: "accepted" | "declined",
@@ -859,6 +905,7 @@ export function WeeklyCoveragePlanScreen() {
                     <Txt style={{ color: "#E9DDED" }}>
                       {controlSummary.pending} pending ·{" "}
                       {controlSummary.timedOut} timed out ·{" "}
+                      {controlSummary.releasedEarly} released early ·{" "}
                       {controlSummary.declined + controlSummary.openCoverage}{" "}
                       moved to backup coverage
                     </Txt>
@@ -901,6 +948,11 @@ export function WeeklyCoveragePlanScreen() {
                   <Text style={S.eyebrow}>TIMED OUT</Text>
                   <Text style={S.h2}>{controlSummary.timedOut}</Text>
                   <Txt style={S.small}>Auto-released</Txt>
+                </Card>
+                <Card style={{ flex: 1, minWidth: 105 }}>
+                  <Text style={S.eyebrow}>RELEASED EARLY</Text>
+                  <Text style={S.h2}>{controlSummary.releasedEarly}</Text>
+                  <Txt style={S.small}>Owner override</Txt>
                 </Card>
               </View>
             </>
@@ -956,8 +1008,26 @@ export function WeeklyCoveragePlanScreen() {
                     : "No caregiver assigned"}
                 </Txt>
 
-                {Boolean(slot.responseNote) && (
+                {Boolean(slot.responseNote) && !slot.ownerReleasedAt && (
                   <Txt style={S.small}>Response note · {slot.responseNote}</Txt>
+                )}
+                {slot.ownerReleasedAt && (
+                  <Card style={{ backgroundColor: C.redBg }}>
+                    <View style={S.row}>
+                      <Icon name="flash-outline" color={C.rose} size={18} />
+                      <Text style={[S.h3, { color: C.rose }]}>
+                        Owner released this slot to backups early
+                      </Text>
+                    </View>
+                    <Txt style={S.small}>
+                      Released · {new Date(slot.ownerReleasedAt).toLocaleString()}
+                    </Txt>
+                    {Boolean(slot.ownerReleaseNote) && (
+                      <Txt style={S.small}>
+                        Owner note · {slot.ownerReleaseNote}
+                      </Txt>
+                    )}
+                  </Card>
                 )}
                 {slot.timedOutAt && (
                   <Txt style={S.small}>
@@ -1050,6 +1120,72 @@ export function WeeklyCoveragePlanScreen() {
                           </Card>
                         );
                       })}
+
+                    <Card style={{ backgroundColor: C.redBg }}>
+                      <View style={S.row}>
+                        <Icon name="flash-outline" color={C.rose} />
+                        <View style={{ flex: 1, gap: 2 }}>
+                          <Text style={[S.h3, { color: C.rose }]}>
+                            Emergency owner override
+                          </Text>
+                          <Txt style={S.small}>
+                            Stop waiting on this caregiver and open this exact
+                            slot to backup caregivers immediately. The action
+                            is recorded in the care audit trail.
+                          </Txt>
+                        </View>
+                      </View>
+
+                      {pendingReleaseId === slot.id && (
+                        <>
+                          <Field
+                            label="Owner release note · optional"
+                            value={releaseNotes[slot.id] ?? ""}
+                            onChange={(value) =>
+                              setReleaseNotes((current) => ({
+                                ...current,
+                                [slot.id]: value.slice(0, 500),
+                              }))
+                            }
+                            multiline
+                          />
+                          <Txt style={S.small}>
+                            This releases the current caregiver from this
+                            pending approval and suppresses them from the new
+                            backup request.
+                          </Txt>
+                        </>
+                      )}
+
+                      <Button
+                        title={
+                          busy === "release:" + slot.id
+                            ? "Opening backup coverage…"
+                            : pendingReleaseId === slot.id
+                              ? "Confirm release to backups"
+                              : "Release to backups now"
+                        }
+                        secondary
+                        disabled={
+                          Boolean(busy) ||
+                          approvalNudgeState?.stage === "expired" ||
+                          Boolean(selectedPlan.approvalDeadlineProcessedAt)
+                        }
+                        icon="megaphone-outline"
+                        onPress={() => void releaseToBackups(slot)}
+                      />
+
+                      {pendingReleaseId === slot.id && !busy && (
+                        <Button
+                          title="Cancel emergency release"
+                          secondary
+                          onPress={() => {
+                            setPendingReleaseId(null);
+                            setMessage("");
+                          }}
+                        />
+                      )}
+                    </Card>
                   </Card>
                 )}
 
