@@ -172,6 +172,7 @@ export function weeklyCoverageControlSummary(
   slots: Array<{
     status: "proposed" | "pending" | "accepted" | "declined" | "open_coverage" | "cancelled";
     timedOutAt?: string | null;
+    ownerReleasedAt?: string | null;
   }>,
 ) {
   return slots.reduce(
@@ -182,6 +183,7 @@ export function weeklyCoverageControlSummary(
       if (slot.status === "declined") summary.declined += 1;
       if (slot.status === "open_coverage") summary.openCoverage += 1;
       if (slot.timedOutAt) summary.timedOut += 1;
+      if (slot.ownerReleasedAt) summary.releasedEarly += 1;
       return summary;
     },
     {
@@ -191,6 +193,7 @@ export function weeklyCoverageControlSummary(
       declined: 0,
       openCoverage: 0,
       timedOut: 0,
+      releasedEarly: 0,
     },
   );
 }
