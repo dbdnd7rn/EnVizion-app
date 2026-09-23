@@ -38,6 +38,7 @@ import {
   addLocalDateDays,
   defaultWeeklyApprovalDeadlineIso,
   localMondayDate,
+  weeklyApprovalNudgeState,
   weeklyCoverageDraftSlots,
   weeklyCoverageNeeds,
   weeklyCoverageResponseCounts,
@@ -156,6 +157,7 @@ export function WeeklyCoveragePlanScreen() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [clockMs, setClockMs] = useState(() => Date.now());
 
   const currentMonday = useMemo(() => localMondayDate(new Date()), []);
   const weekStart = useMemo(
@@ -275,6 +277,28 @@ export function WeeklyCoveragePlanScreen() {
             )
         : [],
     [selectedPlan, slots],
+  );
+
+  useEffect(() => {
+    if (
+      selectedPlan?.status !== "published" ||
+      !selectedPlan.approvalDeadlineAt
+    ) {
+      return;
+    }
+
+    setClockMs(Date.now());
+    const timer = setInterval(() => setClockMs(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, [selectedPlan?.approvalDeadlineAt, selectedPlan?.status]);
+
+  const approvalNudgeState = useMemo(
+    () =>
+      weeklyApprovalNudgeState(
+        selectedPlan?.approvalDeadlineAt ?? null,
+        new Date(clockMs),
+      ),
+    [clockMs, selectedPlan?.approvalDeadlineAt],
   );
 
   const planningStart = useMemo(() => {
@@ -519,7 +543,7 @@ export function WeeklyCoveragePlanScreen() {
       await publishWeeklyCoveragePlan(planId);
       await refresh();
       setMessage(
-        "Weekly plan published. Pending approvals will automatically move to Open Coverage at the response deadline.",
+        "Weekly plan published. Pending caregivers will get automatic 6-hour and 1-hour reminders before unanswered slots move to Open Coverage.",
       );
     } catch (error) {
       setMessage(
@@ -696,6 +720,24 @@ export function WeeklyCoveragePlanScreen() {
                   : ""}
               </Txt>
             )}
+            {selectedPlan.status === "published" && approvalNudgeState && (
+              <View style={[S.row, { alignItems: "center" }]}>
+                <Icon
+                  name={
+                    approvalNudgeState.stage === "one_hour"
+                      ? "alarm-outline"
+                      : "notifications-outline"
+                  }
+                  color={
+                    approvalNudgeState.stage === "one_hour"
+                      ? C.rose
+                      : C.purple
+                  }
+                  size={18}
+                />
+                <Txt style={S.small}>{approvalNudgeState.label}</Txt>
+              </View>
+            )}
           </Card>
 
           {selectedPlanSlots.map((slot) => {
@@ -766,13 +808,19 @@ export function WeeklyCoveragePlanScreen() {
                       Declining moves the slot into Open Coverage automatically.
                     </Txt>
                     {selectedPlan.approvalDeadlineAt && (
-                      <Txt style={S.small}>
-                        Respond by{" "}
-                        {new Date(
-                          selectedPlan.approvalDeadlineAt,
-                        ).toLocaleString()}. If no response arrives by then,
-                        this reservation is released to backup caregivers.
-                      </Txt>
+                      <>
+                        <Txt style={S.small}>
+                          Respond by{" "}
+                          {new Date(
+                            selectedPlan.approvalDeadlineAt,
+                          ).toLocaleString()}. If no response arrives by then,
+                          this reservation is released to backup caregivers.
+                        </Txt>
+                        <Txt style={S.small}>
+                          Automatic reminders are sent while this slot is still
+                          pending at 6 hours and 1 hour before the cutoff.
+                        </Txt>
+                      </>
                     )}
                     <Field
                       label="Optional response note"
@@ -893,6 +941,8 @@ export function WeeklyCoveragePlanScreen() {
                     <Txt style={S.small}>
                       The suggested cutoff leaves time for backup coverage
                       before the earliest assigned slot whenever possible.
+                      Caregivers who are still pending receive automatic
+                      reminders at 6 hours and 1 hour before the cutoff.
                     </Txt>
                   </Card>
                 </>
