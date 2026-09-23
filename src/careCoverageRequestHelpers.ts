@@ -65,6 +65,7 @@ export function latestCoverageResponseForUser(
 export function coverageRequestCounts(requests: CareCoverageRequest[]) {
   return {
     open: requests.filter((item) => item.status === "open").length,
+    reserved: requests.filter((item) => item.status === "reserved").length,
     filled: requests.filter((item) => item.status === "filled").length,
     cancelled: requests.filter((item) => item.status === "cancelled").length,
   };
@@ -81,9 +82,10 @@ export function orderedCoverageRequests(
     ) {
       return 0;
     }
-    if (request.status === "filled") return 1;
-    if (request.status === "open") return 2;
-    return 3;
+    if (request.status === "reserved") return 1;
+    if (request.status === "filled") return 2;
+    if (request.status === "open") return 3;
+    return 4;
   };
 
   return [...requests].sort((a, b) => {
