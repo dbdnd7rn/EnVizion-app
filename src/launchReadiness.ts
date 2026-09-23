@@ -56,7 +56,7 @@ export function launchReadiness(input: {
 
   if (input.operations.staleSupportRequests > 0) {
     issues.push(
-      `${input.operations.staleSupportRequests} support request${input.operations.staleSupportRequests === 1 ? "" : "s"} open longer than 48 hours`,
+      `${input.operations.staleSupportRequests} support request${input.operations.staleSupportRequests === 1 ? "" : "s"} open longer than 24 hours`,
     );
   }
 
