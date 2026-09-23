@@ -29,6 +29,7 @@ import {
   loadCareSchedule,
   type CareShift,
   type CaregiverAvailability,
+  type CaregiverAvailabilityRule,
 } from "../careSchedule";
 import { currentCareTaskUserId } from "../careTasks";
 import {
@@ -156,6 +157,9 @@ export function CareCoverageRequestsScreen({ route }: Props) {
   const [responses, setResponses] = useState<CareCoverageRequestResponse[]>([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
   const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
+  const [recurringAvailability, setRecurringAvailability] = useState<
+    CaregiverAvailabilityRule[]
+  >([]);
   const [shifts, setShifts] = useState<CareShift[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [clock, setClock] = useState(() => Date.now());
@@ -176,6 +180,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
       setResponses([]);
       setRoster(null);
       setAvailability([]);
+      setRecurringAvailability([]);
       setShifts([]);
       setLoading(false);
       return;
@@ -194,6 +199,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
       setResponses(coverage.responses);
       setRoster(team);
       setAvailability(schedule.availability);
+      setRecurringAvailability(schedule.recurringAvailability);
       setShifts(schedule.shifts);
       setCurrentUserId(userId);
     } catch (error) {
@@ -247,6 +253,16 @@ export function CareCoverageRequestsScreen({ route }: Props) {
           event: "*",
           schema: "public",
           table: "caregiver_availability",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "caregiver_availability_rules",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
         () => void refresh(),
@@ -599,6 +615,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
             request,
             members: roster?.members ?? [],
             availability,
+            recurringAvailability,
             shifts,
             responses,
           });
