@@ -25,6 +25,8 @@ export type CareWeeklyCoveragePlan = {
   note: string;
   publishedAt: string | null;
   closedAt: string | null;
+  approvalDeadlineAt: string | null;
+  approvalDeadlineProcessedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -45,6 +47,7 @@ export type CareWeeklyCoverageSlot = {
   respondedAt: string | null;
   shiftId: string | null;
   coverageRequestId: string | null;
+  timedOutAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -60,6 +63,8 @@ function mapPlan(row: any): CareWeeklyCoveragePlan {
     note: row.note ?? "",
     publishedAt: row.published_at ?? null,
     closedAt: row.closed_at ?? null,
+    approvalDeadlineAt: row.approval_deadline_at ?? null,
+    approvalDeadlineProcessedAt: row.approval_deadline_processed_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -91,7 +96,7 @@ export async function loadWeeklyCoveragePlans(careRecipientId: string) {
   const { data: planRows, error: planError } = await supabase
     .from("care_weekly_coverage_plans")
     .select(
-      "id, care_recipient_id, created_by, week_start, timezone, status, note, published_at, closed_at, created_at, updated_at",
+      "id, care_recipient_id, created_by, week_start, timezone, status, note, published_at, closed_at, approval_deadline_at, approval_deadline_processed_at, created_at, updated_at",
     )
     .eq("care_recipient_id", careRecipientId)
     .order("week_start", { ascending: false })
@@ -105,7 +110,7 @@ export async function loadWeeklyCoveragePlans(careRecipientId: string) {
   const { data: slotRows, error: slotError } = await supabase
     .from("care_weekly_coverage_slots")
     .select(
-      "id, plan_id, care_recipient_id, created_by, source_type, source_id, caregiver_id, label, starts_at, ends_at, status, response_note, responded_at, shift_id, coverage_request_id, created_at, updated_at",
+      "id, plan_id, care_recipient_id, created_by, source_type, source_id, caregiver_id, label, starts_at, ends_at, status, response_note, responded_at, shift_id, coverage_request_id, timed_out_at, created_at, updated_at",
     )
     .in(
       "plan_id",
@@ -125,6 +130,7 @@ export async function saveWeeklyCoveragePlanDraft(input: {
   weekStart: string;
   timezone: string;
   note: string;
+  approvalDeadlineAt: string | null;
   slots: WeeklyCoverageDraftSlot[];
 }) {
   const { data, error } = await supabase.rpc(
@@ -135,6 +141,7 @@ export async function saveWeeklyCoveragePlanDraft(input: {
       p_timezone: input.timezone,
       p_note: input.note.trim() || null,
       p_slots: input.slots,
+      p_approval_deadline_at: input.approvalDeadlineAt,
     },
   );
 
