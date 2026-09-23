@@ -38,6 +38,7 @@ import {
 } from "../careTeam";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
+import { useCarePresence } from "../CarePresenceProvider";
 import {
   Button,
   C,
@@ -476,8 +477,24 @@ function WorkflowPanel({
 export function CareCoordinationInboxScreen() {
   const n = useNav();
   const { state } = useCare();
+  const { setActivity } = useCarePresence();
   const careRecipientId = state.careRecipientId;
   const readOnly = state.accessRole === "viewer";
+
+  useEffect(() => {
+    setActivity({
+      mode: "coordination",
+      screenKey: "coordination_inbox",
+      sessionId: null,
+    });
+    return () => {
+      setActivity({
+        mode: "workspace",
+        screenKey: "care_workspace",
+        sessionId: null,
+      });
+    };
+  }, [setActivity]);
 
   const [agenda, setAgenda] = useState<CareAgendaData>({
     appointments: [],

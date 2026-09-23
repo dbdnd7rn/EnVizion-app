@@ -205,6 +205,22 @@ export function PrivacyDataScreen() {
         />
       </Card>
 
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Icon name="people-outline" />
+        <Text style={S.h3}>Live care workspace presence</Text>
+        <Txt>
+          EnVizion temporarily records recent workspace activity so authorized
+          care-team members can see who is actively using the shared care
+          profile. This is not location tracking or proof that someone is
+          physically present.
+        </Txt>
+        <Txt style={S.small}>
+          Live presence ages out automatically and is not included in portable
+          care-profile exports. Durable shift, attendance, handoff, and audit
+          records remain governed by the care profile.
+        </Txt>
+      </Card>
+
       <Section title="Delete a care profile" />
       <Card style={{ borderColor: "#E7C3C7" }}>
         <Text style={[S.h3, { color: C.rose }]}>Permanent care-profile deletion</Text>
