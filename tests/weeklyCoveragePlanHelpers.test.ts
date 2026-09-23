@@ -6,6 +6,7 @@ import {
   localMondayDate,
   weeklyCoverageDraftSlots,
   weeklyCoverageNeeds,
+  weeklyApprovalNudgeState,
   weeklyCoverageResponseCounts,
   weeklyCoverageWindow,
 } from "../src/weeklyCoveragePlanHelpers.ts";
@@ -148,4 +149,26 @@ test("weekly approval deadline refuses a meaningless cutoff when coverage starts
   );
 
   assert.equal(deadline, null);
+});
+
+
+test("weekly approval nudge state moves through scheduled, six-hour, one-hour, and expired windows", () => {
+  const deadline = "2026-09-26T18:00:00Z";
+
+  assert.equal(
+    weeklyApprovalNudgeState(deadline, new Date("2026-09-26T10:00:00Z"))?.stage,
+    "scheduled",
+  );
+  assert.equal(
+    weeklyApprovalNudgeState(deadline, new Date("2026-09-26T13:00:00Z"))?.stage,
+    "six_hours",
+  );
+  assert.equal(
+    weeklyApprovalNudgeState(deadline, new Date("2026-09-26T17:15:00Z"))?.stage,
+    "one_hour",
+  );
+  assert.equal(
+    weeklyApprovalNudgeState(deadline, new Date("2026-09-26T18:00:00Z"))?.stage,
+    "expired",
+  );
 });
