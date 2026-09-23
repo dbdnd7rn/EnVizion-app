@@ -249,6 +249,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("OnShiftCaregiver")}
           />
           <Row
+            title="Live care team & continuity"
+            subtitle="See who is in EnVizion now and review shift-to-shift history"
+            icon="git-compare-outline"
+            onPress={() => n.navigate("CareContinuity")}
+          />
+          <Row
             title="Care coordination analytics"
             subtitle="See this week’s caregiver workload and coverage picture"
             icon="bar-chart-outline"
