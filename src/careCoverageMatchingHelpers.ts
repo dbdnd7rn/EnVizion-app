@@ -6,7 +6,7 @@ import type { CareShift, CaregiverAvailability } from "./careSchedule";
 import {
   intervalsOverlap,
   shiftAvailabilityFit,
-} from "./careScheduleHelpers";
+} from "./careScheduleHelpers.ts";
 import type { CareTeamMember } from "./careTeam";
 
 export type CoverageEscalationLevel =
