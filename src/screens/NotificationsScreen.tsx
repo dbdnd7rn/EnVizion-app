@@ -14,6 +14,7 @@ function iconFor(item: NotificationRecord) {
   if (item.kind.includes("coverage_request")) return "megaphone-outline";
   if (item.kind.includes("task") || item.kind.includes("shift")) return "checkbox-outline";
   if (item.kind.includes("reminder")) return "alarm-outline";
+  if (item.kind.includes("family_update")) return "chatbubbles-outline";
   if (item.kind.includes("document")) return "folder-open-outline";
   return "notifications-outline";
 }
@@ -106,6 +107,11 @@ export function NotificationsScreen() {
         item.entityType === "care_coordination_digest"
       ) {
         n.navigate("CareCoordinationInbox");
+        return;
+      }
+
+      if (item.entityType === "care_family_update") {
+        n.navigate("FamilyCommunication");
         return;
       }
 
