@@ -250,7 +250,7 @@ export function HomeScreen() {
           />
           <Row
             title="Live care team & continuity"
-            subtitle="See who is in EnVizion now and review shift-to-shift history"
+            subtitle="Who has care now, who is next, coverage gaps, and shift history"
             icon="git-compare-outline"
             onPress={() => n.navigate("CareContinuity")}
           />
@@ -473,6 +473,12 @@ export function ToolkitScreen() {
           subtitle="My work, shared work, notes, care context, and shift closeout"
           icon="pulse-outline"
           onPress={() => n.navigate("OnShiftCaregiver")}
+        />
+        <Row
+          title="Live care team & continuity"
+          subtitle="Current caregiver, next shift, coverage bridge, and handoff history"
+          icon="git-compare-outline"
+          onPress={() => n.navigate("CareContinuity")}
         />
         <Row
           title="Caregiver availability & schedule"
