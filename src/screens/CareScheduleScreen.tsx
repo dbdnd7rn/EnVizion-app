@@ -1307,18 +1307,332 @@ export function CareScheduleScreen() {
       )}
 
       <Section title="Availability" />
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Icon name="repeat-outline" color={C.purple} />
+        <Text style={S.h3}>Weekly patterns + one-time exceptions</Text>
+        <Txt>
+          Save the caregiver’s normal weekly routine once, then use one-time
+          availability windows for temporary changes. Unavailable time always
+          takes priority when EnVizion matches backup coverage.
+        </Txt>
+      </Card>
+
       {!readOnly && (
-        <Button
-          title={
-            availabilityFormOpen
-              ? "Close availability form"
-              : "Add availability"
-          }
-          secondary
-          icon="time-outline"
-          onPress={() => setAvailabilityFormOpen((value) => !value)}
-        />
+        <View style={{ gap: 9 }}>
+          <Button
+            title={
+              recurringFormOpen
+                ? "Close weekly pattern form"
+                : "Add weekly availability pattern"
+            }
+            icon="repeat-outline"
+            onPress={() => {
+              setRecurringFormOpen((value) => !value);
+              setMessage("");
+            }}
+          />
+          <Button
+            title={
+              availabilityFormOpen
+                ? "Close one-time availability form"
+                : "Add one-time availability"
+            }
+            secondary
+            icon="time-outline"
+            onPress={() => {
+              setAvailabilityFormOpen((value) => !value);
+              setMessage("");
+            }}
+          />
+        </View>
       )}
+
+      {recurringFormOpen && !readOnly && (
+        <Card>
+          <Text style={S.eyebrow}>REPEATS WEEKLY</Text>
+          <Text style={S.h2}>Weekly caregiver availability</Text>
+
+          <Text style={S.h3}>Caregiver</Text>
+          {editableCaregivers().map((member) => (
+            <Choice
+              key={member.userId}
+              title={memberName(member.userId)}
+              subtitle={member.role === "owner" ? "Care owner" : "Caregiver"}
+              selected={recurringDraft.caregiverId === member.userId}
+              disabled={busy === "recurring-availability"}
+              onPress={() =>
+                setRecurringDraft((draft) => ({
+                  ...draft,
+                  caregiverId: member.userId,
+                }))
+              }
+            />
+          ))}
+
+          <Text style={S.h3}>Availability type</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {availabilityStatuses.map((status) => {
+              const selected = recurringDraft.status === status;
+              return (
+                <Pressable
+                  key={status}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  onPress={() =>
+                    setRecurringDraft((draft) => ({ ...draft, status }))
+                  }
+                  style={[
+                    S.pill,
+                    {
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      backgroundColor: selected ? C.purple : C.lavender,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      S.h3,
+                      {
+                        fontSize: 11,
+                        color: selected ? C.white : C.deep,
+                      },
+                    ]}
+                  >
+                    {availabilityStatusLabels[status]}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={S.h3}>Repeats on</Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {recurringWeekdays.map((item) => {
+              const selected = recurringDraft.daysOfWeek.includes(item.day);
+              return (
+                <Pressable
+                  key={item.day}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: selected }}
+                  onPress={() =>
+                    setRecurringDraft((draft) => ({
+                      ...draft,
+                      daysOfWeek: selected
+                        ? draft.daysOfWeek.filter((day) => day !== item.day)
+                        : [...draft.daysOfWeek, item.day].sort(
+                            (a, b) => a - b,
+                          ),
+                    }))
+                  }
+                  style={[
+                    S.pill,
+                    {
+                      minWidth: 52,
+                      alignItems: "center",
+                      paddingHorizontal: 12,
+                      paddingVertical: 10,
+                      backgroundColor: selected ? C.purple : C.lavender,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      S.h3,
+                      {
+                        fontSize: 11,
+                        color: selected ? C.white : C.deep,
+                      },
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <Field
+                label="Start time (HH:MM)"
+                value={recurringDraft.startTime}
+                onChange={(value) =>
+                  setRecurringDraft((draft) => ({
+                    ...draft,
+                    startTime: value,
+                  }))
+                }
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Field
+                label="End time (HH:MM)"
+                value={recurringDraft.endTime}
+                onChange={(value) =>
+                  setRecurringDraft((draft) => ({
+                    ...draft,
+                    endTime: value,
+                  }))
+                }
+              />
+            </View>
+          </View>
+
+          {/^\d{2}:\d{2}$/.test(recurringDraft.startTime) &&
+            /^\d{2}:\d{2}$/.test(recurringDraft.endTime) &&
+            recurringDraft.endTime < recurringDraft.startTime && (
+              <Txt style={S.small}>
+                Overnight pattern · end time is on the following day.
+              </Txt>
+            )}
+
+          <Field
+            label="Time zone (IANA)"
+            value={recurringDraft.timezone}
+            onChange={(value) =>
+              setRecurringDraft((draft) => ({
+                ...draft,
+                timezone: value.slice(0, 100),
+              }))
+            }
+          />
+
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <Field
+                label="Effective from (YYYY-MM-DD)"
+                value={recurringDraft.effectiveFrom}
+                onChange={(value) =>
+                  setRecurringDraft((draft) => ({
+                    ...draft,
+                    effectiveFrom: value,
+                  }))
+                }
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Field
+                label="Ends on · optional"
+                value={recurringDraft.effectiveUntil}
+                onChange={(value) =>
+                  setRecurringDraft((draft) => ({
+                    ...draft,
+                    effectiveUntil: value,
+                  }))
+                }
+              />
+            </View>
+          </View>
+
+          <Field
+            label="Weekly availability note"
+            value={recurringDraft.note}
+            onChange={(value) =>
+              setRecurringDraft((draft) => ({
+                ...draft,
+                note: value.slice(0, 1000),
+              }))
+            }
+            multiline
+          />
+
+          <Button
+            title={
+              busy === "recurring-availability"
+                ? "Saving weekly pattern…"
+                : "Save weekly pattern"
+            }
+            disabled={
+              busy === "recurring-availability" ||
+              !recurringDraft.caregiverId ||
+              !recurringDraft.daysOfWeek.length
+            }
+            icon="repeat-outline"
+            onPress={() => void saveRecurringAvailability()}
+          />
+        </Card>
+      )}
+
+      <Section title="Weekly recurring patterns" />
+      {recurringAvailability.length ? (
+        recurringAvailability.map((rule) => {
+          const canManage =
+            !readOnly && (owner || rule.caregiverId === currentUserId);
+          const overnight = rule.endLocalTime < rule.startLocalTime;
+
+          return (
+            <Card key={rule.id}>
+              <View style={S.between}>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={S.h3}>{memberName(rule.caregiverId)}</Text>
+                  <Txt style={S.small}>
+                    {recurringDaysLabel(rule.daysOfWeek)} ·{" "}
+                    {rule.startLocalTime} → {rule.endLocalTime}
+                    {overnight ? " next day" : ""}
+                  </Txt>
+                </View>
+                <View
+                  style={[
+                    S.pill,
+                    {
+                      backgroundColor:
+                        rule.status === "unavailable"
+                          ? C.redBg
+                          : rule.status === "preferred"
+                            ? "#EAF4EF"
+                            : C.lavender,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      S.small,
+                      {
+                        color:
+                          rule.status === "unavailable" ? C.rose : C.deep,
+                      },
+                    ]}
+                  >
+                    {availabilityStatusLabels[rule.status]}
+                  </Text>
+                </View>
+              </View>
+
+              <Txt style={S.small}>
+                Repeats weekly · {rule.timezone}
+              </Txt>
+              <Txt style={S.small}>
+                Effective {rule.effectiveFrom}
+                {rule.effectiveUntil ? ` → ${rule.effectiveUntil}` : " · ongoing"}
+              </Txt>
+              {Boolean(rule.note) && <Txt>{rule.note}</Txt>}
+
+              {canManage && (
+                <Button
+                  title={
+                    busy === `recurring:${rule.id}`
+                      ? "Removing…"
+                      : "Remove weekly pattern"
+                  }
+                  secondary
+                  disabled={Boolean(busy)}
+                  onPress={() => void removeRecurringAvailability(rule)}
+                />
+              )}
+            </Card>
+          );
+        })
+      ) : (
+        <Card>
+          <Txt>
+            No weekly availability patterns yet. Add one once and EnVizion will
+            reuse it for future coverage matching.
+          </Txt>
+        </Card>
+      )}
+
+      <Section title="One-time availability windows" />
 
       {availabilityFormOpen && !readOnly && (
         <Card>
