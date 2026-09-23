@@ -458,6 +458,15 @@ export function CareCoverageRequestsScreen({ route }: Props) {
         </Card>
       </View>
 
+      {owner && (
+        <Button
+          title="Coverage insights"
+          secondary
+          icon="analytics-outline"
+          onPress={() => n.navigate("CoverageInsights")}
+        />
+      )}
+
       {Boolean(message) && (
         <Card>
           <Text accessibilityRole="alert" style={S.body}>
