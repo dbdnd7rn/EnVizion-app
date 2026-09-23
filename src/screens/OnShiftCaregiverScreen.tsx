@@ -85,6 +85,7 @@ import {
 import type { MedicationRecord } from "../medications";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
+import { useCarePresence } from "../CarePresenceProvider";
 import {
   Button,
   C,
@@ -247,6 +248,7 @@ function TaskCard({
 export function OnShiftCaregiverScreen() {
   const n = useNav();
   const { state } = useCare();
+  const { setActivity } = useCarePresence();
   const careRecipientId = state.careRecipientId;
   const readOnly = state.accessRole === "viewer";
 
@@ -285,6 +287,22 @@ export function OnShiftCaregiverScreen() {
   const [handoffTo, setHandoffTo] = useState<string | null>(null);
   const [shiftLabel, setShiftLabel] = useState(defaultShiftLabel());
   const [endNote, setEndNote] = useState("");
+
+  useEffect(() => {
+    setActivity({
+      mode: session ? "on_shift" : "workspace",
+      screenKey: "on_shift",
+      sessionId: session?.id ?? null,
+    });
+
+    return () => {
+      setActivity({
+        mode: "workspace",
+        screenKey: "care_workspace",
+        sessionId: null,
+      });
+    };
+  }, [session?.id, setActivity]);
 
   const refresh = useCallback(async () => {
     if (!careRecipientId || readOnly) {
