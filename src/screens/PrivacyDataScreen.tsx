@@ -154,7 +154,8 @@ export function PrivacyDataScreen() {
           includes Care Vault metadata, care contacts, communication history,
           shared care tasks and completion history, caregiver availability,
           scheduled shifts, check-in and attendance history, swap requests,
-          recorded coverage-gap events, caregiver shift briefings (including
+          recorded coverage-gap events, open caregiver coverage requests and
+          caregiver responses, caregiver shift briefings (including
           frozen task, medication, communication, coordination, follow-up, and
           next-visit snapshots), caregiver takeover acknowledgements and acceptance
           notes, active/completed caregiver shift sessions, append-only shift notes,
@@ -230,8 +231,9 @@ export function PrivacyDataScreen() {
           transition checklist, private Care Vault files, care contacts,
           communication history, shared care tasks and completion history,
           caregiver availability, scheduled shifts, check-in and attendance
-          history, swap requests, coverage-gap history, caregiver shift
-          briefings and their frozen snapshots, caregiver takeover acknowledgements
+          history, swap requests, coverage-gap history, open caregiver
+          coverage requests and responses, caregiver shift briefings and their
+          frozen snapshots, caregiver takeover acknowledgements
           and acceptance notes, caregiver shift sessions and append-only shift
           notes, coordination assignments, family coordination comments,
           resolution history, packet workflow history, care-sharing records and
