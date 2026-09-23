@@ -27,6 +27,8 @@ import { CareCalendarScreen } from "./src/screens/CareCalendarScreen";
 import { CareDocumentsScreen } from "./src/screens/CareDocumentsScreen";
 import { CareContactsScreen } from "./src/screens/CareContactsScreen";
 import { CareCommunicationLogScreen } from "./src/screens/CareCommunicationLogScreen";
+import { FamilyCommunicationScreen } from "./src/screens/FamilyCommunicationScreen";
+import { EmergencyCenterScreen } from "./src/screens/EmergencyCenterScreen";
 import { CareTasksScreen } from "./src/screens/CareTasksScreen";
 import { CareShiftBoardScreen } from "./src/screens/CareShiftBoardScreen";
 import { OnShiftCaregiverScreen } from "./src/screens/OnShiftCaregiverScreen";
@@ -77,7 +79,6 @@ import {
 import {
   TrackerScreen,
   AppointmentScreen,
-  EmergencyScreen,
 } from "./src/screens/CareScreens";
 import {
   OnboardingScreen,
@@ -250,7 +251,12 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="CareCommunicationLog"
             component={CareCommunicationLogScreen}
-            options={{ title: "Care notes & communication log" }}
+            options={{ title: "Provider & insurance communication" }}
+          />
+          <Stack.Screen
+            name="FamilyCommunication"
+            component={FamilyCommunicationScreen}
+            options={{ title: "Family communication" }}
           />
           <Stack.Screen
             name="CareTasks"
@@ -320,7 +326,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="CarePacket"
             component={CarePacketScreen}
-            options={{ title: "Handoff & visit packet" }}
+            options={{ title: "Care packet & printable summary" }}
           />
           <Stack.Screen
             name="Assistant"
@@ -364,8 +370,8 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           />
           <Stack.Screen
             name="Emergency"
-            component={EmergencyScreen}
-            options={{ title: "Get help" }}
+            component={EmergencyCenterScreen}
+            options={{ title: "Emergency information" }}
           />
           <Stack.Screen
             name="Guide"
