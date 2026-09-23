@@ -487,6 +487,12 @@ export function ToolkitScreen() {
           onPress={() => n.navigate("CareContinuity")}
         />
         <Row
+          title="Smart Coverage Planner"
+          subtitle="Scan the next 7 days, match caregivers, and review coverage suggestions"
+          icon="sparkles-outline"
+          onPress={() => n.navigate("SmartCoveragePlanner")}
+        />
+        <Row
           title="Open caregiver coverage"
           subtitle="Request help for an uncovered window or claim available coverage"
           icon="megaphone-outline"
