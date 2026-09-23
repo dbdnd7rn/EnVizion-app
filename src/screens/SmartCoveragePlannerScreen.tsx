@@ -6,6 +6,11 @@ import {
   type CareCoverageRequest,
   type CareCoverageRequestResponse,
 } from "../careCoverageRequests";
+import {
+  loadCareCoverageRequirementOccurrences,
+  scheduleCareCoverageRequirementGap,
+  type CareCoverageRequirementOccurrence,
+} from "../careCoverageRequirements";
 import { coverageBackupFitLabel } from "../careCoverageMatchingHelpers";
 import {
   loadCareSchedule,
@@ -89,6 +94,9 @@ export function SmartCoveragePlannerScreen() {
   const [requests, setRequests] = useState<CareCoverageRequest[]>([]);
   const [responses, setResponses] = useState<CareCoverageRequestResponse[]>([]);
   const [tasks, setTasks] = useState<CareTask[]>([]);
+  const [requirementOccurrences, setRequirementOccurrences] = useState<
+    CareCoverageRequirementOccurrence[]
+  >([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
   const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
   const [recurringAvailability, setRecurringAvailability] = useState<
@@ -106,6 +114,7 @@ export function SmartCoveragePlannerScreen() {
       setRequests([]);
       setResponses([]);
       setTasks([]);
+      setRequirementOccurrences([]);
       setRoster(null);
       setAvailability([]);
       setRecurringAvailability([]);
@@ -117,16 +126,27 @@ export function SmartCoveragePlannerScreen() {
     setLoading(true);
     setMessage("");
     try {
-      const [coverage, schedule, taskRows, team] = await Promise.all([
-        loadCareCoverageRequests(careRecipientId),
-        loadCareSchedule(careRecipientId),
-        loadCareTasks(careRecipientId),
-        loadCareTeam(careRecipientId),
-      ]);
+      const occurrenceStart = new Date();
+      const occurrenceEnd = new Date(
+        occurrenceStart.getTime() + 8 * 24 * 60 * 60_000,
+      );
+      const [coverage, schedule, taskRows, team, occurrences] =
+        await Promise.all([
+          loadCareCoverageRequests(careRecipientId),
+          loadCareSchedule(careRecipientId),
+          loadCareTasks(careRecipientId),
+          loadCareTeam(careRecipientId),
+          loadCareCoverageRequirementOccurrences({
+            careRecipientId,
+            startsAt: occurrenceStart.toISOString(),
+            endsAt: occurrenceEnd.toISOString(),
+          }),
+        ]);
 
       setRequests(coverage.requests);
       setResponses(coverage.responses);
       setTasks(taskRows);
+      setRequirementOccurrences(occurrences);
       setRoster(team);
       setAvailability(schedule.availability);
       setRecurringAvailability(schedule.recurringAvailability);
@@ -157,6 +177,7 @@ export function SmartCoveragePlannerScreen() {
     const tables = [
       "care_coverage_requests",
       "care_coverage_request_responses",
+      "care_coverage_requirements",
       "caregiver_availability",
       "caregiver_availability_rules",
       "care_shifts",
@@ -191,6 +212,7 @@ export function SmartCoveragePlannerScreen() {
       buildSmartCoveragePlan({
         requests,
         responses,
+        requirementOccurrences,
         tasks,
         members: roster?.members ?? [],
         availability,
@@ -203,6 +225,7 @@ export function SmartCoveragePlannerScreen() {
       availability,
       clock,
       recurringAvailability,
+      requirementOccurrences,
       requests,
       responses,
       roster,
@@ -234,7 +257,14 @@ export function SmartCoveragePlannerScreen() {
   }, [plan]);
 
   async function confirmCoverage(need: SmartCoverageNeed) {
-    if (!owner || need.source !== "coverage_request" || busy) return;
+    if (
+      !owner ||
+      (need.source !== "coverage_request" &&
+        need.source !== "coverage_requirement") ||
+      busy
+    ) {
+      return;
+    }
 
     const caregiverId = selected[need.id] ?? need.recommendedUserId;
     const candidate = need.candidates.find(
@@ -251,16 +281,29 @@ export function SmartCoveragePlannerScreen() {
     setBusy(need.id);
     setMessage("");
     try {
-      await assignCareCoverageRequest({
-        requestId: need.sourceId,
-        caregiverId,
-        note: "Assigned from Smart Coverage Planner",
-      });
+      if (need.source === "coverage_request") {
+        await assignCareCoverageRequest({
+          requestId: need.sourceId,
+          caregiverId,
+          note: "Assigned from Smart Coverage Planner",
+        });
+      } else {
+        await scheduleCareCoverageRequirementGap({
+          requirementId: need.sourceId,
+          caregiverId,
+          startsAt: need.startsAt,
+          endsAt: need.endsAt,
+          note: "Scheduled from Smart Coverage Planner",
+        });
+      }
+
       await refresh();
       setMessage(
         "Coverage confirmed for " +
           candidate.displayName +
-          ". The open request is filled and the caregiver shift is scheduled.",
+          (need.source === "coverage_request"
+            ? ". The open request is filled and the caregiver shift is scheduled."
+            : ". The uncovered recurring-care segment is now scheduled."),
       );
     } catch (error) {
       setMessage(
@@ -290,7 +333,7 @@ export function SmartCoveragePlannerScreen() {
       <Heading
         eyebrow="SMART COVERAGE PLANNER"
         title="See the next seven days before a care gap becomes urgent."
-        body="EnVizion combines open coverage windows, uncovered care tasks, caregiver availability, weekly patterns, and scheduled shifts. Nothing is scheduled automatically—the family reviews the suggestion first."
+        body="EnVizion combines recurring required-care windows, open coverage requests, uncovered tasks, caregiver availability, weekly patterns, and scheduled shifts. Nothing is scheduled automatically—the family reviews the suggestion first."
       />
 
       <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
@@ -349,6 +392,12 @@ export function SmartCoveragePlannerScreen() {
 
       <View style={{ gap: 9 }}>
         <Button
+          title="Recurring care coverage requirements"
+          secondary
+          icon="time-outline"
+          onPress={() => n.navigate("CareCoverageRequirements")}
+        />
+        <Button
           title="Caregiver availability & schedule"
           secondary
           icon="calendar-outline"
@@ -374,8 +423,9 @@ export function SmartCoveragePlannerScreen() {
           <Icon name="shield-checkmark-outline" color="#2D7656" />
           <Text style={S.h3}>No known coverage gaps need planning.</Text>
           <Txt>
-            Current open coverage windows and upcoming care tasks are covered by
-            the schedule for the next seven days.
+            Current recurring care requirements, open coverage windows, and
+            upcoming care tasks are covered by the schedule for the next seven
+            days.
           </Txt>
         </Card>
       ) : (
@@ -393,7 +443,9 @@ export function SmartCoveragePlannerScreen() {
                   <Text style={S.eyebrow}>
                     {need.source === "coverage_request"
                       ? "OPEN COVERAGE WINDOW"
-                      : "UNCOVERED CARE TASK"}
+                      : need.source === "coverage_requirement"
+                        ? "RECURRING CARE GAP"
+                        : "UNCOVERED CARE TASK"}
                   </Text>
                   <Text style={S.h2}>{need.label}</Text>
                 </View>
@@ -582,6 +634,49 @@ export function SmartCoveragePlannerScreen() {
                       onPress={() => n.navigate("CareCoverageRequests")}
                     />
                   )
+                )
+              ) : need.source === "coverage_requirement" ? (
+                !viewer && (
+                  <>
+                    {owner && selectedCandidate?.assignable ? (
+                      <Button
+                        title={
+                          busy === need.id
+                            ? "Scheduling coverage…"
+                            : "Schedule " +
+                              selectedCandidate.displayName +
+                              " for this gap"
+                        }
+                        disabled={Boolean(busy)}
+                        icon="checkmark-circle-outline"
+                        onPress={() => void confirmCoverage(need)}
+                      />
+                    ) : owner ? (
+                      <Card style={{ backgroundColor: "#FFF1E5" }}>
+                        <Txt>
+                          No caregiver with recorded Preferred or Available time
+                          currently covers this entire gap.
+                        </Txt>
+                      </Card>
+                    ) : null}
+                    <Button
+                      title="Publish this gap as open coverage"
+                      secondary
+                      icon="megaphone-outline"
+                      onPress={() =>
+                        n.navigate("CareCoverageRequests", {
+                          startsAt: need.startsAt,
+                          endsAt: need.endsAt,
+                        })
+                      }
+                    />
+                    <Button
+                      title="Manage recurring requirements"
+                      secondary
+                      icon="time-outline"
+                      onPress={() => n.navigate("CareCoverageRequirements")}
+                    />
+                  </>
                 )
               ) : (
                 !viewer && (
