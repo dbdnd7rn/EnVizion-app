@@ -5,6 +5,8 @@ import {
   loadCareDocuments,
   openCareDocument,
   pickCareDocument,
+  setCareDocumentArchived,
+  shareCareDocument,
   updateCareDocumentMetadata,
   uploadCareDocument,
   type CareDocument,
@@ -14,6 +16,8 @@ import {
   documentCategories,
   documentCategoryLabels,
   documentIconName,
+  documentReviewLabel,
+  documentReviewState,
   formatDocumentBytes,
   type DocumentCategory,
 } from "../documentHelpers";
@@ -93,12 +97,21 @@ export function CareDocumentsScreen() {
   const [uploadCategory, setUploadCategory] =
     useState<DocumentCategory>("other");
   const [uploadNotes, setUploadNotes] = useState("");
+  const [uploadSource, setUploadSource] = useState("");
+  const [uploadDocumentDate, setUploadDocumentDate] = useState("");
+  const [uploadReviewDueOn, setUploadReviewDueOn] = useState("");
+  const [uploadKey, setUploadKey] = useState(false);
 
   const [editing, setEditing] = useState<CareDocument | null>(null);
   const [editName, setEditName] = useState("");
   const [editCategory, setEditCategory] =
     useState<DocumentCategory>("other");
   const [editNotes, setEditNotes] = useState("");
+  const [editSource, setEditSource] = useState("");
+  const [editDocumentDate, setEditDocumentDate] = useState("");
+  const [editReviewDueOn, setEditReviewDueOn] = useState("");
+  const [editKey, setEditKey] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   const [deleting, setDeleting] = useState<CareDocument | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -115,7 +128,11 @@ export function CareDocumentsScreen() {
 
     setLoading(true);
     try {
-      setDocuments(await loadCareDocuments(careRecipientId));
+      setDocuments(
+        await loadCareDocuments(careRecipientId, {
+          includeArchived: !readOnly,
+        }),
+      );
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -125,7 +142,7 @@ export function CareDocumentsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [careRecipientId]);
+  }, [careRecipientId, readOnly]);
 
   useEffect(() => {
     void refresh();
@@ -155,20 +172,26 @@ export function CareDocumentsScreen() {
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return documents;
+    const visible = documents.filter(
+      (document) => showArchived || !document.archivedAt,
+    );
+    if (!needle) return visible;
 
-    return documents.filter((document) =>
+    return visible.filter((document) =>
       [
         document.displayName,
         document.originalName,
         documentCategoryLabels[document.category],
         document.notes,
+        document.sourceName,
+        document.documentDate,
+        document.reviewDueOn,
       ]
         .join(" ")
         .toLowerCase()
         .includes(needle),
     );
-  }, [documents, query]);
+  }, [documents, query, showArchived]);
 
   function canManage(document: CareDocument) {
     return (
@@ -197,7 +220,15 @@ export function CareDocumentsScreen() {
       setPicked(result);
       setUploadName(result.name.replace(/.[^.]+$/, ""));
       setUploadCategory("other");
+      setUploadSource("");
+      setUploadDocumentDate("");
+      setUploadReviewDueOn("");
+      setUploadKey(false);
       setUploadNotes("");
+      setUploadSource("");
+      setUploadDocumentDate("");
+      setUploadReviewDueOn("");
+      setUploadKey(false);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -219,6 +250,10 @@ export function CareDocumentsScreen() {
         displayName: uploadName,
         category: uploadCategory,
         notes: uploadNotes,
+        sourceName: uploadSource,
+        documentDate: uploadDocumentDate,
+        reviewDueOn: uploadReviewDueOn,
+        isKeyDocument: uploadKey,
       });
 
       setPicked(null);
@@ -243,6 +278,10 @@ export function CareDocumentsScreen() {
     setEditName(document.displayName);
     setEditCategory(document.category);
     setEditNotes(document.notes);
+    setEditSource(document.sourceName);
+    setEditDocumentDate(document.documentDate);
+    setEditReviewDueOn(document.reviewDueOn);
+    setEditKey(document.isKeyDocument);
     setMessage("");
   }
 
@@ -257,6 +296,10 @@ export function CareDocumentsScreen() {
         displayName: editName,
         category: editCategory,
         notes: editNotes,
+        sourceName: editSource,
+        documentDate: editDocumentDate,
+        reviewDueOn: editReviewDueOn,
+        isKeyDocument: editKey,
       });
       setEditing(null);
       setMessage("Document details updated.");
@@ -296,6 +339,49 @@ export function CareDocumentsScreen() {
     }
   }
 
+  async function shareDocument(document: CareDocument) {
+    setBusy(`share-${document.id}`);
+    setMessage("");
+    try {
+      const result = await shareCareDocument(document.id);
+      setMessage(
+        `Secure share link created for ${document.displayName}. It expires in ${Math.round(
+          result.expiresIn / 60,
+        )} minutes.`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not create a secure share link.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function setArchived(document: CareDocument, archived: boolean) {
+    setBusy(`${archived ? "archive" : "restore"}-${document.id}`);
+    setMessage("");
+    try {
+      await setCareDocumentArchived(document.id, archived);
+      await refresh();
+      setMessage(
+        archived
+          ? `${document.displayName} moved to archived documents.`
+          : `${document.displayName} restored to the active vault.`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not update the document archive state.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function confirmDelete() {
     if (!deleting || deleteConfirmation !== deleting.displayName) return;
 
@@ -325,6 +411,37 @@ export function CareDocumentsScreen() {
         title="Keep important papers with the care story."
         body="Private documents for the active care profile, protected by the same shared-care permissions as the rest of EnVizion Life."
       />
+
+      <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+        <Card style={{ flex: 1, minWidth: 115 }}>
+          <Text style={S.eyebrow}>KEY DOCS</Text>
+          <Text style={S.h2}>
+            {documents.filter((document) => document.isKeyDocument && !document.archivedAt).length}
+          </Text>
+          <Txt style={S.small}>quick-reference records</Txt>
+        </Card>
+        <Card style={{ flex: 1, minWidth: 115 }}>
+          <Text style={S.eyebrow}>REVIEW</Text>
+          <Text style={S.h2}>
+            {
+              documents.filter((document) => {
+                const state = documentReviewState(document.reviewDueOn);
+                return !document.archivedAt && (state === "overdue" || state === "due_soon");
+              }).length
+            }
+          </Text>
+          <Txt style={S.small}>due / overdue</Txt>
+        </Card>
+        {!readOnly && (
+          <Card style={{ flex: 1, minWidth: 115 }}>
+            <Text style={S.eyebrow}>ARCHIVED</Text>
+            <Text style={S.h2}>
+              {documents.filter((document) => document.archivedAt).length}
+            </Text>
+            <Txt style={S.small}>kept out of active view</Txt>
+          </Card>
+        )}
+      </View>
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <Text style={[S.eyebrow, { color: "#E5C8ED" }]}>ACTIVE CARE PROFILE</Text>
@@ -402,10 +519,36 @@ export function CareDocumentsScreen() {
               />
 
               <Field
+                label="Source / provider (optional)"
+                value={uploadSource}
+                onChange={setUploadSource}
+              />
+              <Field
+                label="Document date (YYYY-MM-DD, optional)"
+                value={uploadDocumentDate}
+                onChange={setUploadDocumentDate}
+              />
+              <Field
+                label="Review due date (YYYY-MM-DD, optional)"
+                value={uploadReviewDueOn}
+                onChange={setUploadReviewDueOn}
+              />
+              <Field
                 label="Notes (optional)"
                 value={uploadNotes}
                 onChange={setUploadNotes}
                 multiline
+              />
+              <Button
+                title={
+                  uploadKey
+                    ? "Key document · remove key status"
+                    : "Mark as key document"
+                }
+                secondary
+                disabled={busy !== null}
+                icon={uploadKey ? "star" : "star-outline"}
+                onPress={() => setUploadKey((value) => !value)}
               />
 
               <Button
@@ -459,10 +602,36 @@ export function CareDocumentsScreen() {
               onChange={setEditCategory}
             />
             <Field
+              label="Source / provider (optional)"
+              value={editSource}
+              onChange={setEditSource}
+            />
+            <Field
+              label="Document date (YYYY-MM-DD, optional)"
+              value={editDocumentDate}
+              onChange={setEditDocumentDate}
+            />
+            <Field
+              label="Review due date (YYYY-MM-DD, optional)"
+              value={editReviewDueOn}
+              onChange={setEditReviewDueOn}
+            />
+            <Field
               label="Notes (optional)"
               value={editNotes}
               onChange={setEditNotes}
               multiline
+            />
+            <Button
+              title={
+                editKey
+                  ? "Key document · remove key status"
+                  : "Mark as key document"
+              }
+              secondary
+              disabled={busy !== null}
+              icon={editKey ? "star" : "star-outline"}
+              onPress={() => setEditKey((value) => !value)}
             />
             <Button
               title="Save document details"
@@ -529,6 +698,15 @@ export function CareDocumentsScreen() {
         onChange={setQuery}
       />
 
+      {!readOnly && documents.some((document) => document.archivedAt) && (
+        <Button
+          title={showArchived ? "Hide archived documents" : "Show archived documents"}
+          secondary
+          icon={showArchived ? "eye-off-outline" : "archive-outline"}
+          onPress={() => setShowArchived((value) => !value)}
+        />
+      )}
+
       {loading && !documents.length ? (
         <Card>
           <ActivityIndicator color={C.purple} />
@@ -565,17 +743,48 @@ export function CareDocumentsScreen() {
                 </View>
                 <View style={{ flex: 1, gap: 4 }}>
                   <View style={S.between}>
-                    <Text style={S.h3}>{document.displayName}</Text>
-                    <View style={S.pill}>
-                      <Text style={S.small}>
-                        {documentCategoryLabels[document.category]}
-                      </Text>
+                    <View style={{ flex: 1, gap: 3 }}>
+                      <Text style={S.h3}>{document.displayName}</Text>
+                      <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                        <View style={S.pill}>
+                          <Text style={S.small}>
+                            {documentCategoryLabels[document.category]}
+                          </Text>
+                        </View>
+                        {document.isKeyDocument && (
+                          <View style={[S.pill, { backgroundColor: "#FFF1E5" }]}>
+                            <Text style={S.small}>Key document</Text>
+                          </View>
+                        )}
+                        {document.archivedAt && (
+                          <View style={[S.pill, { backgroundColor: "#EFECEF" }]}>
+                            <Text style={S.small}>Archived</Text>
+                          </View>
+                        )}
+                      </View>
                     </View>
                   </View>
                   <Txt style={S.small}>
                     {formatDocumentBytes(document.sizeBytes)} ·{" "}
                     {new Date(document.createdAt).toLocaleDateString()}
+                    {document.documentDate ? " · Document " + document.documentDate : ""}
                   </Txt>
+                  {Boolean(document.sourceName) && (
+                    <Txt style={S.small}>Source: {document.sourceName}</Txt>
+                  )}
+                  {Boolean(document.reviewDueOn) && (
+                    <Txt
+                      style={[
+                        S.small,
+                        documentReviewState(document.reviewDueOn) === "overdue" ||
+                        documentReviewState(document.reviewDueOn) === "due_soon"
+                          ? { color: C.rose }
+                          : null,
+                      ]}
+                    >
+                      {documentReviewLabel(document.reviewDueOn)} · {document.reviewDueOn}
+                    </Txt>
+                  )}
                   {Boolean(document.notes) && <Txt>{document.notes}</Txt>}
                 </View>
               </View>
@@ -604,6 +813,13 @@ export function CareDocumentsScreen() {
               {manageable && (
                 <>
                   <Button
+                    title="Share secure 10-minute link"
+                    secondary
+                    icon="share-outline"
+                    disabled={busy !== null}
+                    onPress={() => void shareDocument(document)}
+                  />
+                  <Button
                     title="Edit details"
                     secondary
                     icon="create-outline"
@@ -611,7 +827,14 @@ export function CareDocumentsScreen() {
                     onPress={() => beginEdit(document)}
                   />
                   <Button
-                    title="Delete document"
+                    title={document.archivedAt ? "Restore document" : "Archive document"}
+                    secondary
+                    icon={document.archivedAt ? "refresh-outline" : "archive-outline"}
+                    disabled={busy !== null}
+                    onPress={() => void setArchived(document, !document.archivedAt)}
+                  />
+                  <Button
+                    title="Delete document permanently"
                     secondary
                     icon="trash-outline"
                     disabled={busy !== null}
