@@ -703,6 +703,12 @@ export function CareScheduleScreen() {
         icon="bar-chart-outline"
         onPress={() => n.navigate("CareAnalytics")}
       />
+      <Button
+        title="Open caregiver coverage requests"
+        secondary
+        icon="megaphone-outline"
+        onPress={() => n.navigate("CareCoverageRequests")}
+      />
 
       <Section title="Coverage gaps · next 7 days" />
       {!coverageGaps.length ? (
