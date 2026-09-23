@@ -255,6 +255,12 @@ export function HomeScreen() {
             onPress={() => n.navigate("CareContinuity")}
           />
           <Row
+            title="Open caregiver coverage"
+            subtitle="Publish uncovered time or claim a family coverage request"
+            icon="megaphone-outline"
+            onPress={() => n.navigate("CareCoverageRequests")}
+          />
+          <Row
             title="Care coordination analytics"
             subtitle="See this week’s caregiver workload and coverage picture"
             icon="bar-chart-outline"
@@ -479,6 +485,12 @@ export function ToolkitScreen() {
           subtitle="Current caregiver, next shift, coverage bridge, and handoff history"
           icon="git-compare-outline"
           onPress={() => n.navigate("CareContinuity")}
+        />
+        <Row
+          title="Open caregiver coverage"
+          subtitle="Request help for an uncovered window or claim available coverage"
+          icon="megaphone-outline"
+          onPress={() => n.navigate("CareCoverageRequests")}
         />
         <Row
           title="Caregiver availability & schedule"
