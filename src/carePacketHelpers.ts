@@ -6,33 +6,82 @@ import type { CareReminder } from "./reminderHelpers.ts";
 export const carePacketSections = [
   "profile",
   "emergency_contact",
+  "emergency_profile",
   "appointment",
   "medications",
+  "medication_reconciliation",
   "medication_history",
+  "daily_care_plan",
   "observations",
   "reminders",
   "transition",
+  "transition_plan",
+  "family_updates",
   "vault_documents",
   "care_contacts",
   "communication_log",
 ] as const;
 
 export type CarePacketSection = (typeof carePacketSections)[number];
-export type CarePacketType = "visit" | "handoff";
+export type CarePacketType = "visit" | "handoff" | "emergency";
 
 export const carePacketSectionLabels: Record<CarePacketSection, string> = {
   profile: "Care profile basics",
-  emergency_contact: "Emergency contact",
+  emergency_contact: "Primary emergency contact",
+  emergency_profile: "Emergency information",
   appointment: "Appointment & questions",
   medications: "Active medication list",
+  medication_reconciliation: "Medication reconciliation",
   medication_history: "Recent medication records",
+  daily_care_plan: "Daily care plan & routines",
   observations: "Recent observations",
   reminders: "Upcoming reminders",
   transition: "Transition checklist",
+  transition_plan: "Hospital-to-home plan",
+  family_updates: "Recent family care updates",
   vault_documents: "Selected Care Vault documents",
   care_contacts: "Selected care contacts & providers",
-  communication_log: "Selected care notes & communications",
+  communication_log: "Selected provider / insurance communications",
 };
+
+export function carePacketDefaultSections(
+  packetType: CarePacketType,
+): CarePacketSection[] {
+  if (packetType === "emergency") {
+    return [
+      "profile",
+      "emergency_contact",
+      "emergency_profile",
+      "medications",
+      "medication_reconciliation",
+      "transition_plan",
+      "care_contacts",
+      "vault_documents",
+    ];
+  }
+
+  if (packetType === "handoff") {
+    return [
+      "profile",
+      "emergency_contact",
+      "medications",
+      "medication_reconciliation",
+      "daily_care_plan",
+      "reminders",
+      "transition_plan",
+      "family_updates",
+    ];
+  }
+
+  return [
+    "profile",
+    "appointment",
+    "medications",
+    "medication_reconciliation",
+    "observations",
+    "care_contacts",
+  ];
+}
 
 export type PacketDocumentReference = {
   id: string;
@@ -40,6 +89,9 @@ export type PacketDocumentReference = {
   originalName: string;
   categoryLabel: string;
   sizeLabel: string;
+  sourceName?: string;
+  documentDate?: string;
+  isKeyDocument?: boolean;
 };
 
 export type PacketCareContact = {
@@ -73,6 +125,85 @@ export type PacketCareCommunication = {
   linkedContactRole: string;
 };
 
+export type PacketManagedMedication = {
+  id: string;
+  name: string;
+  instructions: string;
+  time: string;
+  dose?: string;
+  route?: string;
+  purpose?: string;
+  prescriber?: string;
+  pharmacy?: string;
+  isPrn?: boolean;
+};
+
+export type PacketManagedMedicationRecord = {
+  id: string;
+  medicationId: string;
+  status: string;
+  note: string;
+  recordedAt: string;
+  correctedAt: string | null;
+};
+
+export type PacketMedicationReconciliation = {
+  medicationCount: number;
+  note: string;
+  createdAt: string;
+} | null;
+
+export type PacketCarePlanItem = {
+  id: string;
+  title: string;
+  category: string;
+  details: string;
+  localTime: string;
+  timezone: string;
+  daysOfWeek: number[];
+  priority: string;
+};
+
+export type PacketEmergencyProfile = {
+  localEmergencyNumber: string;
+  preferredHospital: string;
+  allergies: string;
+  importantConditions: string;
+  medicalDevices: string;
+  advanceDirectiveLocation: string;
+  emergencyNotes: string;
+  lastReviewedAt: string | null;
+} | null;
+
+export type PacketTransitionPlan = {
+  hospitalName: string;
+  dischargeDate: string;
+  dischargeSummary: string;
+  primaryDiagnosis: string;
+  medicationChanges: string;
+  followUpPlan: string;
+  equipmentPlan: string;
+  transportPlan: string;
+  warningSigns: string;
+  afterHoursContact: string;
+} | null;
+
+export type PacketTransitionFollowUp = {
+  title: string;
+  dueAt: string | null;
+  provider: string;
+  details: string;
+};
+
+export type PacketFamilyUpdate = {
+  title: string;
+  body: string;
+  updateTypeLabel: string;
+  priorityLabel: string;
+  createdAt: string;
+  authorName: string;
+};
+
 export type CarePacketBuildInput = {
   packetType: CarePacketType;
   generatedAt: string;
@@ -84,12 +215,18 @@ export type CarePacketBuildInput = {
   };
   appointment: Appointment;
   questions: string[];
-  medications: Medication[];
-  medicationRecords: MedicationRecord[];
+  medications: Medication[] | PacketManagedMedication[];
+  medicationRecords: MedicationRecord[] | PacketManagedMedicationRecord[];
+  medicationReconciliation?: PacketMedicationReconciliation;
+  carePlanItems?: PacketCarePlanItem[];
+  emergencyProfile?: PacketEmergencyProfile;
   entries: Entry[];
   reminders: CareReminder[];
   transitionSteps: string[];
   transitionCompleted: number[];
+  transitionPlan?: PacketTransitionPlan;
+  transitionFollowUps?: PacketTransitionFollowUp[];
+  familyUpdates?: PacketFamilyUpdate[];
   selectedDocuments: PacketDocumentReference[];
   careContacts: PacketCareContact[];
   careCommunications: PacketCareCommunication[];
@@ -138,7 +275,53 @@ function activeReminder(reminder: CareReminder) {
   return !reminder.completedAt && !reminder.dismissedAt;
 }
 
+function medicationLine(medication: Medication | PacketManagedMedication) {
+  const managed = medication as PacketManagedMedication;
+  return [
+    medication.name,
+    managed.dose || "",
+    managed.route || "",
+    medication.instructions || "No directions recorded",
+    medication.time ? `Scheduled: ${medication.time}` : "",
+    managed.isPrn ? "PRN / as-needed" : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function medicationRecordLine(
+  record: MedicationRecord | PacketManagedMedicationRecord,
+  medications: Array<Medication | PacketManagedMedication>,
+) {
+  if ("medication" in record) {
+    return `${record.medication.name} · Recorded ${formattedDate(
+      record.recordedAt,
+    )}${
+      record.correctedAt
+        ? ` · Corrected ${formattedDate(record.correctedAt)}`
+        : ""
+    }`;
+  }
+
+  const medication = medications.find(
+    (item) => item.id === record.medicationId,
+  );
+
+  return [
+    medication?.name || "Medication",
+    record.status.replaceAll("_", " "),
+    formattedDate(record.recordedAt),
+    record.note ? `Note: ${record.note}` : "",
+    record.correctedAt
+      ? `Corrected ${formattedDate(record.correctedAt)}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 export function carePacketTitle(packetType: CarePacketType) {
+  if (packetType === "emergency") return "Emergency Information Packet";
   return packetType === "visit"
     ? "Visit Preparation Packet"
     : "Caregiver Handoff Packet";
@@ -154,7 +337,9 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
         "Care profile",
         [
           paragraph(`Name: ${input.careRecipient.displayName}`),
-          paragraph(`Relationship: ${input.careRecipient.relationship || "Not recorded"}`),
+          paragraph(
+            `Relationship: ${input.careRecipient.relationship || "Not recorded"}`,
+          ),
         ].join(""),
       ),
     );
@@ -163,7 +348,7 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
   if (selected.has("emergency_contact")) {
     blocks.push(
       section(
-        "Emergency contact",
+        "Primary emergency contact",
         [
           paragraph(
             `Name: ${input.careRecipient.emergencyContactName || "Not recorded"}`,
@@ -172,6 +357,31 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
             `Phone: ${input.careRecipient.emergencyContactPhone || "Not recorded"}`,
           ),
         ].join(""),
+      ),
+    );
+  }
+
+  if (selected.has("emergency_profile")) {
+    const profile = input.emergencyProfile;
+    blocks.push(
+      section(
+        "Emergency information",
+        profile
+          ? `<ul>${[
+              `Local emergency number: ${profile.localEmergencyNumber || "Not recorded"}`,
+              `Preferred hospital / facility: ${profile.preferredHospital || "Not recorded"}`,
+              `Known allergies: ${profile.allergies || "Not recorded"}`,
+              `Important conditions: ${profile.importantConditions || "Not recorded"}`,
+              `Medical devices / equipment: ${profile.medicalDevices || "Not recorded"}`,
+              `Advance directive / document location: ${profile.advanceDirectiveLocation || "Not recorded"}`,
+              `Emergency notes: ${profile.emergencyNotes || "Not recorded"}`,
+              profile.lastReviewedAt
+                ? `Last reviewed: ${formattedDate(profile.lastReviewedAt)}`
+                : "Last reviewed: Not recorded",
+            ]
+              .map(item)
+              .join("")}</ul>`
+          : paragraph("No emergency profile has been recorded."),
       ),
     );
   }
@@ -188,7 +398,9 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
     ];
 
     const questions = input.questions.length
-      ? `<h3>Questions to bring</h3><ol>${input.questions.map(item).join("")}</ol>`
+      ? `<h3>Questions to bring</h3><ol>${input.questions
+          .map(item)
+          .join("")}</ol>`
       : paragraph("No appointment questions recorded.");
 
     blocks.push(
@@ -201,37 +413,41 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
 
   if (selected.has("medications")) {
     const body = input.medications.length
-      ? `<ul>${input.medications
-          .map((medication) =>
-            item(
-              [
-                medication.name,
-                medication.instructions || "No instructions recorded",
-                medication.time ? `Scheduled: ${medication.time}` : "",
-              ]
-                .filter(Boolean)
-                .join(" · "),
-            ),
-          )
-          .join("")}</ul>`
+      ? `<ul>${input.medications.map((medication) =>
+          item(medicationLine(medication)),
+        ).join("")}</ul>`
       : paragraph("No active medications recorded.");
 
     blocks.push(section("Active medication list", body));
   }
 
+  if (selected.has("medication_reconciliation")) {
+    const reconciliation = input.medicationReconciliation ?? null;
+    blocks.push(
+      section(
+        "Medication reconciliation",
+        reconciliation
+          ? [
+              paragraph(
+                `Reconciled ${formattedDate(reconciliation.createdAt)} · ${reconciliation.medicationCount} active medication${reconciliation.medicationCount === 1 ? "" : "s"}`,
+              ),
+              ...(reconciliation.note
+                ? [paragraph(`Note: ${reconciliation.note}`)]
+                : []),
+            ].join("")
+          : paragraph("No medication reconciliation snapshot is on file."),
+      ),
+    );
+  }
+
   if (selected.has("medication_history")) {
     const recent = input.medicationRecords.slice(0, 10);
+    const meds = input.medications as Array<
+      Medication | PacketManagedMedication
+    >;
     const body = recent.length
       ? `<ul>${recent
-          .map((record) =>
-            item(
-              `${record.medication.name} · Recorded ${formattedDate(record.recordedAt)}${
-                record.correctedAt
-                  ? ` · Corrected ${formattedDate(record.correctedAt)}`
-                  : ""
-              }`,
-            ),
-          )
+          .map((record) => item(medicationRecordLine(record, meds)))
           .join("")}</ul>`
       : paragraph("No medication record history available.");
 
@@ -244,6 +460,30 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
         )}${body}`,
       ),
     );
+  }
+
+  if (selected.has("daily_care_plan")) {
+    const routines = input.carePlanItems ?? [];
+    const body = routines.length
+      ? routines
+          .map((routine) => {
+            const details = [
+              routine.category,
+              routine.localTime
+                ? `${routine.localTime} · ${routine.timezone}`
+                : "Any time",
+              routine.priority === "important" ? "Important" : "",
+              routine.details,
+            ].filter(Boolean);
+
+            return `<article class="observation"><strong>${escapeHtml(
+              routine.title,
+            )}</strong><ul>${details.map(item).join("")}</ul></article>`;
+          })
+          .join("")
+      : paragraph("No active recurring care routines recorded.");
+
+    blocks.push(section("Daily care plan & routines", body));
   }
 
   if (selected.has("observations")) {
@@ -273,7 +513,11 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
             item(
               `${reminder.title} · ${formattedDate(
                 reminder.snoozedUntil ?? reminder.scheduledFor,
-              )}${reminder.recurrence !== "none" ? ` · ${reminder.recurrence}` : ""}`,
+              )}${
+                reminder.recurrence !== "none"
+                  ? ` · ${reminder.recurrence}`
+                  : ""
+              }`,
             ),
           )
           .join("")}</ul>`
@@ -292,7 +536,9 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
               contact.phone ? `Phone: ${contact.phone}` : "",
               contact.email ? `Email: ${contact.email}` : "",
               contact.address ? `Address: ${contact.address}` : "",
-              contact.officeHours ? `Office hours: ${contact.officeHours}` : "",
+              contact.officeHours
+                ? `Office hours: ${contact.officeHours}`
+                : "",
               `Preferred contact: ${contact.preferredContactLabel}`,
               contact.notes ? `Caregiver notes: ${contact.notes}` : "",
             ].filter(Boolean);
@@ -329,7 +575,9 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
                 ? `Organization: ${communication.organizationName}`
                 : "",
               `Summary: ${communication.summary}`,
-              communication.outcome ? `Outcome: ${communication.outcome}` : "",
+              communication.outcome
+                ? `Outcome: ${communication.outcome}`
+                : "",
               `Priority: ${communication.priorityLabel}${
                 communication.tag ? ` · ${communication.tag}` : ""
               }`,
@@ -340,7 +588,9 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
                       : "Needed; date not recorded"
                   }`
                 : "",
-              communication.notes ? `Caregiver notes: ${communication.notes}` : "",
+              communication.notes
+                ? `Caregiver notes: ${communication.notes}`
+                : "",
             ].filter(Boolean);
 
             return `<article class="observation"><ul>${details
@@ -350,18 +600,98 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
           .join("")
       : paragraph("No communication entries selected.");
 
-    blocks.push(section("Care notes & communication history", body));
+    blocks.push(section("Provider / insurance communication history", body));
   }
 
   if (selected.has("transition")) {
     const completed = new Set(input.transitionCompleted);
     const body = `<ul>${input.transitionSteps
       .map((step, index) =>
-        item(`${completed.has(index) ? "Prepared" : "Not yet marked prepared"} · ${step}`),
+        item(
+          `${completed.has(index) ? "Prepared" : "Not yet marked prepared"} · ${step}`,
+        ),
       )
       .join("")}</ul>`;
 
     blocks.push(section("Hospital-to-home transition checklist", body));
+  }
+
+  if (selected.has("transition_plan")) {
+    const plan = input.transitionPlan ?? null;
+    const followUps = input.transitionFollowUps ?? [];
+    const body = plan
+      ? [
+          paragraph(
+            `Hospital / facility: ${plan.hospitalName || "Not recorded"}`,
+          ),
+          paragraph(
+            `Discharge date: ${plan.dischargeDate || "Not recorded"}`,
+          ),
+          ...(plan.primaryDiagnosis
+            ? [paragraph(`Reason for stay: ${plan.primaryDiagnosis}`)]
+            : []),
+          ...(plan.dischargeSummary
+            ? [paragraph(`Key instructions: ${plan.dischargeSummary}`)]
+            : []),
+          ...(plan.medicationChanges
+            ? [paragraph(`Medication changes: ${plan.medicationChanges}`)]
+            : []),
+          ...(plan.equipmentPlan
+            ? [paragraph(`Equipment / supplies: ${plan.equipmentPlan}`)]
+            : []),
+          ...(plan.transportPlan
+            ? [paragraph(`Transport: ${plan.transportPlan}`)]
+            : []),
+          ...(plan.warningSigns
+            ? [paragraph(`Discharge-team warning signs: ${plan.warningSigns}`)]
+            : []),
+          ...(plan.afterHoursContact
+            ? [paragraph(`After-hours instructions: ${plan.afterHoursContact}`)]
+            : []),
+          followUps.length
+            ? `<h3>Open transition follow-ups</h3><ul>${followUps
+                .map((followUp) =>
+                  item(
+                    [
+                      followUp.title,
+                      followUp.provider,
+                      followUp.dueAt
+                        ? formattedDate(followUp.dueAt)
+                        : "",
+                      followUp.details,
+                    ]
+                      .filter(Boolean)
+                      .join(" · "),
+                  ),
+                )
+                .join("")}</ul>`
+            : paragraph("No open transition follow-ups."),
+        ].join("")
+      : paragraph("No active hospital-to-home transition plan.");
+
+    blocks.push(section("Hospital-to-home plan", body));
+  }
+
+  if (selected.has("family_updates")) {
+    const updates = (input.familyUpdates ?? []).slice(0, 10);
+    const body = updates.length
+      ? updates
+          .map(
+            (update) =>
+              `<article class="observation"><strong>${escapeHtml(
+                update.title,
+              )}</strong><ul>${[
+                `${update.updateTypeLabel} · ${update.priorityLabel}`,
+                `${update.authorName} · ${formattedDate(update.createdAt)}`,
+                update.body,
+              ]
+                .map(item)
+                .join("")}</ul></article>`,
+          )
+          .join("")
+      : paragraph("No recent family care updates.");
+
+    blocks.push(section("Recent family care updates", body));
   }
 
   if (selected.has("vault_documents")) {
@@ -369,7 +699,18 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
       ? `<ul>${input.selectedDocuments
           .map((document) =>
             item(
-              `${document.displayName} · ${document.categoryLabel} · ${document.sizeLabel}`,
+              [
+                document.displayName,
+                document.categoryLabel,
+                document.sizeLabel,
+                document.isKeyDocument ? "Key document" : "",
+                document.sourceName ? `Source: ${document.sourceName}` : "",
+                document.documentDate
+                  ? `Document date: ${document.documentDate}`
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" · "),
             ),
           )
           .join("")}</ul>${paragraph(
@@ -424,7 +765,7 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
 ${receiverNote}
 ${blocks.join("")}
 <footer>
-  Caregiver-entered EnVizion Life information prepared for a care conversation. This packet is not a diagnosis, verified clinical medical record, emergency monitoring service, or individualized care plan. Review important details with the healthcare team.
+  Caregiver-entered EnVizion Life information prepared for a care conversation. This packet is not a diagnosis, verified clinical medical record, emergency monitoring service, or individualized care plan. Review important details with the healthcare team. For a possible medical emergency, contact the appropriate emergency service directly.
 </footer>
 </body>
 </html>`;
