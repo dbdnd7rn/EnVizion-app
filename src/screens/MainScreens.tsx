@@ -493,6 +493,12 @@ export function ToolkitScreen() {
           onPress={() => n.navigate("CareCoverageRequirements")}
         />
         <Row
+          title="Weekly coverage approval"
+          subtitle="Review the whole week, publish assignments, and track caregiver responses"
+          icon="checkmark-done-outline"
+          onPress={() => n.navigate("WeeklyCoveragePlan")}
+        />
+        <Row
           title="Smart Coverage Planner"
           subtitle="Scan the next 7 days, match caregivers, and review coverage suggestions"
           icon="sparkles-outline"
