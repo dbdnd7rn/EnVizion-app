@@ -4,6 +4,7 @@ import {
   buildSmartCoveragePlan,
   rankSmartCoverageCandidates,
   smartCoveragePlanCounts,
+  uncoveredRequirementSegments,
 } from "../src/smartCoveragePlannerHelpers.ts";
 
 function member(
@@ -135,6 +136,21 @@ function task(overrides: Record<string, unknown> = {}) {
     cancelledAt: null,
     createdAt: "2026-09-23T00:00:00Z",
     updatedAt: "2026-09-23T00:00:00Z",
+    ...overrides,
+  } as any;
+}
+
+function requirementOccurrence(
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    requirementId: "requirement-1",
+    careRecipientId: "care-1",
+    label: "Evening required care",
+    startsAt: "2026-09-24T16:00:00Z",
+    endsAt: "2026-09-24T20:00:00Z",
+    timezone: "Africa/Blantyre",
+    note: "",
     ...overrides,
   } as any;
 }
@@ -366,4 +382,127 @@ test("planner summary separates ready, review, and blocked needs", () => {
   assert.equal(counts.ready, 1);
   assert.equal(counts.review, 1);
   assert.equal(counts.blocked, 1);
+});
+
+
+test("fully scheduled recurring care requirement produces no planner gap", () => {
+  const plan = buildSmartCoveragePlan({
+    requests: [],
+    responses: [],
+    requirementOccurrences: [requirementOccurrence()],
+    tasks: [],
+    members: [member("caregiver-1", "Amina")],
+    availability: [],
+    recurringAvailability: [],
+    shifts: [
+      shift(
+        "coverage",
+        "caregiver-1",
+        "2026-09-24T15:30:00Z",
+        "2026-09-24T20:30:00Z",
+      ),
+    ],
+    now,
+  });
+
+  assert.deepEqual(plan, []);
+});
+
+test("partial scheduled care splits a recurring requirement into exact uncovered segments", () => {
+  const gaps = uncoveredRequirementSegments({
+    occurrence: requirementOccurrence(),
+    shifts: [
+      shift(
+        "middle",
+        "caregiver-1",
+        "2026-09-24T17:00:00Z",
+        "2026-09-24T18:00:00Z",
+      ),
+    ],
+    startsAt: "2026-09-23T10:00:00Z",
+    endsAt: "2026-09-30T10:00:00Z",
+  });
+
+  assert.deepEqual(gaps, [
+    {
+      startsAt: "2026-09-24T16:00:00.000Z",
+      endsAt: "2026-09-24T17:00:00.000Z",
+    },
+    {
+      startsAt: "2026-09-24T18:00:00.000Z",
+      endsAt: "2026-09-24T20:00:00.000Z",
+    },
+  ]);
+});
+
+test("open coverage request reserves its portion of recurring care demand without hiding the remainder", () => {
+  const plan = buildSmartCoveragePlan({
+    requests: [
+      request({
+        startsAt: "2026-09-24T16:00:00Z",
+        endsAt: "2026-09-24T18:00:00Z",
+      }),
+    ],
+    responses: [],
+    requirementOccurrences: [requirementOccurrence()],
+    tasks: [],
+    members: [member("caregiver-1", "Amina")],
+    availability: [
+      availability(
+        "window",
+        "caregiver-1",
+        "available",
+        "2026-09-24T15:00:00Z",
+        "2026-09-24T21:00:00Z",
+      ),
+    ],
+    recurringAvailability: [],
+    shifts: [],
+    now,
+  });
+
+  assert.equal(plan.length, 2);
+  assert.equal(plan[0].source, "coverage_request");
+  assert.equal(plan[1].source, "coverage_requirement");
+  assert.equal(plan[1].startsAt, "2026-09-24T18:00:00.000Z");
+  assert.equal(plan[1].endsAt, "2026-09-24T20:00:00.000Z");
+});
+
+test("unassigned task inside recurring care gap is not duplicated but assigned task stays visible", () => {
+  const base = {
+    requests: [],
+    responses: [],
+    requirementOccurrences: [requirementOccurrence()],
+    members: [member("caregiver-1", "Amina")],
+    availability: [
+      availability(
+        "window",
+        "caregiver-1",
+        "available",
+        "2026-09-24T15:00:00Z",
+        "2026-09-24T21:00:00Z",
+      ),
+    ],
+    recurringAvailability: [],
+    shifts: [],
+    now,
+  };
+
+  const unassigned = buildSmartCoveragePlan({
+    ...base,
+    tasks: [task()],
+  });
+  assert.equal(
+    unassigned.filter((item) => item.source === "task").length,
+    0,
+  );
+
+  const assigned = buildSmartCoveragePlan({
+    ...base,
+    tasks: [task({ assignedTo: "caregiver-1" })],
+  });
+  assert.equal(
+    assigned.filter((item) => item.source === "task").length,
+    1,
+  );
 });
