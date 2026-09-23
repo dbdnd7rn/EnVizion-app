@@ -457,8 +457,14 @@ export function ToolkitScreen() {
       <Section title="Plan & prepare" />
       <View style={{ gap: 10 }}>
         <Row
-          title="Medication logs"
-          subtitle="Keep your list and daily record together"
+          title="Daily care plan & routines"
+          subtitle="Meals, medications, mobility, hygiene, monitoring, and everyday care"
+          icon="list-outline"
+          onPress={() => n.navigate("CarePlan")}
+        />
+        <Row
+          title="Medication management"
+          subtitle="Medication list, PRN records, refills, and reconciliation"
           icon="medical-outline"
           onPress={() => n.navigate("Medications")}
         />
@@ -565,8 +571,8 @@ export function ToolkitScreen() {
           onPress={() => n.navigate("CarePacket")}
         />
         <Row
-          title="Walking Through the Transition"
-          subtitle="Your hospital-to-home checklist"
+          title="Hospital-to-home transition"
+          subtitle="Discharge plan, equipment, warning signs, and follow-ups"
           icon="home-outline"
           onPress={() => n.navigate("Transition")}
         />
