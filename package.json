@@ -10,7 +10,9 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test --test-isolation=none tests/*.test.ts",
-    "build:web": "npm run typecheck && npm test && expo export --platform web"
+    "build:web": "npm run typecheck && npm test && expo export --platform web",
+    "smoke:dist": "node scripts/verify-web-export.mjs",
+    "smoke:live": "node scripts/live-smoke.mjs"
   },
   "dependencies": {
     "expo": "~54.0.0",
