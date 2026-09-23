@@ -41,6 +41,9 @@ import { SmartCoveragePlannerScreen } from "./src/screens/SmartCoveragePlannerSc
 import { WeeklyCoveragePlanScreen } from "./src/screens/WeeklyCoveragePlanScreen";
 import { CareCoverageRequirementsScreen } from "./src/screens/CareCoverageRequirementsScreen";
 import { CarePacketScreen } from "./src/screens/CarePacketScreen";
+import { CarePlanScreen } from "./src/screens/CarePlanScreen";
+import { MedicationManagementScreen } from "./src/screens/MedicationManagementScreen";
+import { HospitalToHomeScreen } from "./src/screens/HospitalToHomeScreen";
 import {
   AssistantScreen,
   HandoffScreen,
@@ -73,9 +76,7 @@ import {
 } from "./src/screens/MainScreens";
 import {
   TrackerScreen,
-  MedicationScreen,
   AppointmentScreen,
-  TransitionScreen,
   EmergencyScreen,
 } from "./src/screens/CareScreens";
 import {
@@ -337,9 +338,14 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             options={{ title: "Team conversation" }}
           />
           <Stack.Screen
+            name="CarePlan"
+            component={CarePlanScreen}
+            options={{ title: "Daily care plan" }}
+          />
+          <Stack.Screen
             name="Medications"
-            component={MedicationScreen}
-            options={{ title: "Medication logs" }}
+            component={MedicationManagementScreen}
+            options={{ title: "Medication management" }}
           />
           <Stack.Screen
             name="Summary"
@@ -353,8 +359,8 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           />
           <Stack.Screen
             name="Transition"
-            component={TransitionScreen}
-            options={{ title: "Transitioning home" }}
+            component={HospitalToHomeScreen}
+            options={{ title: "Hospital to home" }}
           />
           <Stack.Screen
             name="Emergency"
