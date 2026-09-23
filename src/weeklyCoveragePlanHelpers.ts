@@ -1,5 +1,5 @@
 import type { SmartCoverageNeed } from "./smartCoveragePlannerHelpers";
-import { localDateTimeToIso, reminderLocalParts } from "./reminderHelpers";
+import { localDateTimeToIso, reminderLocalParts } from "./reminderHelpers.ts";
 
 export type WeeklyCoverageDraftSlot = {
   sourceType: "coverage_requirement" | "coverage_request";
