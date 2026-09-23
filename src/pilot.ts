@@ -83,6 +83,25 @@ export type PilotConsentState = {
   outstanding: ProgramDocument[];
 };
 
+export type PilotOperationsDiagnostic = {
+  id: string;
+  area: string;
+  summary: string;
+  platform: string;
+  appVersion: string;
+  status: "open" | "reviewed" | "resolved";
+  createdAt: string;
+};
+
+export type PilotOperationsSummary = {
+  openDiagnostics: number;
+  failedPackets24h: number;
+  failedPushes24h: number;
+  staleSupport48h: number;
+  generatedAt: string;
+  recentDiagnostics: PilotOperationsDiagnostic[];
+};
+
 async function invokePilotAdmin<T>(
   body: Record<string, unknown>,
 ): Promise<T> {
@@ -200,6 +219,13 @@ export async function loadPilotSummary(): Promise<PilotSummary> {
     action: "summary",
   });
   return result.summary;
+}
+
+export async function loadPilotOperationsSummary(): Promise<PilotOperationsSummary> {
+  const result = await invokePilotAdmin<{ operations: PilotOperationsSummary }>({
+    action: "operations_summary",
+  });
+  return result.operations;
 }
 
 export async function loadPilotParticipants(): Promise<PilotParticipant[]> {
