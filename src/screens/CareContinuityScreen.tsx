@@ -12,6 +12,11 @@ import {
   type CareContinuityEventKind,
 } from "../careContinuityHelpers";
 import {
+  buildCareCoverageBridge,
+  coverageBridgeStateLabel,
+  coverageMinutesLabel,
+} from "../careCoverageBridgeHelpers";
+import {
   presenceModeLabel,
   presenceScreenLabel,
 } from "../carePresence";
@@ -43,6 +48,7 @@ const emptyData: CareContinuityData = {
   handoffs: [],
   acknowledgements: [],
   attendance: [],
+  shifts: [],
 };
 
 function eventIcon(kind: CareContinuityEventKind) {
@@ -53,6 +59,19 @@ function eventIcon(kind: CareContinuityEventKind) {
   if (kind === "handoff_acknowledged") return "checkmark-done-outline";
   if (kind === "attendance_checkin") return "log-in-outline";
   return "log-out-outline";
+}
+
+function bridgeBackground(state: ReturnType<typeof buildCareCoverageBridge>["state"]) {
+  if (state === "uncovered_now" || state === "gap_ahead") return C.redBg;
+  if (state === "seamless_transition" || state === "covered_now") return "#EAF4EF";
+  if (state === "overlap_ahead") return "#FFF1E5";
+  return C.lavender;
+}
+
+function bridgeAccent(state: ReturnType<typeof buildCareCoverageBridge>["state"]) {
+  if (state === "uncovered_now" || state === "gap_ahead") return C.rose;
+  if (state === "seamless_transition" || state === "covered_now") return C.green;
+  return C.purple;
 }
 
 function eventMatchesFilter(
@@ -86,6 +105,7 @@ export function CareContinuityScreen() {
   const [filter, setFilter] = useState<TimelineFilter>("all");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [clock, setClock] = useState(() => Date.now());
 
   const refresh = useCallback(async () => {
     if (!careRecipientId) {
@@ -136,6 +156,11 @@ export function CareContinuityScreen() {
   }, [refresh]);
 
   useEffect(() => {
+    const timer = setInterval(() => setClock(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     if (!careRecipientId) return;
 
     const tables = [
@@ -144,6 +169,7 @@ export function CareContinuityScreen() {
       "care_shift_handoffs",
       "care_shift_handoff_acknowledgements",
       "care_shift_attendance",
+      "care_shifts",
       "care_recipient_members",
     ];
 
@@ -239,6 +265,19 @@ export function CareContinuityScreen() {
     [livePresence],
   );
 
+  const coverageBridge = useMemo(
+    () =>
+      buildCareCoverageBridge({
+        sessions: data.sessions,
+        attendance: data.attendance,
+        shifts: data.shifts,
+        handoffs: data.handoffs,
+        acknowledgements: data.acknowledgements,
+        now: new Date(clock),
+      }),
+    [clock, data],
+  );
+
   if (!careRecipientId) {
     return (
       <Page>
@@ -255,8 +294,8 @@ export function CareContinuityScreen() {
     <Page>
       <Heading
         eyebrow="LIVE CARE TEAM & CONTINUITY"
-        title="See who is in the care workspace and what changed between shifts."
-        body="Live EnVizion workspace presence sits alongside durable handoffs, shift sessions, notes, and attendance history."
+        title="See who has care now, who comes next, and what changed between shifts."
+        body="Live workspace presence sits alongside durable handoffs, real check-ins, scheduled coverage, and the shift-to-shift continuity timeline."
       />
 
       {Boolean(message) && (
@@ -380,6 +419,191 @@ export function CareContinuityScreen() {
           <Txt style={S.small}>Loaded continuity events</Txt>
         </Card>
       </View>
+
+      <Section title="Coverage bridge" />
+      <Card
+        style={{
+          backgroundColor: bridgeBackground(coverageBridge.state),
+          borderColor: bridgeAccent(coverageBridge.state),
+        }}
+      >
+        <View style={S.between}>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={S.eyebrow}>SHIFT-TO-SHIFT COVERAGE</Text>
+            <Text style={S.h2}>
+              {coverageBridgeStateLabel(coverageBridge.state)}
+            </Text>
+          </View>
+          <Icon
+            name={
+              coverageBridge.state === "gap_ahead" ||
+              coverageBridge.state === "uncovered_now"
+                ? "warning-outline"
+                : coverageBridge.state === "seamless_transition"
+                  ? "checkmark-circle-outline"
+                  : "git-compare-outline"
+            }
+            color={bridgeAccent(coverageBridge.state)}
+            size={28}
+          />
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+          <Card style={{ flex: 1, minWidth: 140, backgroundColor: C.white }}>
+            <Text style={S.eyebrow}>CARE NOW</Text>
+            <Text style={S.h3}>
+              {coverageBridge.currentCaregiverId
+                ? memberName(coverageBridge.currentCaregiverId)
+                : "No confirmed caregiver"}
+            </Text>
+            <Txt style={S.small}>
+              {coverageBridge.currentSession
+                ? "Takeover-backed on-shift session"
+                : coverageBridge.currentCoverageSource === "attendance"
+                  ? "Checked-in scheduled shift"
+                  : coverageBridge.currentCoverageSource === "scheduled"
+                    ? "Scheduled, but no active check-in recorded"
+                    : "No active takeover or check-in"}
+            </Txt>
+            {coverageBridge.currentCoverageEndsAt && (
+              <Txt style={S.small}>
+                Planned coverage end ·{" "}
+                {new Date(
+                  coverageBridge.currentCoverageEndsAt,
+                ).toLocaleString()}
+              </Txt>
+            )}
+          </Card>
+
+          <Card style={{ flex: 1, minWidth: 140, backgroundColor: C.white }}>
+            <Text style={S.eyebrow}>NEXT SCHEDULED</Text>
+            <Text style={S.h3}>
+              {coverageBridge.nextShift
+                ? memberName(coverageBridge.nextShift.caregiverId)
+                : "No next shift recorded"}
+            </Text>
+            {coverageBridge.nextShift ? (
+              <>
+                <Txt style={S.small}>
+                  {coverageBridge.nextShift.label} ·{" "}
+                  {new Date(
+                    coverageBridge.nextShift.startsAt,
+                  ).toLocaleString()}
+                </Txt>
+                {coverageBridge.minutesUntilNext !== null && (
+                  <Txt style={S.small}>
+                    Starts in{" "}
+                    {coverageMinutesLabel(
+                      coverageBridge.minutesUntilNext,
+                    )}
+                  </Txt>
+                )}
+              </>
+            ) : (
+              <Txt style={S.small}>
+                Add the next caregiver shift when coverage is known.
+              </Txt>
+            )}
+          </Card>
+        </View>
+
+        {coverageBridge.state === "gap_ahead" && (
+          <Txt>
+            There is a recorded{" "}
+            {coverageMinutesLabel(coverageBridge.gapMinutes)} gap between the
+            current planned coverage end and the next scheduled shift.
+          </Txt>
+        )}
+
+        {coverageBridge.state === "uncovered_now" && (
+          <Txt>
+            No active takeover or checked-in scheduled shift is recorded right
+            now.
+            {coverageBridge.nextShift
+              ? ` The next scheduled coverage begins in ${coverageMinutesLabel(
+                  coverageBridge.gapMinutes,
+                )}.`
+              : " No future caregiver shift is recorded either."}
+          </Txt>
+        )}
+
+        {coverageBridge.state === "overlap_ahead" && (
+          <Txt>
+            The next shift overlaps current planned coverage by{" "}
+            {coverageMinutesLabel(coverageBridge.overlapMinutes)}.
+          </Txt>
+        )}
+
+        {coverageBridge.state === "seamless_transition" && (
+          <Txt>
+            The next scheduled shift starts within five minutes of the current
+            planned coverage end.
+          </Txt>
+        )}
+
+        {coverageBridge.state === "covered_now" &&
+          !coverageBridge.currentCoverageEndsAt && (
+            <Txt>
+              Care is actively covered, but EnVizion does not have a scheduled
+              end time to calculate the next transition gap.
+            </Txt>
+          )}
+
+        {coverageBridge.state === "no_next_shift" && (
+          <Txt>
+            Current care activity is recorded, but no future caregiver shift is
+            scheduled yet.
+          </Txt>
+        )}
+
+        {coverageBridge.pendingHandoff && (
+          <Card style={{ backgroundColor: "#FFF9F0" }}>
+            <Text style={S.eyebrow}>PENDING HANDOFF</Text>
+            <Text style={S.h3}>
+              {coverageBridge.pendingHandoff.shiftLabel}
+            </Text>
+            <Txt style={S.small}>
+              {coverageBridge.pendingHandoff.handoffTo
+                ? "Prepared for " +
+                  memberName(coverageBridge.pendingHandoff.handoffTo)
+                : "Prepared for the shared care team"}
+            </Txt>
+
+            {coverageBridge.handoffMatchesNextCaregiver === false && (
+              <Txt style={{ color: C.rose }}>
+                The handoff target does not match the next scheduled caregiver.
+                Review the schedule and handoff before the transition.
+              </Txt>
+            )}
+
+            {coverageBridge.handoffMatchesNextCaregiver === true && (
+              <Txt style={{ color: C.green }}>
+                The handoff target matches the next scheduled caregiver.
+              </Txt>
+            )}
+
+            <Button
+              title="Review pending handoff"
+              secondary
+              icon="swap-horizontal-outline"
+              onPress={() => n.navigate("CareShiftBoard")}
+            />
+          </Card>
+        )}
+
+        <Button
+          title={
+            coverageBridge.state === "gap_ahead" ||
+            coverageBridge.state === "uncovered_now" ||
+            coverageBridge.state === "no_next_shift"
+              ? "Fix coverage in caregiver schedule"
+              : "Review caregiver schedule"
+          }
+          secondary
+          icon="calendar-outline"
+          onPress={() => n.navigate("CareSchedule")}
+        />
+      </Card>
 
       {activeSessions.length > 0 && (
         <>
