@@ -29,6 +29,7 @@ export type RootStack = {
   CareCoverageRequirements: undefined;
   WeeklyCoveragePlan: undefined;
   SmartCoveragePlanner: undefined;
+  CoverageInsights: undefined;
   CareCoverageRequests:
     | {
         startsAt?: string;
