@@ -34,3 +34,6 @@ jobs:
 
       - name: Expo web export
         run: npm run build:web
+
+      - name: Production artifact smoke
+        run: npm run smoke:dist
