@@ -6,7 +6,9 @@ import {
   cancelCareShift,
   createCareShift,
   createCaregiverAvailability,
+  createCaregiverAvailabilityRule,
   deleteCaregiverAvailability,
+  deleteCaregiverAvailabilityRule,
   loadCareSchedule,
   requestCareShiftSwap,
   respondToCareShiftSwap,
@@ -14,6 +16,7 @@ import {
   type CareShift,
   type CareShiftSwapRequest,
   type CaregiverAvailability,
+  type CaregiverAvailabilityRule,
 } from "../careSchedule";
 import {
   shiftAvailabilityFit,
@@ -73,6 +76,18 @@ type WindowDraft = {
   note: string;
 };
 
+type RecurringRuleDraft = {
+  caregiverId: string | null;
+  status: AvailabilityStatus;
+  daysOfWeek: number[];
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  effectiveFrom: string;
+  effectiveUntil: string;
+  note: string;
+};
+
 type ShiftDraft = {
   caregiverId: string | null;
   label: string;
@@ -104,6 +119,53 @@ function blankWindow(caregiverId: string | null): WindowDraft {
     ...value,
     note: "",
   };
+}
+
+function blankRecurringRule(caregiverId: string | null): RecurringRuleDraft {
+  const today = reminderLocalParts(new Date().toISOString()).date;
+  return {
+    caregiverId,
+    status: "available",
+    daysOfWeek: [1, 2, 3, 4, 5],
+    startTime: "18:00",
+    endTime: "22:00",
+    timezone: detectedTimezone(),
+    effectiveFrom: today,
+    effectiveUntil: "",
+    note: "",
+  };
+}
+
+const recurringWeekdays = [
+  { day: 1, label: "Mon" },
+  { day: 2, label: "Tue" },
+  { day: 3, label: "Wed" },
+  { day: 4, label: "Thu" },
+  { day: 5, label: "Fri" },
+  { day: 6, label: "Sat" },
+  { day: 7, label: "Sun" },
+] as const;
+
+function recurringDaysLabel(days: number[]) {
+  const normalized = [...new Set(days)].sort((a, b) => a - b);
+  if (
+    normalized.length === 5 &&
+    normalized.every((day, index) => day === index + 1)
+  ) {
+    return "Mon–Fri";
+  }
+  if (
+    normalized.length === 2 &&
+    normalized[0] === 6 &&
+    normalized[1] === 7
+  ) {
+    return "Weekends";
+  }
+  if (normalized.length === 7) return "Every day";
+  return recurringWeekdays
+    .filter((item) => normalized.includes(item.day))
+    .map((item) => item.label)
+    .join(", ");
 }
 
 function blankShift(caregiverId: string | null): ShiftDraft {
@@ -199,6 +261,9 @@ export function CareScheduleScreen() {
   const owner = state.accessRole === "owner";
 
   const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
+  const [recurringAvailability, setRecurringAvailability] = useState<
+    CaregiverAvailabilityRule[]
+  >([]);
   const [shifts, setShifts] = useState<CareShift[]>([]);
   const [swaps, setSwaps] = useState<CareShiftSwapRequest[]>([]);
   const [tasks, setTasks] = useState<CareTask[]>([]);
@@ -211,9 +276,12 @@ export function CareScheduleScreen() {
   const [message, setMessage] = useState("");
 
   const [availabilityFormOpen, setAvailabilityFormOpen] = useState(false);
+  const [recurringFormOpen, setRecurringFormOpen] = useState(false);
   const [shiftFormOpen, setShiftFormOpen] = useState(false);
   const [availabilityDraft, setAvailabilityDraft] =
     useState<WindowDraft>(blankWindow(null));
+  const [recurringDraft, setRecurringDraft] =
+    useState<RecurringRuleDraft>(blankRecurringRule(null));
   const [shiftDraft, setShiftDraft] = useState<ShiftDraft>(blankShift(null));
 
   const [swapShift, setSwapShift] = useState<CareShift | null>(null);
@@ -242,6 +310,7 @@ export function CareScheduleScreen() {
 
       setCurrentUserId(userId);
       setAvailability(schedule.availability);
+      setRecurringAvailability(schedule.recurringAvailability);
       setShifts(schedule.shifts);
       setSwaps(schedule.swaps);
       setAttendance(attendanceRows);
@@ -257,6 +326,11 @@ export function CareScheduleScreen() {
           : userId;
 
       setAvailabilityDraft((draft) =>
+        draft.caregiverId
+          ? draft
+          : { ...draft, caregiverId: defaultCaregiver },
+      );
+      setRecurringDraft((draft) =>
         draft.caregiverId
           ? draft
           : { ...draft, caregiverId: defaultCaregiver },
@@ -293,6 +367,16 @@ export function CareScheduleScreen() {
           event: "*",
           schema: "public",
           table: "caregiver_availability",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "caregiver_availability_rules",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
         () => void refresh(),
@@ -461,6 +545,101 @@ export function CareScheduleScreen() {
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "We could not save availability.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function saveRecurringAvailability() {
+    if (!careRecipientId || readOnly || !recurringDraft.caregiverId) return;
+
+    setBusy("recurring-availability");
+    setMessage("");
+    try {
+      const days = [...new Set(recurringDraft.daysOfWeek)].sort(
+        (a, b) => a - b,
+      );
+      if (!days.length) {
+        throw new Error("Choose at least one weekday for this weekly pattern.");
+      }
+
+      const timeAnchor = "2026-01-15";
+      const startCheck = localDateTimeToIso(timeAnchor, recurringDraft.startTime);
+      const endCheck = localDateTimeToIso(timeAnchor, recurringDraft.endTime);
+      if (!startCheck || !endCheck) {
+        throw new Error("Use 24-hour times such as 18:00 and 22:00.");
+      }
+      if (recurringDraft.startTime === recurringDraft.endTime) {
+        throw new Error("Start and end time cannot be the same.");
+      }
+
+      const fromCheck = localDateTimeToIso(
+        recurringDraft.effectiveFrom,
+        "12:00",
+      );
+      if (!fromCheck) {
+        throw new Error("Use a valid effective-from date such as 2026-09-23.");
+      }
+
+      if (recurringDraft.effectiveUntil) {
+        const untilCheck = localDateTimeToIso(
+          recurringDraft.effectiveUntil,
+          "12:00",
+        );
+        if (!untilCheck) {
+          throw new Error("Use a valid end date or leave it blank.");
+        }
+        if (
+          new Date(untilCheck).getTime() < new Date(fromCheck).getTime()
+        ) {
+          throw new Error("The recurring rule end date cannot be earlier than its start date.");
+        }
+      }
+
+      await createCaregiverAvailabilityRule({
+        careRecipientId,
+        caregiverId: recurringDraft.caregiverId,
+        daysOfWeek: days,
+        startLocalTime: recurringDraft.startTime,
+        endLocalTime: recurringDraft.endTime,
+        timezone: recurringDraft.timezone.trim() || detectedTimezone(),
+        status: recurringDraft.status,
+        effectiveFrom: recurringDraft.effectiveFrom,
+        effectiveUntil: recurringDraft.effectiveUntil.trim() || null,
+        note: recurringDraft.note,
+      });
+
+      setRecurringFormOpen(false);
+      setRecurringDraft(blankRecurringRule(currentUserId));
+      await refresh();
+      setMessage("Weekly availability pattern saved.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not save that weekly availability pattern.",
+      );
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function removeRecurringAvailability(
+    rule: CaregiverAvailabilityRule,
+  ) {
+    if (!careRecipientId || readOnly || busy) return;
+    setBusy(`recurring:${rule.id}`);
+    setMessage("");
+    try {
+      await deleteCaregiverAvailabilityRule(careRecipientId, rule.id);
+      await refresh();
+      setMessage("Weekly availability pattern removed.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not remove that weekly pattern.",
       );
     } finally {
       setBusy(null);
@@ -829,7 +1008,11 @@ export function CareScheduleScreen() {
         </Card>
       ) : upcomingShifts.length ? (
         upcomingShifts.map((shift) => {
-          const fit = shiftAvailabilityFit(shift, availability);
+          const fit = shiftAvailabilityFit(
+            shift,
+            availability,
+            recurringAvailability,
+          );
           const attendanceItem = attendanceForShift(shift.id, attendance);
           const attendanceState = shiftAttendanceState(
             shift,
