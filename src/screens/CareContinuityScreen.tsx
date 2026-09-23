@@ -591,18 +591,39 @@ export function CareContinuityScreen() {
           </Card>
         )}
 
-        <Button
-          title={
-            coverageBridge.state === "gap_ahead" ||
-            coverageBridge.state === "uncovered_now" ||
-            coverageBridge.state === "no_next_shift"
-              ? "Fix coverage in caregiver schedule"
-              : "Review caregiver schedule"
-          }
-          secondary
-          icon="calendar-outline"
-          onPress={() => n.navigate("CareSchedule")}
-        />
+        {(coverageBridge.state === "gap_ahead" ||
+          coverageBridge.state === "uncovered_now" ||
+          coverageBridge.state === "no_next_shift") &&
+        state.accessRole !== "viewer" ? (
+          <>
+            <Button
+              title="Publish this coverage gap"
+              icon="megaphone-outline"
+              onPress={() =>
+                n.navigate("CareCoverageRequests", {
+                  startsAt:
+                    coverageBridge.state === "gap_ahead"
+                      ? coverageBridge.currentCoverageEndsAt ?? undefined
+                      : new Date(clock).toISOString(),
+                  endsAt: coverageBridge.nextShift?.startsAt,
+                })
+              }
+            />
+            <Button
+              title="Adjust caregiver schedule instead"
+              secondary
+              icon="calendar-outline"
+              onPress={() => n.navigate("CareSchedule")}
+            />
+          </>
+        ) : (
+          <Button
+            title="Review caregiver schedule"
+            secondary
+            icon="calendar-outline"
+            onPress={() => n.navigate("CareSchedule")}
+          />
+        )}
       </Card>
 
       {activeSessions.length > 0 && (
