@@ -242,7 +242,7 @@ export function CoverageInsightsScreen({ navigation }: Props) {
                     <View
                       style={{
                         height: "100%",
-                        width: width + "%",
+                        width: `${width}%` as `${number}%`,
                         backgroundColor: C.purple,
                       }}
                     />
