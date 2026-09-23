@@ -4,6 +4,8 @@ import {
   activeCaregiversOnDuty,
   coveringShiftForTask,
   intervalsOverlap,
+  recurringAvailabilityFit,
+  recurringAvailabilityRuleRelation,
   shiftAvailabilityFit,
   uncoveredUpcomingTasks,
 } from "../src/careScheduleHelpers.ts";
@@ -121,4 +123,180 @@ test("on-duty list only returns active overlapping scheduled shifts", () => {
   ] as any;
 
   assert.deepEqual(activeCaregiversOnDuty(shifts, now).map((shift) => shift.id), ["on"]);
+});
+
+
+function recurringRule(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "rule-1",
+    careRecipientId: "care-1",
+    caregiverId: "u1",
+    createdBy: "u1",
+    daysOfWeek: [1, 2, 3, 4, 5],
+    startLocalTime: "18:00",
+    endLocalTime: "22:00",
+    timezone: "Africa/Blantyre",
+    status: "available",
+    effectiveFrom: "2026-09-01",
+    effectiveUntil: null,
+    note: "",
+    createdAt: "2026-09-01T00:00:00Z",
+    updatedAt: "2026-09-01T00:00:00Z",
+    ...overrides,
+  } as any;
+}
+
+test("recurring weekday availability matches the caregiver local timezone", () => {
+  const rule = recurringRule({
+    daysOfWeek: [3],
+    status: "preferred",
+  });
+
+  assert.equal(
+    recurringAvailabilityFit(
+      "u1",
+      "2026-09-23T16:30:00Z",
+      "2026-09-23T19:30:00Z",
+      [rule],
+    ),
+    "preferred",
+  );
+
+  assert.equal(
+    recurringAvailabilityFit(
+      "u1",
+      "2026-09-24T16:30:00Z",
+      "2026-09-24T19:30:00Z",
+      [rule],
+    ),
+    "unspecified",
+  );
+});
+
+test("recurring weekend rules stay separate from weekdays", () => {
+  const rule = recurringRule({
+    daysOfWeek: [6, 7],
+    startLocalTime: "08:00",
+    endLocalTime: "18:00",
+    status: "available",
+  });
+
+  assert.equal(
+    recurringAvailabilityFit(
+      "u1",
+      "2026-09-26T07:00:00Z",
+      "2026-09-26T12:00:00Z",
+      [rule],
+    ),
+    "covered",
+  );
+  assert.equal(
+    recurringAvailabilityFit(
+      "u1",
+      "2026-09-25T07:00:00Z",
+      "2026-09-25T12:00:00Z",
+      [rule],
+    ),
+    "unspecified",
+  );
+});
+
+test("overnight recurring availability carries into the following local day", () => {
+  const rule = recurringRule({
+    daysOfWeek: [3],
+    startLocalTime: "22:00",
+    endLocalTime: "06:00",
+    status: "available",
+  });
+
+  assert.equal(
+    recurringAvailabilityRuleRelation(
+      rule,
+      "2026-09-23T21:00:00Z",
+      "2026-09-24T03:00:00Z",
+    ),
+    "covers",
+  );
+  assert.equal(
+    recurringAvailabilityFit(
+      "u1",
+      "2026-09-23T21:00:00Z",
+      "2026-09-24T03:00:00Z",
+      [rule],
+    ),
+    "covered",
+  );
+});
+
+test("America New York recurring rules follow local clock time", () => {
+  const rule = recurringRule({
+    daysOfWeek: [1],
+    startLocalTime: "18:00",
+    endLocalTime: "22:00",
+    timezone: "America/New_York",
+    status: "preferred",
+  });
+
+  assert.equal(
+    recurringAvailabilityFit(
+      "u1",
+      "2026-11-02T23:30:00Z",
+      "2026-11-03T02:30:00Z",
+      [rule],
+    ),
+    "preferred",
+  );
+});
+
+test("recurring unavailable overrides recurring preferred coverage", () => {
+  const preferred = recurringRule({
+    id: "preferred",
+    daysOfWeek: [3],
+    status: "preferred",
+  });
+  const unavailable = recurringRule({
+    id: "unavailable",
+    daysOfWeek: [3],
+    startLocalTime: "19:00",
+    endLocalTime: "20:00",
+    status: "unavailable",
+  });
+
+  assert.equal(
+    recurringAvailabilityFit(
+      "u1",
+      "2026-09-23T16:30:00Z",
+      "2026-09-23T19:30:00Z",
+      [preferred, unavailable],
+    ),
+    "conflict",
+  );
+});
+
+test("one-time unavailable exception overrides a weekly preferred rule", () => {
+  const shift = {
+    caregiverId: "u1",
+    startsAt: "2026-09-23T16:30:00Z",
+    endsAt: "2026-09-23T19:30:00Z",
+  };
+  const preferred = recurringRule({
+    daysOfWeek: [3],
+    status: "preferred",
+  });
+
+  assert.equal(
+    shiftAvailabilityFit(
+      shift as any,
+      [
+        {
+          caregiverId: "u1",
+          startsAt: "2026-09-23T17:00:00Z",
+          endsAt: "2026-09-23T18:00:00Z",
+          status: "unavailable",
+        },
+      ] as any,
+      [preferred],
+    ),
+    "conflict",
+  );
 });
