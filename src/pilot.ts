@@ -55,6 +55,28 @@ export type PilotAdminAudit = {
   createdAt: string;
 };
 
+export type PilotDiagnosticReport = {
+  id: string;
+  userId: string;
+  displayName: string;
+  area: string;
+  summary: string;
+  details: Record<string, unknown>;
+  platform: string;
+  appVersion: string;
+  status: "open" | "reviewed" | "resolved";
+  reviewedAt: string | null;
+  createdAt: string;
+};
+
+export type PilotOperationsSummary = {
+  openDiagnostics: number;
+  failedPacketExports24h: number;
+  staleSupportRequests: number;
+  pushDeliveryErrors24h: number;
+  recentDiagnostics: PilotDiagnosticReport[];
+};
+
 export type PilotConsentState = {
   enrolled: boolean;
   status: PilotStatus | null;
@@ -250,6 +272,20 @@ export async function retireProgramDocument(documentId: string) {
   await invokePilotAdmin({
     action: "retire_document",
     documentId,
+  });
+}
+
+export async function loadPilotOperations(): Promise<PilotOperationsSummary> {
+  const result = await invokePilotAdmin<{ operations: PilotOperationsSummary }>({
+    action: "operations",
+  });
+  return result.operations;
+}
+
+export async function resolvePilotDiagnostic(diagnosticId: string) {
+  await invokePilotAdmin({
+    action: "resolve_diagnostic",
+    diagnosticId,
   });
 }
 
