@@ -50,6 +50,9 @@ export type CareWeeklyCoverageSlot = {
   timedOutAt: string | null;
   approvalNudge6hAt: string | null;
   approvalNudge1hAt: string | null;
+  ownerReleasedAt: string | null;
+  ownerReleasedBy: string | null;
+  ownerReleaseNote: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -92,6 +95,9 @@ function mapSlot(row: any): CareWeeklyCoverageSlot {
     timedOutAt: row.timed_out_at ?? null,
     approvalNudge6hAt: row.approval_nudge_6h_at ?? null,
     approvalNudge1hAt: row.approval_nudge_1h_at ?? null,
+    ownerReleasedAt: row.owner_released_at ?? null,
+    ownerReleasedBy: row.owner_released_by ?? null,
+    ownerReleaseNote: row.owner_release_note ?? "",
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -115,7 +121,7 @@ export async function loadWeeklyCoveragePlans(careRecipientId: string) {
   const { data: slotRows, error: slotError } = await supabase
     .from("care_weekly_coverage_slots")
     .select(
-      "id, plan_id, care_recipient_id, created_by, source_type, source_id, caregiver_id, label, starts_at, ends_at, status, response_note, responded_at, shift_id, coverage_request_id, timed_out_at, approval_nudge_6h_at, approval_nudge_1h_at, created_at, updated_at",
+      "id, plan_id, care_recipient_id, created_by, source_type, source_id, caregiver_id, label, starts_at, ends_at, status, response_note, responded_at, shift_id, coverage_request_id, timed_out_at, approval_nudge_6h_at, approval_nudge_1h_at, owner_released_at, owner_released_by, owner_release_note, created_at, updated_at",
     )
     .in(
       "plan_id",
@@ -238,5 +244,23 @@ export async function reassignWeeklyCoverageSlot(input: {
 
   if (error) throw error;
   if (!data) throw new Error("Weekly coverage reassignment was not saved.");
+  return String(data);
+}
+
+
+export async function releaseWeeklyCoverageSlotToBackups(input: {
+  slotId: string;
+  note?: string;
+}) {
+  const { data, error } = await supabase.rpc(
+    "release_weekly_coverage_slot_to_backups",
+    {
+      p_slot_id: input.slotId,
+      p_note: input.note?.trim() || null,
+    },
+  );
+
+  if (error) throw error;
+  if (!data) throw new Error("Weekly coverage was not released to backups.");
   return String(data);
 }
