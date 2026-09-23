@@ -18,6 +18,18 @@ import {
   latestCoverageResponseForUser,
   orderedCoverageRequests,
 } from "../careCoverageRequestHelpers";
+import {
+  buildCoverageBackupMatches,
+  coverageBackupFitLabel,
+  coverageEscalationLabel,
+  coverageEscalationLevel,
+  escalationEligibleMatches,
+} from "../careCoverageMatchingHelpers";
+import {
+  loadCareSchedule,
+  type CareShift,
+  type CaregiverAvailability,
+} from "../careSchedule";
 import { currentCareTaskUserId } from "../careTasks";
 import {
   loadCareTeam,
@@ -105,6 +117,32 @@ function statusBackground(request: CareCoverageRequest, now = new Date()) {
   return "#F1EDEF";
 }
 
+function escalationBackground(
+  level: ReturnType<typeof coverageEscalationLevel>,
+) {
+  if (level === "active_unfilled" || level === "starts_soon") return C.redBg;
+  if (level === "getting_close") return "#FFF1E5";
+  if (level === "watch") return C.lavender;
+  return "#F1EDEF";
+}
+
+function escalationAccent(
+  level: ReturnType<typeof coverageEscalationLevel>,
+) {
+  if (level === "active_unfilled" || level === "starts_soon") return C.rose;
+  if (level === "getting_close") return "#A65F20";
+  return C.purple;
+}
+
+function fitBackground(fit: ReturnType<typeof buildCoverageBackupMatches>[number]["fit"]) {
+  if (fit === "preferred") return "#EAF4EF";
+  if (fit === "available") return C.lavender;
+  if (fit === "scheduled_conflict" || fit === "unavailable_conflict") {
+    return C.redBg;
+  }
+  return "#F1EDEF";
+}
+
 export function CareCoverageRequestsScreen({ route }: Props) {
   const n = useNav();
   const { state } = useCare();
@@ -117,7 +155,10 @@ export function CareCoverageRequestsScreen({ route }: Props) {
   const [requests, setRequests] = useState<CareCoverageRequest[]>([]);
   const [responses, setResponses] = useState<CareCoverageRequestResponse[]>([]);
   const [roster, setRoster] = useState<CareTeamRoster | null>(null);
+  const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
+  const [shifts, setShifts] = useState<CareShift[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [clock, setClock] = useState(() => Date.now());
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
@@ -134,6 +175,8 @@ export function CareCoverageRequestsScreen({ route }: Props) {
       setRequests([]);
       setResponses([]);
       setRoster(null);
+      setAvailability([]);
+      setShifts([]);
       setLoading(false);
       return;
     }
@@ -141,14 +184,17 @@ export function CareCoverageRequestsScreen({ route }: Props) {
     setLoading(true);
     setMessage("");
     try {
-      const [coverage, team, userId] = await Promise.all([
+      const [coverage, team, userId, schedule] = await Promise.all([
         loadCareCoverageRequests(careRecipientId),
         loadCareTeam(careRecipientId),
         currentCareTaskUserId(),
+        loadCareSchedule(careRecipientId),
       ]);
       setRequests(coverage.requests);
       setResponses(coverage.responses);
       setRoster(team);
+      setAvailability(schedule.availability);
+      setShifts(schedule.shifts);
       setCurrentUserId(userId);
     } catch (error) {
       setMessage(
@@ -164,6 +210,11 @@ export function CareCoverageRequestsScreen({ route }: Props) {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setClock(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (!careRecipientId) return;
@@ -186,6 +237,26 @@ export function CareCoverageRequestsScreen({ route }: Props) {
           event: "*",
           schema: "public",
           table: "care_coverage_request_responses",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "caregiver_availability",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shifts",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
         () => void refresh(),
@@ -348,7 +419,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
       <Heading
         eyebrow="OPEN SHIFT / COVERAGE REQUEST"
         title="Turn uncovered care time into a clear request for help."
-        body="Publish a specific coverage window. The first eligible caregiver who accepts claims it and receives the scheduled shift automatically."
+        body="Publish a specific coverage window. EnVizion matches backup caregivers from recorded availability, escalates unfilled requests as start time approaches, and the first eligible caregiver who accepts receives the scheduled shift automatically."
       />
 
       <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
@@ -520,6 +591,24 @@ export function CareCoverageRequestsScreen({ route }: Props) {
           const responseRows = responses.filter(
             (item) => item.requestId === request.id,
           );
+          const escalationLevel = coverageEscalationLevel(
+            request,
+            new Date(clock),
+          );
+          const backupMatches = buildCoverageBackupMatches({
+            request,
+            members: roster?.members ?? [],
+            availability,
+            shifts,
+            responses,
+          });
+          const escalationTargets = escalationEligibleMatches(
+            backupMatches,
+            escalationLevel,
+          );
+          const currentUserMatch =
+            backupMatches.find((match) => match.userId === currentUserId) ??
+            null;
           const canCancel =
             request.status === "open" &&
             (owner || request.createdBy === currentUserId);
@@ -527,6 +616,8 @@ export function CareCoverageRequestsScreen({ route }: Props) {
             !viewer &&
             request.status === "open" &&
             windowState !== "ended";
+          const claimBlockedByScheduledConflict =
+            currentUserMatch?.fit === "scheduled_conflict";
 
           return (
             <Card
@@ -569,6 +660,147 @@ export function CareCoverageRequestsScreen({ route }: Props) {
               </View>
 
               {Boolean(request.note) && <Txt>{request.note}</Txt>}
+
+              {request.status === "open" && windowState !== "ended" && (
+                <>
+                  <Card
+                    style={{
+                      backgroundColor: escalationBackground(escalationLevel),
+                      borderColor: escalationAccent(escalationLevel),
+                    }}
+                  >
+                    <View style={S.between}>
+                      <View style={{ flex: 1, gap: 3 }}>
+                        <Text style={S.eyebrow}>COVERAGE ESCALATION</Text>
+                        <Text style={S.h3}>
+                          {coverageEscalationLabel(escalationLevel)}
+                        </Text>
+                      </View>
+                      <Icon
+                        name={
+                          escalationLevel === "active_unfilled" ||
+                          escalationLevel === "starts_soon"
+                            ? "warning-outline"
+                            : "notifications-outline"
+                        }
+                        color={escalationAccent(escalationLevel)}
+                        size={24}
+                      />
+                    </View>
+
+                    {escalationLevel === "watch" && (
+                      <Txt style={S.small}>
+                        Preferred backups are now eligible for reminder escalation.
+                      </Txt>
+                    )}
+                    {escalationLevel === "getting_close" && (
+                      <Txt style={S.small}>
+                        Preferred and Available backups are now eligible for reminder escalation.
+                      </Txt>
+                    )}
+                    {(escalationLevel === "starts_soon" ||
+                      escalationLevel === "active_unfilled") && (
+                      <Txt style={S.small}>
+                        EnVizion can now remind any eligible backup who has not
+                        declined, is not already scheduled elsewhere, and has not
+                        marked this window unavailable.
+                      </Txt>
+                    )}
+                    {escalationTargets.length > 0 && (
+                      <Txt style={S.small}>
+                        {escalationTargets.length} backup caregiver
+                        {escalationTargets.length === 1 ? "" : "s"} match the
+                        current escalation stage.
+                      </Txt>
+                    )}
+                  </Card>
+
+                  <Card style={{ backgroundColor: "#FBF9FC" }}>
+                    <View style={S.between}>
+                      <View style={{ flex: 1, gap: 3 }}>
+                        <Text style={S.eyebrow}>BACKUP CAREGIVER MATCHING</Text>
+                        <Text style={S.h3}>
+                          Recorded fit for this exact coverage window
+                        </Text>
+                      </View>
+                      <Icon name="people-outline" color={C.purple} size={24} />
+                    </View>
+                    <Txt style={S.small}>
+                      Matching uses caregiver availability and scheduled shifts.
+                      “No availability recorded” is not treated as confirmation
+                      that someone is free.
+                    </Txt>
+
+                    {!backupMatches.length ? (
+                      <Txt style={S.small}>
+                        No other active Owner/Caregiver is available in this care
+                        profile to compare.
+                      </Txt>
+                    ) : (
+                      backupMatches.slice(0, 6).map((match) => (
+                        <View
+                          key={match.userId}
+                          style={{
+                            padding: 12,
+                            borderRadius: 13,
+                            backgroundColor: C.white,
+                            borderWidth: 1,
+                            borderColor: C.line,
+                            gap: 5,
+                          }}
+                        >
+                          <View style={S.between}>
+                            <Text style={S.h3}>
+                              {match.displayName}
+                              {match.isCurrentUser ? " (me)" : ""}
+                            </Text>
+                            <View
+                              style={[
+                                S.pill,
+                                { backgroundColor: fitBackground(match.fit) },
+                              ]}
+                            >
+                              <Text style={S.small}>
+                                {coverageBackupFitLabel(match.fit)}
+                              </Text>
+                            </View>
+                          </View>
+
+                          {match.declined && (
+                            <Txt style={S.small}>
+                              This caregiver already declined this request, so
+                              automatic escalation will not keep reminding them.
+                            </Txt>
+                          )}
+                          {Boolean(match.overlappingShiftLabel) && (
+                            <Txt style={S.small}>
+                              Schedule conflict · {match.overlappingShiftLabel}
+                            </Txt>
+                          )}
+                          {Boolean(match.availabilityNote) && (
+                            <Txt style={S.small}>
+                              Availability note · {match.availabilityNote}
+                            </Txt>
+                          )}
+                        </View>
+                      ))
+                    )}
+                  </Card>
+
+                  {currentUserMatch?.fit === "unavailable_conflict" && (
+                    <Txt style={{ color: C.rose }}>
+                      Your recorded availability marks part of this window as
+                      unavailable. Accept only if your availability has changed.
+                    </Txt>
+                  )}
+                  {currentUserMatch?.fit === "scheduled_conflict" && (
+                    <Txt style={{ color: C.rose }}>
+                      You already have another scheduled shift overlapping this
+                      window, so EnVizion will not let you claim it.
+                    </Txt>
+                  )}
+                </>
+              )}
 
               {request.status === "filled" && (
                 <Card style={{ backgroundColor: "#EAF4EF" }}>
@@ -624,7 +856,9 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                         ? "Claiming coverage…"
                         : "Accept & claim coverage"
                     }
-                    disabled={Boolean(busy)}
+                    disabled={
+                      Boolean(busy) || claimBlockedByScheduledConflict
+                    }
                     icon="hand-left-outline"
                     onPress={() => void respond(request, "accepted")}
                   />
