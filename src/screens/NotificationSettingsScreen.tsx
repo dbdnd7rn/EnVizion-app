@@ -8,6 +8,10 @@ import {
   type NotificationPreferences,
 } from "../notificationPreferences";
 import {
+  coverageForecastAlertLevelLabel,
+  coverageForecastHorizonLabel,
+} from "../careCoverageForecastAlertHelpers";
+import {
   disableNativePushDevices,
   openNotificationSystemSettings,
   registerNativePush,
@@ -286,6 +290,88 @@ export function NotificationSettingsScreen() {
           void persist({ ...prefs, coordinationPush: value })
         }
       />
+
+      <Section title="Coverage forecast alerts" />
+      <PreferenceSwitch
+        title="Forecast alerts"
+        body="Create proactive Owner alerts when an upcoming recurring-care window becomes High Attention or Elevated. Device delivery still follows your main Push notifications and quiet-hours settings."
+        value={prefs.coverageForecastAlertsEnabled}
+        disabled={busy}
+        onChange={(value) =>
+          void persist(
+            {
+              ...prefs,
+              coverageForecastAlertsEnabled: value,
+            },
+            value
+              ? "Coverage forecast alerts enabled."
+              : "Coverage forecast alerts disabled.",
+          )
+        }
+      />
+
+      {prefs.coverageForecastAlertsEnabled && (
+        <>
+          <Card>
+            <Text style={S.h3}>Alert severity</Text>
+            <Txt style={S.small}>
+              Choose which forecast risk levels should create a notification.
+            </Txt>
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              {(["high", "elevated"] as const).map((level) => (
+                <View key={level} style={{ flex: 1 }}>
+                  <Button
+                    title={coverageForecastAlertLevelLabel(level)}
+                    secondary={prefs.coverageForecastAlertLevel !== level}
+                    disabled={busy}
+                    onPress={() =>
+                      void persist(
+                        {
+                          ...prefs,
+                          coverageForecastAlertLevel: level,
+                        },
+                        level === "high"
+                          ? "Forecast alerts will now notify only for High Attention windows."
+                          : "Forecast alerts will notify for High Attention and Elevated windows.",
+                      )
+                    }
+                  />
+                </View>
+              ))}
+            </View>
+          </Card>
+
+          <Card>
+            <Text style={S.h3}>Warning horizon</Text>
+            <Txt style={S.small}>
+              EnVizion will evaluate recurring-care coverage this far into the
+              future for automatic alerts.
+            </Txt>
+            <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
+              {([3, 7, 14, 21] as const).map((days) => (
+                <View key={days} style={{ minWidth: 105, flexGrow: 1 }}>
+                  <Button
+                    title={coverageForecastHorizonLabel(days)}
+                    secondary={prefs.coverageForecastHorizonDays !== days}
+                    disabled={busy}
+                    onPress={() =>
+                      void persist(
+                        {
+                          ...prefs,
+                          coverageForecastHorizonDays: days,
+                        },
+                        "Forecast warning horizon set to " +
+                          coverageForecastHorizonLabel(days) +
+                          ".",
+                      )
+                    }
+                  />
+                </View>
+              ))}
+            </View>
+          </Card>
+        </>
+      )}
 
       <Section title="Coordination digest" />
       <PreferenceSwitch
