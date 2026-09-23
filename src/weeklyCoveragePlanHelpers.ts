@@ -168,6 +168,33 @@ export function weeklyApprovalNudgeState(
   };
 }
 
+export function weeklyCoverageControlSummary(
+  slots: Array<{
+    status: "proposed" | "pending" | "accepted" | "declined" | "open_coverage" | "cancelled";
+    timedOutAt?: string | null;
+  }>,
+) {
+  return slots.reduce(
+    (summary, slot) => {
+      summary.total += 1;
+      if (slot.status === "accepted") summary.accepted += 1;
+      if (slot.status === "pending") summary.pending += 1;
+      if (slot.status === "declined") summary.declined += 1;
+      if (slot.status === "open_coverage") summary.openCoverage += 1;
+      if (slot.timedOutAt) summary.timedOut += 1;
+      return summary;
+    },
+    {
+      total: 0,
+      accepted: 0,
+      pending: 0,
+      declined: 0,
+      openCoverage: 0,
+      timedOut: 0,
+    },
+  );
+}
+
 export function weeklyCoverageResponseCounts(
   statuses: Array<
     "proposed" | "pending" | "accepted" | "declined" | "open_coverage" | "cancelled"
