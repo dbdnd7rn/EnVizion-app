@@ -10,6 +10,7 @@ function iconFor(item: NotificationRecord) {
   if (item.kind.includes("support")) return "heart-outline";
   if (item.kind.includes("coordination")) return "warning-outline";
   if (item.kind.includes("weekly_coverage")) return "checkmark-done-outline";
+  if (item.kind.includes("coverage_forecast")) return "telescope-outline";
   if (item.kind.includes("coverage_request")) return "megaphone-outline";
   if (item.kind.includes("task") || item.kind.includes("shift")) return "checkbox-outline";
   if (item.kind.includes("reminder")) return "alarm-outline";
@@ -79,6 +80,11 @@ export function NotificationsScreen() {
 
       if (item.entityType === "care_weekly_coverage_slot") {
         n.navigate("WeeklyCoveragePlan");
+        return;
+      }
+
+      if (item.entityType === "care_coverage_forecast") {
+        n.navigate("CoverageForecast");
         return;
       }
 
