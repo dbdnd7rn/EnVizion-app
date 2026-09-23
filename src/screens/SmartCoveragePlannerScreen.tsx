@@ -392,6 +392,12 @@ export function SmartCoveragePlannerScreen() {
 
       <View style={{ gap: 9 }}>
         <Button
+          title="Proactive coverage forecast"
+          secondary
+          icon="telescope-outline"
+          onPress={() => n.navigate("CoverageForecast")}
+        />
+        <Button
           title="Review & publish weekly coverage"
           secondary
           icon="checkmark-done-outline"
