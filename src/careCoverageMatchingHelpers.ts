@@ -2,7 +2,11 @@ import type {
   CareCoverageRequest,
   CareCoverageRequestResponse,
 } from "./careCoverageRequests";
-import type { CareShift, CaregiverAvailability } from "./careSchedule";
+import type {
+  CareShift,
+  CaregiverAvailability,
+  CaregiverAvailabilityRule,
+} from "./careSchedule";
 import {
   intervalsOverlap,
   shiftAvailabilityFit,
@@ -123,6 +127,7 @@ export function buildCoverageBackupMatches(input: {
   request: CareCoverageRequest;
   members: CareTeamMember[];
   availability: CaregiverAvailability[];
+  recurringAvailability: CaregiverAvailabilityRule[];
   shifts: CareShift[];
   responses: CareCoverageRequestResponse[];
 }) {
@@ -158,6 +163,7 @@ export function buildCoverageBackupMatches(input: {
           endsAt: input.request.endsAt,
         },
         input.availability,
+        input.recurringAvailability,
       );
 
       let fit: CoverageBackupFit = "unspecified";
