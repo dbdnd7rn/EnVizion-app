@@ -48,6 +48,8 @@ export type CareWeeklyCoverageSlot = {
   shiftId: string | null;
   coverageRequestId: string | null;
   timedOutAt: string | null;
+  approvalNudge6hAt: string | null;
+  approvalNudge1hAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -88,6 +90,8 @@ function mapSlot(row: any): CareWeeklyCoverageSlot {
     shiftId: row.shift_id ?? null,
     coverageRequestId: row.coverage_request_id ?? null,
     timedOutAt: row.timed_out_at ?? null,
+    approvalNudge6hAt: row.approval_nudge_6h_at ?? null,
+    approvalNudge1hAt: row.approval_nudge_1h_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -111,7 +115,7 @@ export async function loadWeeklyCoveragePlans(careRecipientId: string) {
   const { data: slotRows, error: slotError } = await supabase
     .from("care_weekly_coverage_slots")
     .select(
-      "id, plan_id, care_recipient_id, created_by, source_type, source_id, caregiver_id, label, starts_at, ends_at, status, response_note, responded_at, shift_id, coverage_request_id, timed_out_at, created_at, updated_at",
+      "id, plan_id, care_recipient_id, created_by, source_type, source_id, caregiver_id, label, starts_at, ends_at, status, response_note, responded_at, shift_id, coverage_request_id, timed_out_at, approval_nudge_6h_at, approval_nudge_1h_at, created_at, updated_at",
     )
     .in(
       "plan_id",
@@ -194,4 +198,45 @@ export async function currentWeeklyCoverageUserId() {
 
   if (error || !user) throw new Error("Please sign in again.");
   return user.id;
+}
+
+
+export type WeeklyCoverageReassignmentCandidate = {
+  userId: string;
+  displayName: string;
+  fit: "preferred" | "available";
+};
+
+export async function loadWeeklyCoverageReassignmentCandidates(
+  slotId: string,
+): Promise<WeeklyCoverageReassignmentCandidate[]> {
+  const { data, error } = await supabase.rpc(
+    "weekly_coverage_reassignment_candidates",
+    { p_slot_id: slotId },
+  );
+
+  if (error) throw error;
+
+  return (data ?? []).map((row: any) => ({
+    userId: String(row.user_id),
+    displayName: String(row.display_name || "Caregiver"),
+    fit: String(row.fit) as "preferred" | "available",
+  }));
+}
+
+export async function reassignWeeklyCoverageSlot(input: {
+  slotId: string;
+  caregiverId: string;
+}) {
+  const { data, error } = await supabase.rpc(
+    "reassign_weekly_coverage_slot",
+    {
+      p_slot_id: input.slotId,
+      p_caregiver_id: input.caregiverId,
+    },
+  );
+
+  if (error) throw error;
+  if (!data) throw new Error("Weekly coverage reassignment was not saved.");
+  return String(data);
 }
