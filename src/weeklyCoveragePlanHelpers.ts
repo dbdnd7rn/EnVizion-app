@@ -99,6 +99,33 @@ export function weeklyCoverageDraftSlots(
   });
 }
 
+export function defaultWeeklyApprovalDeadlineIso(
+  needs: Array<Pick<SmartCoverageNeed, "startsAt">>,
+  now = new Date(),
+) {
+  const current = now.getTime();
+  const earliestStart = needs.reduce((earliest, need) => {
+    const start = new Date(need.startsAt).getTime();
+    if (!Number.isFinite(start) || start <= current) return earliest;
+    return earliest === null || start < earliest ? start : earliest;
+  }, null as number | null);
+
+  if (earliestStart === null || earliestStart <= current + 2 * 60_000) {
+    return null;
+  }
+
+  let target = Math.min(
+    current + 24 * 60 * 60_000,
+    earliestStart - 12 * 60 * 60_000,
+  );
+
+  if (target <= current + 60_000) {
+    target = current + Math.floor((earliestStart - current) / 2);
+  }
+
+  return new Date(target).toISOString();
+}
+
 export function weeklyCoverageResponseCounts(
   statuses: Array<
     "proposed" | "pending" | "accepted" | "declined" | "open_coverage" | "cancelled"
