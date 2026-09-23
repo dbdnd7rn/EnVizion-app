@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   buildCarePacketHtml,
+  carePacketDefaultSections,
   carePacketTitle,
   type CarePacketBuildInput,
 } from "../src/carePacketHelpers.ts";
@@ -134,6 +135,15 @@ function baseInput(): CarePacketBuildInput {
 test("care packet title varies by packet type", () => {
   assert.equal(carePacketTitle("visit"), "Visit Preparation Packet");
   assert.equal(carePacketTitle("handoff"), "Caregiver Handoff Packet");
+  assert.equal(carePacketTitle("emergency"), "Emergency Information Packet");
+});
+
+test("emergency packet defaults include quick-reference safety context", () => {
+  const sections = carePacketDefaultSections("emergency");
+  assert.equal(sections.includes("emergency_profile"), true);
+  assert.equal(sections.includes("medication_reconciliation"), true);
+  assert.equal(sections.includes("transition_plan"), true);
+  assert.equal(sections.includes("vault_documents"), true);
 });
 
 test("packet includes only explicitly selected sections", () => {
@@ -166,12 +176,69 @@ test("packet includes only selected communication history", () => {
   input.selectedSections = [...input.selectedSections, "communication_log"];
   const html = buildCarePacketHtml(input);
 
-  assert.match(html, /Care notes &amp; communication history/);
+  assert.match(html, /Provider \/ insurance communication history/);
   assert.match(html, /Nurse James/);
   assert.match(html, /Dr\. Rivera/);
   assert.match(html, /Follow-up/);
   assert.match(html, /Reviewed swelling &lt;changes&gt;/);
   assert.doesNotMatch(html, /Reviewed swelling <changes>/);
+});
+
+test("packet can render emergency and reconciliation sections", () => {
+  const input = baseInput();
+  input.packetType = "emergency";
+  input.selectedSections = [
+    "profile",
+    "emergency_contact",
+    "emergency_profile",
+    "medications",
+    "medication_reconciliation",
+    "transition_plan",
+  ];
+  input.emergencyProfile = {
+    localEmergencyNumber: "911",
+    preferredHospital: "Central Hospital",
+    allergies: "Penicillin",
+    importantConditions: "CHF",
+    medicalDevices: "Home oxygen",
+    advanceDirectiveLocation: "Care Vault",
+    emergencyNotes: "Bring medication list",
+    lastReviewedAt: "2026-09-23T11:00:00.000Z",
+  };
+  input.medicationReconciliation = {
+    medicationCount: 1,
+    note: "Confirmed against discharge paperwork",
+    createdAt: "2026-09-23T12:00:00.000Z",
+  };
+  input.transitionPlan = {
+    hospitalName: "Central Hospital",
+    dischargeDate: "2026-09-22",
+    dischargeSummary: "Continue home recovery plan",
+    primaryDiagnosis: "Heart failure",
+    medicationChanges: "See reconciled list",
+    followUpPlan: "Cardiology follow-up",
+    equipmentPlan: "Scale",
+    transportPlan: "Family transport",
+    warningSigns: "Call for severe breathing difficulty",
+    afterHoursContact: "Hospital nurse line",
+  };
+  input.transitionFollowUps = [
+    {
+      title: "Cardiology review",
+      dueAt: "2026-09-30T10:00:00.000Z",
+      provider: "Dr. Rivera",
+      details: "Bring weight log",
+    },
+  ];
+
+  const html = buildCarePacketHtml(input);
+
+  assert.match(html, /Emergency Information Packet/);
+  assert.match(html, /Known allergies: Penicillin/);
+  assert.match(html, /Medication reconciliation/);
+  assert.match(html, /Confirmed against discharge paperwork/);
+  assert.match(html, /Hospital-to-home plan/);
+  assert.match(html, /Cardiology review/);
 });
 
 test("packet escapes user-entered HTML-sensitive content", () => {
