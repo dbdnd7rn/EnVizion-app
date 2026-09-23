@@ -58,6 +58,7 @@ import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsScreen";
 import { CareTeamScreen } from "./src/screens/CareTeamScreen";
 import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
+import { AccessibilityScreen } from "./src/screens/AccessibilityScreen";
 import { PilotConsentGate } from "./src/PilotConsentGate";
 import { PilotAdminScreen } from "./src/screens/PilotAdminScreen";
 import { getStaffMembership, type StaffMembership } from "./src/staff";
@@ -412,6 +413,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="PrivacyData"
             component={PrivacyDataScreen}
             options={{ title: "Account, privacy & data" }}
+          />
+          <Stack.Screen
+            name="Accessibility"
+            component={AccessibilityScreen}
+            options={{ title: "Accessibility & display" }}
           />
           <Stack.Screen
             name="CareTeam"
