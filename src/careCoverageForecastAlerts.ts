@@ -12,7 +12,18 @@ export function coverageForecastWindowKey(
   startsAt: string,
   endsAt: string,
 ) {
-  return requirementId + "|" + startsAt + "|" + endsAt;
+  const normalized = (value: string) => {
+    const parsed = new Date(value);
+    return Number.isFinite(parsed.getTime()) ? parsed.toISOString() : value;
+  };
+
+  return (
+    requirementId +
+    "|" +
+    normalized(startsAt) +
+    "|" +
+    normalized(endsAt)
+  );
 }
 
 export async function loadCoverageForecastSnoozes(
