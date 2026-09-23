@@ -1,15 +1,42 @@
-import { loadCareDocuments, type CareDocument } from "./documents";
-import { loadCareContacts, careContactCategoryLabels, preferredContactMethodLabels, type CareContact } from "./careContacts";
-import { loadCareCommunications, careCommunicationPriorityLabels, careCommunicationTypeLabels, type CareCommunication } from "./careCommunications";
-import { documentCategoryLabels, formatDocumentBytes } from "./documentHelpers";
+import {
+  loadCareContacts,
+  careContactCategoryLabels,
+  preferredContactMethodLabels,
+  type CareContact,
+} from "./careContacts";
+import {
+  loadCareCommunications,
+  careCommunicationPriorityLabels,
+  careCommunicationTypeLabels,
+  type CareCommunication,
+} from "./careCommunications";
+import { loadCarePlan } from "./carePlan";
+import {
+  familyUpdatePriorityLabels,
+  familyUpdateTypeLabels,
+  loadFamilyCommunicationCenter,
+} from "./familyCommunication";
+import { loadMedicationManagement } from "./medicationManagement";
+import { loadCareTransitionWorkspace } from "./careTransition";
+import { loadCareTeam } from "./careTeam";
+import {
+  loadCareDocuments,
+  type CareDocument,
+} from "./documents";
+import {
+  documentCategoryLabels,
+  formatDocumentBytes,
+} from "./documentHelpers";
 import { loadCareReminders } from "./reminders";
 import type { CareReminder } from "./reminderHelpers";
 import type {
   CarePacketSection,
   CarePacketType,
-  PacketDocumentReference,
-  PacketCareContact,
   PacketCareCommunication,
+  PacketCareContact,
+  PacketDocumentReference,
+  PacketEmergencyProfile,
+  PacketFamilyUpdate,
 } from "./carePacketHelpers";
 import { supabase } from "./supabase";
 
@@ -28,6 +55,8 @@ export type CarePacketExportRecord = {
   selectedContactIds: string[];
   selectedCommunicationIds: string[];
   observationLimit: number;
+  templateVersion: number;
+  receiverNote: string;
   status: "started" | "completed" | "failed";
   startedAt: string;
   completedAt: string | null;
@@ -43,6 +72,8 @@ function mapExport(row: any): CarePacketExportRecord {
     selectedContactIds: row.selected_contact_ids ?? [],
     selectedCommunicationIds: row.selected_communication_ids ?? [],
     observationLimit: Number(row.observation_limit ?? 5),
+    templateVersion: Number(row.template_version ?? 1),
+    receiverNote: row.receiver_note ?? "",
     status: row.status,
     startedAt: row.started_at,
     completedAt: row.completed_at ?? null,
@@ -59,6 +90,9 @@ export function packetDocumentReference(
     originalName: document.originalName,
     categoryLabel: documentCategoryLabels[document.category],
     sizeLabel: formatDocumentBytes(document.sizeBytes),
+    sourceName: document.sourceName,
+    documentDate: document.documentDate,
+    isKeyDocument: document.isKeyDocument,
   };
 }
 
@@ -114,15 +148,21 @@ export function packetCareCommunicationReference(
 
 export async function loadCarePacketSupportingData(
   careRecipientId: string,
-): Promise<{
-  recipient: CarePacketRecipient;
-  reminders: CareReminder[];
-  documents: CareDocument[];
-  contacts: CareContact[];
-  communications: CareCommunication[];
-  history: CarePacketExportRecord[];
-}> {
-  const [recipientResult, reminders, documents, contacts, communications, historyResult] = await Promise.all([
+) {
+  const [
+    recipientResult,
+    emergencyResult,
+    reminders,
+    documents,
+    contacts,
+    communications,
+    historyResult,
+    carePlan,
+    medicationData,
+    transitionData,
+    familyCenter,
+    careTeam,
+  ] = await Promise.all([
     supabase
       .from("care_recipients")
       .select(
@@ -130,22 +170,74 @@ export async function loadCarePacketSupportingData(
       )
       .eq("id", careRecipientId)
       .single(),
+    supabase
+      .from("care_emergency_profiles")
+      .select(
+        "local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, last_reviewed_at",
+      )
+      .eq("care_recipient_id", careRecipientId)
+      .maybeSingle(),
     loadCareReminders(careRecipientId),
-    loadCareDocuments(careRecipientId),
+    loadCareDocuments(careRecipientId, { includeArchived: false }),
     loadCareContacts(careRecipientId),
     loadCareCommunications(careRecipientId),
     supabase
       .from("care_packet_exports")
       .select(
-        "id, packet_type, included_sections, selected_document_ids, selected_contact_ids, selected_communication_ids, observation_limit, status, started_at, completed_at, failed_at",
+        "id, packet_type, included_sections, selected_document_ids, selected_contact_ids, selected_communication_ids, observation_limit, template_version, receiver_note, status, started_at, completed_at, failed_at",
       )
       .eq("care_recipient_id", careRecipientId)
       .order("started_at", { ascending: false })
-      .limit(8),
+      .limit(10),
+    loadCarePlan(careRecipientId),
+    loadMedicationManagement(careRecipientId),
+    loadCareTransitionWorkspace(careRecipientId),
+    loadFamilyCommunicationCenter(careRecipientId),
+    loadCareTeam(careRecipientId),
   ]);
 
   if (recipientResult.error) throw recipientResult.error;
+  if (emergencyResult.error) throw emergencyResult.error;
   if (historyResult.error) throw historyResult.error;
+
+  const memberMap = new Map(
+    careTeam.members.map((member) => [
+      member.userId,
+      member.isCurrentUser
+        ? `${member.displayName || "Me"} (me)`
+        : member.displayName || "Caregiver",
+    ]),
+  );
+
+  const familyUpdates: PacketFamilyUpdate[] = familyCenter.updates
+    .slice(0, 20)
+    .map((update) => ({
+      title: update.title,
+      body: update.body,
+      updateTypeLabel: familyUpdateTypeLabels[update.updateType],
+      priorityLabel: familyUpdatePriorityLabels[update.priority],
+      createdAt: update.createdAt,
+      authorName: update.createdBy
+        ? memberMap.get(update.createdBy) ?? "Caregiver"
+        : "Care team",
+    }));
+
+  const emergencyProfile: PacketEmergencyProfile =
+    emergencyResult.data
+      ? {
+          localEmergencyNumber:
+            emergencyResult.data.local_emergency_number ?? "",
+          preferredHospital: emergencyResult.data.preferred_hospital ?? "",
+          allergies: emergencyResult.data.allergies ?? "",
+          importantConditions:
+            emergencyResult.data.important_conditions ?? "",
+          medicalDevices: emergencyResult.data.medical_devices ?? "",
+          advanceDirectiveLocation:
+            emergencyResult.data.advance_directive_location ?? "",
+          emergencyNotes: emergencyResult.data.emergency_notes ?? "",
+          lastReviewedAt: emergencyResult.data.last_reviewed_at ?? null,
+        }
+      : null;
 
   return {
     recipient: {
@@ -155,12 +247,26 @@ export async function loadCarePacketSupportingData(
         recipientResult.data.emergency_contact_name ?? "",
       emergencyContactPhone:
         recipientResult.data.emergency_contact_phone ?? "",
-    },
+    } satisfies CarePacketRecipient,
     reminders,
     documents,
     contacts,
     communications,
     history: (historyResult.data ?? []).map(mapExport),
+    carePlanItems: carePlan.items,
+    carePlanCompletions: carePlan.completions,
+    managedMedications: medicationData.medications.filter(
+      (medication) => medication.active,
+    ),
+    managedMedicationRecords: medicationData.records,
+    latestReconciliation: medicationData.reconciliations[0] ?? null,
+    transitionPlan:
+      transitionData.plan?.status === "active" ? transitionData.plan : null,
+    transitionFollowUps: transitionData.followUps.filter(
+      (followUp) => followUp.status === "open",
+    ),
+    emergencyProfile,
+    familyUpdates,
   };
 }
 
@@ -182,6 +288,7 @@ export async function startCarePacketExport(input: {
   selectedContactIds: string[];
   selectedCommunicationIds: string[];
   observationLimit: number;
+  receiverNote: string;
 }) {
   return invokePacket<{ packetId: string; startedAt: string }>({
     action: "start",
@@ -192,6 +299,8 @@ export async function startCarePacketExport(input: {
     selectedContactIds: input.selectedContactIds,
     selectedCommunicationIds: input.selectedCommunicationIds,
     observationLimit: input.observationLimit,
+    receiverNote: input.receiverNote.slice(0, 1200),
+    templateVersion: 2,
   });
 }
 
