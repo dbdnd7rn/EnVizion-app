@@ -487,6 +487,12 @@ export function ToolkitScreen() {
           onPress={() => n.navigate("CareContinuity")}
         />
         <Row
+          title="Recurring care coverage"
+          subtitle="Define repeatable times when caregiver coverage is actually required"
+          icon="time-outline"
+          onPress={() => n.navigate("CareCoverageRequirements")}
+        />
+        <Row
           title="Smart Coverage Planner"
           subtitle="Scan the next 7 days, match caregivers, and review coverage suggestions"
           icon="sparkles-outline"
