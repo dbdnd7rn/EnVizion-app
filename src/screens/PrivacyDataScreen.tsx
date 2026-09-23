@@ -152,8 +152,9 @@ export function PrivacyDataScreen() {
           Care-profile exports are owner-only so a collaborator cannot create a
           portable copy of another family’s complete care record. The export
           includes Care Vault metadata, care contacts, communication history,
-          shared care tasks and completion history, caregiver availability,
-          scheduled shifts, check-in and attendance history, swap requests,
+          shared care tasks and completion history, caregiver availability
+          windows and recurring weekly availability rules, scheduled shifts,
+          check-in and attendance history, swap requests,
           recorded coverage-gap events, open caregiver coverage requests and
           caregiver responses, caregiver shift briefings (including
           frozen task, medication, communication, coordination, follow-up, and
@@ -230,7 +231,8 @@ export function PrivacyDataScreen() {
           observations, medications, dose history, appointments, questions,
           transition checklist, private Care Vault files, care contacts,
           communication history, shared care tasks and completion history,
-          caregiver availability, scheduled shifts, check-in and attendance
+          caregiver availability windows and recurring weekly availability
+          rules, scheduled shifts, check-in and attendance
           history, swap requests, coverage-gap history, open caregiver
           coverage requests and responses, caregiver shift briefings and their
           frozen snapshots, caregiver takeover acknowledgements
