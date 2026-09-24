@@ -543,6 +543,21 @@ export function PilotAdminScreen() {
         </>
       )}
 
+      <Section title="Pilot metrics & launch intelligence" />
+      <Card style={{ backgroundColor: C.deep }}>
+        <Icon name="analytics-outline" color={C.white} size={28} />
+        <Text style={[S.h2, { color: C.white }]}>Final pilot intelligence</Text>
+        <Txt style={{ color: "#E3D5E9" }}>
+          Compare the live onboarding funnel, device and platform results,
+          feedback trends, launch waves, outcomes and clinical-content readiness.
+        </Txt>
+        <Button
+          title="Open Pilot Intelligence"
+          icon="bar-chart-outline"
+          onPress={() => n.navigate("PilotIntelligence")}
+        />
+      </Card>
+
       <Section title="Launch validation" />
       <Card style={{ backgroundColor: C.lavender }}>
         <Icon name="flag-outline" size={28} />
