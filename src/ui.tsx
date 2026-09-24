@@ -419,22 +419,47 @@ export function Landscape({ height = 145 }: { height?: number }) {
 }
 export function Fade({ children }: { children: React.ReactNode }) {
   const opacity = useRef(new Animated.Value(1)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     let alive = true;
+
     AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
-      if (!reduced && alive) {
-        opacity.setValue(0);
+      if (!alive || reduced) return;
+
+      opacity.setValue(0);
+      translateY.setValue(8);
+
+      Animated.parallel([
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 360,
+          duration: 320,
           useNativeDriver: Platform.OS !== "web",
-        }).start();
-      }
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 320,
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ]).start();
     });
+
     return () => {
       alive = false;
       opacity.stopAnimation();
+      translateY.stopAnimation();
     };
-  }, [opacity]);
-  return <Animated.View style={{ opacity, gap: 22 }}>{children}</Animated.View>;
+  }, [opacity, translateY]);
+
+  return (
+    <Animated.View
+      style={{
+        opacity,
+        transform: [{ translateY }],
+        gap: 22,
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
 }
