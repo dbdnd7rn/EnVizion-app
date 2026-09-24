@@ -22,6 +22,7 @@ import {
 } from "../pilot";
 import { getStaffMembership } from "../staff";
 import { launchReadiness } from "../launchReadiness";
+import { useNav } from "./MainScreens";
 import {
   Button,
   C,
@@ -88,6 +89,7 @@ function StatusPill({ status }: { status: string }) {
 }
 
 export function PilotAdminScreen() {
+  const n = useNav();
   const [summary, setSummary] = useState<PilotSummary | null>(null);
   const [operations, setOperations] =
     useState<PilotOperationsSummary | null>(null);
@@ -417,6 +419,22 @@ export function PilotAdminScreen() {
           )}
         </>
       )}
+
+      <Section title="Launch validation" />
+      <Card style={{ backgroundColor: C.lavender }}>
+        <Icon name="flag-outline" size={28} />
+        <Text style={S.h3}>Final launch evidence & sign-off</Text>
+        <Txt>
+          Create pilot launch waves, review real Owner/Caregiver/Viewer
+          journeys, device QA and recovery drills, then record a controlled
+          hold or approval.
+        </Txt>
+        <Button
+          title="Open Launch Center"
+          icon="rocket-outline"
+          onPress={() => n.navigate("LaunchCenter")}
+        />
+      </Card>
 
       <Section title="Invite pilot participant" />
       <Card>
