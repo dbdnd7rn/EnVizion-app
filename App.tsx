@@ -107,12 +107,13 @@ function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: C.purple,
         tabBarInactiveTintColor: "#8B8091",
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: C.white,
           borderTopColor: C.line,
-          height: 76,
-          paddingTop: 10,
-          paddingBottom: 12,
+          height: 72,
+          paddingTop: 8,
+          paddingBottom: 10,
         },
         tabBarLabelStyle: {
           fontFamily: "DMSans_600SemiBold",
@@ -135,10 +136,26 @@ function MainTabs() {
         ),
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Toolkit" component={ToolkitScreen} />
-      <Tab.Screen name="Library" component={LibraryScreen} />
-      <Tab.Screen name="Support" component={SupportScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ tabBarLabel: "Home" }}
+      />
+      <Tab.Screen
+        name="Toolkit"
+        component={ToolkitScreen}
+        options={{ tabBarLabel: "Care" }}
+      />
+      <Tab.Screen
+        name="Library"
+        component={LibraryScreen}
+        options={{ tabBarLabel: "Learn" }}
+      />
+      <Tab.Screen
+        name="Support"
+        component={SupportScreen}
+        options={{ tabBarLabel: "Support" }}
+      />
     </Tab.Navigator>
   );
 }
