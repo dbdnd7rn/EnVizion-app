@@ -59,6 +59,8 @@ import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsSc
 import { CareTeamScreen } from "./src/screens/CareTeamScreen";
 import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
 import { AccessibilityScreen } from "./src/screens/AccessibilityScreen";
+import { LaunchValidationScreen } from "./src/screens/LaunchValidationScreen";
+import { LaunchCenterScreen } from "./src/screens/LaunchCenterScreen";
 import { PilotConsentGate } from "./src/PilotConsentGate";
 import { PilotAdminScreen } from "./src/screens/PilotAdminScreen";
 import { getStaffMembership, type StaffMembership } from "./src/staff";
@@ -418,6 +420,16 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="Accessibility"
             component={AccessibilityScreen}
             options={{ title: "Accessibility & display" }}
+          />
+          <Stack.Screen
+            name="LaunchValidation"
+            component={LaunchValidationScreen}
+            options={{ title: "Pilot launch validation" }}
+          />
+          <Stack.Screen
+            name="LaunchCenter"
+            component={LaunchCenterScreen}
+            options={{ title: "Launch Center" }}
           />
           <Stack.Screen
             name="CareTeam"
