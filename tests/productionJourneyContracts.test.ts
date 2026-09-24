@@ -69,3 +69,16 @@ test("admin launch center enforces evidence-based sign-off", () => {
   assert.match(client, /launch-admin/);
   assert.match(client, /signoff/);
 });
+
+test("launch center blocks synthetic pilot foundation setup", () => {
+  const center = source("src/screens/LaunchCenterScreen.tsx");
+  const client = source("src/launchValidation.ts");
+
+  assert.match(center, /Pilot foundation/);
+  assert.match(center, /No real pilot cohort exists yet/);
+  assert.match(center, /Real pilot cohort/);
+  assert.match(center, /Open Pilot Administration/);
+  assert.doesNotMatch(center, /label="Pilot cohort"/);
+  assert.match(client, /PilotFoundationSnapshot/);
+  assert.match(client, /activationReady/);
+});
