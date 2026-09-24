@@ -64,6 +64,7 @@ import { PilotFeedbackScreen } from "./src/screens/PilotFeedbackScreen";
 import { LaunchCenterScreen } from "./src/screens/LaunchCenterScreen";
 import { PilotConsentGate } from "./src/PilotConsentGate";
 import { PilotAdminScreen } from "./src/screens/PilotAdminScreen";
+import { PilotIntelligenceScreen } from "./src/screens/PilotIntelligenceScreen";
 import { getStaffMembership, type StaffMembership } from "./src/staff";
 import {
   StaffSupportThreadScreen,
@@ -505,6 +506,11 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           name="PilotAdmin"
           component={PilotAdminScreen}
           options={{ title: "Pilot administration" }}
+        />
+        <StaffStack.Screen
+          name="PilotIntelligence"
+          component={PilotIntelligenceScreen}
+          options={{ title: "Pilot intelligence" }}
         />
         <StaffStack.Screen
           name="ClinicalContent"
