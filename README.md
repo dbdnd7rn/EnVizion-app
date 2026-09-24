@@ -1,74 +1,87 @@
-# EnVizion Life mobile MVP
+# EnVizion Life Caregiver Toolkit
 
-A caregiver-facing Expo + React Native + TypeScript frontend for iOS, Android, and web review. Uses React Navigation, shared design tokens, bundled DM Sans and Lora typography, and the original EnVizion Life logo extracted from the supplied care-team document.
+EnVizion Life is a caregiver-facing Expo + React Native + TypeScript application for iOS, Android and web, with a Supabase production backend and a protected staff workspace.
 
-The browser preview runs at http://localhost:8082. Dependency installation, type checking, domain tests, and a production web export have completed successfully. See [validation details](VALIDATION.md).
+Production web review: https://envizion-life-caregiver.onrender.com/
 
-## Run
+## What is implemented
 
-Node 22.13+ and pnpm are required (verified with Node 24 and pnpm 11.19).
+### Caregiver experience
+- Account authentication, recovery, profile and privacy/data controls.
+- Multiple care profiles with Owner, Caregiver and Viewer access.
+- Care-team invitations, consent-aware sharing and revocation.
+- Vitals, blood sugar, CHF, behavior/memory and red-flag observation tracking.
+- Medication management, dose records, corrections, reconciliation and printable history.
+- Appointment preparation, questions, transition-home planning and care summaries.
+- Care contacts/provider directory, care document vault and printable Care Packet.
+- Family communication and provider/insurance communication logs.
+- Daily care plans, shared care tasks, caregiver shifts, attendance, handoffs and continuity.
+- Recurring care-coverage requirements, caregiver availability, Open Coverage, backup escalation and weekly approval plans.
+- Smart Coverage Planner, coverage insights, proactive coverage forecasts and deduplicated forecast alerts.
+- Notifications, quiet hours, native push registration, calendar integration and offline/reconnect-aware behavior.
+- Educational library, specialist guidance, caregiver support/coaching requests and optional spiritual wellness.
+- EnVizion Assistant with bounded support behavior and explicit human handoff.
+- Pilot launch validation and a dedicated Pilot Feedback workspace.
 
-```sh
-pnpm install
-pnpm web
-# Or start on a phone/emulator:
-pnpm start
-pnpm android
-pnpm ios
-```
-
-iOS simulator requires macOS. Physical device testing can use a compatible Expo development environment. The browser preview is at http://localhost:8082.
-
-## Checks
-
-```sh
-pnpm typecheck
-pnpm test
-pnpm build:web
-```
-
-Tests use the Node 22+ built-in TypeScript stripping feature (validated with Node 24).
-
-## Included flows
-
-- Assistant conversation preview with scripted app guidance, resource links, opt-in spiritual encouragement, and a path to a person
-- Reviewed support handoff with optional conversation attachment and in-app/WhatsApp/email channel preferences
-- Staff inbox preview with sample replies, caregiver follow-ups, and conversation closure
-
-- Care summary combining session observations, medications, and appointment preparation, with printable export
-
-- Two-step onboarding with name, caregiving relationship, and optional spiritual encouragement
-- Home dashboard, Toolkit, Library, and Support tabs
-- Vitals, blood sugar, CHF observations, behavior/delirium observations, and red-flag logs, with input validation and session history
-- Editable sample medication list, timestamped dose history, corrections that retain original entries, and printable medication records; editable appointment title, date, time, location, and preparation notes, with question add/remove and a printable plan
-- Hospital-to-home checklist with progress and printable worksheet
-- Patient rights and advance care conversation starters
-- COPD, heart failure, diabetes, kidney health, memory/neurological care, and stroke/TIA guides
-- Eight specialist guides and visit preparation
-- Coaching interest selection, explicitly not a sent request or confirmed booking
-- Spiritual reflection, optional encouragement, and a one-minute quiet timer
-- Saved guides, trusted resource links, printing on web, and PDF sharing on native
-- Prominent emergency guidance and explicit US 911 action
+### Staff / administration
+- Authenticated staff workspace with server-enforced staff roles.
+- Support inbox and clinical-content administration.
+- Pilot enrollment, consent-document publishing, onboarding readiness and activation gates.
+- Automatic onboarding reminders and 72-hour stalled-participant detection.
+- Cohort progress, feedback/bug triage and evidence-based participant closeout.
+- Launch waves, Owner/Caregiver/Viewer acceptance runs, device QA, recovery drills and launch sign-off.
+- Pilot Intelligence Center with onboarding funnel, device/platform matrix, feedback trends, wave comparisons, outcomes, content readiness and printable/PDF pilot outcome reports.
 
 ## Architecture
 
-`App.tsx` owns the native stack and bottom tabs. `src/navigation.ts` defines route contracts. `src/ui.tsx` contains shared components and design tokens. Feature screens live in `src/screens/`. `src/content.ts` separates educational content from presentation. `src/domain.ts` contains pure validation and safe printable HTML rendering. `src/store.tsx` owns session state through a typed reducer. `src/printing.ts` adapts export to the platform.
+- **Client:** Expo 54, React Native 0.81, React 19, TypeScript.
+- **Navigation:** React Navigation native stack + bottom tabs.
+- **Backend:** Supabase Auth, Postgres, RLS, Edge Functions, Storage/Realtime integrations and scheduled Postgres jobs.
+- **Production web hosting:** Render.
+- **Notifications:** in-app notifications plus Expo native push plumbing.
+- **Printing/export:** Expo Print + native sharing.
+- **Testing:** Node TypeScript tests, TypeScript compile checks, Expo web export and production-artifact smoke checks in GitHub Actions.
 
-The frontend has no authentication, live AI, backend, analytics, external messaging, or persistent health data. The staff inbox is a local demonstration, not an authenticated staff area. WhatsApp and email preferences do not send messages. See [the production roadmap](PRODUCT_ROADMAP.md). Only sample information should be entered. Reloading clears session state. No medical thresholds, risk scoring, medication dosing, or automated clinical recommendations are generated.
+Core feature screens are under `src/screens/`. Pure domain helpers and backend clients live under `src/`. The CI release gate is `.github/workflows/security-quality-gate.yml`.
 
-## Content and branding
+## Local development
 
-Original logo source: `Professional_Care_Team_for_Chronic_Illness_Management_EnVizion.docx`, supplied in the referenced conversation. Red and purple are taken from the logo; supporting lavender, ivory, and typography are proposed UI choices, not a claimed approved brand standard.
+Node 22+ is recommended.
 
-The educational summaries are draft content for Dr. Tolbert’s clinical review, not verbatim reproductions of the source documents. Stroke information was checked against [CDC guidance](https://www.cdc.gov/stroke/signs-symptoms/index.html). Other resource links point to Medicare, NIH/NIA/NHLBI/NIDDK, MedlinePlus, and EnVizion Life. Printouts are educational worksheets, not legal advance directive forms.
+```bash
+npm install
+npm run typecheck
+npm test
+npm run web
+```
 
-## Next integration phase
+Production web export:
 
-1. Confirm launch locations, emergency contacts, approved content, and exact medication/log requirements.
-2. Add identity, consent, secure storage, user access controls, and backend services before collecting real health information.
-3. Replace content fixtures with versioned, clinically reviewed content from an admin service.
-4. Connect real coaching availability and explicit booking submission.
-5. Add persistent care profiles, reminders only if requested, and approved PDF resources.
-6. Verify on iOS and Android devices, including screen readers, larger text, keyboard behavior, and reduced motion.
+```bash
+npm run build:web
+npm run smoke:dist
+```
 
-No App Store build, production deployment, or clinical approval is implied by this frontend prototype.
+## Native release preparation
+
+`eas.json` contains preview and production build profiles. Before any store submission, link the repository to the correct Expo/EAS account and provide Apple/Google store credentials. Store submission is intentionally not automated without those real account credentials.
+
+## Current external launch dependencies
+
+The software foundation is built, but a real pilot/launch cannot be manufactured by code. As of 24 September 2026 the production pilot database still has no enrolled pilot participants, launch waves, acceptance runs, recovery drills or sign-offs; all eight clinical-content records remain Draft.
+
+Before a real release decision:
+1. Publish the approved Privacy Notice, Pilot Consent and Terms of Use.
+2. Obtain Dr. Delphine Tolbert / EnVizion Life clinical review and publish approved clinical content.
+3. Enroll real pilot participants and establish real Owner/Caregiver/Viewer care access.
+4. Run real iOS, Android and web acceptance journeys on actual target devices.
+5. Record recovery drills, resolve pilot feedback and complete launch-wave sign-off.
+6. Confirm launch jurisdiction/emergency wording, data-retention policy and operational support coverage.
+7. Enable Supabase leaked-password protection in Auth settings.
+8. Link EAS/store accounts and complete App Store / Google Play review requirements.
+
+See `RELEASE_HANDOFF.md` for the final technical and operational handoff.
+
+## Safety boundary
+
+EnVizion Life is a caregiver organization and education tool. It does not diagnose, prescribe, calculate medication doses or replace emergency/clinical care. Pilot analytics are operational evidence only; they are not clinical-safety, legal, regulatory or compliance certification.
