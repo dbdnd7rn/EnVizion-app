@@ -9,6 +9,15 @@ import { NotificationBell } from "../notifications";
 import { FamilyCareDashboard } from "../components/FamilyCareDashboard";
 import { CareSyncBanner } from "../components/CareSyncBanner";
 import {
+  loadToolPreferences,
+  rankToolTitles,
+  recordToolUse,
+  togglePinnedTool,
+  withRecordedUse,
+  withToggledPin,
+  type ToolPreferences,
+} from "../toolPreferences";
+import {
   Brand,
   Button,
   C,
@@ -379,17 +388,105 @@ type ToolItem = {
   onPress: () => void;
 };
 
+function ToolItemRow({
+  item,
+  pinned,
+  onOpen,
+  onTogglePin,
+}: {
+  item: ToolItem;
+  pinned: boolean;
+  onOpen: (item: ToolItem) => void;
+  onTogglePin: (title: string) => void;
+}) {
+  return (
+    <View
+      style={[
+        S.card,
+        {
+          padding: 0,
+          flexDirection: "row",
+          alignItems: "stretch",
+          overflow: "hidden",
+        },
+      ]}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${item.title}. ${item.subtitle}`}
+        accessibilityHint="Open this care tool"
+        onPress={() => onOpen(item)}
+        style={({ pressed }) => ({
+          flex: 1,
+          minHeight: 76,
+          padding: 15,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 14,
+          opacity: pressed ? 0.72 : 1,
+        })}
+      >
+        <View
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 13,
+            backgroundColor: C.lavender,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name={item.icon} size={21} />
+        </View>
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={S.h3}>{item.title}</Text>
+          <Text style={S.small}>{item.subtitle}</Text>
+        </View>
+        <Icon name="chevron-forward" color="#A092A6" size={17} />
+      </Pressable>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={pinned ? `Unpin ${item.title}` : `Pin ${item.title}`}
+        accessibilityState={{ selected: pinned }}
+        onPress={() => onTogglePin(item.title)}
+        style={({ pressed }) => ({
+          width: 50,
+          alignItems: "center",
+          justifyContent: "center",
+          borderLeftWidth: 1,
+          borderLeftColor: C.line,
+          backgroundColor: pinned ? "#F7F1F9" : C.white,
+          opacity: pressed ? 0.65 : 1,
+        })}
+      >
+        <Icon
+          name={pinned ? "star" : "star-outline"}
+          color={pinned ? C.purple : C.muted}
+          size={20}
+        />
+      </Pressable>
+    </View>
+  );
+}
+
 function ToolGroup({
   title,
   subtitle,
   icon,
   items,
+  preferences,
+  onOpenTool,
+  onTogglePin,
   defaultOpen = false,
 }: {
   title: string;
   subtitle: string;
   icon: string;
   items: ToolItem[];
+  preferences: ToolPreferences;
+  onOpenTool: (item: ToolItem) => void;
+  onTogglePin: (title: string) => void;
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -447,12 +544,12 @@ function ToolGroup({
         <Fade>
           <View style={{ gap: 10, paddingLeft: 6 }}>
             {items.map((item) => (
-              <Row
+              <ToolItemRow
                 key={item.title}
-                title={item.title}
-                subtitle={item.subtitle}
-                icon={item.icon}
-                onPress={item.onPress}
+                item={item}
+                pinned={preferences.pinned.includes(item.title)}
+                onOpen={onOpenTool}
+                onTogglePin={onTogglePin}
               />
             ))}
           </View>
@@ -465,6 +562,21 @@ function ToolGroup({
 export function ToolkitScreen() {
   const n = useNav();
   const [query, setQuery] = useState("");
+  const [preferences, setPreferences] = useState<ToolPreferences>({
+    pinned: [],
+    recent: [],
+    usage: {},
+  });
+
+  useEffect(() => {
+    let active = true;
+    loadToolPreferences().then((saved) => {
+      if (active) setPreferences(saved);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const groups: Array<{
     title: string;
@@ -733,6 +845,26 @@ export function ToolkitScreen() {
     },
   ];
 
+  const allItems = groups.flatMap((group) => group.items);
+
+  function openTool(item: ToolItem) {
+    const next = withRecordedUse(preferences, item.title);
+    setPreferences(next);
+    void recordToolUse(preferences, item.title);
+    item.onPress();
+  }
+
+  function togglePin(title: string) {
+    const next = withToggledPin(preferences, title);
+    setPreferences(next);
+    void togglePinnedTool(preferences, title);
+  }
+
+  const personalizedItems = rankToolTitles(preferences)
+    .map((title) => allItems.find((item) => item.title === title))
+    .filter((item): item is ToolItem => Boolean(item))
+    .slice(0, 4);
+
   const normalizedQuery = query.trim().toLowerCase();
   const matches = groups.flatMap((group) =>
     group.items.filter((item) =>
@@ -748,7 +880,7 @@ export function ToolkitScreen() {
         <Heading
           eyebrow="FIND WHAT YOU NEED"
           title="Care tools, without the clutter"
-          body="Search by what you want to do, or open a category. Every existing care feature is still here."
+          body="Search by what you want to do, open a category, or pin the tools you use most. Every existing care feature is still here."
         />
 
         <View style={[S.input, S.row]}>
@@ -789,13 +921,23 @@ export function ToolkitScreen() {
             title="Today"
             subtitle="Tasks & handoffs"
             icon="checkbox-outline"
-            onPress={() => n.navigate("CareShiftBoard")}
+            onPress={() => {
+              const item = allItems.find(
+                (tool) => tool.title === "Today & caregiver shift board",
+              );
+              if (item) openTool(item);
+            }}
           />
           <QuickCard
             title="Calendar"
             subtitle="Visits & shifts"
             icon="calendar-outline"
-            onPress={() => n.navigate("CareCalendar")}
+            onPress={() => {
+              const item = allItems.find(
+                (tool) => tool.title === "Family care calendar & agenda",
+              );
+              if (item) openTool(item);
+            }}
           />
         </View>
 
@@ -805,12 +947,12 @@ export function ToolkitScreen() {
           <View style={{ gap: 10 }}>
             <Section title={`${matches.length} matching ${matches.length === 1 ? "tool" : "tools"}`} />
             {matches.map((item) => (
-              <Row
+              <ToolItemRow
                 key={item.title}
-                title={item.title}
-                subtitle={item.subtitle}
-                icon={item.icon}
-                onPress={item.onPress}
+                item={item}
+                pinned={preferences.pinned.includes(item.title)}
+                onOpen={openTool}
+                onTogglePin={togglePin}
               />
             ))}
             {!matches.length && (
@@ -825,7 +967,35 @@ export function ToolkitScreen() {
             )}
           </View>
         ) : (
-          <View style={{ gap: 12 }}>
+          <View style={{ gap: 14 }}>
+            {personalizedItems.length > 0 && (
+              <View style={{ gap: 10 }}>
+                <Section
+                  title={
+                    preferences.pinned.length
+                      ? "Your shortcuts"
+                      : "Recently used"
+                  }
+                />
+                <Txt style={S.small}>
+                  {preferences.pinned.length
+                    ? "Pinned tools stay here. Recent tools help fill the remaining spots."
+                    : "This area learns from the tools you open most often."}
+                </Txt>
+                {personalizedItems.map((item) => (
+                  <ToolItemRow
+                    key={`personal-${item.title}`}
+                    item={item}
+                    pinned={preferences.pinned.includes(item.title)}
+                    onOpen={openTool}
+                    onTogglePin={togglePin}
+                  />
+                ))}
+              </View>
+            )}
+
+            <Section title="All care tools" />
+
             {groups.map((group, index) => (
               <ToolGroup
                 key={group.title}
@@ -833,7 +1003,10 @@ export function ToolkitScreen() {
                 subtitle={group.subtitle}
                 icon={group.icon}
                 items={group.items}
-                defaultOpen={index === 0}
+                preferences={preferences}
+                onOpenTool={openTool}
+                onTogglePin={togglePin}
+                defaultOpen={index === 0 && personalizedItems.length === 0}
               />
             ))}
           </View>
