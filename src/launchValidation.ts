@@ -102,10 +102,31 @@ export type LaunchGate = {
   };
 };
 
+export type PilotFoundationCohort = {
+  cohort: string;
+  totalParticipants: number;
+  activeParticipants: number;
+  invitedParticipants: number;
+  pausedParticipants: number;
+  consentCurrent: number;
+  roleCoverage: Record<LaunchRole, number>;
+  activationBlockers: string[];
+  activationReady: boolean;
+};
+
+export type PilotFoundationSnapshot = {
+  publishedRequiredDocuments: number;
+  publishedDocumentTypes: string[];
+  missingDocumentTypes: string[];
+  cohorts: PilotFoundationCohort[];
+  foundationReady: boolean;
+};
+
 export type LaunchAdminDashboard = {
   waves: LaunchWave[];
   gates: LaunchGate[];
   operations: LaunchGate["operations"];
+  foundation: PilotFoundationSnapshot;
 };
 
 function mapWave(row: any): LaunchWave {
@@ -258,6 +279,29 @@ export async function loadLaunchAdminDashboard(): Promise<LaunchAdminDashboard> 
         : null,
     })),
     operations: result.operations,
+    foundation: {
+      publishedRequiredDocuments: Number(
+        result.foundation?.publishedRequiredDocuments ?? 0,
+      ),
+      publishedDocumentTypes: result.foundation?.publishedDocumentTypes ?? [],
+      missingDocumentTypes: result.foundation?.missingDocumentTypes ?? [],
+      cohorts: (result.foundation?.cohorts ?? []).map((item: any) => ({
+        cohort: String(item.cohort),
+        totalParticipants: Number(item.totalParticipants ?? 0),
+        activeParticipants: Number(item.activeParticipants ?? 0),
+        invitedParticipants: Number(item.invitedParticipants ?? 0),
+        pausedParticipants: Number(item.pausedParticipants ?? 0),
+        consentCurrent: Number(item.consentCurrent ?? 0),
+        roleCoverage: {
+          owner: Number(item.roleCoverage?.owner ?? 0),
+          caregiver: Number(item.roleCoverage?.caregiver ?? 0),
+          viewer: Number(item.roleCoverage?.viewer ?? 0),
+        },
+        activationBlockers: item.activationBlockers ?? [],
+        activationReady: Boolean(item.activationReady),
+      })),
+      foundationReady: Boolean(result.foundation?.foundationReady),
+    },
   };
 }
 
