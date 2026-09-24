@@ -5,17 +5,23 @@ import {
   loadPilotAdminAudit,
   loadPilotParticipants,
   loadPilotSummary,
+  loadPilotCohortProgress,
+  loadPilotFeedback,
   loadPilotOperations,
   loadProgramDocuments,
   publishProgramDocument,
   retireProgramDocument,
   saveProgramDocument,
   updatePilotParticipant,
+  updatePilotFeedback,
+  closeoutPilotParticipant,
   resolvePilotDiagnostic,
   type PilotAdminAudit,
   type PilotParticipant,
   type PilotStatus,
   type PilotSummary,
+  type PilotCohortProgress,
+  type PilotFeedbackItem,
   type PilotOperationsSummary,
   type ProgramDocument,
   type ProgramDocumentType,
@@ -99,6 +105,8 @@ export function PilotAdminScreen() {
   const [operations, setOperations] =
     useState<PilotOperationsSummary | null>(null);
   const [participants, setParticipants] = useState<PilotParticipant[]>([]);
+  const [cohorts, setCohorts] = useState<PilotCohortProgress[]>([]);
+  const [feedback, setFeedback] = useState<PilotFeedbackItem[]>([]);
   const [documents, setDocuments] = useState<ProgramDocument[]>([]);
   const [audit, setAudit] = useState<PilotAdminAudit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,6 +116,7 @@ export function PilotAdminScreen() {
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteCohort, setInviteCohort] = useState("Pilot 1");
+  const [closeoutNotes, setCloseoutNotes] = useState<Record<string, string>>({});
 
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [documentType, setDocumentType] =
@@ -126,21 +135,27 @@ export function PilotAdminScreen() {
 
       const [
         nextSummary,
+        nextCohorts,
         nextOperations,
         nextParticipants,
+        nextFeedback,
         nextDocuments,
         nextAudit,
       ] = await Promise.all([
         loadPilotSummary(),
+        loadPilotCohortProgress(),
         loadPilotOperations(),
         loadPilotParticipants(),
+        loadPilotFeedback(),
         loadProgramDocuments(),
         loadPilotAdminAudit(),
       ]);
 
       setSummary(nextSummary);
+      setCohorts(nextCohorts);
       setOperations(nextOperations);
       setParticipants(nextParticipants);
+      setFeedback(nextFeedback);
       setDocuments(nextDocuments);
       setAudit(nextAudit);
     } catch (error) {
@@ -290,6 +305,23 @@ export function PilotAdminScreen() {
             </View>
           </Card>
 
+          <Card style={{ backgroundColor: C.lavender }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+              <Metric
+                value={summary.stalledParticipants}
+                label="stalled over 72h"
+              />
+              <Metric
+                value={cohorts.reduce((sum, item) => sum + item.passedValidation, 0)}
+                label="participants with passed validation"
+              />
+              <Metric
+                value={cohorts.reduce((sum, item) => sum + item.completed, 0)}
+                label="pilot journeys completed"
+              />
+            </View>
+          </Card>
+
           <Card>
             <View style={{ flexDirection: "row", gap: 18 }}>
               <Metric value={summary.openSupport} label="open support" />
@@ -298,6 +330,63 @@ export function PilotAdminScreen() {
             </View>
           </Card>
         </>
+      )}
+
+      <Section title="Cohort progress" />
+      {!cohorts.length ? (
+        <Card>
+          <Txt>No pilot cohorts exist yet.</Txt>
+        </Card>
+      ) : (
+        cohorts.map((cohort) => (
+          <Card key={cohort.cohort}>
+            <View style={S.between}>
+              <View style={{ flex: 1 }}>
+                <Text style={S.h2}>{cohort.cohort}</Text>
+                <Txt style={S.small}>
+                  {cohort.total} participants · {cohort.active} active ·{" "}
+                  {cohort.exited} exited
+                </Txt>
+              </View>
+              <View
+                style={[
+                  S.pill,
+                  {
+                    backgroundColor:
+                      cohort.stalled > 0 ? "#FFF1E5" : "#E8F1ED",
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    S.small,
+                    { color: cohort.stalled > 0 ? C.rose : C.green },
+                  ]}
+                >
+                  {cohort.stalled > 0
+                    ? `${cohort.stalled} stalled`
+                    : "No stalled users"}
+                </Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
+              <Metric
+                value={cohort.consentComplete}
+                label="consent complete"
+              />
+              <Metric
+                value={cohort.readyForActivation}
+                label="ready to activate"
+              />
+              <Metric value={cohort.launchReady} label="launch ready" />
+              <Metric
+                value={cohort.passedValidation}
+                label="passed validation"
+              />
+              <Metric value={cohort.completed} label="completed" />
+            </View>
+          </Card>
+        ))
       )}
 
       {operations && (
@@ -516,6 +605,40 @@ export function PilotAdminScreen() {
         </Txt>
       </Card>
 
+      <Section title="Stalled onboarding follow-up" />
+      {!participants.some((participant) => participant.stalled) ? (
+        <Card style={{ backgroundColor: "#E8F1ED" }}>
+          <Icon name="checkmark-circle-outline" color={C.green} size={26} />
+          <Text style={S.h3}>No participant is stalled over 72 hours.</Text>
+          <Txt style={S.small}>
+            The scheduled reminder sweep runs every 6 hours and deduplicates
+            the same onboarding stage for 72 hours.
+          </Txt>
+        </Card>
+      ) : (
+        participants
+          .filter((participant) => participant.stalled)
+          .map((participant) => (
+            <Card
+              key={"stalled-" + participant.userId}
+              style={{ backgroundColor: "#FFF9F2" }}
+            >
+              <View style={S.between}>
+                <View style={{ flex: 1 }}>
+                  <Text style={S.eyebrow}>STALLED ONBOARDING</Text>
+                  <Text style={S.h3}>{participant.displayName}</Text>
+                  <Txt style={S.small}>
+                    {pilotOnboardingStageLabel(participant.onboardingStage)} ·{" "}
+                    {participant.stalledHours}h in current stage
+                  </Txt>
+                </View>
+                <Icon name="time-outline" color={C.rose} size={25} />
+              </View>
+              <Txt>{participant.nextAction}</Txt>
+            </Card>
+          ))
+      )}
+
       <Section title="Activation command center" />
       {!readyToActivate.length ? (
         <Card style={{ backgroundColor: C.lavender }}>
@@ -697,7 +820,7 @@ export function PilotAdminScreen() {
                 )}
 
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                {(["active", "paused", "exited"] as const).map((status) => {
+                {(["active", "paused"] as const).map((status) => {
                   const activationLocked =
                     status === "active" && !participant.readyForActivation;
                   const disabled =
@@ -771,6 +894,164 @@ export function PilotAdminScreen() {
                     care-team invitation and consent workflow.
                   </Txt>
                 )}
+
+              {participant.status !== "exited" && (
+                <Card style={{ backgroundColor: C.paper }}>
+                  <Text style={S.h3}>Pilot closeout</Text>
+                  <Txt style={S.small}>
+                    Passed validation runs: {participant.validation.passedRuns}
+                  </Txt>
+                  <Field
+                    label="Closeout note (optional)"
+                    value={closeoutNotes[participant.userId] ?? ""}
+                    onChange={(value) =>
+                      setCloseoutNotes((current) => ({
+                        ...current,
+                        [participant.userId]: value,
+                      }))
+                    }
+                    multiline
+                  />
+                  <Button
+                    title={
+                      participant.validation.canCompletePilot
+                        ? "Mark pilot journey completed"
+                        : "Completion locked · validation required"
+                    }
+                    icon="checkmark-done-outline"
+                    disabled={
+                      busy !== null || !participant.validation.canCompletePilot
+                    }
+                    onPress={() =>
+                      void run(
+                        `complete-${participant.userId}`,
+                        () =>
+                          closeoutPilotParticipant({
+                            userId: participant.userId,
+                            outcome: "completed",
+                            note: closeoutNotes[participant.userId] ?? "",
+                          }),
+                        "Pilot journey completed with validation evidence.",
+                      )
+                    }
+                  />
+                  <Button
+                    title="Withdraw / exit pilot"
+                    secondary
+                    icon="exit-outline"
+                    disabled={busy !== null}
+                    onPress={() =>
+                      void run(
+                        `withdraw-${participant.userId}`,
+                        () =>
+                          closeoutPilotParticipant({
+                            userId: participant.userId,
+                            outcome: "withdrawn",
+                            note: closeoutNotes[participant.userId] ?? "",
+                          }),
+                        "Participant exited the pilot as withdrawn.",
+                      )
+                    }
+                  />
+                </Card>
+              )}
+
+              {participant.status === "exited" && participant.completion && (
+                <Card
+                  style={{
+                    backgroundColor:
+                      participant.completion.outcome === "completed"
+                        ? "#E8F1ED"
+                        : "#FFF9F2",
+                  }}
+                >
+                  <Text style={S.h3}>
+                    Pilot {participant.completion.outcome}
+                  </Text>
+                  <Txt style={S.small}>
+                    {new Date(participant.completion.createdAt).toLocaleString()} ·{" "}
+                    {participant.completion.passedValidationRuns} passed validation
+                    run(s)
+                  </Txt>
+                  {Boolean(participant.completion.note) && (
+                    <Txt>{participant.completion.note}</Txt>
+                  )}
+                </Card>
+              )}
+            </Card>
+          );
+        })
+      )}
+
+      <Section title="Pilot feedback triage" />
+      {!feedback.length ? (
+        <Card>
+          <Icon name="chatbubble-ellipses-outline" size={26} />
+          <Text style={S.h3}>No pilot feedback has been submitted yet.</Text>
+          <Txt style={S.small}>
+            Tester bugs, experience notes and suggestions will appear here.
+          </Txt>
+        </Card>
+      ) : (
+        feedback.slice(0, 30).map((item) => {
+          const isBug = item.source === "diagnostic";
+          const done =
+            item.status === "closed" || item.status === "resolved";
+          return (
+            <Card key={item.source + "-" + item.id}>
+              <View style={S.between}>
+                <View style={{ flex: 1 }}>
+                  <Text style={S.eyebrow}>
+                    {item.category.toUpperCase()} · {item.source.toUpperCase()}
+                  </Text>
+                  <Text style={S.h3}>{item.summary}</Text>
+                  <Txt style={S.small}>
+                    {item.displayName} ·{" "}
+                    {new Date(item.createdAt).toLocaleString()}
+                    {item.platform ? ` · ${item.platform}` : ""}
+                    {item.appVersion ? ` · v${item.appVersion}` : ""}
+                  </Txt>
+                </View>
+                <StatusPill status={item.status} />
+              </View>
+              {Boolean(item.detail) && <Txt>{item.detail}</Txt>}
+              {!done && (
+                <View style={{ gap: 8 }}>
+                  <Button
+                    title={isBug ? "Mark reviewed" : "Move to review"}
+                    secondary
+                    disabled={busy !== null || item.status === "reviewed" || item.status === "in_review"}
+                    onPress={() =>
+                      void run(
+                        `feedback-review-${item.id}`,
+                        () =>
+                          updatePilotFeedback({
+                            feedbackId: item.id,
+                            source: item.source,
+                            status: isBug ? "reviewed" : "in_review",
+                          }),
+                        "Pilot feedback moved into review.",
+                      )
+                    }
+                  />
+                  <Button
+                    title={isBug ? "Resolve bug feedback" : "Close feedback"}
+                    disabled={busy !== null}
+                    onPress={() =>
+                      void run(
+                        `feedback-close-${item.id}`,
+                        () =>
+                          updatePilotFeedback({
+                            feedbackId: item.id,
+                            source: item.source,
+                            status: isBug ? "resolved" : "closed",
+                          }),
+                        "Pilot feedback closed.",
+                      )
+                    }
+                  />
+                </View>
+              )}
             </Card>
           );
         })
