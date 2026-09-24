@@ -943,6 +943,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Pilot launch validation"
+        subtitle="Run role, device and recovery checks for an active pilot wave"
+        icon="flag-outline"
+        onPress={() => n.navigate("LaunchValidation")}
+      />
+
+      <Row
         title="Notification preferences"
         subtitle="Push updates, quiet hours, and alert categories"
         icon="notifications-outline"
