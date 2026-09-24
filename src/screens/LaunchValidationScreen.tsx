@@ -639,7 +639,15 @@ export function LaunchValidationScreen() {
                     secondary
                     icon="open-outline"
                     disabled={busy !== null}
-                    onPress={() => n.navigate(drill.route)}
+                    onPress={() => {
+                      if (drill.route === "PrivacyData") {
+                        n.navigate("PrivacyData");
+                      } else if (drill.route === "CarePacket") {
+                        n.navigate("CarePacket");
+                      } else if (drill.route === "Notifications") {
+                        n.navigate("Notifications");
+                      }
+                    }}
                   />
                 )}
 
