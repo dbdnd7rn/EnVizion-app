@@ -60,6 +60,7 @@ import { CareTeamScreen } from "./src/screens/CareTeamScreen";
 import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
 import { AccessibilityScreen } from "./src/screens/AccessibilityScreen";
 import { LaunchValidationScreen } from "./src/screens/LaunchValidationScreen";
+import { PilotFeedbackScreen } from "./src/screens/PilotFeedbackScreen";
 import { LaunchCenterScreen } from "./src/screens/LaunchCenterScreen";
 import { PilotConsentGate } from "./src/PilotConsentGate";
 import { PilotAdminScreen } from "./src/screens/PilotAdminScreen";
@@ -425,6 +426,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="LaunchValidation"
             component={LaunchValidationScreen}
             options={{ title: "Pilot launch validation" }}
+          />
+          <Stack.Screen
+            name="PilotFeedback"
+            component={PilotFeedbackScreen}
+            options={{ title: "Pilot feedback" }}
           />
           <Stack.Screen
             name="LaunchCenter"
