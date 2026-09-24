@@ -82,3 +82,20 @@ test("launch center blocks synthetic pilot foundation setup", () => {
   assert.match(client, /PilotFoundationSnapshot/);
   assert.match(client, /activationReady/);
 });
+
+test("pilot admin exposes the five-stage activation command center", () => {
+  const screen = source("src/screens/PilotAdminScreen.tsx");
+  const client = source("src/pilot.ts");
+  const helpers = source("src/pilotOnboardingHelpers.ts");
+
+  assert.match(screen, /Activation command center/);
+  assert.match(screen, /invitation acceptance/i);
+  assert.match(screen, /first sign-in/i);
+  assert.match(screen, /Outstanding documents/);
+  assert.match(screen, /Care-role access is intentionally not assigned/);
+  assert.match(screen, /Active · locked/);
+  assert.match(client, /readyForActivation/);
+  assert.match(client, /launchTestingReady/);
+  assert.match(helpers, /Invitation accepted/);
+  assert.match(helpers, /Real care-team role available/);
+});
