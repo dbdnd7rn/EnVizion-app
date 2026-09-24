@@ -20,6 +20,7 @@ test("production-critical routes remain registered", () => {
     "PilotAdmin",
     "LaunchValidation",
     "LaunchCenter",
+    "PilotFeedback",
   ]) {
     assert.match(navigation, new RegExp(`\\b${route}\\b`));
     assert.match(app, new RegExp(`name=["']${route}["']`));
@@ -98,4 +99,21 @@ test("pilot admin exposes the five-stage activation command center", () => {
   assert.match(client, /launchTestingReady/);
   assert.match(helpers, /Invitation accepted/);
   assert.match(helpers, /Real care-team role available/);
+});
+
+test("pilot operations automation stays visible and evidence based", () => {
+  const admin = source("src/screens/PilotAdminScreen.tsx");
+  const client = source("src/pilot.ts");
+  const feedback = source("src/screens/PilotFeedbackScreen.tsx");
+
+  assert.match(admin, /Stalled onboarding follow-up/);
+  assert.match(admin, /scheduled reminder sweep runs every 6 hours/i);
+  assert.match(admin, /Cohort progress/);
+  assert.match(admin, /Pilot feedback triage/);
+  assert.match(admin, /Completion locked · validation required/);
+  assert.match(admin, /Withdraw \/ exit pilot/);
+  assert.match(client, /loadPilotCohortProgress/);
+  assert.match(client, /closeoutPilotParticipant/);
+  assert.match(feedback, /PILOT FEEDBACK/);
+  assert.match(feedback, /Bugs go to technical diagnostics/i);
 });
