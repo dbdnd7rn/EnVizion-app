@@ -48,6 +48,15 @@ function participant(
     activationBlockers: ["Invitation/account setup has not been completed"],
     readyForActivation: false,
     launchTestingReady: false,
+    stalled: false,
+    stalledHours: 0,
+    stageStartedAt: "2026-09-24T00:00:00Z",
+    nextAction: "Follow up on the account invitation",
+    validation: {
+      passedRuns: 0,
+      canCompletePilot: false,
+    },
+    completion: null,
     ...overrides,
   };
 }
