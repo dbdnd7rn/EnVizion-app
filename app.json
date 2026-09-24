@@ -7,10 +7,12 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.envizionlife.caregiver"
+      "bundleIdentifier": "com.envizionlife.caregiver",
+      "buildNumber": "1"
     },
     "android": {
-      "package": "com.envizionlife.caregiver"
+      "package": "com.envizionlife.caregiver",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
