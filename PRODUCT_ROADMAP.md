@@ -1,35 +1,48 @@
-# EnVizion Life product direction
+# EnVizion Life Product Roadmap
 
-## Agreed experience
+Updated: 24 September 2026.
 
-A professional caregiver companion that combines everyday care tools, an AI assistant for basic questions, and direct conversations with the EnVizion Life team. The staff inbox is the central conversation record. WhatsApp and email are additional channels. Spiritual encouragement is opt-in and defaults to off.
+## Build phase status
 
-## Implemented in this frontend increment
+The planned software foundation is substantially implemented. The remaining work is no longer ordinary feature construction; it is **real-world validation, clinical/content approval, store ownership and launch operations**.
 
-- Updated dashboard with assistant entry point and consistent sans-serif headings.
-- Chat interface with suggested questions, resource links, optional spiritual encouragement, and a persistent emergency-help entry point.
-- Scripted answers for a small set of app-navigation questions. This is explicitly a demonstration, not a language model or clinical triage system.
-- Handoff form with topic, message, preferred channel, and an optional exact transcript preview. Clinical logs and reflections are not attached.
-- Session-only team conversation and staff inbox preview. Manually entered sample staff replies appear on the caregiver side. Closed requests reject additional replies.
-- Only one request is retained in this preview. Starting a new request after closure replaces the previous request. All data clears on reload.
+### Completed product areas
 
-## Required before live AI or staff messaging
+- Secure identity, account recovery, session controls and privacy/data management.
+- Persistent care profiles with Owner/Caregiver/Viewer permissions.
+- Care-team sharing, invitations, consent-aware membership and revocation.
+- Core caregiver tracking, medication, appointments, transition-home, care summaries and printable exports.
+- Care contacts, provider directory, document vault and Care Packet.
+- Care plans, shared care tasks, family communication and provider communication logs.
+- Caregiver availability, scheduling, shifts, attendance, handoffs and continuity.
+- Recurring care requirements, Smart Coverage Planner, Open Coverage, backup escalation, weekly approval, coverage analytics, forecasting and forecast alerts.
+- Notification preferences, native push plumbing, calendar integration and reconnect/offline behavior.
+- Clinical-content admin workflow and staff support workspace.
+- Pilot administration: documents, enrollment, onboarding gates, reminders, stalled detection, activation and participant closeout.
+- Pilot launch validation: launch waves, role journeys, device QA, recovery drills and evidence-based sign-off.
+- Pilot feedback and unified Admin triage.
+- Pilot Intelligence Center and printable/PDF pilot outcome reporting.
+- Production web deployment and automated security/quality release gate.
 
-1. **Identity and storage:** caregiver accounts, staff-only authentication, server-enforced roles, conversation ownership, durable storage, audit history, consent versioning, deletion/export controls, backup and recovery. Remove the staff preview entry point from caregiver production navigation.
-2. **AI service:** choose and configure a provider through a server-owned credential, never an Expo public variable. Approve a versioned knowledge library with Dr. Tolbert. Responses should cite approved material, distinguish AI from staff, avoid diagnosis and dosing, and offer staff handoff when outside scope. Treat uploaded documents and conversation content as untrusted. Test ambiguous, urgent, adversarial, and out-of-scope questions before release. The preview's exact-match rules are not a production safety system.
-3. **Staff inbox:** authenticated assignment, unread counts, server timestamps, delivery states, multiple conversation history, reopen/resolve actions, response ownership, and interruption of automated replies while staff manage a conversation. Define actual coverage hours and urgent escalation procedures before displaying availability or response promises.
-4. **WhatsApp and email:** official business number and support mailbox are not set up yet. Configure providers, verified destinations, required channel opt-ins, server-side webhooks, signature verification, retries and duplicate prevention. Keep sensitive content out of notification previews; direct staff to the authenticated inbox. Do not mark a message delivered until the provider confirms delivery.
-5. **Privacy and clinical review:** identify launch jurisdictions and organizational obligations, approve content, data retention and provider handling, publish privacy/support terms, document incident handling, and confirm emergency wording and numbers for launch locations. No regulatory compliance claim is made by this prototype.
-6. **Release quality:** verify iOS and Android devices, small screens, keyboard behavior, large text, screen readers, reduced motion, offline/error recovery, performance, real printing, and push notification preferences. Finish account/profile management and production content administration.
+## External launch track
 
-## Suggested server contract
+These items require decisions/evidence outside the codebase:
 
-- `POST /conversations`: create an authenticated caregiver-owned conversation.
-- `POST /conversations/:id/messages`: accept a client message with an idempotency key, enforce ownership and size limits, and respond with server-issued IDs and delivery status.
-- `POST /conversations/:id/handoff`: validate consent and an explicit transcript selection; create a support case without implicitly copying health records.
-- `GET /staff/cases`: staff-only queue with authorization enforced on the server.
-- `POST /staff/cases/:id/replies`: authorized staff reply, stored once and routed to the caregiver's opted-in channel.
-- `POST /staff/cases/:id/resolve`: authorized status transition with audit history.
-- Provider webhooks update delivery state through verified, idempotent handlers.
+1. **Clinical content approval** — all content that will be represented as approved EnVizion Life guidance must be reviewed and published by the authorized clinical owner.
+2. **Participation documents** — publish final Privacy Notice, Pilot Consent and Terms of Use.
+3. **Real pilot cohort** — invite real participants and obtain real consent.
+4. **Real care access** — Owner/Caregiver/Viewer roles must be created through actual care-team workflows, not seeded for appearance.
+5. **Device/UAT evidence** — complete real iOS, Android and web testing, including small screens, text scaling, keyboard behavior, accessibility, background/resume and offline/reconnect.
+6. **Recovery evidence** — execute the defined network reconnect, session revocation, Care Packet recovery and notification fallback drills.
+7. **Launch sign-off** — use Launch Center gates and sign-off only after evidence exists.
+8. **Store ownership** — connect the correct Expo/EAS, Apple Developer and Google Play Console accounts and supply store assets/credentials.
+9. **Auth hardening** — enable leaked-password protection in Supabase Auth.
+10. **Jurisdiction/operations** — confirm launch locations, emergency wording, support coverage, retention policy and incident response.
 
-The contract above is an implementation plan, not deployed endpoints. The current code makes no AI, email, or WhatsApp requests and creates no real bookings or support notifications.
+## Later expansion, not required to close the current build
+
+Potential future commercial expansion can include multilingual content, external patient-portal/wearable integrations, deeper coach/provider portals and broader interoperability. These should be treated as post-pilot roadmap choices rather than hidden launch blockers.
+
+## Release principle
+
+No fake pilot users, fake acceptance runs, fake clinical approvals or fake launch sign-off should be created to make dashboards look complete. The application is designed so missing real evidence remains visible.
