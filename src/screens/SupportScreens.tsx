@@ -950,6 +950,13 @@ export function ProfileScreen() {
       />
 
       <Row
+        title="Pilot feedback"
+        subtitle="Report bugs, share your experience, or suggest improvements"
+        icon="chatbubble-ellipses-outline"
+        onPress={() => n.navigate("PilotFeedback")}
+      />
+
+      <Row
         title="Notification preferences"
         subtitle="Push updates, quiet hours, and alert categories"
         icon="notifications-outline"
