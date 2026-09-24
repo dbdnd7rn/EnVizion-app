@@ -561,6 +561,7 @@ function ToolGroup({
 
 export function ToolkitScreen() {
   const n = useNav();
+  const { state } = useCare();
   const [query, setQuery] = useState("");
   const [preferences, setPreferences] = useState<ToolPreferences>({
     pinned: [],
@@ -860,10 +861,41 @@ export function ToolkitScreen() {
     void togglePinnedTool(preferences, title);
   }
 
-  const personalizedItems = rankToolTitles(preferences)
+  const learnedTitles = rankToolTitles(preferences);
+  const roleSuggestions = !state.careRecipientId
+    ? ["Care team & sharing", "Daily care plan & routines", "Appointment prep"]
+    : state.accessRole === "owner"
+      ? [
+          "Needs coordination",
+          "Weekly coverage approval",
+          "Care team & sharing",
+          "Family care calendar & agenda",
+        ]
+      : state.accessRole === "caregiver"
+        ? [
+            "Today & caregiver shift board",
+            "On-shift caregiver mode",
+            "Daily care plan & routines",
+            "Family care calendar & agenda",
+          ]
+        : [
+            "Care summary",
+            "Care timeline & insights",
+            "Family communication center",
+            "Care contacts & providers",
+          ];
+
+  const forYouTitles = [...learnedTitles, ...roleSuggestions].filter(
+    (title, index, items) => items.indexOf(title) === index,
+  );
+
+  const personalizedItems = forYouTitles
     .map((title) => allItems.find((item) => item.title === title))
     .filter((item): item is ToolItem => Boolean(item))
     .slice(0, 4);
+
+  const hasLearnedPreferences =
+    preferences.pinned.length > 0 || preferences.recent.length > 0;
 
   const normalizedQuery = query.trim().toLowerCase();
   const matches = groups.flatMap((group) =>
@@ -974,13 +1006,23 @@ export function ToolkitScreen() {
                   title={
                     preferences.pinned.length
                       ? "Your shortcuts"
-                      : "Recently used"
+                      : hasLearnedPreferences
+                        ? "Pick up where you left off"
+                        : "Suggested for you"
                   }
                 />
                 <Txt style={S.small}>
                   {preferences.pinned.length
-                    ? "Pinned tools stay here. Recent tools help fill the remaining spots."
-                    : "This area learns from the tools you open most often."}
+                    ? "Pinned tools stay first. Recent activity helps fill the remaining spots."
+                    : hasLearnedPreferences
+                      ? "Recent and frequently used tools rise automatically."
+                      : state.accessRole === "owner"
+                        ? "Owner-focused shortcuts for coordination, coverage, and shared care."
+                        : state.accessRole === "caregiver"
+                          ? "Caregiver-focused shortcuts for today’s work and handoffs."
+                          : state.accessRole === "viewer"
+                            ? "Quick ways to stay informed without changing shared care records."
+                            : "Start with the tools that help organize a shared care profile."}
                 </Txt>
                 {personalizedItems.map((item) => (
                   <ToolItemRow
