@@ -142,7 +142,7 @@ export function PilotIntelligenceScreen() {
                   <View
                     style={{
                       height: 8,
-                      width: rate + "%",
+                      width: `${Math.min(100, rate)}%` as `${number}%`,
                       maxWidth: "100%",
                       backgroundColor: C.purple,
                     }}
