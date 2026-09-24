@@ -32,6 +32,41 @@ export function HomeScreen() {
   const logged = state.entries.length > 0;
   const doseRecorded = state.medicationRecords.some((record) => !record.correctedAt);
   const completed = Number(logged) + Number(doseRecorded);
+  const smartNext =
+    !state.careRecipientId
+      ? {
+          title: "Set up shared care",
+          body: "Create or join a care profile so schedules, tasks, records, and family updates stay connected.",
+          icon: "people-outline",
+          onPress: () => n.navigate("CareTeam"),
+        }
+      : !logged
+        ? {
+            title: "Start today’s check-in",
+            body: "Record the observations you already have so the rest of the care team can see today’s picture.",
+            icon: "pulse-outline",
+            onPress: () => n.navigate("Tracker", { kind: "Vitals" }),
+          }
+        : state.accessRole === "caregiver"
+          ? {
+              title: "See what needs you today",
+              body: "Open the shift board for assigned work, handoffs, overdue items, and shared responsibilities.",
+              icon: "people-outline",
+              onPress: () => n.navigate("CareShiftBoard"),
+            }
+          : state.accessRole === "owner"
+            ? {
+                title: "Review today’s coordination",
+                body: "Check conflicts, uncovered work, and follow-ups that may need an owner decision.",
+                icon: "sparkles-outline",
+                onPress: () => n.navigate("CareCoordinationInbox"),
+              }
+            : {
+                title: "Review the care summary",
+                body: "See the latest care information in one place without changing shared records.",
+                icon: "document-text-outline",
+                onPress: () => n.navigate("Summary"),
+              };
   return (
     <Page>
       <Fade>
@@ -95,6 +130,40 @@ export function HomeScreen() {
               : "Your care tools and support, together."}
           </Txt>
         </View>
+
+        <Card
+          onPress={() => smartNext.onPress()}
+          label={smartNext.title}
+          style={{
+            backgroundColor: "#F6F0F8",
+            borderColor: "#E2D7E8",
+            padding: 18,
+            gap: 12,
+          }}
+        >
+          <View style={S.between}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 14,
+                  backgroundColor: C.white,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name={smartNext.icon} size={21} />
+              </View>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={S.eyebrow}>SMART NEXT STEP</Text>
+                <Text style={S.h3}>{smartNext.title}</Text>
+              </View>
+            </View>
+            <Icon name="arrow-forward" size={18} />
+          </View>
+          <Txt>{smartNext.body}</Txt>
+        </Card>
 
         <FamilyCareDashboard
           careRecipientId={state.careRecipientId}
@@ -192,129 +261,43 @@ export function HomeScreen() {
         </Card>
         <View style={{ gap: 12 }}>
           <Section
-            title="Daily care shortcuts"
-            action="My toolkit"
+            title="Quick actions"
+            action="All tools"
             onPress={() => n.navigate("Main", { screen: "Toolkit" })}
-          />
-          <Row
-            title="Open today’s care plan"
-            subtitle="See recurring routines and what remains today"
-            icon="list-outline"
-            onPress={() => n.navigate("CarePlan")}
           />
           <View style={{ flexDirection: "row", gap: 12 }}>
             <QuickCard
-              title="Record health"
-              subtitle={logged ? "Check-in recorded" : "A moment to check in"}
+              title="Care plan"
+              subtitle="See what matters today"
+              icon="list-outline"
+              onPress={() => n.navigate("CarePlan")}
+            />
+            <QuickCard
+              title="Check-in"
+              subtitle={logged ? "Add another record" : "Record health"}
               icon="pulse-outline"
               onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
             />
+          </View>
+          <View style={{ flexDirection: "row", gap: 12 }}>
             <QuickCard
               title="Medications"
-              subtitle={
-                doseRecorded
-                  ? "Dose record added"
-                  : "Keep a simple record"
-              }
+              subtitle={doseRecorded ? "Record updated" : "Open medication log"}
               icon="medical-outline"
               onPress={() => n.navigate("Medications")}
             />
+            <QuickCard
+              title="Calendar"
+              subtitle="Visits, tasks & shifts"
+              icon="calendar-outline"
+              onPress={() => n.navigate("CareCalendar")}
+            />
           </View>
           <Row
-            title="Care summary"
-            subtitle="Bring your care records together"
-            icon="document-text-outline"
-            onPress={() => n.navigate("Summary")}
-          />
-          <Row
-            title="Care timeline & insights"
-            subtitle="Visual trends, activity, and preparation progress"
-            icon="analytics-outline"
-            onPress={() => n.navigate("Insights")}
-          />
-          <Row
-            title="Today & caregiver shift board"
-            subtitle="See who owns today’s work, overdue tasks, and handoffs"
-            icon="people-outline"
-            onPress={() => n.navigate("CareShiftBoard")}
-          />
-          <Row
-            title="On-shift caregiver mode"
-            subtitle="Focused workspace after you accept a caregiver takeover"
-            icon="pulse-outline"
-            onPress={() => n.navigate("OnShiftCaregiver")}
-          />
-          <Row
-            title="Live care team & continuity"
-            subtitle="Who has care now, who is next, coverage gaps, and shift history"
-            icon="git-compare-outline"
-            onPress={() => n.navigate("CareContinuity")}
-          />
-          <Row
-            title="Open caregiver coverage"
-            subtitle="Publish uncovered time or claim a family coverage request"
-            icon="megaphone-outline"
-            onPress={() => n.navigate("CareCoverageRequests")}
-          />
-          <Row
-            title="Care coordination analytics"
-            subtitle="See this week’s caregiver workload and coverage picture"
-            icon="bar-chart-outline"
-            onPress={() => n.navigate("CareAnalytics")}
-          />
-          <Row
-            title="Needs coordination"
-            subtitle="Catch scheduling conflicts, uncovered tasks, and care-plan collisions"
-            icon="warning-outline"
-            onPress={() => n.navigate("CareCoordinationInbox")}
-          />
-          <Row
-            title="Care tasks & shared care plan"
-            subtitle="Assign responsibilities, due dates, and follow-ups"
-            icon="checkbox-outline"
-            onPress={() => n.navigate("CareTasks")}
-          />
-          <Row
-            title="Family care calendar & agenda"
-            subtitle="Appointments, shifts, tasks, reminders, follow-ups, and handoffs"
-            icon="notifications-outline"
-            onPress={() => n.navigate("CareCalendar")}
-          />
-          <Row
-            title="Care Document Vault"
-            subtitle="Keep important care papers private and close"
-            icon="folder-open-outline"
-            onPress={() => n.navigate("CareDocuments")}
-          />
-          <Row
-            title="Care contacts & providers"
-            subtitle="Doctors, specialists, pharmacy, insurance, and care services"
-            icon="call-outline"
-            onPress={() => n.navigate("CareContacts")}
-          />
-          <Row
-            title="Family communication"
-            subtitle="Share care-team updates and track acknowledgements"
-            icon="chatbubbles-outline"
-            onPress={() => n.navigate("FamilyCommunication")}
-          />
-          <Row
-            title="Provider & insurance communication"
-            subtitle="Track calls, portal messages, outcomes, and follow-ups"
-            icon="document-text-outline"
-            onPress={() => n.navigate("CareCommunicationLog")}
-          />
-          <Row
-            title="Care packet & printable summary"
-            subtitle="Build visit, handoff, or emergency information PDFs"
-            icon="reader-outline"
-            onPress={() => n.navigate("CarePacket")}
-          />
-          <Row
-            title="Prepare for your next visit"
-            subtitle={`${state.appointment.title}${state.appointment.date ? ` · ${state.appointment.date}` : ""} · ${state.questions.length} questions`}
-            icon="calendar-outline"
-            onPress={() => n.navigate("Appointments")}
+            title="Find any care tool"
+            subtitle="Search the full toolkit by what you need to do"
+            icon="search-outline"
+            onPress={() => n.navigate("Main", { screen: "Toolkit" })}
           />
         </View>
         <Safety onPress={() => n.navigate("Emergency")} />
@@ -388,231 +371,478 @@ function QuickCard({
     </Card>
   );
 }
+type ToolItem = {
+  title: string;
+  subtitle: string;
+  icon: string;
+  keywords?: string;
+  onPress: () => void;
+};
+
+function ToolGroup({
+  title,
+  subtitle,
+  icon,
+  items,
+  defaultOpen = false,
+}: {
+  title: string;
+  subtitle: string;
+  icon: string;
+  items: ToolItem[];
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <View style={{ gap: 10 }}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityLabel={`${title}. ${subtitle}`}
+        onPress={() => setOpen((value) => !value)}
+        style={({ pressed }) => [
+          S.card,
+          {
+            padding: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 14,
+            backgroundColor: open ? "#F7F1F9" : C.white,
+            opacity: pressed ? 0.8 : 1,
+          },
+        ]}
+      >
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 14,
+            backgroundColor: C.lavender,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name={icon} />
+        </View>
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={S.h3}>{title}</Text>
+          <Text style={S.small}>{subtitle}</Text>
+        </View>
+        <View
+          style={{
+            minWidth: 28,
+            height: 28,
+            borderRadius: 14,
+            backgroundColor: C.white,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name={open ? "chevron-up" : "chevron-down"} size={17} />
+        </View>
+      </Pressable>
+
+      {open && (
+        <Fade>
+          <View style={{ gap: 10, paddingLeft: 6 }}>
+            {items.map((item) => (
+              <Row
+                key={item.title}
+                title={item.title}
+                subtitle={item.subtitle}
+                icon={item.icon}
+                onPress={item.onPress}
+              />
+            ))}
+          </View>
+        </Fade>
+      )}
+    </View>
+  );
+}
+
 export function ToolkitScreen() {
   const n = useNav();
+  const [query, setQuery] = useState("");
+
+  const groups: Array<{
+    title: string;
+    subtitle: string;
+    icon: string;
+    items: ToolItem[];
+  }> = [
+    {
+      title: "Daily care",
+      subtitle: "Check-ins, observations, summaries, and trends",
+      icon: "pulse-outline",
+      items: [
+        {
+          title: "Vitals",
+          subtitle: "Blood pressure, pulse, and temperature",
+          icon: "pulse-outline",
+          keywords: "health check in blood pressure temperature",
+          onPress: () => n.navigate("Tracker", { kind: "Vitals" }),
+        },
+        {
+          title: "Blood sugar",
+          subtitle: "Record a reading and its context",
+          icon: "water-outline",
+          keywords: "glucose diabetes health check in",
+          onPress: () => n.navigate("Tracker", { kind: "Blood sugar" }),
+        },
+        {
+          title: "CHF symptoms",
+          subtitle: "Weight, breathing, and swelling",
+          icon: "heart-outline",
+          keywords: "heart failure breathing swelling weight",
+          onPress: () => n.navigate("Tracker", { kind: "CHF symptoms" }),
+        },
+        {
+          title: "Behavior & delirium monitoring",
+          subtitle: "Notice changes from their usual self",
+          icon: "flower-outline",
+          keywords: "memory behavior confusion delirium",
+          onPress: () => n.navigate("Tracker", { kind: "Behavior & memory" }),
+        },
+        {
+          title: "Red-flag symptoms",
+          subtitle: "Keep a record after seeking help",
+          icon: "flag-outline",
+          keywords: "warning red flag symptoms urgent",
+          onPress: () => n.navigate("Tracker", { kind: "Red-flag symptoms" }),
+        },
+        {
+          title: "Care summary",
+          subtitle: "Observations, medicines, and visit questions",
+          icon: "document-text-outline",
+          keywords: "summary overview records",
+          onPress: () => n.navigate("Summary"),
+        },
+        {
+          title: "Care timeline & insights",
+          subtitle: "Visual trends and recent care activity",
+          icon: "analytics-outline",
+          keywords: "timeline trends charts insights history",
+          onPress: () => n.navigate("Insights"),
+        },
+      ],
+    },
+    {
+      title: "Plan & prepare",
+      subtitle: "Routines, medicines, appointments, documents, and transitions",
+      icon: "calendar-outline",
+      items: [
+        {
+          title: "Daily care plan & routines",
+          subtitle: "Meals, medications, mobility, hygiene, monitoring, and everyday care",
+          icon: "list-outline",
+          keywords: "routine daily plan meals mobility hygiene",
+          onPress: () => n.navigate("CarePlan"),
+        },
+        {
+          title: "Medication management",
+          subtitle: "Medication list, PRN records, refills, and reconciliation",
+          icon: "medical-outline",
+          keywords: "medicine medication refill prn dose",
+          onPress: () => n.navigate("Medications"),
+        },
+        {
+          title: "Appointment prep",
+          subtitle: "Bring your questions and observations",
+          icon: "calendar-outline",
+          keywords: "visit doctor appointment questions",
+          onPress: () => n.navigate("Appointments"),
+        },
+        {
+          title: "Care Document Vault",
+          subtitle: "Private discharge papers, care plans, insurance files, and more",
+          icon: "folder-open-outline",
+          keywords: "documents files discharge insurance papers",
+          onPress: () => n.navigate("CareDocuments"),
+        },
+        {
+          title: "Care contacts & providers",
+          subtitle: "Keep the people and organizations around this care profile together",
+          icon: "call-outline",
+          keywords: "doctor provider pharmacy insurance phone contacts",
+          onPress: () => n.navigate("CareContacts"),
+        },
+        {
+          title: "Care packet & printable summary",
+          subtitle: "Build privacy-controlled visit, handoff, and emergency PDFs",
+          icon: "reader-outline",
+          keywords: "packet pdf print summary handoff",
+          onPress: () => n.navigate("CarePacket"),
+        },
+        {
+          title: "Hospital-to-home transition",
+          subtitle: "Discharge plan, equipment, warning signs, and follow-ups",
+          icon: "home-outline",
+          keywords: "hospital home discharge transition",
+          onPress: () => n.navigate("Transition"),
+        },
+        {
+          title: "Emergency Information Center",
+          subtitle: "Quick contacts, key records, medication reconciliation, and preparedness",
+          icon: "alert-circle-outline",
+          keywords: "emergency urgent warning safety",
+          onPress: () => n.navigate("Emergency"),
+        },
+      ],
+    },
+    {
+      title: "Care team & coordination",
+      subtitle: "People, schedules, tasks, coverage, communication, and handoffs",
+      icon: "people-outline",
+      items: [
+        {
+          title: "Care team & sharing",
+          subtitle: "Invite family, switch care profiles, and manage access",
+          icon: "people-outline",
+          keywords: "family invite access roles team share",
+          onPress: () => n.navigate("CareTeam"),
+        },
+        {
+          title: "Today & caregiver shift board",
+          subtitle: "Coverage, due work, reassignment, and shift handoffs",
+          icon: "people-outline",
+          keywords: "today shift board handoff caregiver",
+          onPress: () => n.navigate("CareShiftBoard"),
+        },
+        {
+          title: "On-shift caregiver mode",
+          subtitle: "My work, shared work, notes, care context, and shift closeout",
+          icon: "pulse-outline",
+          keywords: "shift caregiver work takeover closeout",
+          onPress: () => n.navigate("OnShiftCaregiver"),
+        },
+        {
+          title: "Live care team & continuity",
+          subtitle: "Current caregiver, next shift, coverage bridge, and handoff history",
+          icon: "git-compare-outline",
+          keywords: "continuity current caregiver handoff next shift",
+          onPress: () => n.navigate("CareContinuity"),
+        },
+        {
+          title: "Recurring care coverage",
+          subtitle: "Define repeatable times when caregiver coverage is required",
+          icon: "time-outline",
+          keywords: "recurring coverage requirement schedule",
+          onPress: () => n.navigate("CareCoverageRequirements"),
+        },
+        {
+          title: "Weekly coverage approval",
+          subtitle: "Review the week, publish assignments, and track caregiver responses",
+          icon: "checkmark-done-outline",
+          keywords: "weekly approval publish assignment response deadline",
+          onPress: () => n.navigate("WeeklyCoveragePlan"),
+        },
+        {
+          title: "Smart Coverage Planner",
+          subtitle: "Scan the next 7 days, match caregivers, and review coverage suggestions",
+          icon: "sparkles-outline",
+          keywords: "smart planner match caregiver suggestions coverage",
+          onPress: () => n.navigate("SmartCoveragePlanner"),
+        },
+        {
+          title: "Open caregiver coverage",
+          subtitle: "Request help for an uncovered window or claim available coverage",
+          icon: "megaphone-outline",
+          keywords: "open coverage uncovered request claim backup",
+          onPress: () => n.navigate("CareCoverageRequests"),
+        },
+        {
+          title: "Caregiver availability & schedule",
+          subtitle: "Plan shifts, check-ins, attendance, swaps, and uncovered responsibilities",
+          icon: "calendar-outline",
+          keywords: "availability schedule shifts swap attendance",
+          onPress: () => n.navigate("CareSchedule"),
+        },
+        {
+          title: "Care coordination analytics",
+          subtitle: "Weekly workload, attendance, tasks, and coverage trends",
+          icon: "bar-chart-outline",
+          keywords: "analytics workload coverage attendance trends",
+          onPress: () => n.navigate("CareAnalytics"),
+        },
+        {
+          title: "Needs coordination",
+          subtitle: "Overlaps, uncovered work, appointment clashes, and long care days",
+          icon: "warning-outline",
+          keywords: "conflicts inbox coordination overlap uncovered",
+          onPress: () => n.navigate("CareCoordinationInbox"),
+        },
+        {
+          title: "Care tasks & shared care plan",
+          subtitle: "Assign responsibilities and track what the care team completes",
+          icon: "checkbox-outline",
+          keywords: "tasks assign responsibilities follow up",
+          onPress: () => n.navigate("CareTasks"),
+        },
+        {
+          title: "Family care calendar & agenda",
+          subtitle: "One day and week view across the shared care plan",
+          icon: "notifications-outline",
+          keywords: "calendar agenda day week reminder",
+          onPress: () => n.navigate("CareCalendar"),
+        },
+        {
+          title: "Family communication center",
+          subtitle: "Share family care updates and track acknowledgements",
+          icon: "chatbubbles-outline",
+          keywords: "family communication updates acknowledgement",
+          onPress: () => n.navigate("FamilyCommunication"),
+        },
+        {
+          title: "Provider & insurance communication",
+          subtitle: "Calls, portal messages, decisions, and follow-ups",
+          icon: "document-text-outline",
+          keywords: "provider insurance calls messages portal follow up",
+          onPress: () => n.navigate("CareCommunicationLog"),
+        },
+      ],
+    },
+    {
+      title: "Understand & advocate",
+      subtitle: "Healthcare navigation and clinically governed guidance",
+      icon: "shield-checkmark-outline",
+      items: [
+        {
+          title: "Healthcare navigation",
+          subtitle: "Understand each specialist’s role",
+          icon: "compass-outline",
+          keywords: "specialists healthcare navigation doctors",
+          onPress: () => n.navigate("Specialists"),
+        },
+        {
+          title: "Patient rights",
+          subtitle: "Available after EnVizion clinical publication",
+          icon: "shield-checkmark-outline",
+          keywords: "rights advocacy patient",
+          onPress: () => n.navigate("Guide", { id: "rights" }),
+        },
+        {
+          title: "Advance directive starter",
+          subtitle: "Available after EnVizion clinical publication",
+          icon: "chatbubbles-outline",
+          keywords: "advance directive wishes planning advocate",
+          onPress: () => n.navigate("Guide", { id: "advance" }),
+        },
+      ],
+    },
+  ];
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const matches = groups.flatMap((group) =>
+    group.items.filter((item) =>
+      `${item.title} ${item.subtitle} ${item.keywords || ""}`
+        .toLowerCase()
+        .includes(normalizedQuery),
+    ),
+  );
+
   return (
     <Page>
-      <Heading
-        eyebrow="ORGANIZE WITH CONFIDENCE"
-        title="Your caregiver toolkit"
-        body="A little structure for the things that matter most."
-      />
-      <Safety onPress={() => n.navigate("Emergency")} />
-      <Row
-        title="Care team & sharing"
-        subtitle="Invite family, switch care profiles, and manage access"
-        icon="people-outline"
-        onPress={() => n.navigate("CareTeam")}
-      />
-      <Section title="Daily care" />
-      <View style={{ gap: 10 }}>
-        {(
-          [
-            "Vitals",
-            "Blood sugar",
-            "CHF symptoms",
-            "Behavior & memory",
-            "Red-flag symptoms",
-          ] as const
-        ).map((kind, i) => (
-          <Row
-            key={kind}
-            title={
-              kind === "Behavior & memory"
-                ? "Behavior & delirium monitoring"
-                : kind
-            }
-            subtitle={
-              [
-                "Blood pressure, pulse, and temperature",
-                "Record a reading and its context",
-                "Weight, breathing, and swelling",
-                "Notice changes from their usual self",
-                "Keep a record after seeking help",
-              ][i]
-            }
-            icon={
-              [
-                "pulse-outline",
-                "water-outline",
-                "heart-outline",
-                "flower-outline",
-                "flag-outline",
-              ][i]
-            }
-            onPress={() => n.navigate("Tracker", { kind })}
+      <Fade>
+        <Heading
+          eyebrow="FIND WHAT YOU NEED"
+          title="Care tools, without the clutter"
+          body="Search by what you want to do, or open a category. Every existing care feature is still here."
+        />
+
+        <View style={[S.input, S.row]}>
+          <Icon name="search-outline" size={20} />
+          <TextInput
+            accessibilityLabel="Search care tools"
+            placeholder="Try “medication”, “coverage”, “documents”…"
+            placeholderTextColor="#AAA0AF"
+            value={query}
+            onChangeText={setQuery}
+            style={{
+              flex: 1,
+              fontFamily: "DMSans_400Regular",
+              fontSize: 14,
+              color: C.ink,
+            }}
           />
-        ))}
-      </View>
-      <Row
-        title="Care summary"
-        subtitle="Observations, medicines, and visit questions"
-        icon="document-text-outline"
-        onPress={() => n.navigate("Summary")}
-      />
-      <Row
-        title="Care timeline & insights"
-        subtitle="Visual trends and recent care activity"
-        icon="analytics-outline"
-        onPress={() => n.navigate("Insights")}
-      />
-      <Section title="Plan & prepare" />
-      <View style={{ gap: 10 }}>
-        <Row
-          title="Daily care plan & routines"
-          subtitle="Meals, medications, mobility, hygiene, monitoring, and everyday care"
-          icon="list-outline"
-          onPress={() => n.navigate("CarePlan")}
-        />
-        <Row
-          title="Medication management"
-          subtitle="Medication list, PRN records, refills, and reconciliation"
-          icon="medical-outline"
-          onPress={() => n.navigate("Medications")}
-        />
-        <Row
-          title="Appointment prep"
-          subtitle="Bring your questions and observations"
-          icon="calendar-outline"
-          onPress={() => n.navigate("Appointments")}
-        />
-        <Row
-          title="Today & caregiver shift board"
-          subtitle="Coverage, due work, reassignment, and shift handoffs"
-          icon="people-outline"
-          onPress={() => n.navigate("CareShiftBoard")}
-        />
-        <Row
-          title="On-shift caregiver mode"
-          subtitle="My work, shared work, notes, care context, and shift closeout"
-          icon="pulse-outline"
-          onPress={() => n.navigate("OnShiftCaregiver")}
-        />
-        <Row
-          title="Live care team & continuity"
-          subtitle="Current caregiver, next shift, coverage bridge, and handoff history"
-          icon="git-compare-outline"
-          onPress={() => n.navigate("CareContinuity")}
-        />
-        <Row
-          title="Recurring care coverage"
-          subtitle="Define repeatable times when caregiver coverage is actually required"
-          icon="time-outline"
-          onPress={() => n.navigate("CareCoverageRequirements")}
-        />
-        <Row
-          title="Weekly coverage approval"
-          subtitle="Review the whole week, publish assignments, and track caregiver responses"
-          icon="checkmark-done-outline"
-          onPress={() => n.navigate("WeeklyCoveragePlan")}
-        />
-        <Row
-          title="Smart Coverage Planner"
-          subtitle="Scan the next 7 days, match caregivers, and review coverage suggestions"
-          icon="sparkles-outline"
-          onPress={() => n.navigate("SmartCoveragePlanner")}
-        />
-        <Row
-          title="Open caregiver coverage"
-          subtitle="Request help for an uncovered window or claim available coverage"
-          icon="megaphone-outline"
-          onPress={() => n.navigate("CareCoverageRequests")}
-        />
-        <Row
-          title="Caregiver availability & schedule"
-          subtitle="Plan shifts, check-ins, attendance, swaps, and uncovered responsibilities"
-          icon="calendar-outline"
-          onPress={() => n.navigate("CareSchedule")}
-        />
-        <Row
-          title="Care coordination analytics"
-          subtitle="Weekly workload, attendance, tasks, and coverage trends"
-          icon="bar-chart-outline"
-          onPress={() => n.navigate("CareAnalytics")}
-        />
-        <Row
-          title="Needs coordination"
-          subtitle="Overlaps, uncovered work, appointment clashes, and long care days"
-          icon="warning-outline"
-          onPress={() => n.navigate("CareCoordinationInbox")}
-        />
-        <Row
-          title="Care tasks & shared care plan"
-          subtitle="Assign responsibilities and track what the care team completes"
-          icon="checkbox-outline"
-          onPress={() => n.navigate("CareTasks")}
-        />
-        <Row
-          title="Family care calendar & agenda"
-          subtitle="One day and week view across the shared care plan"
-          icon="notifications-outline"
-          onPress={() => n.navigate("CareCalendar")}
-        />
-        <Row
-          title="Care Document Vault"
-          subtitle="Private discharge papers, care plans, insurance files, and more"
-          icon="folder-open-outline"
-          onPress={() => n.navigate("CareDocuments")}
-        />
-        <Row
-          title="Care contacts & providers"
-          subtitle="Keep the people and organizations around this care profile together"
-          icon="call-outline"
-          onPress={() => n.navigate("CareContacts")}
-        />
-        <Row
-          title="Family communication center"
-          subtitle="Share family care updates and track acknowledgements"
-          icon="chatbubbles-outline"
-          onPress={() => n.navigate("FamilyCommunication")}
-        />
-        <Row
-          title="Provider & insurance communication"
-          subtitle="Calls, portal messages, hospital updates, decisions, and follow-ups"
-          icon="document-text-outline"
-          onPress={() => n.navigate("CareCommunicationLog")}
-        />
-        <Row
-          title="Care packet & printable summary"
-          subtitle="Build privacy-controlled visit, handoff, and emergency PDFs"
-          icon="reader-outline"
-          onPress={() => n.navigate("CarePacket")}
-        />
-        <Row
-          title="Emergency Information Center"
-          subtitle="Quick contacts, key records, medication reconciliation, and preparedness"
-          icon="alert-circle-outline"
-          onPress={() => n.navigate("Emergency")}
-        />
-        <Row
-          title="Hospital-to-home transition"
-          subtitle="Discharge plan, equipment, warning signs, and follow-ups"
-          icon="home-outline"
-          onPress={() => n.navigate("Transition")}
-        />
-        <Row
-          title="Healthcare navigation"
-          subtitle="Understand each specialist’s role"
-          icon="compass-outline"
-          onPress={() => n.navigate("Specialists")}
-        />
-      </View>
-      <Section title="Understand & advocate" />
-      <Row
-        title="Patient rights"
-        subtitle="Available after EnVizion clinical publication"
-        icon="shield-checkmark-outline"
-        onPress={() => n.navigate("Guide", { id: "rights" })}
-      />
-      <Row
-        title="Advance directive starter"
-        subtitle="Available after EnVizion clinical publication"
-        icon="chatbubbles-outline"
-        onPress={() => n.navigate("Guide", { id: "advance" })}
-      />
+          {Boolean(query) && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Clear tool search"
+              onPress={() => setQuery("")}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 17,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="close" size={18} color={C.muted} />
+            </Pressable>
+          )}
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <QuickCard
+            title="Today"
+            subtitle="Tasks & handoffs"
+            icon="checkbox-outline"
+            onPress={() => n.navigate("CareShiftBoard")}
+          />
+          <QuickCard
+            title="Calendar"
+            subtitle="Visits & shifts"
+            icon="calendar-outline"
+            onPress={() => n.navigate("CareCalendar")}
+          />
+        </View>
+
+        <Safety onPress={() => n.navigate("Emergency")} />
+
+        {normalizedQuery ? (
+          <View style={{ gap: 10 }}>
+            <Section title={`${matches.length} matching ${matches.length === 1 ? "tool" : "tools"}`} />
+            {matches.map((item) => (
+              <Row
+                key={item.title}
+                title={item.title}
+                subtitle={item.subtitle}
+                icon={item.icon}
+                onPress={item.onPress}
+              />
+            ))}
+            {!matches.length && (
+              <Card>
+                <Icon name="search-outline" />
+                <Text style={S.h3}>No tool matched that search.</Text>
+                <Txt>
+                  Try a task word such as medication, documents, coverage,
+                  calendar, family, appointment, or emergency.
+                </Txt>
+              </Card>
+            )}
+          </View>
+        ) : (
+          <View style={{ gap: 12 }}>
+            {groups.map((group, index) => (
+              <ToolGroup
+                key={group.title}
+                title={group.title}
+                subtitle={group.subtitle}
+                icon={group.icon}
+                items={group.items}
+                defaultOpen={index === 0}
+              />
+            ))}
+          </View>
+        )}
+      </Fade>
     </Page>
   );
 }
+
 export function LibraryScreen() {
   const n = useNav();
   const { state } = useCare();
