@@ -123,6 +123,7 @@ test("pilot operations automation stays visible and evidence based", () => {
 test("pilot intelligence closes the operational reporting loop", () => {
   const screen = source("src/screens/PilotIntelligenceScreen.tsx");
   const client = source("src/pilotIntelligence.ts");
+  const helpers = source("src/pilotIntelligenceHelpers.ts");
   const admin = source("src/screens/PilotAdminScreen.tsx");
 
   assert.match(screen, /PILOT METRICS & LAUNCH INTELLIGENCE/);
@@ -131,6 +132,6 @@ test("pilot intelligence closes the operational reporting loop", () => {
   assert.match(screen, /Launch-wave comparison/);
   assert.match(screen, /Generate pilot outcome report/);
   assert.match(client, /action: "intelligence"/);
-  assert.match(client, /operational pilot evidence only/i);
+  assert.match(helpers, /operational pilot evidence only/i);
   assert.match(admin, /Open Pilot Intelligence/);
 });
