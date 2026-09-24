@@ -74,6 +74,21 @@ export type PilotParticipant = {
   activationBlockers: string[];
   readyForActivation: boolean;
   launchTestingReady: boolean;
+  stalled: boolean;
+  stalledHours: number;
+  stageStartedAt: string | null;
+  nextAction: string;
+  validation: {
+    passedRuns: number;
+    canCompletePilot: boolean;
+  };
+  completion: {
+    id: string;
+    outcome: "completed" | "withdrawn";
+    passedValidationRuns: number;
+    note: string;
+    createdAt: string;
+  } | null;
 };
 
 export type PilotSummary = {
@@ -90,6 +105,37 @@ export type PilotSummary = {
   readyForActivation: number;
   activeLaunchReady: number;
   onboardingBlocked: number;
+  stalledParticipants: number;
+};
+
+export type PilotCohortProgress = {
+  cohort: string;
+  total: number;
+  invited: number;
+  active: number;
+  paused: number;
+  exited: number;
+  readyForActivation: number;
+  launchReady: number;
+  stalled: number;
+  consentComplete: number;
+  passedValidation: number;
+  completed: number;
+};
+
+export type PilotFeedbackItem = {
+  id: string;
+  source: "support" | "diagnostic";
+  userId: string;
+  displayName: string;
+  category: string;
+  summary: string;
+  detail: string;
+  status: string;
+  platform: string;
+  appVersion: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type PilotAdminAudit = {
@@ -251,6 +297,16 @@ export async function loadPilotSummary(): Promise<PilotSummary> {
   return result.summary;
 }
 
+export async function loadPilotCohortProgress(): Promise<PilotCohortProgress[]> {
+  const result = await invokePilotAdmin<{
+    summary: PilotSummary;
+    cohorts: PilotCohortProgress[];
+  }>({
+    action: "summary",
+  });
+  return result.cohorts ?? [];
+}
+
 export async function loadPilotParticipants(): Promise<PilotParticipant[]> {
   const result = await invokePilotAdmin<{ participants: PilotParticipant[] }>({
     action: "list_participants",
@@ -285,6 +341,39 @@ export async function updatePilotParticipant(input: {
     userId: input.userId,
     status: input.status,
     cohort: input.cohort,
+  });
+}
+
+export async function loadPilotFeedback(): Promise<PilotFeedbackItem[]> {
+  const result = await invokePilotAdmin<{ feedback: PilotFeedbackItem[] }>({
+    action: "list_pilot_feedback",
+  });
+  return result.feedback ?? [];
+}
+
+export async function updatePilotFeedback(input: {
+  feedbackId: string;
+  source: "support" | "diagnostic";
+  status: string;
+}) {
+  await invokePilotAdmin({
+    action: "update_pilot_feedback",
+    feedbackId: input.feedbackId,
+    source: input.source,
+    status: input.status,
+  });
+}
+
+export async function closeoutPilotParticipant(input: {
+  userId: string;
+  outcome: "completed" | "withdrawn";
+  note?: string;
+}) {
+  await invokePilotAdmin({
+    action: "closeout_participant",
+    userId: input.userId,
+    outcome: input.outcome,
+    note: input.note ?? "",
   });
 }
 
