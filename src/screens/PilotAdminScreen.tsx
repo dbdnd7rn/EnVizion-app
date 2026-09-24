@@ -22,6 +22,11 @@ import {
 } from "../pilot";
 import { getStaffMembership } from "../staff";
 import { launchReadiness } from "../launchReadiness";
+import {
+  pilotOnboardingProgress,
+  pilotOnboardingStageLabel,
+  pilotOnboardingSteps,
+} from "../pilotOnboardingHelpers";
 import { useNav } from "./MainScreens";
 import {
   Button,
@@ -158,6 +163,17 @@ export function PilotAdminScreen() {
     [documents],
   );
 
+  const readyToActivate = useMemo(
+    () =>
+      participants.filter(
+        (participant) =>
+          participant.status !== "active" &&
+          participant.status !== "exited" &&
+          participant.readyForActivation,
+      ),
+    [participants],
+  );
+
   const readiness = useMemo(
     () =>
       launchReadiness({
@@ -253,6 +269,24 @@ export function PilotAdminScreen() {
                 label="current published documents"
               />
               <Metric value={summary.careProfiles} label="care profiles" />
+            </View>
+          </Card>
+
+          <Card style={{ backgroundColor: "#FFF9F2" }}>
+            <Text style={S.eyebrow}>ONBOARDING COMMAND CENTER</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+              <Metric
+                value={summary.readyForActivation}
+                label="ready for activation"
+              />
+              <Metric
+                value={summary.activeLaunchReady}
+                label="active + launch ready"
+              />
+              <Metric
+                value={summary.onboardingBlocked}
+                label="onboarding blocked"
+              />
             </View>
           </Card>
 
@@ -482,102 +516,264 @@ export function PilotAdminScreen() {
         </Txt>
       </Card>
 
+      <Section title="Activation command center" />
+      {!readyToActivate.length ? (
+        <Card style={{ backgroundColor: C.lavender }}>
+          <Icon name="lock-closed-outline" size={26} />
+          <Text style={S.h3}>No participant is ready for activation yet.</Text>
+          <Txt style={S.small}>
+            Activation unlocks automatically after invitation acceptance,
+            first sign-in, all current participation documents, and a real
+            Owner/Caregiver/Viewer care-profile role are complete.
+          </Txt>
+        </Card>
+      ) : (
+        readyToActivate.map((participant) => (
+          <Card
+            key={"ready-" + participant.userId}
+            style={{ backgroundColor: "#E8F1ED" }}
+          >
+            <View style={S.between}>
+              <View style={{ flex: 1 }}>
+                <Text style={S.eyebrow}>READY FOR ACTIVATION</Text>
+                <Text style={S.h3}>{participant.displayName}</Text>
+                <Txt style={S.small}>
+                  {participant.cohort || "No cohort"} · all prerequisites complete
+                </Txt>
+              </View>
+              <Icon
+                name="checkmark-circle-outline"
+                color={C.green}
+                size={28}
+              />
+            </View>
+            <Button
+              title={
+                busy === `participant-${participant.userId}`
+                  ? "Activating…"
+                  : "Activate for pilot testing"
+              }
+              icon="play-circle-outline"
+              disabled={busy !== null}
+              onPress={() =>
+                void run(
+                  `participant-${participant.userId}`,
+                  () =>
+                    updatePilotParticipant({
+                      userId: participant.userId,
+                      status: "active",
+                      cohort: participant.cohort,
+                    }),
+                  "Participant activated and ready for pilot launch validation.",
+                )
+              }
+            />
+          </Card>
+        ))
+      )}
+
       <Section title="Pilot participants" />
       {!participants.length ? (
         <Card>
           <Txt>No pilot participants have been enrolled yet.</Txt>
         </Card>
       ) : (
-        participants.map((participant) => (
-          <Card key={participant.userId}>
-            <View style={S.between}>
-              <View style={{ flex: 1 }}>
-                <Text style={S.h3}>{participant.displayName}</Text>
-                <Txt style={S.small}>{participant.email}</Txt>
-              </View>
-              <StatusPill status={participant.status} />
-            </View>
+        participants.map((participant) => {
+          const progress = pilotOnboardingProgress(participant);
+          const steps = pilotOnboardingSteps(participant);
+          const stageLabel = pilotOnboardingStageLabel(
+            participant.onboardingStage,
+          );
 
-            <Txt>
-              {participant.cohort || "No cohort"} · {participant.careProfileCount}{" "}
-              care {participant.careProfileCount === 1 ? "profile" : "profiles"}
-            </Txt>
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              <Icon
-                name={
-                  participant.consentComplete
-                    ? "checkmark-circle-outline"
-                    : "time-outline"
-                }
-                color={participant.consentComplete ? C.green : C.purple}
-                size={18}
-              />
-              <Txt style={S.small}>
-                {participant.consentComplete
-                  ? "Current on required published documents"
-                  : "Required document acceptance incomplete"}
-              </Txt>
-            </View>
-
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-              {(["active", "paused", "exited"] as const).map((status) => (
-                <Pressable
-                  key={status}
-                  accessibilityRole="button"
-                  accessibilityState={{
-                    selected: participant.status === status,
-                    disabled: busy !== null,
-                  }}
-                  disabled={busy !== null || participant.status === status}
-                  onPress={() =>
-                    void run(
-                      `participant-${participant.userId}`,
-                      () =>
-                        updatePilotParticipant({
-                          userId: participant.userId,
-                          status,
-                          cohort: participant.cohort,
-                        }),
-                      `Participant moved to ${statusLabels[status].toLowerCase()}.`,
-                    )
-                  }
+          return (
+            <Card key={participant.userId}>
+              <View style={S.between}>
+                <View style={{ flex: 1 }}>
+                  <Text style={S.h3}>{participant.displayName}</Text>
+                  <Txt style={S.small}>{participant.email}</Txt>
+                  <Txt style={S.small}>
+                    {participant.cohort || "No cohort"} · {progress.complete}/
+                    {progress.total} onboarding stages complete
+                  </Txt>
+                </View>
+                <View
                   style={[
                     S.pill,
                     {
-                      minHeight: 42,
-                      justifyContent: "center",
-                      paddingHorizontal: 13,
-                      opacity:
-                        busy !== null || participant.status === status ? 0.6 : 1,
-                      backgroundColor:
-                        participant.status === status ? C.purple : C.lavender,
+                      backgroundColor: participant.launchTestingReady
+                        ? "#E8F1ED"
+                        : participant.readyForActivation
+                          ? C.lavender
+                          : "#FFF1E5",
                     },
                   ]}
                 >
                   <Text
                     style={[
-                      S.h3,
+                      S.small,
                       {
-                        fontSize: 12,
-                        color:
-                          participant.status === status ? C.white : C.deep,
+                        color: participant.launchTestingReady
+                          ? C.green
+                          : participant.readyForActivation
+                            ? C.purple
+                            : C.rose,
                       },
                     ]}
                   >
-                    {statusLabels[status]}
+                    {stageLabel}
                   </Text>
-                </Pressable>
-              ))}
-            </View>
-          </Card>
-        ))
+                </View>
+              </View>
+
+              <Card style={{ backgroundColor: C.paper }}>
+                <Text style={S.h3}>Onboarding evidence</Text>
+                {steps.map((step) => (
+                  <View
+                    key={step.id}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      gap: 9,
+                    }}
+                  >
+                    <Icon
+                      name={
+                        step.complete
+                          ? "checkmark-circle-outline"
+                          : "ellipse-outline"
+                      }
+                      color={step.complete ? C.green : C.muted}
+                      size={19}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[S.h3, { fontSize: 13 }]}>
+                        {step.title}
+                      </Text>
+                      <Txt style={S.small}>{step.detail}</Txt>
+                    </View>
+                  </View>
+                ))}
+              </Card>
+
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+                <View style={{ flex: 1, minWidth: 130 }}>
+                  <Text style={S.h3}>Documents</Text>
+                  <Txt style={S.small}>
+                    {participant.documents.accepted}/
+                    {participant.documents.required} accepted
+                  </Txt>
+                </View>
+                <View style={{ flex: 1, minWidth: 130 }}>
+                  <Text style={S.h3}>Care roles</Text>
+                  <Txt style={S.small}>
+                    Owner {participant.roles.owner} · Caregiver{" "}
+                    {participant.roles.caregiver} · Viewer{" "}
+                    {participant.roles.viewer}
+                  </Txt>
+                </View>
+              </View>
+
+              {participant.documents.outstanding.length > 0 && (
+                <Card style={{ backgroundColor: "#FFF9F2" }}>
+                  <Text style={S.h3}>Outstanding documents</Text>
+                  {participant.documents.outstanding.map((document) => (
+                    <Txt key={document.id} style={S.small}>
+                      • {document.title} · v{document.version}
+                    </Txt>
+                  ))}
+                </Card>
+              )}
+
+              {participant.activationBlockers.length > 0 &&
+                participant.status !== "exited" && (
+                  <Card style={{ backgroundColor: "#FFF9F2" }}>
+                    <Text style={S.h3}>Activation blockers</Text>
+                    {participant.activationBlockers.map((blocker) => (
+                      <Txt key={blocker} style={S.small}>
+                        • {blocker}
+                      </Txt>
+                    ))}
+                  </Card>
+                )}
+
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                {(["active", "paused", "exited"] as const).map((status) => {
+                  const activationLocked =
+                    status === "active" && !participant.readyForActivation;
+                  const disabled =
+                    busy !== null ||
+                    participant.status === status ||
+                    activationLocked;
+
+                  return (
+                    <Pressable
+                      key={status}
+                      accessibilityRole="button"
+                      accessibilityState={{
+                        selected: participant.status === status,
+                        disabled,
+                      }}
+                      disabled={disabled}
+                      onPress={() =>
+                        void run(
+                          `participant-${participant.userId}`,
+                          () =>
+                            updatePilotParticipant({
+                              userId: participant.userId,
+                              status,
+                              cohort: participant.cohort,
+                            }),
+                          `Participant moved to ${statusLabels[
+                            status
+                          ].toLowerCase()}.`,
+                        )
+                      }
+                      style={[
+                        S.pill,
+                        {
+                          minHeight: 42,
+                          justifyContent: "center",
+                          paddingHorizontal: 13,
+                          opacity: disabled ? 0.55 : 1,
+                          backgroundColor:
+                            participant.status === status
+                              ? C.purple
+                              : C.lavender,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          S.h3,
+                          {
+                            fontSize: 12,
+                            color:
+                              participant.status === status
+                                ? C.white
+                                : C.deep,
+                          },
+                        ]}
+                      >
+                        {status === "active" && activationLocked
+                          ? "Active · locked"
+                          : statusLabels[status]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {!participant.roles.ready &&
+                participant.status !== "exited" && (
+                  <Txt style={S.small}>
+                    Care-role access is intentionally not assigned from Pilot
+                    Admin. A care owner must grant it through the normal
+                    care-team invitation and consent workflow.
+                  </Txt>
+                )}
+            </Card>
+          );
+        })
       )}
 
       <Section title="Required participation documents" />
