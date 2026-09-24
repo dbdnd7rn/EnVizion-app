@@ -22,13 +22,9 @@ import {
   Section,
   Txt,
 } from "../ui";
+import { useNav } from "./MainScreens";
 
-const statuses: LaunchWaveStatus[] = [
-  "draft",
-  "active",
-  "completed",
-  "cancelled",
-];
+const statuses: LaunchWaveStatus[] = ["draft", "active", "cancelled"];
 
 const platforms: Array<{ id: LaunchPlatform; label: string }> = [
   { id: "ios", label: "iOS" },
@@ -81,6 +77,7 @@ function Choice({
 }
 
 export function LaunchCenterScreen() {
+  const n = useNav();
   const [dashboard, setDashboard] = useState<LaunchAdminDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
@@ -88,7 +85,7 @@ export function LaunchCenterScreen() {
 
   const [waveId, setWaveId] = useState<string | null>(null);
   const [name, setName] = useState("");
-  const [cohort, setCohort] = useState("Pilot 1");
+  const [cohort, setCohort] = useState("");
   const [status, setStatus] = useState<LaunchWaveStatus>("draft");
   const [requiredPlatforms, setRequiredPlatforms] = useState<LaunchPlatform[]>([
     "ios",
@@ -102,7 +99,14 @@ export function LaunchCenterScreen() {
     setLoading(true);
     setMessage("");
     try {
-      setDashboard(await loadLaunchAdminDashboard());
+      const data = await loadLaunchAdminDashboard();
+      setDashboard(data);
+      setCohort((current) =>
+        current &&
+        data.foundation.cohorts.some((item) => item.cohort === current)
+          ? current
+          : data.foundation.cohorts[0]?.cohort ?? "",
+      );
     } catch (error) {
       setDashboard(null);
       setMessage(
@@ -127,10 +131,17 @@ export function LaunchCenterScreen() {
     [dashboard],
   );
 
+  const selectedFoundationCohort = useMemo(
+    () =>
+      dashboard?.foundation.cohorts.find((item) => item.cohort === cohort) ??
+      null,
+    [cohort, dashboard],
+  );
+
   function clearForm() {
     setWaveId(null);
     setName("");
-    setCohort("Pilot 1");
+    setCohort(dashboard?.foundation.cohorts[0]?.cohort ?? "");
     setStatus("draft");
     setRequiredPlatforms(["ios", "android", "web"]);
     setNotes("");
@@ -230,7 +241,157 @@ export function LaunchCenterScreen() {
       )}
 
       {dashboard && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <>
+          <Section title="Pilot foundation" />
+          <Card
+            style={{
+              backgroundColor: dashboard.foundation.foundationReady
+                ? "#E8F1ED"
+                : "#FFF9F2",
+            }}
+          >
+            <View style={S.between}>
+              <View style={{ flex: 1 }}>
+                <Text style={S.eyebrow}>REAL PILOT SETUP</Text>
+                <Text style={S.h2}>
+                  {dashboard.foundation.foundationReady
+                    ? "A real cohort is ready for launch validation"
+                    : "Pilot foundation still needs setup"}
+                </Text>
+              </View>
+              <Icon
+                name={
+                  dashboard.foundation.foundationReady
+                    ? "checkmark-circle-outline"
+                    : "construct-outline"
+                }
+                color={
+                  dashboard.foundation.foundationReady ? C.green : C.purple
+                }
+                size={30}
+              />
+            </View>
+
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
+              <Metric
+                value={dashboard.foundation.publishedRequiredDocuments}
+                label="published required documents"
+              />
+              <Metric
+                value={dashboard.foundation.cohorts.length}
+                label="real pilot cohorts"
+              />
+              <Metric
+                value={dashboard.foundation.cohorts.reduce(
+                  (sum, item) => sum + item.activeParticipants,
+                  0,
+                )}
+                label="active pilot participants"
+              />
+              <Metric
+                value={dashboard.foundation.cohorts.reduce(
+                  (sum, item) => sum + item.consentCurrent,
+                  0,
+                )}
+                label="consent current"
+              />
+            </View>
+
+            <Card style={{ backgroundColor: C.paper }}>
+              <Text style={S.h3}>Required participation documents</Text>
+              {(
+                [
+                  ["privacy_notice", "Privacy notice"],
+                  ["pilot_consent", "Pilot consent"],
+                  ["terms_of_use", "Terms of use"],
+                ] as const
+              ).map(([id, label]) => {
+                const published =
+                  dashboard.foundation.publishedDocumentTypes.includes(id);
+                return (
+                  <View key={id} style={[S.row, { alignItems: "center" }]}>
+                    <Icon
+                      name={
+                        published
+                          ? "checkmark-circle-outline"
+                          : "ellipse-outline"
+                      }
+                      color={published ? C.green : C.muted}
+                      size={20}
+                    />
+                    <Txt style={S.small}>
+                      {label} · {published ? "published" : "missing"}
+                    </Txt>
+                  </View>
+                );
+              })}
+            </Card>
+
+            {!dashboard.foundation.cohorts.length ? (
+              <Card style={{ backgroundColor: C.paper }}>
+                <Text style={S.h3}>No real pilot cohort exists yet.</Text>
+                <Txt style={S.small}>
+                  Invite a real participant in Pilot Administration and assign
+                  that person to a cohort. Launch waves cannot be created from
+                  arbitrary cohort names.
+                </Txt>
+              </Card>
+            ) : (
+              dashboard.foundation.cohorts.map((item) => (
+                <Card key={item.cohort} style={{ backgroundColor: C.paper }}>
+                  <View style={S.between}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={S.h3}>{item.cohort}</Text>
+                      <Txt style={S.small}>
+                        {item.activeParticipants} active · {item.invitedParticipants} invited ·{" "}
+                        {item.consentCurrent} consent current
+                      </Txt>
+                      <Txt style={S.small}>
+                        Role coverage: Owner {item.roleCoverage.owner} ·
+                        Caregiver {item.roleCoverage.caregiver} · Viewer{" "}
+                        {item.roleCoverage.viewer}
+                      </Txt>
+                    </View>
+                    <View
+                      style={[
+                        S.pill,
+                        {
+                          backgroundColor: item.activationReady
+                            ? "#E8F1ED"
+                            : "#FFF1E5",
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          S.small,
+                          {
+                            color: item.activationReady ? C.green : C.rose,
+                          },
+                        ]}
+                      >
+                        {item.activationReady ? "Can activate" : "Setup needed"}
+                      </Text>
+                    </View>
+                  </View>
+                  {item.activationBlockers.map((blocker) => (
+                    <Txt key={blocker} style={S.small}>
+                      • {blocker}
+                    </Txt>
+                  ))}
+                </Card>
+              ))
+            )}
+
+            <Button
+              title="Open Pilot Administration"
+              secondary
+              icon="people-outline"
+              onPress={() => n.navigate("PilotAdmin")}
+            />
+          </Card>
+
+          <Card style={{ backgroundColor: C.lavender }}>
           <Text style={S.eyebrow}>CURRENT OPERATIONS</Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
             <Metric
@@ -251,16 +412,29 @@ export function LaunchCenterScreen() {
             />
           </View>
         </Card>
+        </>
       )}
 
       <Section title={waveId ? "Edit launch wave" : "Create launch wave"} />
       <Card>
         <Field label="Wave name" value={name} onChange={setName} />
-        <Field
-          label="Pilot cohort"
-          value={cohort}
-          onChange={setCohort}
-        />
+        <Text style={S.h3}>Real pilot cohort</Text>
+        {!dashboard?.foundation.cohorts.length ? (
+          <Txt style={S.small}>
+            Create a real cohort from Pilot Administration first.
+          </Txt>
+        ) : (
+          <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+            {dashboard.foundation.cohorts.map((item) => (
+              <Choice
+                key={item.cohort}
+                selected={cohort === item.cohort}
+                label={item.cohort}
+                onPress={() => setCohort(item.cohort)}
+              />
+            ))}
+          </View>
+        )}
 
         <Text style={S.h3}>Wave status</Text>
         <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
@@ -269,7 +443,11 @@ export function LaunchCenterScreen() {
               key={value}
               selected={status === value}
               label={value.replaceAll("_", " ")}
-              disabled={value === "completed" && status !== "completed"}
+              disabled={
+                value === "active" &&
+                (!selectedFoundationCohort ||
+                  !selectedFoundationCohort.activationReady)
+              }
               onPress={() => setStatus(value)}
             />
           ))}
@@ -307,7 +485,9 @@ export function LaunchCenterScreen() {
             busy !== null ||
             !name.trim() ||
             !cohort.trim() ||
-            !requiredPlatforms.length
+            !requiredPlatforms.length ||
+            (status === "active" &&
+              !selectedFoundationCohort?.activationReady)
           }
           onPress={() => void saveWave()}
         />
@@ -321,9 +501,10 @@ export function LaunchCenterScreen() {
         )}
 
         <Txt style={S.small}>
-          No participant or care record is generated here. A wave targets the
-          existing pilot cohort, and testers must use their real active
-          care-profile membership.
+          No participant or care record is generated here. A wave can target
+          only a cohort that already exists in real pilot enrollment data.
+          Active status is blocked until required documents are published and
+          active participants are current on consent.
         </Txt>
       </Card>
 
