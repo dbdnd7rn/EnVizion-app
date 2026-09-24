@@ -21,6 +21,16 @@ export type ProgramDocument = {
   updatedAt: string;
 };
 
+export type PilotOnboardingStage =
+  | "invitation_pending"
+  | "first_sign_in_pending"
+  | "documents_pending"
+  | "role_pending"
+  | "ready_for_activation"
+  | "active_ready"
+  | "paused_ready"
+  | "exited";
+
 export type PilotParticipant = {
   userId: string;
   email: string;
@@ -31,8 +41,39 @@ export type PilotParticipant = {
   exitedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  invitation: {
+    authInvitedAt: string | null;
+    emailConfirmedAt: string | null;
+    lastSignInAt: string | null;
+    accountConfirmed: boolean;
+    signedIn: boolean;
+  };
+  documents: {
+    required: number;
+    accepted: number;
+    complete: boolean;
+    publishedRequiredTypesComplete: boolean;
+    missingRequiredTypes: ProgramDocumentType[];
+    outstanding: Array<{
+      id: string;
+      documentType: ProgramDocumentType;
+      title: string;
+      version: number;
+    }>;
+  };
+  roles: {
+    owner: number;
+    caregiver: number;
+    viewer: number;
+    careProfileCount: number;
+    ready: boolean;
+  };
   consentComplete: boolean;
   careProfileCount: number;
+  onboardingStage: PilotOnboardingStage;
+  activationBlockers: string[];
+  readyForActivation: boolean;
+  launchTestingReady: boolean;
 };
 
 export type PilotSummary = {
@@ -46,6 +87,9 @@ export type PilotSummary = {
   careProfiles: number;
   openSupport: number;
   activeCoaching: number;
+  readyForActivation: number;
+  activeLaunchReady: number;
+  onboardingBlocked: number;
 };
 
 export type PilotAdminAudit = {
@@ -91,7 +135,12 @@ async function invokePilotAdmin<T>(
   });
 
   if (error) throw error;
-  if (data?.error) throw new Error(String(data.error));
+  if (data?.error) {
+    const blockers = Array.isArray(data.blockers)
+      ? ": " + data.blockers.join("; ")
+      : "";
+    throw new Error(String(data.error) + blockers);
+  }
   return data as T;
 }
 
