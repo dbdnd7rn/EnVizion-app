@@ -4,7 +4,7 @@ import {
   pilotFunnelRate,
   pilotOutcomeReportHtml,
   type PilotIntelligence,
-} from "../src/pilotIntelligence.ts";
+} from "../src/pilotIntelligenceHelpers.ts";
 
 const empty: PilotIntelligence = {
   generatedAt: "2026-09-24T00:00:00Z",
