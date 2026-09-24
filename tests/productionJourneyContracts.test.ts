@@ -21,6 +21,7 @@ test("production-critical routes remain registered", () => {
     "LaunchValidation",
     "LaunchCenter",
     "PilotFeedback",
+    "PilotIntelligence",
   ]) {
     assert.match(navigation, new RegExp(`\\b${route}\\b`));
     assert.match(app, new RegExp(`name=["']${route}["']`));
@@ -116,4 +117,20 @@ test("pilot operations automation stays visible and evidence based", () => {
   assert.match(client, /closeoutPilotParticipant/);
   assert.match(feedback, /PILOT FEEDBACK/);
   assert.match(feedback, /Bugs go to technical diagnostics/i);
+});
+
+
+test("pilot intelligence closes the operational reporting loop", () => {
+  const screen = source("src/screens/PilotIntelligenceScreen.tsx");
+  const client = source("src/pilotIntelligence.ts");
+  const admin = source("src/screens/PilotAdminScreen.tsx");
+
+  assert.match(screen, /PILOT METRICS & LAUNCH INTELLIGENCE/);
+  assert.match(screen, /Device & platform validation matrix/);
+  assert.match(screen, /Feedback trends/);
+  assert.match(screen, /Launch-wave comparison/);
+  assert.match(screen, /Generate pilot outcome report/);
+  assert.match(client, /action: "intelligence"/);
+  assert.match(client, /operational pilot evidence only/i);
+  assert.match(admin, /Open Pilot Intelligence/);
 });
