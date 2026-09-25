@@ -18,17 +18,32 @@ Using custom SMTP is what replaces the visible `Supabase Auth` sender name. Edit
 
 ## Google sign-in
 
+The app already uses Supabase Google OAuth on web and Expo WebBrowser + deep linking on native. First-time Google users are created through Supabase Auth; returning users sign back into the same Supabase account.
+
 1. In Google Cloud Console, configure the OAuth consent screen:
    - App name: `EnVizion Life`
    - Add the EnVizion Life logo, support email, privacy-policy URL and terms URL.
    - Request only `openid`, `email` and `profile` scopes.
 2. Create an OAuth 2.0 **Web application** client.
-3. Add this authorized redirect URI exactly:
-   `https://nvmepknmkptltnuxdyfv.supabase.co/auth/v1/callback`
-4. In Supabase **Authentication > Sign In / Providers > Google**, enable Google and save the Google client ID and client secret.
-5. In Supabase **Authentication > URL Configuration**, add these redirect URLs:
-   - `envizionlife://auth/confirmed`
-   - `https://envizion-life-caregiver.onrender.com/`
-6. Publish the Google OAuth consent screen for production, or add every tester as a test user while it remains in testing mode.
+3. Add this **Authorized JavaScript origin**:
+   - `https://envizion-life-caregiver.onrender.com`
+4. Add this **Authorized redirect URI** exactly:
+   - `https://nvmepknmkptltnuxdyfv.supabase.co/auth/v1/callback`
+5. In Supabase **Authentication > Sign In / Providers > Google**, enable Google and save the Google client ID and client secret.
+6. In Supabase **Authentication > URL Configuration**:
+   - Set the Site URL to `https://envizion-life-caregiver.onrender.com/`
+   - Add these Redirect URLs:
+     - `https://envizion-life-caregiver.onrender.com/?auth=confirm`
+     - `https://envizion-life-caregiver.onrender.com/?auth=recovery`
+     - `envizionlife://auth/confirmed`
+     - `envizionlife://auth/reset-password`
+7. Publish the Google OAuth consent screen for production, or add every tester as a test user while it remains in testing mode.
+
+### Expected behavior
+
+- On the web, **Sign in with Google** / **Sign up with Google** opens Google, returns to the deployed EnVizion Life URL, and Supabase restores the session.
+- On Android/iOS, Google opens in a secure browser session and returns to the app through the `envizionlife://` deep link.
+- The session persists securely, and the existing **Sign out** action clears it.
+- Do not add a Google client secret to Expo environment variables or commit it to this repository. The secret belongs only in the Supabase provider configuration.
 
 Never commit the Google client secret or SMTP password to this repository.
