@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm your EnVizion Life account</title>
+  </head>
+  <body style="margin:0;background:#f3edf5;font-family:Arial,Helvetica,sans-serif;color:#34263b">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f3edf5;padding:28px 12px">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#fffdfa;border-radius:24px;overflow:hidden;border:1px solid #eadfeb">
+            <tr>
+              <td style="height:8px;background:linear-gradient(90deg,#f51b2b 0%,#f51b2b 50%,#7b428e 50%,#7b428e 100%)"></td>
+            </tr>
+            <tr>
+              <td style="padding:38px 42px 18px;text-align:center">
+                <div style="font-size:30px;font-weight:800;letter-spacing:-1px;color:#34263b">
+                  <span style="color:#f51b2b">EnVizion</span> <span style="color:#7b428e">Life</span>
+                </div>
+                <div style="margin-top:8px;font-size:12px;font-weight:700;letter-spacing:3px;color:#7b428e">YOUR CARE COMPANION</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:12px 42px 40px">
+                <h1 style="margin:0 0 16px;font-size:28px;line-height:1.2;color:#34263b">Welcome to EnVizion Life</h1>
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#675b6c">
+                  Confirm your email address to finish creating your account and securely sign in to your EnVizion Life care workspace.
+                </p>
+                <p style="margin:0 0 26px;font-size:16px;line-height:1.65;color:#675b6c">
+                  Once confirmed, return to the app and sign in to access your care information, planning tools and authorized care-team features.
+                </p>
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 auto 28px">
+                  <tr>
+                    <td style="border-radius:14px;background:#7b428e">
+                      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 30px;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700">Confirm my EnVizion Life account</a>
+                    </td>
+                  </tr>
+                </table>
+                <div style="padding:18px;border-radius:14px;background:#f7f1f8;color:#675b6c;font-size:13px;line-height:1.55">
+                  For your security, only use this link if you requested an EnVizion Life account. EnVizion Life will never ask for your password by email.
+                </div>
+                <p style="margin:24px 0 0;font-size:12px;line-height:1.55;color:#8a7e8e;text-align:center">
+                  If the button does not open, copy this address into your browser:<br />
+                  <a href="{{ .ConfirmationURL }}" style="color:#7b428e;word-break:break-all">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+          <p style="max-width:540px;margin:18px auto 0;font-size:12px;line-height:1.5;color:#7e7282;text-align:center">
+            You received this account-security email because this address was used to register for EnVizion Life.
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

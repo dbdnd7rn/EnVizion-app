@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
   AccessibilityInfo,
   ActivityIndicator,
+  Animated,
+  Easing,
   Platform,
   Text,
   View,
@@ -198,6 +200,110 @@ function LoadingState() {
       <Text style={{ marginTop: 12, color: C.deep }}>
         Preparing your care companion…
       </Text>
+    </View>
+  );
+}
+
+function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
+  const reveal = React.useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
+  const drift = React.useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (reducedMotion) return;
+
+    Animated.parallel([
+      Animated.spring(reveal, {
+        toValue: 1,
+        damping: 12,
+        stiffness: 95,
+        mass: 0.8,
+        useNativeDriver: true,
+      }),
+      Animated.timing(drift, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [drift, reducedMotion, reveal]);
+
+  return (
+    <View
+      accessibilityLabel="EnVizion Life is opening"
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        backgroundColor: "#FCF9F6",
+      }}
+    >
+      <Animated.View
+        style={{
+          position: "absolute",
+          width: 290,
+          height: 290,
+          borderRadius: 145,
+          borderWidth: 1,
+          borderColor: "#7B428E24",
+          opacity: drift.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [0.2, 0.8, 0.25],
+          }),
+          transform: [
+            {
+              scale: drift.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.72, 1.18],
+              }),
+            },
+            {
+              rotate: drift.interpolate({
+                inputRange: [0, 1],
+                outputRange: ["-8deg", "8deg"],
+              }),
+            },
+          ],
+        }}
+      />
+      <Animated.View
+        style={{
+          alignItems: "center",
+          opacity: reveal,
+          transform: [
+            {
+              translateY: reveal.interpolate({
+                inputRange: [0, 1],
+                outputRange: [28, 0],
+              }),
+            },
+            {
+              scale: reveal.interpolate({
+                inputRange: [0, 0.72, 1],
+                outputRange: [0.72, 1.06, 1],
+              }),
+            },
+          ],
+        }}
+      >
+        <Animated.Image
+          source={require("./assets/envizion-original.png")}
+          resizeMode="contain"
+          style={{ width: 270, height: 168 }}
+        />
+        <Text
+          style={{
+            marginTop: 18,
+            color: C.purple,
+            fontFamily: "DMSans_700Bold",
+            fontSize: 12,
+            letterSpacing: 4,
+          }}
+        >
+          CARE IN MOTION
+        </Text>
+      </Animated.View>
     </View>
   );
 }
@@ -651,12 +757,22 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
 
 export default function App() {
   const reducedMotion = useReducedMotion();
+  const [showLaunch, setShowLaunch] = useState(true);
   const [loaded, error] = useFonts({
     DMSans_400Regular,
     DMSans_600SemiBold,
     DMSans_700Bold,
     Lora_500Medium,
   });
+
+  useEffect(() => {
+    if (!loaded && !error) return;
+    const timer = setTimeout(
+      () => setShowLaunch(false),
+      reducedMotion ? 700 : 2100,
+    );
+    return () => clearTimeout(timer);
+  }, [error, loaded, reducedMotion]);
 
   if (!loaded && !error) return <LoadingState />;
 
@@ -678,9 +794,13 @@ export default function App() {
           }}
         >
           <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-            <AuthProvider>
-              <AuthGate reducedMotion={reducedMotion} />
-            </AuthProvider>
+            {showLaunch ? (
+              <AnimatedLaunchScreen reducedMotion={reducedMotion} />
+            ) : (
+              <AuthProvider>
+                <AuthGate reducedMotion={reducedMotion} />
+              </AuthProvider>
+            )}
           </SafeAreaView>
         </View>
       </View>

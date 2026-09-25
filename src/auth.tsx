@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+import * as WebBrowser from "expo-web-browser";
 import { supabase } from "./supabase";
 import {
   MIN_PASSWORD_LENGTH,
@@ -34,6 +35,7 @@ type AuthContextValue = {
   recoveryMode: boolean;
   authMessage: string;
   signIn: (email: string, password: string) => Promise<string | null>;
+  signInWithGoogle: () => Promise<string | null>;
   signUp: (
     fullName: string,
     email: string,
@@ -48,6 +50,8 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+WebBrowser.maybeCompleteAuthSession();
 
 function redirectUrl(kind: "confirm" | "recovery") {
   if (Platform.OS === "web" && typeof window !== "undefined") {
@@ -212,6 +216,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         return error?.message ?? null;
       },
+      async signInWithGoogle() {
+        setAuthMessage("");
+        const returnUrl = redirectUrl("confirm");
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: returnUrl,
+            skipBrowserRedirect: Platform.OS !== "web",
+            queryParams: {
+              access_type: "offline",
+              prompt: "select_account",
+            },
+          },
+        });
+
+        if (error) return error.message;
+        if (Platform.OS === "web") return null;
+        if (!data.url) return "Google sign-in could not be started.";
+
+        const result = await WebBrowser.openAuthSessionAsync(data.url, returnUrl);
+        if (result.type === "cancel" || result.type === "dismiss") return null;
+        if (result.type !== "success" || !result.url) {
+          return "Google sign-in did not finish. Please try again.";
+        }
+
+        await applyNativeAuthUrl(result.url);
+        return null;
+      },
       async signUp(fullName, email, password) {
         setAuthMessage("");
         const passwordIssue = passwordValidationMessage(password);
@@ -275,7 +307,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
       },
     }),
-    [authMessage, loading, recoveryMode, session],
+    [applyNativeAuthUrl, authMessage, loading, recoveryMode, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -398,6 +430,7 @@ export function PasswordRecoveryScreen() {
 export function AuthScreen() {
   const {
     signIn,
+    signInWithGoogle,
     signUp,
     requestPasswordReset,
     resendConfirmation,
@@ -409,6 +442,7 @@ export function AuthScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState("");
 
@@ -473,16 +507,25 @@ export function AuthScreen() {
     try {
       if (mode === "signin") {
         const error = await signIn(email, password);
-        if (error) setMessage(error);
+        if (error) {
+          if (error.toLowerCase().includes("email not confirmed")) {
+            setPendingConfirmationEmail(normalizeEmail(email));
+            setMessage(
+              "Your email address still needs confirmation. Check your inbox and spam folder, or request a new confirmation email below.",
+            );
+          } else {
+            setPendingConfirmationEmail("");
+            setMessage(error);
+          }
+        }
       } else {
         const result = await signUp(fullName, email, password);
         if (result.error) {
           setMessage(result.error);
         } else if (result.needsConfirmation) {
-          const normalized = normalizeEmail(email);
-          setPendingConfirmationEmail(normalized);
+          setPendingConfirmationEmail("");
           setMessage(
-            "Check your email to confirm your account, then return here and sign in.",
+            "Account request accepted. Check your inbox and spam folder, then return here and sign in. If this address already has an account, use your existing password instead.",
           );
           setMode("signin");
           setPassword("");
@@ -503,10 +546,21 @@ export function AuthScreen() {
       setMessage(
         error
           ? error
-          : "A new confirmation email has been sent. The older link may no longer be useful.",
+          : "Request accepted. If this account is still awaiting confirmation, a new email will be sent. Check your spam folder too. If you already confirmed this address, sign in with your password instead.",
       );
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function continueWithGoogle() {
+    setGoogleBusy(true);
+    setMessage("");
+    try {
+      const error = await signInWithGoogle();
+      if (error) setMessage(error);
+    } finally {
+      setGoogleBusy(false);
     }
   }
 
@@ -620,6 +674,63 @@ export function AuthScreen() {
           onPress={() => void submit()}
         />
 
+        {mode !== "forgot" && (
+          <>
+            <View
+              accessibilityElementsHidden
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
+              <View style={{ height: 1, flex: 1, backgroundColor: C.line }} />
+              <Text style={[S.small, { color: C.muted }]}>or</Text>
+              <View style={{ height: 1, flex: 1, backgroundColor: C.line }} />
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                mode === "signup" ? "Sign up with Google" : "Sign in with Google"
+              }
+              disabled={busy || googleBusy}
+              onPress={() => void continueWithGoogle()}
+              style={({ pressed }) => ({
+                minHeight: 52,
+                borderRadius: 15,
+                borderWidth: 1,
+                borderColor: C.line,
+                backgroundColor: pressed ? "#F7F1F8" : C.white,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 11,
+                opacity: busy || googleBusy ? 0.55 : 1,
+              })}
+            >
+              <View
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 13,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#FFFFFF",
+                  borderWidth: 1,
+                  borderColor: "#E5E7EB",
+                }}
+              >
+                <Text style={{ color: "#4285F4", fontSize: 16, fontWeight: "700" }}>
+                  G
+                </Text>
+              </View>
+              <Text style={[S.h3, { color: C.ink, fontSize: 14 }]}>
+                {googleBusy
+                  ? "Opening Google…"
+                  : mode === "signup"
+                    ? "Sign up with Google"
+                    : "Sign in with Google"}
+              </Text>
+            </Pressable>
+          </>
+        )}
+
         {mode === "signin" && pendingConfirmationEmail && (
           <Button
             title="Resend confirmation email"
@@ -694,7 +805,7 @@ export function AuthScreen() {
         </Pressable>
       )}
 
-      {busy && <ActivityIndicator color={C.purple} />}
+      {(busy || googleBusy) && <ActivityIndicator color={C.purple} />}
 
       <Txt style={[S.small, { textAlign: "center" }]}>
         Your account protects access to saved care information and authorized

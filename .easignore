@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.tools/
+artifacts/
+.git/
+.env*
+npm-debug.log*
