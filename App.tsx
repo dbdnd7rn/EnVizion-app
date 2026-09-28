@@ -108,26 +108,28 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: C.purple,
-        tabBarInactiveTintColor: "#8B8091",
+        tabBarInactiveTintColor: "#8A8494",
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: C.white,
-          borderTopWidth: 0,
-          height: 84,
-          paddingTop: 9,
-          paddingBottom: 14,
-          borderTopLeftRadius: 28,
-          borderTopRightRadius: 28,
+          backgroundColor: "#FFFFFF",
+          borderTopWidth: 1,
+          borderTopColor: "#F0E9F1",
+          height: 78,
+          paddingTop: 8,
+          paddingBottom: 12,
           shadowColor: "#2E2135",
-          shadowOpacity: 0.08,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: -5 },
-          elevation: 10,
+          shadowOpacity: 0.035,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: -3 },
+          elevation: 5,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
         },
         tabBarLabelStyle: {
           fontFamily: "DMSans_600SemiBold",
           fontSize: 10,
-          marginTop: 3,
+          marginTop: 2,
         },
         tabBarIcon: ({ color, focused }) => (
           <Icon
@@ -140,7 +142,7 @@ function MainTabs() {
               }[route.name]
             }
             color={color}
-            size={22}
+            size={23}
           />
         ),
       })}
