@@ -38,6 +38,7 @@ function roleLabel(role: CareRole) {
   return {
     owner: "Owner",
     caregiver: "Caregiver",
+    patient: "Patient / care recipient",
     viewer: "Viewer",
   }[role];
 }
@@ -61,8 +62,8 @@ function RolePicker({
   onChange: (role: Exclude<CareRole, "owner">) => void;
 }) {
   return (
-    <View style={{ flexDirection: "row", gap: 8 }}>
-      {(["caregiver", "viewer"] as const).map((role) => (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      {(["caregiver", "patient", "viewer"] as const).map((role) => (
         <Pressable
           key={role}
           disabled={disabled}
@@ -263,7 +264,7 @@ export function CareTeamScreen() {
         </Text>
         <Txt style={{ color: "#E9DDED" }}>
           {roleLabel(state.accessRole)} access
-          {state.accessRole === "viewer"
+          {state.accessRole === "viewer" || state.accessRole === "patient"
             ? " · read-only"
             : " · can update shared care records"}
         </Txt>
@@ -367,7 +368,9 @@ export function CareTeamScreen() {
 
           <Txt>
             {roleLabel(member.role)}
-            {member.role === "viewer" ? " · read-only" : ""}
+            {member.role === "viewer" || member.role === "patient"
+              ? " · read-only"
+              : ""}
           </Txt>
 
           {canManage && member.role !== "owner" && (
@@ -468,8 +471,9 @@ export function CareTeamScreen() {
               onChange={setInviteRole}
             />
             <Txt style={S.small}>
-              Caregiver can view and update shared care records. Viewer can read
-              the shared care record but cannot change it.
+              Caregiver can view and update shared care records. Patient / care
+              recipient can view their shared care record. Viewer can read the
+              shared care record but cannot change it.
             </Txt>
             <Button
               title={busyId === "invite-new" ? "Sending invitation…" : "Invite to care team"}
