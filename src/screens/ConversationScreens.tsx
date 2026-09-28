@@ -103,6 +103,384 @@ const styles = StyleSheet.create({
     backgroundColor: C.white,
   },
   inputRow: { flexDirection: "row", alignItems: "flex-end", gap: 10 },
+
+  assistantTopbar: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#FFFFFF",
+  },
+  assistantBack: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F8F5FB",
+  },
+  assistantTopTitle: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 22,
+    lineHeight: 28,
+    color: "#12143D",
+  },
+  assistantTopSub: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 13,
+    lineHeight: 18,
+    color: "#8A879A",
+  },
+  assistantGuideBadge: {
+    marginLeft: "auto",
+    minHeight: 40,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+    backgroundColor: "#F1EAFE",
+  },
+  assistantGuideText: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 12,
+    color: "#6D32A3",
+  },
+  assistantHero: {
+    marginHorizontal: 20,
+    borderRadius: 30,
+    minHeight: 300,
+    padding: 22,
+    overflow: "hidden",
+    backgroundColor: "#F0EEFF",
+    borderWidth: 1,
+    borderColor: "#ECE8FF",
+  },
+  assistantHeroGlowOne: {
+    position: "absolute",
+    width: 240,
+    height: 240,
+    borderRadius: 120,
+    right: -70,
+    top: -76,
+    backgroundColor: "#E1E7FF",
+    opacity: 0.8,
+  },
+  assistantHeroGlowTwo: {
+    position: "absolute",
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    right: 4,
+    bottom: -115,
+    backgroundColor: "#EADDFC",
+    opacity: 0.75,
+  },
+  assistantGreeting: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 14,
+    color: "#713BA0",
+    marginBottom: 10,
+  },
+  assistantHeroTitle: {
+    width: "64%",
+    fontFamily: "DMSans_700Bold",
+    fontSize: 32,
+    lineHeight: 37,
+    color: "#10133F",
+  },
+  assistantHeroBody: {
+    width: "62%",
+    marginTop: 10,
+    fontFamily: "DMSans_400Regular",
+    fontSize: 14,
+    lineHeight: 21,
+    color: "#777589",
+  },
+  assistantRobot: {
+    position: "absolute",
+    right: 5,
+    top: 46,
+    width: 142,
+    height: 166,
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
+  assistantRobotAntennaStem: {
+    width: 6,
+    height: 20,
+    borderRadius: 3,
+    backgroundColor: "#252755",
+  },
+  assistantRobotAntenna: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginTop: -2,
+    marginBottom: -2,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 4,
+    borderColor: "#E4E8FF",
+  },
+  assistantRobotShell: {
+    width: 112,
+    height: 88,
+    borderRadius: 35,
+    padding: 8,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E4E5F4",
+    shadowColor: "#39345A",
+    shadowOpacity: 0.14,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  assistantRobotFace: {
+    flex: 1,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#17194A",
+  },
+  assistantRobotBody: {
+    width: 72,
+    height: 62,
+    marginTop: -5,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E4E5F4",
+  },
+  assistantRobotArm: {
+    position: "absolute",
+    left: 0,
+    bottom: 18,
+    width: 38,
+    height: 16,
+    borderRadius: 10,
+    transform: [{ rotate: "-25deg" }],
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E4E5F4",
+  },
+  assistantHeroPills: {
+    marginTop: 26,
+    flexDirection: "row",
+    gap: 8,
+  },
+  assistantHeroPill: {
+    flex: 1,
+    minHeight: 62,
+    paddingHorizontal: 9,
+    paddingVertical: 9,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.88)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.95)",
+  },
+  assistantHeroPillLabel: {
+    marginTop: 4,
+    textAlign: "center",
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 10,
+    lineHeight: 13,
+    color: "#24264B",
+  },
+  assistantQuickGrid: {
+    marginTop: 18,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    gap: 10,
+  },
+  assistantQuickCard: {
+    flex: 1,
+    minHeight: 112,
+    borderRadius: 22,
+    paddingHorizontal: 9,
+    paddingVertical: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#F0EBF2",
+  },
+  assistantQuickIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.68)",
+  },
+  assistantQuickLabel: {
+    marginTop: 9,
+    textAlign: "center",
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 11,
+    lineHeight: 14,
+    color: "#191B45",
+  },
+  assistantSectionHeader: {
+    paddingHorizontal: 20,
+    marginTop: 28,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  assistantSectionTitle: {
+    fontFamily: "DMSans_700Bold",
+    fontSize: 21,
+    color: "#14163F",
+  },
+  assistantViewAll: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 12,
+    color: "#713BA0",
+  },
+  assistantQuestionList: {
+    paddingHorizontal: 20,
+    gap: 10,
+  },
+  assistantQuestionCard: {
+    minHeight: 82,
+    borderRadius: 22,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E9E4EE",
+  },
+  assistantQuestionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F1EBFC",
+  },
+  assistantQuestionTitle: {
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 14,
+    lineHeight: 18,
+    color: "#171943",
+  },
+  assistantQuestionSub: {
+    marginTop: 3,
+    fontFamily: "DMSans_400Regular",
+    fontSize: 11,
+    lineHeight: 15,
+    color: "#9A96A7",
+  },
+  assistantResourceGrid: {
+    marginTop: 26,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    flexDirection: "row",
+    gap: 10,
+  },
+  assistantResourceCard: {
+    flex: 1,
+    minHeight: 112,
+    borderRadius: 22,
+    paddingHorizontal: 8,
+    paddingVertical: 13,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#F0EBF2",
+  },
+  assistantResourceLabel: {
+    marginTop: 8,
+    textAlign: "center",
+    fontFamily: "DMSans_600SemiBold",
+    fontSize: 10,
+    lineHeight: 14,
+    color: "#292B4D",
+  },
+  assistantComposerWrap: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 8,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#F3EEF4",
+  },
+  assistantComposerShell: {
+    minHeight: 60,
+    borderRadius: 30,
+    paddingLeft: 10,
+    paddingRight: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E6DFEB",
+    shadowColor: "#2E2135",
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  assistantAttach: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F6F2FB",
+  },
+  assistantSend: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#713BA0",
+  },
+  assistantDisclaimer: {
+    marginTop: 8,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+  },
+  assistantDisclaimerText: {
+    flex: 1,
+    fontFamily: "DMSans_400Regular",
+    fontSize: 10,
+    lineHeight: 14,
+    color: "#9A96A7",
+  },
+  assistantChatIntro: {
+    marginBottom: 4,
+    padding: 15,
+    borderRadius: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#F3EFFF",
+    borderWidth: 1,
+    borderColor: "#E8E1F4",
+  },
+  assistantChatOrb: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#713BA0",
+  },
 });
 
 function Badge({ text }: { text: string }) {
@@ -178,7 +556,7 @@ function Composer({
   onSend,
   disabled = false,
   label = "Your message",
-  placeholder = "Ask a basic caregiving question…",
+  placeholder = "Ask anything about caregiving…",
 }: {
   onSend: (text: string) => void;
   disabled?: boolean;
@@ -186,62 +564,220 @@ function Composer({
   placeholder?: string;
 }) {
   const [text, setText] = useState("");
+  const ready = Boolean(text.trim()) && !disabled;
+
   return (
-    <View style={styles.composer}>
-      <View style={styles.inputRow}>
+    <View style={styles.assistantComposerWrap}>
+      <View style={styles.assistantComposerShell}>
+        <View style={styles.assistantAttach}>
+          <Icon name="attach-outline" color="#6D6590" size={21} />
+        </View>
         <TextInput
           value={text}
           onChangeText={setText}
           accessibilityLabel={label}
           placeholder={placeholder}
-          placeholderTextColor={C.muted}
+          placeholderTextColor="#9D98AA"
           multiline
           maxLength={1200}
           editable={!disabled}
-          style={[
-            S.input,
-            {
-              flex: 1,
-              minHeight: 50,
-              maxHeight: 130,
-              textAlignVertical: "top",
-              padding: 13,
-            },
-          ]}
+          style={{
+            flex: 1,
+            minHeight: 48,
+            maxHeight: 110,
+            paddingVertical: 13,
+            fontFamily: "DMSans_400Regular",
+            fontSize: 14,
+            lineHeight: 20,
+            color: "#171943",
+            textAlignVertical: "center",
+          }}
         />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Send message"
-          disabled={disabled || !text.trim()}
+          disabled={!ready}
           onPress={() => {
             const value = text.trim();
             if (!value || disabled) return;
             onSend(value);
             setText("");
           }}
-          style={({ pressed }) => ({
-            width: 50,
-            height: 50,
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: 15,
-            backgroundColor: C.deep,
-            opacity: disabled || !text.trim() ? 0.4 : pressed ? 0.7 : 1,
-          })}
+          style={({ pressed }) => [
+            styles.assistantSend,
+            { opacity: !ready ? 0.4 : pressed ? 0.76 : 1 },
+          ]}
         >
-          <Icon name="arrow-up" color={C.white} />
+          <Icon name="paper-plane-outline" color="#FFFFFF" size={22} />
         </Pressable>
       </View>
-      <Text style={S.small}>Educational support · {text.length}/1200</Text>
+      <View style={styles.assistantDisclaimer}>
+        <Icon name="information-circle-outline" color="#9A96A7" size={15} />
+        <Text style={styles.assistantDisclaimerText}>
+          AI provides general guidance and is not a substitute for professional
+          medical advice. For emergencies, use your local emergency services.
+        </Text>
+      </View>
     </View>
+  );
+}
+
+function AssistantFeaturePill({
+  icon,
+  label,
+  tint,
+  active = false,
+  onPress,
+}: {
+  icon: string;
+  label: string;
+  tint: string;
+  active?: boolean;
+  onPress?: () => void;
+}) {
+  const body = (
+    <View
+      style={[
+        styles.assistantHeroPill,
+        active && { borderColor: tint, backgroundColor: "#FFFFFF" },
+      ]}
+    >
+      <Icon name={icon} color={tint} size={20} />
+      <Text style={styles.assistantHeroPillLabel}>{label}</Text>
+    </View>
+  );
+
+  if (!onPress) return body;
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      onPress={onPress}
+      style={{ flex: 1 }}
+    >
+      {body}
+    </Pressable>
+  );
+}
+
+function AssistantRobot() {
+  return (
+    <View pointerEvents="none" style={styles.assistantRobot}>
+      <View style={styles.assistantRobotAntenna} />
+      <View style={styles.assistantRobotAntennaStem} />
+      <View style={styles.assistantRobotShell}>
+        <View style={styles.assistantRobotFace}>
+          <Icon name="happy-outline" color="#8BA2FF" size={46} />
+        </View>
+      </View>
+      <View style={styles.assistantRobotBody}>
+        <Icon name="heart" color="#B977CE" size={24} />
+      </View>
+      <View style={styles.assistantRobotArm} />
+    </View>
+  );
+}
+
+function AssistantQuickCard({
+  icon,
+  label,
+  background,
+  iconColor,
+  onPress,
+}: {
+  icon: string;
+  label: string;
+  background: string;
+  iconColor: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.assistantQuickCard,
+        { backgroundColor: background, opacity: pressed ? 0.75 : 1 },
+      ]}
+    >
+      <View style={styles.assistantQuickIcon}>
+        <Icon name={icon} color={iconColor} size={23} />
+      </View>
+      <Text style={styles.assistantQuickLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function AssistantQuestion({
+  icon,
+  title,
+  subtitle,
+  onPress,
+}: {
+  icon: string;
+  title: string;
+  subtitle: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.assistantQuestionCard,
+        { opacity: pressed ? 0.72 : 1 },
+      ]}
+    >
+      <View style={styles.assistantQuestionIcon}>
+        <Icon name={icon} color="#713BA0" size={23} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.assistantQuestionTitle}>{title}</Text>
+        <Text style={styles.assistantQuestionSub}>{subtitle}</Text>
+      </View>
+      <Icon name="chevron-forward" color="#151744" size={20} />
+    </Pressable>
+  );
+}
+
+function AssistantResourceCard({
+  icon,
+  label,
+  background,
+  iconColor,
+  onPress,
+}: {
+  icon: string;
+  label: string;
+  background: string;
+  iconColor: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.assistantResourceCard,
+        { backgroundColor: background, opacity: pressed ? 0.75 : 1 },
+      ]}
+    >
+      <View style={[styles.assistantQuickIcon, { width: 42, height: 42 }]}>
+        <Icon name={icon} color={iconColor} size={22} />
+      </View>
+      <Text style={styles.assistantResourceLabel}>{label}</Text>
+    </Pressable>
   );
 }
 
 export function AssistantScreen() {
   const { state, dispatch } = useCare();
   const n = useNav();
-  const [faith, setFaith] = useState(false);
+  const [faith, setFaith] = useState(state.faith);
   const scroll = useRef<ScrollView>(null);
+  const firstName = state.name.trim().split(/\s+/)[0] || "there";
+
   const send = (text: string) => {
     const answer = previewReply(text, faith);
     dispatch({
@@ -252,112 +788,222 @@ export function AssistantScreen() {
       ],
     });
   };
+
+  const hasMessages = state.conversation.messages.length > 0;
+
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: C.paper }}
+      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={90}
+      keyboardVerticalOffset={0}
     >
-      <View style={styles.header}>
-        <View style={S.row}>
-          <View style={styles.avatar}>
-            <Icon name="chatbubbles-outline" color={C.white} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={S.h3}>EnVizion Assistant</Text>
-            <Text style={S.small}>A starting point for your questions</Text>
-          </View>
-          <Badge text="Guided support" />
+      <View style={styles.assistantTopbar}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          onPress={() => n.goBack()}
+          style={({ pressed }) => [
+            styles.assistantBack,
+            { opacity: pressed ? 0.65 : 1 },
+          ]}
+        >
+          <Icon name="arrow-back" color="#171943" size={22} />
+        </Pressable>
+
+        <View style={{ flex: 1 }}>
+          <Text style={styles.assistantTopTitle}>EnVizion Assistant</Text>
+          <Text style={styles.assistantTopSub}>Your AI caregiver companion</Text>
         </View>
-        <View style={S.between}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Talk to our team"
-            onPress={() => n.navigate("Handoff")}
-            style={{ minHeight: 44, justifyContent: "center" }}
-          >
-            <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-              Talk to our team →
-            </Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Emergency help"
-            onPress={() => n.navigate("Emergency")}
-            style={{ minHeight: 44, justifyContent: "center" }}
-          >
-            <Text style={[S.h3, { color: C.rose, fontSize: 13 }]}>
-              Emergency help
-            </Text>
-          </Pressable>
-        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open guided support"
+          onPress={() => n.navigate("Guide")}
+          style={({ pressed }) => [
+            styles.assistantGuideBadge,
+            { opacity: pressed ? 0.7 : 1 },
+          ]}
+        >
+          <Icon name="book-outline" color="#713BA0" size={18} />
+          <Text style={styles.assistantGuideText}>Guided support</Text>
+        </Pressable>
       </View>
+
       <ScrollView
         ref={scroll}
         style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 20, gap: 18 }}
+        contentContainerStyle={{ paddingBottom: 16 }}
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
         onContentSizeChange={() => {
-          if (state.conversation.messages.length)
-            scroll.current?.scrollToEnd({ animated: false });
+          if (hasMessages) scroll.current?.scrollToEnd({ animated: false });
         }}
       >
-        {state.conversation.messages.length === 0 ? (
-          <Fade>
-            <View style={{ paddingVertical: 10, gap: 12 }}>
-              <Text style={S.eyebrow}>A LITTLE GUIDANCE, WHEN YOU NEED IT</Text>
-              <Text
-                style={[
-                  S.title,
-                  { fontFamily: "DMSans_600SemiBold", fontSize: 29 },
-                ]}
-              >
-                What would make{`\n`}today a little easier?
+        {!hasMessages ? (
+          <>
+            <View style={styles.assistantHero}>
+              <View style={styles.assistantHeroGlowOne} />
+              <View style={styles.assistantHeroGlowTwo} />
+              <Text style={styles.assistantGreeting}>Hi {firstName} 👋</Text>
+              <Text style={styles.assistantHeroTitle}>
+                How can I support you today?
               </Text>
-              <Txt>
-                Find the right tool, prepare a question, or start a conversation
-                with the team.
-              </Txt>
+              <Text style={styles.assistantHeroBody}>
+                Get personalized guidance, practical tools, and faith-based
+                support for your caregiving journey.
+              </Text>
+
+              <AssistantRobot />
+
+              <View style={styles.assistantHeroPills}>
+                <AssistantFeaturePill
+                  icon="sparkles"
+                  label="Practical advice"
+                  tint="#7A3DB0"
+                />
+                <AssistantFeaturePill
+                  icon="book"
+                  label="Trusted resources"
+                  tint="#4A78D9"
+                />
+                <AssistantFeaturePill
+                  icon="heart"
+                  label="Faith-based encouragement"
+                  tint="#D75F7E"
+                  active={faith}
+                  onPress={() => setFaith((value) => !value)}
+                />
+              </View>
             </View>
-            <View style={styles.chips}>
-              {starters.map((starter) => (
-                <Pressable
-                  key={starter}
-                  accessibilityRole="button"
-                  onPress={() => send(starter)}
-                  style={styles.chip}
-                >
-                  <Text style={[S.body, { color: C.ink }]}>{starter}</Text>
-                </Pressable>
-              ))}
+
+            <View style={styles.assistantQuickGrid}>
+              <AssistantQuickCard
+                icon="document-text-outline"
+                label={"Summarize\ninformation"}
+                background="#F4EEFF"
+                iconColor="#7A3DB0"
+                onPress={() => n.navigate("Summary")}
+              />
+              <AssistantQuickCard
+                icon="medkit-outline"
+                label={"Medication\nhelp"}
+                background="#EEF5FF"
+                iconColor="#4E7EE8"
+                onPress={() => n.navigate("Medications")}
+              />
+              <AssistantQuickCard
+                icon="calendar-outline"
+                label={"Prepare\nfor a visit"}
+                background="#EEF9F0"
+                iconColor="#25A768"
+                onPress={() => n.navigate("Appointments")}
+              />
+              <AssistantQuickCard
+                icon="home-outline"
+                label={"Plan transition\nhome"}
+                background="#FFF2E8"
+                iconColor="#E6845F"
+                onPress={() => n.navigate("Transition")}
+              />
             </View>
-          </Fade>
+
+            <View style={styles.assistantSectionHeader}>
+              <Text style={styles.assistantSectionTitle}>Popular questions</Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => n.navigate("Guide")}
+                style={{ flexDirection: "row", alignItems: "center", gap: 2 }}
+              >
+                <Text style={styles.assistantViewAll}>View all</Text>
+                <Icon name="chevron-forward" color="#713BA0" size={15} />
+              </Pressable>
+            </View>
+
+            <View style={styles.assistantQuestionList}>
+              <AssistantQuestion
+                icon="medical-outline"
+                title="How do I prepare for a doctor’s visit?"
+                subtitle="Get a step-by-step checklist"
+                onPress={() => send("How do I prepare for a doctor’s visit?")}
+              />
+              <AssistantQuestion
+                icon="medkit-outline"
+                title="How can I organize medications?"
+                subtitle="Tips, reminders and safety guidelines"
+                onPress={() => send("How can I organize medications?")}
+              />
+              <AssistantQuestion
+                icon="home-outline"
+                title="What should I prepare before going home?"
+                subtitle="Discharge planning and home care tips"
+                onPress={() =>
+                  send("What should I prepare before going home from the hospital?")
+                }
+              />
+            </View>
+
+            <View style={styles.assistantResourceGrid}>
+              <AssistantResourceCard
+                icon="chatbubble-outline"
+                label="Talk to our team"
+                background="#FAF6FF"
+                iconColor="#713BA0"
+                onPress={() => n.navigate("Handoff")}
+              />
+              <AssistantResourceCard
+                icon="call-outline"
+                label="Emergency help"
+                background="#FFF2F2"
+                iconColor="#D34E67"
+                onPress={() => n.navigate("Emergency")}
+              />
+              <AssistantResourceCard
+                icon="book-outline"
+                label="Caregiving resources"
+                background="#F7F4FF"
+                iconColor="#7552B3"
+                onPress={() => n.navigate("Resources")}
+              />
+              <AssistantResourceCard
+                icon="people-outline"
+                label="Community support"
+                background="#EEFAF8"
+                iconColor="#2DA88E"
+                onPress={() => n.navigate("Handoff")}
+              />
+            </View>
+          </>
         ) : (
-          state.conversation.messages.map((message) => (
-            <Bubble key={message.id} message={message} />
-          ))
+          <View style={{ paddingHorizontal: 20, paddingTop: 8, gap: 14 }}>
+            <View style={styles.assistantChatIntro}>
+              <View style={styles.assistantChatOrb}>
+                <Icon name="sparkles" color="#FFFFFF" size={21} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[S.h3, { color: "#171943" }]}>
+                  I’m here with you.
+                </Text>
+                <Text style={[S.small, { marginTop: 2, color: "#777589" }]}>
+                  Ask a follow-up or choose another caregiving topic.
+                </Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Start a new assistant conversation"
+                onPress={() => dispatch({ type: "conversation-clear" })}
+                style={{ padding: 8 }}
+              >
+                <Icon name="refresh-outline" color="#713BA0" size={21} />
+              </Pressable>
+            </View>
+
+            {state.conversation.messages.map((message) => (
+              <Bubble key={message.id} message={message} />
+            ))}
+          </View>
         )}
-        <View style={[S.row, { alignItems: "flex-start" }]}>
-          <Icon name="information-circle-outline" size={18} color={C.muted} />
-          <Txt style={[S.small, { flex: 1 }]}>
-            Scripted demonstration. Live AI is not connected. Replies cannot
-            assess symptoms, diagnose, or prescribe. For a possible emergency,
-            call your local emergency number.
-          </Txt>
-        </View>
       </ScrollView>
-      <View style={[S.between, { paddingHorizontal: 20, paddingVertical: 6 }]}>
-        <Text style={[S.small, { flex: 1 }]}>
-          Include spiritual encouragement
-        </Text>
-        <Switch
-          accessibilityLabel="Include spiritual encouragement in assistant replies"
-          value={faith}
-          onValueChange={setFaith}
-          trackColor={{ true: C.purple }}
-        />
-      </View>
+
       <Composer onSend={send} />
     </KeyboardAvoidingView>
   );
