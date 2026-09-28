@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f7f2f8;font-family:Arial,sans-serif;color:#2e2436;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f2f8;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:22px;padding:32px;">
+            <tr>
+              <td>
+                <div style="font-size:14px;letter-spacing:2px;font-weight:700;color:#8a3da1;margin-bottom:12px;">ENVIZION LIFE</div>
+                <h1 style="font-size:28px;line-height:1.2;margin:0 0 18px;">You’ve been invited to a care team</h1>
+
+                <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+                  Hi {{ .Data.full_name }},
+                </p>
+
+                <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">
+                  <strong>{{ .Data.invited_by_name }}</strong> invited you to join the EnVizion Life care space for
+                  <strong>{{ .Data.care_recipient_name }}</strong>.
+                </p>
+
+                <p style="font-size:16px;line-height:1.7;margin:0 0 22px;">
+                  Your access role will be <strong>{{ .Data.care_access_role }}</strong>. Once you accept, you can sign in to EnVizion Life and access the shared care information available to your role.
+                </p>
+
+                <p style="margin:0 0 24px;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#843a9b;color:#ffffff;text-decoration:none;font-weight:700;padding:14px 22px;border-radius:14px;">
+                    Accept care team invitation
+                  </a>
+                </p>
+
+                <p style="font-size:13px;line-height:1.6;color:#756a7d;margin:0;">
+                  If you were not expecting this invitation, you can ignore this email.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
