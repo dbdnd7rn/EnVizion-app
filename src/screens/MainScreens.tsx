@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
@@ -33,6 +33,109 @@ import {
 } from "../ui";
 export const useNav = () =>
   useNavigation<NativeStackNavigationProp<RootStack>>();
+function HomeReveal({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(18)).current;
+
+  useEffect(() => {
+    let active = true;
+    let animation: Animated.CompositeAnimation | null = null;
+
+    AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
+      if (!active || reduced) {
+        opacity.setValue(1);
+        translateY.setValue(0);
+        return;
+      }
+
+      animation = Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 430,
+          delay,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 430,
+          delay,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ]);
+      animation.start();
+    });
+
+    return () => {
+      active = false;
+      animation?.stop();
+    };
+  }, [delay, opacity, translateY]);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
+      {children}
+    </Animated.View>
+  );
+}
+
+function HomeFloat({
+  children,
+  distance = 5,
+  duration = 1800,
+}: {
+  children: React.ReactNode;
+  distance?: number;
+  duration?: number;
+}) {
+  const y = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let active = true;
+    let loop: Animated.CompositeAnimation | null = null;
+
+    AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
+      if (!active || reduced) return;
+
+      loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(y, {
+            toValue: -distance,
+            duration,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+          Animated.timing(y, {
+            toValue: 0,
+            duration,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+        ]),
+      );
+      loop.start();
+    });
+
+    return () => {
+      active = false;
+      loop?.stop();
+    };
+  }, [distance, duration, y]);
+
+  return (
+    <Animated.View style={{ transform: [{ translateY: y }] }}>
+      {children}
+    </Animated.View>
+  );
+}
+
 export function HomeScreen() {
   const n = useNav();
   const { state } = useCare();
@@ -46,7 +149,8 @@ export function HomeScreen() {
     Number(state.medications.length > 0 && !doseRecorded);
   const upcomingCount = state.appointment.date.trim() ? 1 : 0;
   const coordinationCount = Number(!state.careRecipientId);
-  const displayName = state.name.trim() || "Caregiver";
+  const fullName = state.name.trim() || "Caregiver";
+  const displayName = fullName.split(/\s+/)[0];
   const profileInitial = displayName.slice(0, 1).toUpperCase();
 
   const hour = new Date().getHours();
@@ -77,447 +181,498 @@ export function HomeScreen() {
 
   return (
     <Page>
-      <Fade>
-        <View style={S.between}>
-          <Brand />
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <NotificationBell onPress={() => n.navigate("Notifications")} />
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Open your profile"
-              onPress={() => n.navigate("Profile")}
-              style={({ pressed }) => ({
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                backgroundColor: "#F1E8F8",
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? 0.72 : 1,
-              })}
-            >
-              <Text
-                style={{
-                  fontFamily: "DMSans_600SemiBold",
-                  fontSize: 20,
-                  color: "#6F2F8E",
-                }}
+      <View style={{ gap: 19 }}>
+        <HomeReveal>
+          <View style={S.between}>
+            <Brand />
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <NotificationBell onPress={() => n.navigate("Notifications")} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Open your profile"
+                onPress={() => n.navigate("Profile")}
+                style={({ pressed }) => ({
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: "#F1E8F8",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: pressed ? 0.72 : 1,
+                  transform: [{ scale: pressed ? 0.96 : 1 }],
+                })}
               >
-                {profileInitial}
-              </Text>
-            </Pressable>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_600SemiBold",
+                    fontSize: 20,
+                    color: "#6F2F8E",
+                  }}
+                >
+                  {profileInitial}
+                </Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
+        </HomeReveal>
 
-        <View
-          style={{
-            position: "relative",
-            minHeight: 232,
-            borderRadius: 28,
-            overflow: "hidden",
-            backgroundColor: "#FFFDFC",
-            marginHorizontal: -2,
-          }}
-        >
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              left: 125,
-              right: -62,
-              bottom: -4,
-              opacity: 0.75,
-            }}
-          >
-            <Landscape height={205} />
-          </View>
-
+        <HomeReveal delay={65}>
           <View
             style={{
-              gap: 8,
-              paddingTop: 6,
-              paddingHorizontal: 4,
-              maxWidth: 310,
+              position: "relative",
+              minHeight: 224,
+              borderRadius: 30,
+              overflow: "hidden",
+              backgroundColor: "#FFFDFC",
+              marginHorizontal: -2,
             }}
           >
-            <Text
-              style={[
-                S.eyebrow,
-                { color: "#7A3F96", fontSize: 11, letterSpacing: 2.8 },
-              ]}
-            >
-              YOUR CARE COMPANION
-            </Text>
-            <Text
-              accessibilityRole="header"
+            <View
+              pointerEvents="none"
               style={{
-                fontFamily: "DMSans_700Bold",
-                fontSize: 43,
-                lineHeight: 50,
-                letterSpacing: -1.2,
-                color: "#18163C",
+                position: "absolute",
+                left: 116,
+                right: -66,
+                bottom: -8,
+                opacity: 0.78,
               }}
             >
-              {greeting},{"\n"}{displayName}.
-            </Text>
-            <Text
+              <HomeFloat distance={4} duration={3300}>
+                <Landscape height={205} />
+              </HomeFloat>
+            </View>
+
+            <View
               style={{
-                fontFamily: "DMSans_400Regular",
-                fontSize: 18,
-                lineHeight: 25,
-                color: "#77758B",
-                maxWidth: 275,
+                gap: 8,
+                paddingTop: 7,
+                paddingHorizontal: 4,
+                maxWidth: 310,
               }}
             >
-              Here for a calmer, more confident day of care.
-            </Text>
-          </View>
-        </View>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={priority.title}
-          onPress={priority.onPress}
-          style={({ pressed }) => ({
-            position: "relative",
-            overflow: "hidden",
-            borderRadius: 27,
-            backgroundColor: "#693083",
-            padding: 24,
-            minHeight: 210,
-            opacity: pressed ? 0.88 : 1,
-            transform: [{ scale: pressed ? 0.992 : 1 }],
-            shadowColor: "#5B226F",
-            shadowOpacity: 0.2,
-            shadowRadius: 20,
-            shadowOffset: { width: 0, height: 10 },
-            elevation: 5,
-          })}
-        >
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              width: 230,
-              height: 230,
-              borderRadius: 115,
-              right: -78,
-              top: -102,
-              backgroundColor: "#FFFFFF0D",
-            }}
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              width: 150,
-              height: 150,
-              borderRadius: 75,
-              right: 65,
-              bottom: -104,
-              backgroundColor: "#FFFFFF0A",
-            }}
-          />
-
-          <Text
-            style={[
-              S.eyebrow,
-              {
-                color: "#F2DDF8",
-                fontSize: 11,
-                letterSpacing: 2.8,
-                marginBottom: 16,
-              },
-            ]}
-          >
-            YOUR NEXT STEP
-          </Text>
-
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-            <View style={{ flex: 1, gap: 8 }}>
               <Text
+                style={[
+                  S.eyebrow,
+                  { color: "#7A3F96", fontSize: 11, letterSpacing: 2.8 },
+                ]}
+              >
+                YOUR CARE COMPANION
+              </Text>
+              <Text
+                accessibilityRole="header"
                 style={{
                   fontFamily: "DMSans_700Bold",
-                  fontSize: 32,
-                  lineHeight: 38,
-                  letterSpacing: -0.7,
-                  color: C.white,
-                  maxWidth: 245,
+                  fontSize: 42,
+                  lineHeight: 49,
+                  letterSpacing: -1.15,
+                  color: "#17153A",
                 }}
               >
-                {priority.title}
+                {greeting},{"\n"}{displayName}.
               </Text>
               <Text
                 style={{
                   fontFamily: "DMSans_400Regular",
-                  fontSize: 15,
-                  lineHeight: 22,
-                  color: "#EEE1F3",
-                  maxWidth: 260,
+                  fontSize: 18,
+                  lineHeight: 25,
+                  color: "#77758B",
+                  maxWidth: 280,
                 }}
               >
-                {priority.body}
+                Here for a calmer, more confident day of care.
               </Text>
             </View>
-
-            <View style={{ alignItems: "center", gap: 18 }}>
-              <View
-                style={{
-                  width: 74,
-                  height: 74,
-                  borderRadius: 23,
-                  backgroundColor: "#F7EDFB",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transform: [{ rotate: "4deg" }],
-                }}
-              >
-                <Icon name={priority.icon} size={36} color="#8E49A8" />
-              </View>
-              <View
-                style={{
-                  width: 54,
-                  height: 54,
-                  borderRadius: 27,
-                  backgroundColor: C.white,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="arrow-forward" size={26} color="#6E3288" />
-              </View>
-            </View>
           </View>
-        </Pressable>
+        </HomeReveal>
 
-        <Card
-          style={{
-            borderRadius: 25,
-            padding: 16,
-            gap: 14,
-            backgroundColor: "#FBF8FD",
-            borderColor: "#EDE4F1",
-          }}
-        >
-          <View style={S.between}>
+        <HomeReveal delay={120}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={priority.title}
+            onPress={priority.onPress}
+            style={({ pressed }) => ({
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 28,
+              backgroundColor: "#63307D",
+              paddingHorizontal: 23,
+              paddingVertical: 22,
+              minHeight: 205,
+              opacity: pressed ? 0.9 : 1,
+              transform: [{ scale: pressed ? 0.988 : 1 }],
+              shadowColor: "#5A246C",
+              shadowOpacity: 0.2,
+              shadowRadius: 20,
+              shadowOffset: { width: 0, height: 10 },
+              elevation: 5,
+            })}
+          >
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                width: 240,
+                height: 240,
+                borderRadius: 120,
+                right: -104,
+                top: -124,
+                backgroundColor: "#FFFFFF0C",
+              }}
+            />
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                width: 154,
+                height: 154,
+                borderRadius: 77,
+                right: 52,
+                bottom: -105,
+                backgroundColor: "#FFFFFF0A",
+              }}
+            />
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                width: 78,
+                height: 78,
+                borderRadius: 39,
+                left: -22,
+                bottom: -28,
+                backgroundColor: "#B277CA17",
+              }}
+            />
+
             <Text
               style={[
                 S.eyebrow,
-                { color: "#72408F", fontSize: 11, letterSpacing: 2.5 },
+                {
+                  color: "#F1DAF7",
+                  fontSize: 11,
+                  letterSpacing: 2.8,
+                  marginBottom: 14,
+                },
               ]}
             >
-              TODAY AT A GLANCE
+              YOUR NEXT STEP
             </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => n.navigate("CarePlan")}
-              style={{ minHeight: 38, justifyContent: "center" }}
+
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+              <View style={{ flex: 1, gap: 8 }}>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_700Bold",
+                    fontSize: 31,
+                    lineHeight: 37,
+                    letterSpacing: -0.65,
+                    color: C.white,
+                    maxWidth: 240,
+                  }}
+                >
+                  {priority.title}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_400Regular",
+                    fontSize: 15,
+                    lineHeight: 22,
+                    color: "#EEE2F2",
+                    maxWidth: 258,
+                  }}
+                >
+                  {priority.body}
+                </Text>
+              </View>
+
+              <View style={{ width: 76, alignItems: "center", gap: 17 }}>
+                <HomeFloat distance={6} duration={1550}>
+                  <View
+                    style={{
+                      width: 72,
+                      height: 72,
+                      borderRadius: 23,
+                      backgroundColor: "#F7EDFB",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transform: [{ rotate: "4deg" }],
+                    }}
+                  >
+                    <Icon name={priority.icon} size={35} color="#9B58B3" />
+                  </View>
+                </HomeFloat>
+                <View
+                  style={{
+                    width: 53,
+                    height: 53,
+                    borderRadius: 27,
+                    backgroundColor: C.white,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    shadowColor: "#2A1831",
+                    shadowOpacity: 0.08,
+                    shadowRadius: 10,
+                    shadowOffset: { width: 0, height: 4 },
+                    elevation: 2,
+                  }}
+                >
+                  <Icon name="arrow-forward" size={25} color="#6E3288" />
+                </View>
+              </View>
+            </View>
+          </Pressable>
+        </HomeReveal>
+
+        <HomeReveal delay={175}>
+          <Card
+            style={{
+              borderRadius: 25,
+              padding: 15,
+              gap: 13,
+              backgroundColor: "#FBF8FD",
+              borderColor: "#EDE4F1",
+            }}
+          >
+            <View style={S.between}>
+              <Text
+                style={[
+                  S.eyebrow,
+                  { color: "#72408F", fontSize: 10.5, letterSpacing: 2.4 },
+                ]}
+              >
+                TODAY AT A GLANCE
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => n.navigate("CarePlan")}
+                style={{ minHeight: 36, justifyContent: "center" }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "DMSans_600SemiBold",
+                    fontSize: 12,
+                    color: "#74328F",
+                  }}
+                >
+                  View details →
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <HomeStat
+                icon="alert-circle-outline"
+                iconColor="#C53E6E"
+                iconBackground="#FFF0F4"
+                value={attentionCount}
+                label="Needs attention"
+              />
+              <HomeStat
+                icon="calendar-outline"
+                iconColor="#74328F"
+                iconBackground="#F1E9FA"
+                value={upcomingCount}
+                label="Overdue tasks"
+              />
+              <HomeStat
+                icon="people-outline"
+                iconColor="#74328F"
+                iconBackground="#F1E9FA"
+                value={coordinationCount}
+                label="Coordination"
+              />
+            </View>
+          </Card>
+        </HomeReveal>
+
+        <HomeReveal delay={230}>
+          <View style={{ gap: 13 }}>
+            <Section
+              title="Quick actions"
+              action="See all tools"
+              onPress={() => n.navigate("Main", { screen: "Toolkit" })}
+            />
+
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <HomeActionCard
+                title="Check-in"
+                subtitle="Record health"
+                icon="pulse-outline"
+                background="#F6F0FB"
+                iconBackground="#EEE5F8"
+                onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
+              />
+              <HomeActionCard
+                title="Medications"
+                subtitle="Open log"
+                icon="medical-outline"
+                background="#FFF1F5"
+                iconBackground="#FFE4EC"
+                iconColor="#C43873"
+                onPress={() => n.navigate("Medications")}
+              />
+              <HomeActionCard
+                title="Calendar"
+                subtitle="Visits & tasks"
+                icon="calendar-outline"
+                background="#F6F0FB"
+                iconBackground="#EEE5F8"
+                onPress={() => n.navigate("CareCalendar")}
+              />
+              <HomeActionCard
+                title="Care plan"
+                subtitle="See today"
+                icon="document-text-outline"
+                background="#FFF3F1"
+                iconBackground="#FFE8E5"
+                iconColor="#C64D69"
+                onPress={() => n.navigate("CarePlan")}
+              />
+            </View>
+          </View>
+        </HomeReveal>
+
+        <HomeReveal delay={285}>
+          <Card
+            onPress={() => n.navigate("Assistant")}
+            label="Ask EnVizion Assistant"
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 25,
+              minHeight: 138,
+              padding: 20,
+              backgroundColor: "#F5EEFA",
+              borderColor: "#E5D8EE",
+            }}
+          >
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                width: 150,
+                height: 150,
+                borderRadius: 75,
+                right: -58,
+                bottom: -83,
+                backgroundColor: "#E5D3F2",
+              }}
+            />
+            <View style={{ gap: 8, paddingRight: 58 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Icon name="sparkles-outline" color="#B34E9A" size={19} />
+                <Text
+                  style={[
+                    S.eyebrow,
+                    { color: "#7B4196", fontSize: 10, letterSpacing: 2.2 },
+                  ]}
+                >
+                  ENVIZION ASSISTANT
+                </Text>
+              </View>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 21,
+                  lineHeight: 27,
+                  color: "#18163C",
+                }}
+              >
+                A question is a good place to start.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 13,
+                  lineHeight: 19,
+                  color: "#77758B",
+                }}
+              >
+                Get guidance, find resources, or bring up a concern.
+              </Text>
+            </View>
+            <View
+              style={{
+                position: "absolute",
+                right: 18,
+                top: 44,
+              }}
             >
+              <HomeFloat distance={4} duration={1400}>
+                <View
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 24,
+                    backgroundColor: C.white,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    shadowColor: "#4B3155",
+                    shadowOpacity: 0.06,
+                    shadowRadius: 9,
+                    shadowOffset: { width: 0, height: 4 },
+                    elevation: 2,
+                  }}
+                >
+                  <Icon name="arrow-forward" size={23} color="#74328F" />
+                </View>
+              </HomeFloat>
+            </View>
+          </Card>
+        </HomeReveal>
+
+        <HomeReveal delay={340}>
+          <Card
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              minHeight: 146,
+              borderRadius: 25,
+              padding: 20,
+              backgroundColor: "#FFFDFD",
+              borderColor: "#F0E9ED",
+            }}
+          >
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                left: 178,
+                right: -42,
+                bottom: -25,
+                opacity: 0.62,
+              }}
+            >
+              <HomeFloat distance={3} duration={3600}>
+                <Landscape height={116} />
+              </HomeFloat>
+            </View>
+            <View style={{ maxWidth: 250, gap: 10 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Icon name="heart" color="#EF8FA9" size={18} />
+                <Text
+                  style={[
+                    S.eyebrow,
+                    { color: "#824A9D", fontSize: 10, letterSpacing: 2.1 },
+                  ]}
+                >
+                  YOU’RE MAKING A DIFFERENCE
+                </Text>
+              </View>
               <Text
                 style={{
                   fontFamily: "DMSans_600SemiBold",
-                  fontSize: 12,
-                  color: "#74328F",
+                  fontSize: 21,
+                  lineHeight: 28,
+                  color: "#18163C",
                 }}
               >
-                View details →
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <HomeStat
-              icon="alert-circle-outline"
-              iconColor="#C53E6E"
-              iconBackground="#FFF0F4"
-              value={attentionCount}
-              label="Needs attention"
-            />
-            <HomeStat
-              icon="calendar-outline"
-              iconColor="#74328F"
-              iconBackground="#F1E9FA"
-              value={upcomingCount}
-              label="Upcoming"
-            />
-            <HomeStat
-              icon="people-outline"
-              iconColor="#74328F"
-              iconBackground="#F1E9FA"
-              value={coordinationCount}
-              label="Coordination"
-            />
-          </View>
-        </Card>
-
-        <View style={{ gap: 14 }}>
-          <Section
-            title="Quick actions"
-            action="See all tools"
-            onPress={() => n.navigate("Main", { screen: "Toolkit" })}
-          />
-
-          <View style={{ flexDirection: "row", gap: 9 }}>
-            <HomeActionCard
-              title="Check-in"
-              subtitle="Record health"
-              icon="pulse-outline"
-              background="#F6F0FB"
-              iconBackground="#EEE5F8"
-              onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
-            />
-            <HomeActionCard
-              title="Medications"
-              subtitle="Open log"
-              icon="medical-outline"
-              background="#FFF1F5"
-              iconBackground="#FFE4EC"
-              iconColor="#C43873"
-              onPress={() => n.navigate("Medications")}
-            />
-            <HomeActionCard
-              title="Calendar"
-              subtitle="Visits & tasks"
-              icon="calendar-outline"
-              background="#F6F0FB"
-              iconBackground="#EEE5F8"
-              onPress={() => n.navigate("CareCalendar")}
-            />
-            <HomeActionCard
-              title="Care plan"
-              subtitle="See today"
-              icon="document-text-outline"
-              background="#FFF3F1"
-              iconBackground="#FFE8E5"
-              iconColor="#C64D69"
-              onPress={() => n.navigate("CarePlan")}
-            />
-          </View>
-        </View>
-
-        <Card
-          onPress={() => n.navigate("Assistant")}
-          label="Ask EnVizion Assistant"
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            borderRadius: 25,
-            minHeight: 142,
-            padding: 20,
-            backgroundColor: "#F5EEFA",
-            borderColor: "#E5D8EE",
-          }}
-        >
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              width: 140,
-              height: 140,
-              borderRadius: 70,
-              right: -54,
-              bottom: -74,
-              backgroundColor: "#E6D5F3",
-            }}
-          />
-          <View style={{ gap: 9, paddingRight: 54 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Icon name="sparkles-outline" color="#B34E9A" size={19} />
-              <Text
-                style={[
-                  S.eyebrow,
-                  { color: "#7B4196", fontSize: 10, letterSpacing: 2.2 },
-                ]}
-              >
-                ENVIZION ASSISTANT
+                “Small steps today{"\n"}create brighter tomorrows.”
               </Text>
             </View>
-            <Text
-              style={{
-                fontFamily: "DMSans_700Bold",
-                fontSize: 22,
-                lineHeight: 28,
-                color: "#18163C",
-              }}
-            >
-              A question is a good place to start.
-            </Text>
-            <Text
-              style={{
-                fontFamily: "DMSans_400Regular",
-                fontSize: 13,
-                lineHeight: 19,
-                color: "#77758B",
-              }}
-            >
-              Get guidance, find resources, or bring up a concern.
-            </Text>
-          </View>
-          <View
-            style={{
-              position: "absolute",
-              right: 18,
-              top: 45,
-              width: 48,
-              height: 48,
-              borderRadius: 24,
-              backgroundColor: C.white,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="arrow-forward" size={23} color="#74328F" />
-          </View>
-        </Card>
-
-        <Card
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            minHeight: 154,
-            borderRadius: 25,
-            padding: 20,
-            backgroundColor: "#FFFDFD",
-            borderColor: "#F0E9ED",
-          }}
-        >
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              left: 180,
-              right: -42,
-              bottom: -22,
-              opacity: 0.62,
-            }}
-          >
-            <Landscape height={120} />
-          </View>
-          <View style={{ maxWidth: 250, gap: 10 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Icon name="heart" color="#EF8FA9" size={18} />
-              <Text
-                style={[
-                  S.eyebrow,
-                  { color: "#824A9D", fontSize: 10, letterSpacing: 2.1 },
-                ]}
-              >
-                YOU’RE MAKING A DIFFERENCE
-              </Text>
-            </View>
-            <Text
-              style={{
-                fontFamily: "DMSans_600SemiBold",
-                fontSize: 21,
-                lineHeight: 28,
-                color: "#18163C",
-              }}
-            >
-              “Small steps today{"\n"}create brighter tomorrows.”
-            </Text>
-          </View>
-        </Card>
-      </Fade>
+          </Card>
+        </HomeReveal>
+      </View>
     </Page>
   );
 }
@@ -541,16 +696,18 @@ function HomeStat({
         flex: 1,
         minWidth: 0,
         borderRadius: 19,
-        paddingHorizontal: 10,
-        paddingVertical: 13,
+        paddingHorizontal: 9,
+        paddingVertical: 12,
         backgroundColor: C.white,
-        gap: 8,
+        gap: 7,
+        borderWidth: 1,
+        borderColor: "#F1EBF3",
       }}
     >
       <View
         style={{
-          width: 36,
-          height: 36,
+          width: 35,
+          height: 35,
           borderRadius: 13,
           backgroundColor: iconBackground,
           alignItems: "center",
@@ -562,8 +719,8 @@ function HomeStat({
       <Text
         style={{
           fontFamily: "DMSans_700Bold",
-          fontSize: 22,
-          lineHeight: 26,
+          fontSize: 21,
+          lineHeight: 25,
           color: "#18163C",
         }}
       >
@@ -573,8 +730,8 @@ function HomeStat({
         numberOfLines={2}
         style={{
           fontFamily: "DMSans_400Regular",
-          fontSize: 11,
-          lineHeight: 15,
+          fontSize: 10.5,
+          lineHeight: 14,
           color: "#77758B",
         }}
       >
@@ -609,37 +766,38 @@ function HomeActionCard({
       style={({ pressed }) => ({
         flex: 1,
         minWidth: 0,
-        minHeight: 126,
+        minHeight: 122,
         borderRadius: 21,
         backgroundColor: background,
-        padding: 11,
-        gap: 9,
+        paddingHorizontal: 9,
+        paddingVertical: 11,
+        gap: 8,
         borderWidth: 1,
         borderColor: "#EEE7F0",
-        opacity: pressed ? 0.74 : 1,
-        transform: [{ scale: pressed ? 0.985 : 1 }],
+        opacity: pressed ? 0.76 : 1,
+        transform: [{ scale: pressed ? 0.965 : 1 }],
       })}
     >
       <View
         style={{
-          width: 42,
-          height: 42,
-          borderRadius: 16,
+          width: 40,
+          height: 40,
+          borderRadius: 15,
           backgroundColor: iconBackground,
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={23} color={iconColor} />
+        <Icon name={icon} size={22} color={iconColor} />
       </View>
-      <View style={{ gap: 3 }}>
+      <View style={{ gap: 2 }}>
         <Text
           numberOfLines={1}
           adjustsFontSizeToFit
           style={{
             fontFamily: "DMSans_600SemiBold",
-            fontSize: 13,
-            lineHeight: 18,
+            fontSize: 12.5,
+            lineHeight: 17,
             color: "#18163C",
           }}
         >
@@ -649,8 +807,8 @@ function HomeActionCard({
           numberOfLines={2}
           style={{
             fontFamily: "DMSans_400Regular",
-            fontSize: 10.5,
-            lineHeight: 14,
+            fontSize: 10,
+            lineHeight: 13,
             color: "#77758B",
           }}
         >
