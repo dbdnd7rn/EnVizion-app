@@ -654,7 +654,7 @@ export function HomeScreen() {
                 <HomeLandscape height={116} />
               </HomeFloat>
             </View>
-            <View style={{ maxWidth: 250, gap: 10 }}>
+            <View style={{ maxWidth: 275, gap: 10 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Icon name="heart" color="#EF8FA9" size={18} />
                 <Text
@@ -1661,7 +1661,7 @@ export function LibraryScreen() {
             overflow: "hidden",
           }}
         >
-          <View style={{ gap: 8, maxWidth: 255, paddingTop: 4 }}>
+          <View style={{ gap: 8, maxWidth: 310, paddingTop: 4, paddingRight: 72 }}>
             <Text
               style={[
                 S.eyebrow,
@@ -1674,8 +1674,8 @@ export function LibraryScreen() {
               accessibilityRole="header"
               style={{
                 fontFamily: "DMSans_700Bold",
-                fontSize: 42,
-                lineHeight: 47,
+                fontSize: 39,
+                lineHeight: 44,
                 letterSpacing: -1.05,
                 color: "#141238",
               }}
@@ -1695,116 +1695,20 @@ export function LibraryScreen() {
             </Text>
           </View>
 
-          <HomeFloat distance={4} duration={3000}>
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                right: -12,
-                top: 3,
-                width: 190,
-                height: 190,
-              }}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  width: 154,
-                  height: 154,
-                  borderRadius: 77,
-                  right: 0,
-                  top: 5,
-                  backgroundColor: "#F1E9FA",
-                }}
-              />
-              <View
-                style={{
-                  position: "absolute",
-                  width: 31,
-                  height: 80,
-                  borderRadius: 18,
-                  right: 15,
-                  top: 27,
-                  backgroundColor: "#CBB5E5",
-                  transform: [{ rotate: "22deg" }],
-                }}
-              />
-              <View
-                style={{
-                  position: "absolute",
-                  width: 29,
-                  height: 72,
-                  borderRadius: 18,
-                  right: 50,
-                  top: 16,
-                  backgroundColor: "#BCA0D9",
-                  transform: [{ rotate: "-14deg" }],
-                }}
-              />
-              <View
-                style={{
-                  position: "absolute",
-                  width: 88,
-                  height: 88,
-                  borderRadius: 44,
-                  right: 42,
-                  top: 27,
-                  backgroundColor: "#49324F",
-                }}
-              />
-              <View
-                style={{
-                  position: "absolute",
-                  width: 59,
-                  height: 59,
-                  borderRadius: 30,
-                  right: 54,
-                  top: 38,
-                  backgroundColor: "#F0C7B5",
-                }}
-              />
-              <View
-                style={{
-                  position: "absolute",
-                  width: 115,
-                  height: 72,
-                  borderTopLeftRadius: 48,
-                  borderTopRightRadius: 48,
-                  right: 15,
-                  bottom: 4,
-                  backgroundColor: "#FFF9F5",
-                }}
-              />
-              <View
-                style={{
-                  position: "absolute",
-                  width: 84,
-                  height: 55,
-                  borderRadius: 9,
-                  right: 61,
-                  bottom: 15,
-                  backgroundColor: "#66317F",
-                  transform: [{ rotate: "-7deg" }],
-                  borderWidth: 3,
-                  borderColor: "#814A99",
-                }}
-              />
-              <View
-                style={{
-                  position: "absolute",
-                  width: 33,
-                  height: 33,
-                  borderRadius: 10,
-                  right: 12,
-                  bottom: 38,
-                  backgroundColor: C.white,
-                  borderWidth: 2,
-                  borderColor: "#E8DDEB",
-                }}
-              />
-            </View>
-          </HomeFloat>
-        </View>
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              right: -6,
+              top: 0,
+              width: 184,
+              height: 205,
+            }}
+          >
+            <HomeFloat distance={4} duration={3000}>
+              <LearnHeroGraphic />
+            </HomeFloat>
+          </View>
 
         <View
           style={[
@@ -1954,87 +1858,20 @@ export function LibraryScreen() {
               </View>
             </View>
 
-            <HomeFloat distance={4} duration={2400}>
-              <View
-                pointerEvents="none"
-                style={{
-                  position: "absolute",
-                  right: -4,
-                  bottom: -5,
-                  width: 150,
-                  height: 150,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <View
-                  style={{
-                    position: "absolute",
-                    width: 70,
-                    height: 118,
-                    borderRadius: 35,
-                    left: 4,
-                    bottom: 0,
-                    backgroundColor: "#D6C2EB",
-                    transform: [{ rotate: "20deg" }],
-                  }}
-                />
-                <View
-                  style={{
-                    position: "absolute",
-                    width: 68,
-                    height: 110,
-                    borderRadius: 34,
-                    right: 2,
-                    top: 8,
-                    backgroundColor: "#E5D7F2",
-                    transform: [{ rotate: "-19deg" }],
-                  }}
-                />
-                <View
-                  style={{
-                    width: 96,
-                    height: 118,
-                    borderRadius: 14,
-                    backgroundColor: "#FFFDFE",
-                    padding: 18,
-                    gap: 9,
-                    transform: [{ rotate: "-5deg" }],
-                    shadowColor: "#5A2E6E",
-                    shadowOpacity: 0.08,
-                    shadowRadius: 10,
-                    shadowOffset: { width: 0, height: 5 },
-                    elevation: 2,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 16,
-                      alignSelf: "center",
-                      backgroundColor: "#E6D4F3",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon name="heart" size={17} color="#9862B0" />
-                  </View>
-                  {[84, 96, 70, 54].map((w, index) => (
-                    <View
-                      key={index}
-                      style={{
-                        width: w,
-                        maxWidth: "100%",
-                        height: 5,
-                        borderRadius: 3,
-                        backgroundColor: "#DCC9EA",
-                      }}
-                    />
-                  ))}
-                </View>
-              </View>
-            </HomeFloat>
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                right: -2,
+                bottom: 0,
+                width: 158,
+                height: 170,
+              }}
+            >
+              <HomeFloat distance={4} duration={2400}>
+                <LearnFeaturedGraphic />
+              </HomeFloat>
+            </View>
           </Pressable>
         )}
 
@@ -2109,8 +1946,8 @@ export function LibraryScreen() {
                   numberOfLines={2}
                   style={{
                     fontFamily: "DMSans_600SemiBold",
-                    fontSize: 11.5,
-                    lineHeight: 15,
+                    fontSize: 10.8,
+                    lineHeight: 14,
                     textAlign: "center",
                     color: C.ink,
                   }}
@@ -2249,90 +2086,11 @@ export function LibraryScreen() {
                         borderRadius: 16,
                         overflow: "hidden",
                         backgroundColor: "#F4ECFB",
-                        alignItems: "center",
-                        justifyContent: "center",
                       }}
                     >
-                      <View
-                        style={{
-                          position: "absolute",
-                          width: 86,
-                          height: 86,
-                          borderRadius: 43,
-                          left: -18,
-                          bottom: -34,
-                          backgroundColor: "#E1D0F0",
-                        }}
+                      <LearnGuideGraphic
+                        kind={medication ? "medication" : "symptoms"}
                       />
-                      <View
-                        style={{
-                          position: "absolute",
-                          width: 70,
-                          height: 70,
-                          borderRadius: 35,
-                          right: -12,
-                          top: -20,
-                          backgroundColor: "#F9E9EB",
-                        }}
-                      />
-                      {medication ? (
-                        <>
-                          <View
-                            style={{
-                              width: 48,
-                              height: 68,
-                              borderRadius: 10,
-                              backgroundColor: "#CF6F2A",
-                              borderWidth: 4,
-                              borderColor: "#F6F0EA",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <View
-                              style={{
-                                width: 38,
-                                height: 20,
-                                backgroundColor: C.white,
-                                borderRadius: 4,
-                              }}
-                            />
-                          </View>
-                          <Icon
-                            name="medical-outline"
-                            size={23}
-                            color="#7E5C91"
-                          />
-                        </>
-                      ) : (
-                        <View
-                          style={{
-                            width: 74,
-                            height: 78,
-                            borderTopLeftRadius: 42,
-                            borderTopRightRadius: 42,
-                            borderBottomLeftRadius: 25,
-                            borderBottomRightRadius: 32,
-                            backgroundColor: "#8A68A0",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            transform: [{ rotate: "-8deg" }],
-                          }}
-                        >
-                          <View
-                            style={{
-                              width: 38,
-                              height: 38,
-                              borderRadius: 19,
-                              backgroundColor: "#F1DFF4",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <Icon name="heart" size={19} color="#6A3B80" />
-                          </View>
-                        </View>
-                      )}
                     </View>
 
                     <Text
