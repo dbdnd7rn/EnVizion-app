@@ -342,9 +342,14 @@ async function requireCareContext() {
 
 async function requireEditableCareContext() {
   const context = await requireCareContext();
-  if (context.accessRole === "viewer") {
+  if (
+    context.accessRole === "viewer" ||
+    context.accessRole === "patient"
+  ) {
     throw new Error(
-      "Viewer access is read-only. Ask the care owner for Caregiver access to make changes.",
+      context.accessRole === "patient"
+        ? "Patient / care recipient access is read-only. Ask the care owner for Caregiver access to make changes."
+        : "Viewer access is read-only. Ask the care owner for Caregiver access to make changes.",
     );
   }
   return context;
