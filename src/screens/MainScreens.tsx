@@ -3,6 +3,7 @@ import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, TextInp
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
+import Svg, { Circle, Ellipse, G, Line, Path, Rect } from "react-native-svg";
 import { useCare } from "../store";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
@@ -1525,6 +1526,83 @@ export function ToolkitScreen() {
   );
 }
 
+
+
+function LearnHeroGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 260 220">
+      <Circle cx="166" cy="102" r="84" fill="#F1E9FA" />
+      <Ellipse cx="213" cy="67" rx="17" ry="49" fill="#C9B3E5" transform="rotate(24 213 67)" />
+      <Ellipse cx="190" cy="52" rx="14" ry="43" fill="#B79AD7" transform="rotate(-12 190 52)" />
+      <Ellipse cx="234" cy="103" rx="13" ry="38" fill="#D8C7EC" transform="rotate(36 234 103)" />
+      <Path d="M118 88c-5-39 23-68 58-67 37 1 62 25 60 58-1 22-10 36-26 48h-87c-5-14-5-25-5-39Z" fill="#4E3558" />
+      <Circle cx="177" cy="78" r="33" fill="#F1C9B7" />
+      <Path d="M147 71c5-24 26-37 51-29 15 5 24 17 26 30-13-10-23-15-37-14-16 1-25 7-40 13Z" fill="#4E3558" />
+      <Circle cx="166" cy="79" r="2.3" fill="#7B4E4F" />
+      <Circle cx="188" cy="79" r="2.3" fill="#7B4E4F" />
+      <Path d="M171 93c5 4 10 4 15 0" stroke="#C87F78" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <Path d="M131 210c1-45 26-79 70-79 39 0 59 31 58 79H131Z" fill="#FFF8F4" />
+      <Path d="M129 174c17 0 35 6 48 19v27h-64c0-19 4-34 16-46Z" fill="#E8DDF5" />
+      <Path d="M100 148l72 5-6 60-81-11c-5-17-1-38 15-54Z" fill="#68357F" />
+      <Path d="M100 148l34 6-5 53-44-5c-5-17-1-38 15-54Z" fill="#7D45A0" />
+      <Path d="M171 153l33-4-4 55-34 9 5-60Z" fill="#5C2E72" />
+      <Path d="M107 151c15-10 26-12 42-8" stroke="#9B6CB0" strokeWidth="3" strokeLinecap="round" fill="none" />
+      <Ellipse cx="122" cy="152" rx="13" ry="21" fill="#F1C9B7" transform="rotate(-16 122 152)" />
+      <Ellipse cx="202" cy="139" rx="13" ry="22" fill="#F1C9B7" transform="rotate(8 202 139)" />
+      <Rect x="205" y="109" width="34" height="39" rx="8" fill="#FFFFFF" stroke="#E7DCE9" strokeWidth="2.5" />
+      <Path d="M238 120c10 0 12 18 1 20" stroke="#DCCFE1" strokeWidth="3" fill="none" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function LearnFeaturedGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 180 170">
+      <Circle cx="119" cy="86" r="60" fill="#EEE2F8" />
+      <Ellipse cx="48" cy="112" rx="18" ry="56" fill="#BFA7DC" transform="rotate(26 48 112)" />
+      <Ellipse cx="72" cy="111" rx="16" ry="49" fill="#D1BEE7" transform="rotate(-8 72 111)" />
+      <Ellipse cx="148" cy="95" rx="17" ry="54" fill="#D6C4EA" transform="rotate(25 148 95)" />
+      <G transform="translate(64 23) rotate(8 52 65)">
+        <Rect x="16" y="8" width="96" height="124" rx="14" fill="#E8DCF2" />
+        <Rect x="0" y="0" width="96" height="124" rx="14" fill="#FFFDFE" />
+        <Circle cx="48" cy="33" r="20" fill="#E7D7F2" />
+        <Path d="M48 44c-14-10-16-18-8-22 6-3 8 2 8 2s2-5 8-2c8 4 6 12-8 22Z" fill="#9F70B6" />
+        <Rect x="24" y="65" width="53" height="7" rx="3.5" fill="#D7C4E5" />
+        <Rect x="24" y="81" width="61" height="7" rx="3.5" fill="#D7C4E5" />
+        <Rect x="24" y="97" width="48" height="7" rx="3.5" fill="#D7C4E5" />
+      </G>
+    </Svg>
+  );
+}
+
+function LearnGuideGraphic({ kind }: { kind: "medication" | "symptoms" }) {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 180 100">
+      <Circle cx="28" cy="91" r="42" fill="#DCC8ED" />
+      <Circle cx="160" cy="13" r="42" fill="#F7E9EB" />
+      {kind === "medication" ? (
+        <>
+          <Ellipse cx="74" cy="67" rx="13" ry="38" fill="#A283B6" transform="rotate(38 74 67)" />
+          <Rect x="82" y="18" width="43" height="65" rx="8" fill="#C97836" />
+          <Rect x="86" y="26" width="35" height="17" rx="4" fill="#FFFFFF" />
+          <Rect x="90" y="12" width="27" height="10" rx="4" fill="#EAE2E5" />
+          <Ellipse cx="126" cy="77" rx="11" ry="5" fill="#FFFDFD" stroke="#D8CADF" strokeWidth="1.5" transform="rotate(-10 126 77)" />
+          <Ellipse cx="146" cy="70" rx="11" ry="5" fill="#FFFDFD" stroke="#D8CADF" strokeWidth="1.5" transform="rotate(17 146 70)" />
+        </>
+      ) : (
+        <>
+          <Path d="M91 15c28 0 47 20 47 46 0 11-4 21-10 29H78c-10-9-16-22-16-36 0-22 9-39 29-39Z" fill="#8A6AA0" />
+          <Path d="M79 36c-12 14-17 25-17 43 0 12 4 20 12 29h35v-14c-10-8-15-16-15-28 0-12 4-22 12-30H79Z" fill="#7A5C91" />
+          <Circle cx="111" cy="45" r="17" fill="#F1DFF4" />
+          <Path d="M111 54c-11-8-13-14-6-17 4-2 6 2 6 2s2-4 6-2c7 3 5 9-6 17Z" fill="#6E3D82" />
+          <Line x1="145" y1="29" x2="154" y2="20" stroke="#B58BC6" strokeWidth="3" strokeLinecap="round" />
+          <Line x1="150" y1="43" x2="162" y2="41" stroke="#B58BC6" strokeWidth="3" strokeLinecap="round" />
+          <Line x1="141" y1="17" x2="145" y2="6" stroke="#B58BC6" strokeWidth="3" strokeLinecap="round" />
+        </>
+      )}
+    </Svg>
+  );
+}
 
 export function LibraryScreen() {
   const n = useNav();
