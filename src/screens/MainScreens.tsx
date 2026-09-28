@@ -1525,6 +1525,7 @@ export function ToolkitScreen() {
   );
 }
 
+
 export function LibraryScreen() {
   const n = useNav();
   const { state } = useCare();
@@ -1556,136 +1557,772 @@ export function LibraryScreen() {
 
   const filtered = guides.filter(
     (g) =>
-      `${g.title} ${g.category}`
+      (g.title + " " + g.category)
         .toLowerCase()
         .includes(query.toLowerCase()) &&
       (filter !== "Saved" || state.saved.includes(g.id)) &&
       (filter !== "Conditions" || g.category === "Condition guide"),
   );
 
+  const popular = filtered.slice(0, 2);
+
+  const topicItems = [
+    { title: "Medications", icon: "medical-outline", query: "medication", bg: "#F1E5FA", color: "#8B46A8" },
+    { title: "Symptoms", icon: "pulse-outline", query: "symptom", bg: "#F2E7FA", color: "#9850B1" },
+    { title: "Home care", icon: "home-outline", query: "home", bg: "#F8EAF3", color: "#8A4AA2" },
+    { title: "Appointments", icon: "calendar-outline", query: "appointment", bg: "#E9EEFF", color: "#6275C8" },
+  ];
+
   return (
     <Page>
-      <Heading
-        eyebrow="KNOWLEDGE BRINGS CLARITY"
-        title="A little more understanding"
-        body="Clinically governed resources published by EnVizion Life."
-      />
-
-      <View style={[S.input, S.row]}>
-        <Icon name="search-outline" size={20} />
-        <TextInput
-          accessibilityLabel="Search resources"
-          placeholder="Search published guides"
-          value={query}
-          onChangeText={setQuery}
+      <Fade>
+        <View
           style={{
-            flex: 1,
-            fontFamily: "DMSans_400Regular",
-            fontSize: 14,
-            color: C.ink,
+            position: "relative",
+            minHeight: 215,
+            overflow: "hidden",
           }}
-        />
-      </View>
-
-      <View style={S.row}>
-        {["All", "Conditions", "Saved"].map((f) => (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ selected: filter === f }}
-            key={f}
-            onPress={() => setFilter(f)}
-            style={[
-              S.pill,
-              {
-                paddingVertical: 11,
-                paddingHorizontal: 18,
-                backgroundColor: filter === f ? C.purple : "#F0EBF1",
-              },
-            ]}
-          >
+        >
+          <View style={{ gap: 8, maxWidth: 255, paddingTop: 4 }}>
             <Text
               style={[
-                S.h3,
-                { fontSize: 12, color: filter === f ? C.white : C.muted },
+                S.eyebrow,
+                { color: "#74328F", fontSize: 10.5, letterSpacing: 2.5 },
               ]}
             >
-              {f}
+              KNOWLEDGE BRINGS CLARITY
             </Text>
-          </Pressable>
-        ))}
-      </View>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 42,
+                lineHeight: 47,
+                letterSpacing: -1.05,
+                color: "#141238",
+              }}
+            >
+              Learn simply.
+            </Text>
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 16,
+                lineHeight: 23,
+                color: "#7A748A",
+                maxWidth: 250,
+              }}
+            >
+              Trusted, easy-to-understand resources for your caregiving journey.
+            </Text>
+          </View>
 
-      {filter === "All" && !query && (
-        <Card style={{ backgroundColor: "#F0E8F3" }}>
-          <Text style={S.eyebrow}>CLINICALLY GOVERNED LIBRARY</Text>
-          <Text style={S.h2}>Published with review behind it.</Text>
-          <Txt>
-            Only resources that have completed EnVizion Life’s approval and
-            publication workflow appear in this library.
-          </Txt>
-          <Button
-            title="Browse trusted resources"
-            secondary
-            icon="document-text-outline"
-            onPress={() => n.navigate("Resources")}
+          <HomeFloat distance={4} duration={3000}>
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                right: -12,
+                top: 3,
+                width: 190,
+                height: 190,
+              }}
+            >
+              <View
+                style={{
+                  position: "absolute",
+                  width: 154,
+                  height: 154,
+                  borderRadius: 77,
+                  right: 0,
+                  top: 5,
+                  backgroundColor: "#F1E9FA",
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  width: 31,
+                  height: 80,
+                  borderRadius: 18,
+                  right: 15,
+                  top: 27,
+                  backgroundColor: "#CBB5E5",
+                  transform: [{ rotate: "22deg" }],
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  width: 29,
+                  height: 72,
+                  borderRadius: 18,
+                  right: 50,
+                  top: 16,
+                  backgroundColor: "#BCA0D9",
+                  transform: [{ rotate: "-14deg" }],
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  width: 88,
+                  height: 88,
+                  borderRadius: 44,
+                  right: 42,
+                  top: 27,
+                  backgroundColor: "#49324F",
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  width: 59,
+                  height: 59,
+                  borderRadius: 30,
+                  right: 54,
+                  top: 38,
+                  backgroundColor: "#F0C7B5",
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  width: 115,
+                  height: 72,
+                  borderTopLeftRadius: 48,
+                  borderTopRightRadius: 48,
+                  right: 15,
+                  bottom: 4,
+                  backgroundColor: "#FFF9F5",
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  width: 84,
+                  height: 55,
+                  borderRadius: 9,
+                  right: 61,
+                  bottom: 15,
+                  backgroundColor: "#66317F",
+                  transform: [{ rotate: "-7deg" }],
+                  borderWidth: 3,
+                  borderColor: "#814A99",
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  width: 33,
+                  height: 33,
+                  borderRadius: 10,
+                  right: 12,
+                  bottom: 38,
+                  backgroundColor: C.white,
+                  borderWidth: 2,
+                  borderColor: "#E8DDEB",
+                }}
+              />
+            </View>
+          </HomeFloat>
+        </View>
+
+        <View
+          style={[
+            S.input,
+            {
+              minHeight: 58,
+              borderRadius: 23,
+              paddingHorizontal: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 11,
+            },
+          ]}
+        >
+          <Icon name="search-outline" size={23} />
+          <TextInput
+            accessibilityLabel="Search resources"
+            placeholder="Search guides, topics, or conditions"
+            placeholderTextColor="#A9A1B1"
+            value={query}
+            onChangeText={setQuery}
+            style={{
+              flex: 1,
+              fontFamily: "DMSans_400Regular",
+              fontSize: 14,
+              color: C.ink,
+            }}
           />
-        </Card>
-      )}
-
-      {Boolean(message) && (
-        <Card style={{ backgroundColor: C.redBg }}>
-          <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
-            {message}
-          </Text>
-          <Button title="Try again" secondary onPress={() => void refresh()} />
-        </Card>
-      )}
-
-      {loading ? (
-        <Card>
-          <Txt>Loading published resources…</Txt>
-        </Card>
-      ) : (
-        <View style={{ gap: 12 }}>
-          {filtered.map((g) => (
-            <Row
-              key={g.id}
-              title={g.title}
-              subtitle={`${g.category} · ${g.readTime}`}
-              icon={g.icon}
-              onPress={() => n.navigate("Guide", { id: g.id })}
-            />
-          ))}
-
-          {!filtered.length && (
-            <Card>
-              <Icon name="shield-checkmark-outline" />
-              <Text style={S.h3}>
-                {filter === "Saved"
-                  ? "No saved published guides yet"
-                  : "No published guides yet"}
-              </Text>
-              <Txt>
-                {filter === "Saved"
-                  ? "Published guides you save will appear here."
-                  : "EnVizion Life’s current educational drafts are in clinical review. Approved resources will appear here once published."}
-              </Txt>
-            </Card>
+          {Boolean(query) && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Clear search"
+              onPress={() => setQuery("")}
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 17,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="close" size={18} color={C.muted} />
+            </Pressable>
           )}
         </View>
-      )}
 
-      <Row
-        title="Trusted resource directory"
-        subtitle="Public health resources and EnVizion Life"
-        icon="globe-outline"
-        onPress={() => n.navigate("Resources")}
-      />
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          {["All", "Conditions", "Saved"].map((item) => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: filter === item }}
+              key={item}
+              onPress={() => setFilter(item)}
+              style={({ pressed }) => ({
+                minWidth: item === "Conditions" ? 126 : 102,
+                minHeight: 54,
+                borderRadius: 27,
+                paddingHorizontal: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: filter === item ? C.purple : "#F1EDF2",
+                opacity: pressed ? 0.76 : 1,
+              })}
+            >
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 14,
+                  color: filter === item ? C.white : "#716B7E",
+                }}
+              >
+                {item}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
 
-      <Text style={S.small}>
-        Published guides support conversations with your healthcare team and do
-        not replace an individualized care plan.
-      </Text>
+        {filter === "All" && !query && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Explore trusted care guides"
+            onPress={() => n.navigate("Resources")}
+            style={({ pressed }) => ({
+              minHeight: 240,
+              borderRadius: 28,
+              overflow: "hidden",
+              backgroundColor: "#F4ECFA",
+              padding: 22,
+              opacity: pressed ? 0.9 : 1,
+              transform: [{ scale: pressed ? 0.995 : 1 }],
+            })}
+          >
+            <View style={{ maxWidth: 225, gap: 8 }}>
+              <Text
+                style={[
+                  S.eyebrow,
+                  { color: "#74328F", fontSize: 10.5, letterSpacing: 2.3 },
+                ]}
+              >
+                FEATURED GUIDE
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 28,
+                  lineHeight: 33,
+                  letterSpacing: -0.55,
+                  color: "#17153A",
+                }}
+              >
+                Trusted guides,{"\n"}real answers.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 14,
+                  lineHeight: 20,
+                  color: "#77718A",
+                  maxWidth: 210,
+                }}
+              >
+                Clinically reviewed resources for everyday caregiving.
+              </Text>
+              <View
+                style={{
+                  alignSelf: "flex-start",
+                  minHeight: 46,
+                  borderRadius: 23,
+                  paddingHorizontal: 18,
+                  backgroundColor: C.purple,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 9,
+                  marginTop: 5,
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "DMSans_600SemiBold",
+                    fontSize: 13,
+                    color: C.white,
+                  }}
+                >
+                  Explore guides
+                </Text>
+                <Icon name="arrow-forward" color={C.white} size={17} />
+              </View>
+            </View>
+
+            <HomeFloat distance={4} duration={2400}>
+              <View
+                pointerEvents="none"
+                style={{
+                  position: "absolute",
+                  right: -4,
+                  bottom: -5,
+                  width: 150,
+                  height: 150,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    position: "absolute",
+                    width: 70,
+                    height: 118,
+                    borderRadius: 35,
+                    left: 4,
+                    bottom: 0,
+                    backgroundColor: "#D6C2EB",
+                    transform: [{ rotate: "20deg" }],
+                  }}
+                />
+                <View
+                  style={{
+                    position: "absolute",
+                    width: 68,
+                    height: 110,
+                    borderRadius: 34,
+                    right: 2,
+                    top: 8,
+                    backgroundColor: "#E5D7F2",
+                    transform: [{ rotate: "-19deg" }],
+                  }}
+                />
+                <View
+                  style={{
+                    width: 96,
+                    height: 118,
+                    borderRadius: 14,
+                    backgroundColor: "#FFFDFE",
+                    padding: 18,
+                    gap: 9,
+                    transform: [{ rotate: "-5deg" }],
+                    shadowColor: "#5A2E6E",
+                    shadowOpacity: 0.08,
+                    shadowRadius: 10,
+                    shadowOffset: { width: 0, height: 5 },
+                    elevation: 2,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      alignSelf: "center",
+                      backgroundColor: "#E6D4F3",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name="heart" size={17} color="#9862B0" />
+                  </View>
+                  {[84, 96, 70, 54].map((w, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        width: w,
+                        maxWidth: "100%",
+                        height: 5,
+                        borderRadius: 3,
+                        backgroundColor: "#DCC9EA",
+                      }}
+                    />
+                  ))}
+                </View>
+              </View>
+            </HomeFloat>
+          </Pressable>
+        )}
+
+        <View style={{ gap: 12 }}>
+          <View style={S.between}>
+            <Text
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 21,
+                lineHeight: 27,
+                color: C.ink,
+              }}
+            >
+              Explore by topic
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => n.navigate("Resources")}
+              style={{ minHeight: 40, justifyContent: "center" }}
+            >
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 12,
+                  color: C.purple,
+                }}
+              >
+                See all →
+              </Text>
+            </Pressable>
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {topicItems.map((item) => (
+              <Pressable
+                key={item.title}
+                accessibilityRole="button"
+                accessibilityLabel={item.title}
+                onPress={() => {
+                  setFilter("All");
+                  setQuery(item.query);
+                }}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  minWidth: 0,
+                  minHeight: 116,
+                  borderRadius: 21,
+                  backgroundColor: C.white,
+                  borderWidth: 1,
+                  borderColor: "#EEE8F0",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingHorizontal: 7,
+                  gap: 10,
+                  opacity: pressed ? 0.72 : 1,
+                  transform: [{ scale: pressed ? 0.98 : 1 }],
+                })}
+              >
+                <View
+                  style={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: 26,
+                    backgroundColor: item.bg,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name={item.icon} size={27} color={item.color} />
+                </View>
+                <Text
+                  numberOfLines={2}
+                  style={{
+                    fontFamily: "DMSans_600SemiBold",
+                    fontSize: 11.5,
+                    lineHeight: 15,
+                    textAlign: "center",
+                    color: C.ink,
+                  }}
+                >
+                  {item.title}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        {Boolean(message) && (
+          <Card style={{ backgroundColor: C.redBg }}>
+            <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
+              {message}
+            </Text>
+            <Button title="Try again" secondary onPress={() => void refresh()} />
+          </Card>
+        )}
+
+        {loading ? (
+          <Card
+            style={{
+              minHeight: 130,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="book-outline" size={28} />
+            <Txt>Loading trusted guides…</Txt>
+          </Card>
+        ) : query || filter !== "All" ? (
+          <View style={{ gap: 12 }}>
+            <Section title="Guides" />
+            {filtered.map((guide) => (
+              <Row
+                key={guide.id}
+                title={guide.title}
+                subtitle={guide.category + " · " + guide.readTime}
+                icon={guide.icon}
+                onPress={() => n.navigate("Guide", { id: guide.id })}
+              />
+            ))}
+
+            {!filtered.length && (
+              <Card
+                style={{
+                  borderRadius: 24,
+                  padding: 18,
+                  backgroundColor: "#F7F2FA",
+                }}
+              >
+                <Icon name="book-outline" size={26} />
+                <Text style={S.h3}>
+                  {filter === "Saved" ? "No saved guides yet" : "No guides found"}
+                </Text>
+                <Txt>
+                  {filter === "Saved"
+                    ? "Save a published guide and it will appear here."
+                    : "Try another topic or browse the trusted resource directory."}
+                </Txt>
+              </Card>
+            )}
+          </View>
+        ) : (
+          <View style={{ gap: 12 }}>
+            <View style={S.between}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 21,
+                  lineHeight: 27,
+                  color: C.ink,
+                }}
+              >
+                Popular guides
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => n.navigate("Resources")}
+                style={{ minHeight: 40, justifyContent: "center" }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "DMSans_600SemiBold",
+                    fontSize: 12,
+                    color: C.purple,
+                  }}
+                >
+                  See all →
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              {[0, 1].map((index) => {
+                const guide = popular[index];
+                const medication = index === 0;
+                const title = guide
+                  ? guide.title
+                  : medication
+                    ? "Medication basics"
+                    : "Understanding symptoms";
+                const subtitle = guide
+                  ? guide.category + " · " + guide.readTime
+                  : medication
+                    ? "What to know, what to expect."
+                    : "Common signs and how to respond.";
+
+                return (
+                  <Pressable
+                    key={index}
+                    accessibilityRole="button"
+                    accessibilityLabel={title}
+                    onPress={() =>
+                      guide
+                        ? n.navigate("Guide", { id: guide.id })
+                        : n.navigate("Resources")
+                    }
+                    style={({ pressed }) => ({
+                      flex: 1,
+                      minWidth: 0,
+                      borderRadius: 22,
+                      backgroundColor: C.white,
+                      borderWidth: 1,
+                      borderColor: "#EEE8F0",
+                      padding: 10,
+                      gap: 9,
+                      opacity: pressed ? 0.75 : 1,
+                      transform: [{ scale: pressed ? 0.99 : 1 }],
+                    })}
+                  >
+                    <View
+                      style={{
+                        height: 108,
+                        borderRadius: 16,
+                        overflow: "hidden",
+                        backgroundColor: "#F4ECFB",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <View
+                        style={{
+                          position: "absolute",
+                          width: 86,
+                          height: 86,
+                          borderRadius: 43,
+                          left: -18,
+                          bottom: -34,
+                          backgroundColor: "#E1D0F0",
+                        }}
+                      />
+                      <View
+                        style={{
+                          position: "absolute",
+                          width: 70,
+                          height: 70,
+                          borderRadius: 35,
+                          right: -12,
+                          top: -20,
+                          backgroundColor: "#F9E9EB",
+                        }}
+                      />
+                      {medication ? (
+                        <>
+                          <View
+                            style={{
+                              width: 48,
+                              height: 68,
+                              borderRadius: 10,
+                              backgroundColor: "#CF6F2A",
+                              borderWidth: 4,
+                              borderColor: "#F6F0EA",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <View
+                              style={{
+                                width: 38,
+                                height: 20,
+                                backgroundColor: C.white,
+                                borderRadius: 4,
+                              }}
+                            />
+                          </View>
+                          <Icon
+                            name="medical-outline"
+                            size={23}
+                            color="#7E5C91"
+                          />
+                        </>
+                      ) : (
+                        <View
+                          style={{
+                            width: 74,
+                            height: 78,
+                            borderTopLeftRadius: 42,
+                            borderTopRightRadius: 42,
+                            borderBottomLeftRadius: 25,
+                            borderBottomRightRadius: 32,
+                            backgroundColor: "#8A68A0",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transform: [{ rotate: "-8deg" }],
+                          }}
+                        >
+                          <View
+                            style={{
+                              width: 38,
+                              height: 38,
+                              borderRadius: 19,
+                              backgroundColor: "#F1DFF4",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Icon name="heart" size={19} color="#6A3B80" />
+                          </View>
+                        </View>
+                      )}
+                    </View>
+
+                    <Text
+                      numberOfLines={2}
+                      style={{
+                        fontFamily: "DMSans_700Bold",
+                        fontSize: 14,
+                        lineHeight: 18,
+                        color: C.ink,
+                      }}
+                    >
+                      {title}
+                    </Text>
+                    <Text
+                      numberOfLines={2}
+                      style={{
+                        fontFamily: "DMSans_400Regular",
+                        fontSize: 11,
+                        lineHeight: 15,
+                        color: C.muted,
+                      }}
+                    >
+                      {subtitle}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {!guides.length && (
+              <Card
+                style={{
+                  borderRadius: 24,
+                  padding: 16,
+                  minHeight: 88,
+                  backgroundColor: "#FAF6FC",
+                  borderColor: "#EDE4F2",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 14,
+                }}
+              >
+                <View
+                  style={{
+                    width: 54,
+                    height: 54,
+                    borderRadius: 18,
+                    backgroundColor: "#EFE4F8",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="library-outline" size={27} />
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={[S.h3, { fontSize: 14 }]}>
+                    Our library is growing
+                  </Text>
+                  <Text style={[S.small, { fontSize: 12 }]}>
+                    More trusted guides are on the way.
+                  </Text>
+                </View>
+                <Icon name="sparkles-outline" size={20} color="#B57AC8" />
+              </Card>
+            )}
+          </View>
+        )}
+      </Fade>
     </Page>
   );
 }
