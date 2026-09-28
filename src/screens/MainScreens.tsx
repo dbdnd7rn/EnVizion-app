@@ -1709,6 +1709,7 @@ export function LibraryScreen() {
               <LearnHeroGraphic />
             </HomeFloat>
           </View>
+        </View>
 
         <View
           style={[
