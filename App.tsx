@@ -468,7 +468,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="Assistant"
             component={AssistantScreen}
-            options={{ title: "Your assistant" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Handoff"
