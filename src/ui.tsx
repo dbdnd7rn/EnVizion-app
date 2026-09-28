@@ -220,13 +220,27 @@ export function Page({ children }: { children: React.ReactNode }) {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: C.paper }}
-      contentContainerStyle={S.page}
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingTop: 18,
+        paddingBottom: 42,
+      }}
       automaticallyAdjustKeyboardInsets
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
+      horizontal={false}
     >
-      {children}
+      <View
+        style={{
+          width: "100%",
+          maxWidth: 440,
+          alignSelf: "center",
+          gap: 20,
+        }}
+      >
+        {children}
+      </View>
     </ScrollView>
   );
 }
@@ -432,6 +446,48 @@ export function Landscape({ height = 145 }: { height?: number }) {
     </Svg>
   );
 }
+export function HomeLandscape({ height = 180 }: { height?: number }) {
+  return (
+    <Svg
+      width="100%"
+      height={height}
+      viewBox="0 0 400 180"
+      preserveAspectRatio="xMidYMid meet"
+      {...(Platform.OS === "web"
+        ? { "aria-hidden": true }
+        : { accessibilityElementsHidden: true })}
+    >
+      <Circle cx="310" cy="48" r="27" fill="#FAEED5" opacity={0.94} />
+      <Path
+        d="M32 143Q105 70 184 119T398 79V180H32Z"
+        fill="#E7D9EE"
+        opacity={0.98}
+      />
+      <Path
+        d="M62 164Q143 102 228 145T398 111V180H62Z"
+        fill="#CDB8DA"
+      />
+      <Path
+        d="M117 180Q188 132 278 164T400 142V180H117Z"
+        fill="#A88FB8"
+      />
+      <Path
+        d="M226 181Q334 147 282 126Q244 112 298 100"
+        fill="none"
+        stroke="#FFF2D7"
+        strokeWidth="8"
+        strokeLinecap="round"
+      />
+      <Path
+        d="M352 133V75M352 104Q329 95 335 79Q355 80 352 104M353 119Q377 108 373 92Q350 96 353 119"
+        stroke="#745188"
+        strokeWidth="3"
+        fill="#8C68A0"
+      />
+    </Svg>
+  );
+}
+
 export function Fade({ children }: { children: React.ReactNode }) {
   const opacity = useRef(new Animated.Value(1)).current;
   const translateY = useRef(new Animated.Value(0)).current;
