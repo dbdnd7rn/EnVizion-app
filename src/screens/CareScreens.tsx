@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, TextInput, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
 import {
@@ -54,6 +55,172 @@ function ReadOnlyCareNotice() {
   );
 }
 
+
+function VitalsHeroGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 230 180">
+      <Defs>
+        <LinearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#F58BB0" />
+          <Stop offset="0.52" stopColor="#D56ABE" />
+          <Stop offset="1" stopColor="#8C4FC2" />
+        </LinearGradient>
+        <LinearGradient id="paperGradient" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFDFE" />
+          <Stop offset="1" stopColor="#EEE5F7" />
+        </LinearGradient>
+      </Defs>
+
+      <Path
+        d="M85 171C45 139 39 92 56 52C77 4 142-3 190 27C223 48 241 89 221 126C196 170 139 187 85 171Z"
+        fill="#F4ECFA"
+      />
+      <Rect
+        x="139"
+        y="30"
+        width="76"
+        height="112"
+        rx="15"
+        fill="url(#paperGradient)"
+        transform="rotate(8 139 30)"
+      />
+      <Rect x="160" y="48" width="22" height="22" rx="5" fill="#9A62BC" />
+      <Path d="M166 59h4l3 5 5-8 3 3" stroke="#FFF" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <Rect x="187" y="51" width="18" height="4" rx="2" fill="#C9B3DE" />
+      <Rect x="185" y="64" width="22" height="4" rx="2" fill="#D7C7E5" />
+      <Rect x="183" y="77" width="26" height="4" rx="2" fill="#D7C7E5" />
+      <Path d="M175 112c10-2 13-14 22-15 8-1 10 9 15 7 7-3 8-17 16-18" stroke="#A379C0" strokeWidth="3" fill="none" strokeLinecap="round" />
+
+      <Path
+        d="M69 77C69 54 86 42 105 42c16 0 27 9 33 22 6-13 18-22 33-22 20 0 36 13 36 35 0 35-36 61-69 84-33-23-69-49-69-84Z"
+        fill="url(#heartGradient)"
+      />
+      <Path d="M92 95h27l11-25 14 49 12-27 9 14h26" stroke="#FFF" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+
+      <Path d="M118 39v-20" stroke="#8055B0" strokeWidth="3" strokeLinecap="round" />
+      <Path d="M118 28c-9-9-14-19-8-27 10 3 15 14 8 27Z" fill="#9D76C4" />
+      <Path d="M121 29c10-7 18-14 17-23-11 0-19 8-17 23Z" fill="#7650AD" />
+      <Path d="M115 34c-10-5-19-9-23-17 10-3 20 3 23 17Z" fill="#B698D4" />
+
+      <Circle cx="54" cy="107" r="4" fill="#B984D0" />
+      <Circle cx="137" cy="154" r="3" fill="#A87AC9" />
+      <Path d="M47 80c-5 10-5 19 0 28" stroke="#A06EC4" strokeWidth="2.5" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function VitalsEmptyGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 150 100">
+      <Circle cx="64" cy="55" r="41" fill="#F1E8FA" />
+      <Path d="M38 88c4-18 8-28 20-39" stroke="#8260A2" strokeWidth="2" fill="none" />
+      <Path d="M46 69c-9-3-15-1-18 6 8 2 14 0 18-6Z" fill="#9B79BA" />
+      <Path d="M52 57c-8-4-15-3-18 3 7 4 13 3 18-3Z" fill="#C0A7D7" />
+      <G transform="translate(60 14) rotate(-7 32 38)">
+        <Rect x="0" y="0" width="62" height="76" rx="9" fill="#FFF" stroke="#E8DCF1" strokeWidth="2" />
+        <Rect x="13" y="17" width="36" height="6" rx="3" fill="#C8AFE0" />
+        <Rect x="13" y="31" width="31" height="5" rx="2.5" fill="#D9C8E8" />
+        <Rect x="13" y="44" width="35" height="5" rx="2.5" fill="#D9C8E8" />
+        <Rect x="13" y="57" width="26" height="5" rx="2.5" fill="#D9C8E8" />
+      </G>
+      <Path d="M125 19l4-9M134 26l9-3M128 31l5 7" stroke="#F0B85D" strokeWidth="2.4" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function VitalMetricField({
+  label,
+  unit,
+  icon,
+  iconBackground,
+  iconColor,
+  placeholder,
+  value,
+  onChange,
+  editable,
+}: {
+  label: string;
+  unit: string;
+  icon: string;
+  iconBackground: string;
+  iconColor: string;
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+  editable: boolean;
+}) {
+  return (
+    <View
+      style={{
+        width: "48.5%",
+        minWidth: 0,
+        paddingVertical: 4,
+        gap: 9,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: iconBackground,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name={icon} size={23} color={iconColor} />
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text
+            numberOfLines={2}
+            style={{
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 12,
+              lineHeight: 16,
+              color: C.ink,
+            }}
+          >
+            {label}
+          </Text>
+          <Text
+            style={{
+              fontFamily: "DMSans_400Regular",
+              fontSize: 11.5,
+              lineHeight: 15,
+              color: C.muted,
+            }}
+          >
+            {unit}
+          </Text>
+        </View>
+      </View>
+
+      <TextInput
+        accessibilityLabel={label}
+        editable={editable}
+        keyboardType="decimal-pad"
+        placeholder={placeholder}
+        placeholderTextColor="#A7A0B2"
+        value={value}
+        onChangeText={onChange}
+        style={{
+          minHeight: 48,
+          borderRadius: 14,
+          borderWidth: 1,
+          borderColor: "#DED3E4",
+          backgroundColor: C.white,
+          paddingHorizontal: 14,
+          fontFamily: "DMSans_400Regular",
+          fontSize: 14,
+          color: C.ink,
+          opacity: editable ? 1 : 0.72,
+        }}
+      />
+    </View>
+  );
+}
+
 export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
@@ -90,6 +257,536 @@ export function TrackerScreen({
     } finally {
       setSaving(false);
     }
+  }
+
+  if (kind === "Vitals") {
+    const setVital = (key: string, value: string) => {
+      setValues((old) => ({ ...old, [key]: value }));
+      setSuccess(false);
+    };
+
+    return (
+      <Page>
+        <View
+          style={{
+            minHeight: 214,
+            position: "relative",
+            overflow: "hidden",
+            marginBottom: 2,
+          }}
+        >
+          <View style={{ maxWidth: 245, gap: 8, paddingTop: 4 }}>
+            <Text
+              style={[
+                S.eyebrow,
+                { color: "#74328F", fontSize: 10.5, letterSpacing: 2.5 },
+              ]}
+            >
+              DAILY CARE JOURNAL
+            </Text>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 40,
+                lineHeight: 45,
+                letterSpacing: -0.9,
+                color: "#17143D",
+              }}
+            >
+              Vitals
+            </Text>
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 15.5,
+                lineHeight: 22,
+                color: "#747184",
+                maxWidth: 245,
+              }}
+            >
+              Notice, record, and share with your healthcare team.
+            </Text>
+          </View>
+
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              right: -12,
+              top: 0,
+              width: 205,
+              height: 190,
+            }}
+          >
+            <VitalsHeroGraphic />
+          </View>
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Emergency and warning signs"
+          onPress={() => n.navigate("Emergency")}
+          style={({ pressed }) => ({
+            minHeight: 92,
+            borderRadius: 22,
+            borderWidth: 1,
+            borderColor: "#F3C9D2",
+            backgroundColor: "#FFF1F2",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 17,
+            gap: 14,
+            opacity: pressed ? 0.75 : 1,
+          })}
+        >
+          <View
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: 27,
+              backgroundColor: "#FFDCE2",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 19,
+                backgroundColor: "#E54563",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 22,
+                  color: C.white,
+                }}
+              >
+                !
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 16,
+                lineHeight: 21,
+                color: "#A11E39",
+              }}
+            >
+              Emergency & warning signs
+            </Text>
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 13,
+                lineHeight: 18,
+                color: "#B05C6B",
+              }}
+            >
+              Know when to get help.
+            </Text>
+          </View>
+          <Icon name="chevron-forward" size={23} color="#C73250" />
+        </Pressable>
+
+        {readOnly && (
+          <Card
+            style={{
+              borderRadius: 22,
+              padding: 16,
+              minHeight: 106,
+              backgroundColor: "#F3ECFA",
+              borderColor: "#E8DAF0",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 14,
+            }}
+          >
+            <View
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 27,
+                backgroundColor: "#E5D5F4",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="eye-outline" size={28} color="#7D36A1" />
+            </View>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 16,
+                  lineHeight: 21,
+                  color: C.ink,
+                }}
+              >
+                Viewer access is read-only.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 12.5,
+                  lineHeight: 18,
+                  color: C.muted,
+                }}
+              >
+                You can review the shared care record, but only the Owner or a
+                Caregiver can make changes.
+              </Text>
+            </View>
+          </Card>
+        )}
+
+        <Card
+          style={{
+            borderRadius: 26,
+            padding: 16,
+            gap: 16,
+            backgroundColor: "#FFFEFF",
+            borderColor: "#EEE8F0",
+          }}
+        >
+          <View style={S.between}>
+            <Text
+              style={[
+                S.eyebrow,
+                { color: "#74328F", fontSize: 10.5, letterSpacing: 2.4 },
+              ]}
+            >
+              NEW OBSERVATION
+            </Text>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Track progress"
+              onPress={() => n.navigate("Insights")}
+              style={({ pressed }) => ({
+                minHeight: 40,
+                borderRadius: 20,
+                backgroundColor: "#F3ECFA",
+                paddingHorizontal: 13,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                opacity: pressed ? 0.72 : 1,
+              })}
+            >
+              <Icon name="bar-chart-outline" size={18} color="#7C3AA0" />
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 12,
+                  color: C.ink,
+                }}
+              >
+                Track progress
+              </Text>
+              <Icon name="chevron-forward" size={15} color="#7C3AA0" />
+            </Pressable>
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              columnGap: 10,
+              rowGap: 14,
+            }}
+          >
+            <VitalMetricField
+              label="Systolic blood pressure"
+              unit="mmHg"
+              icon="heart-outline"
+              iconBackground="#FFF0F4"
+              iconColor="#EB4772"
+              placeholder="e.g. 120"
+              value={values.systolic || ""}
+              onChange={(value) => setVital("systolic", value)}
+              editable={!readOnly && !saving}
+            />
+            <VitalMetricField
+              label="Diastolic blood pressure"
+              unit="mmHg"
+              icon="heart-circle-outline"
+              iconBackground="#F2E9FA"
+              iconColor="#7E3AA3"
+              placeholder="e.g. 80"
+              value={values.diastolic || ""}
+              onChange={(value) => setVital("diastolic", value)}
+              editable={!readOnly && !saving}
+            />
+            <VitalMetricField
+              label="Pulse"
+              unit="bpm"
+              icon="pulse-outline"
+              iconBackground="#F2E9FA"
+              iconColor="#8537A7"
+              placeholder="e.g. 72"
+              value={values.pulse || ""}
+              onChange={(value) => setVital("pulse", value)}
+              editable={!readOnly && !saving}
+            />
+            <VitalMetricField
+              label="Temperature"
+              unit="°F"
+              icon="thermometer-outline"
+              iconBackground="#EAF2FF"
+              iconColor="#3578C7"
+              placeholder="e.g. 98.6"
+              value={values.temperature || ""}
+              onChange={(value) => setVital("temperature", value)}
+              editable={!readOnly && !saving}
+            />
+          </View>
+
+          <View style={{ height: 1, backgroundColor: "#EEE8F0" }} />
+
+          <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: "#F3E8FB",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="document-text-outline" size={22} color="#7C3AA0" />
+            </View>
+            <View style={{ flex: 1, gap: 8 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 13,
+                  color: C.ink,
+                }}
+              >
+                Additional notes (optional)
+              </Text>
+              <TextInput
+                accessibilityLabel="Additional notes"
+                editable={!readOnly && !saving}
+                multiline
+                placeholder="Write here..."
+                placeholderTextColor="#A7A0B2"
+                value={values.notes || ""}
+                onChangeText={(value) => setVital("notes", value)}
+                style={{
+                  minHeight: 94,
+                  borderRadius: 15,
+                  borderWidth: 1,
+                  borderColor: "#DED3E4",
+                  backgroundColor: C.white,
+                  paddingHorizontal: 14,
+                  paddingTop: 13,
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 14,
+                  lineHeight: 20,
+                  color: C.ink,
+                  textAlignVertical: "top",
+                  opacity: readOnly ? 0.72 : 1,
+                }}
+              />
+            </View>
+          </View>
+
+          {Boolean(error) && (
+            <Text
+              accessibilityRole="alert"
+              style={{
+                fontFamily: "DMSans_500Medium",
+                fontSize: 12.5,
+                lineHeight: 18,
+                color: C.rose,
+              }}
+            >
+              {error}
+            </Text>
+          )}
+
+          {success && (
+            <Text
+              accessibilityRole="alert"
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 13,
+                color: C.green,
+              }}
+            >
+              Observation saved securely.
+            </Text>
+          )}
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Save observation"
+            accessibilityState={{ disabled: saving || readOnly }}
+            disabled={saving || readOnly}
+            onPress={() => void save()}
+            style={({ pressed }) => ({
+              minHeight: 56,
+              borderRadius: 28,
+              backgroundColor: "#8138A3",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              opacity: readOnly || saving ? 0.56 : pressed ? 0.82 : 1,
+              shadowColor: "#5B276E",
+              shadowOpacity: 0.14,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 7 },
+              elevation: 3,
+            })}
+          >
+            <Icon
+              name={saving ? "hourglass-outline" : "add-outline"}
+              size={22}
+              color={C.white}
+            />
+            <Text
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 15,
+                color: C.white,
+              }}
+            >
+              {saving ? "Saving observation…" : "Save observation"}
+            </Text>
+          </Pressable>
+        </Card>
+
+        <View style={S.between}>
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 25,
+              lineHeight: 31,
+              letterSpacing: -0.45,
+              color: C.ink,
+            }}
+          >
+            Recent observations
+          </Text>
+
+          <View
+            style={{
+              minHeight: 44,
+              borderRadius: 22,
+              paddingHorizontal: 14,
+              backgroundColor: "#F6F1F9",
+              borderWidth: 1,
+              borderColor: "#E8E0ED",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <Icon name="calendar-outline" size={18} color="#5C2E72" />
+            <Text
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 12.5,
+                color: C.ink,
+              }}
+            >
+              Today
+            </Text>
+            <Icon name="chevron-down" size={15} color="#5C2E72" />
+          </View>
+        </View>
+
+        {!history.length ? (
+          <Card
+            style={{
+              minHeight: 154,
+              borderRadius: 24,
+              padding: 16,
+              borderColor: "#DDD0E7",
+              backgroundColor: "#FBF8FD",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 14,
+            }}
+          >
+            <View style={{ width: 132, height: 98 }}>
+              <VitalsEmptyGraphic />
+            </View>
+            <View style={{ flex: 1, gap: 6 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 16,
+                  lineHeight: 21,
+                  color: C.ink,
+                }}
+              >
+                A fresh page for today.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 12.5,
+                  lineHeight: 18,
+                  color: C.muted,
+                }}
+              >
+                Your saved observations will appear here. No readings have been
+                added yet.
+              </Text>
+            </View>
+          </Card>
+        ) : (
+          history.map((entry) => (
+            <Card key={entry.id} style={{ borderRadius: 22, gap: 11 }}>
+              <Text style={S.eyebrow}>
+                {new Date(entry.recordedAt).toLocaleString()}
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  columnGap: 12,
+                  rowGap: 12,
+                }}
+              >
+                {trackerFields[kind]
+                  .filter((field) => entry.values[field.key])
+                  .map((field) => (
+                    <View
+                      key={field.key}
+                      style={{
+                        width: "47%",
+                        backgroundColor: "#FAF6FC",
+                        borderRadius: 16,
+                        padding: 12,
+                      }}
+                    >
+                      <Text style={S.small}>{field.label}</Text>
+                      <Text style={[S.h3, { marginTop: 3 }]}>
+                        {entry.values[field.key]}
+                      </Text>
+                    </View>
+                  ))}
+              </View>
+              {Boolean(entry.values.notes) && <Txt>{entry.values.notes}</Txt>}
+            </Card>
+          ))
+        )}
+      </Page>
+    );
   }
 
   return (
