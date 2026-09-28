@@ -22,45 +22,45 @@ import Svg, {
   Stop,
 } from "react-native-svg";
 export const C = {
-  ink: "#30243A",
-  muted: "#776C7D",
-  purple: "#7B428E",
-  deep: "#4C2B61",
-  lavender: "#EFE6F4",
-  paper: "#FCFAF7",
-  line: "#EDE7EC",
-  rose: "#BA424E",
-  redBg: "#FFF0EE",
-  green: "#437565",
+  ink: "#18163C",
+  muted: "#77758B",
+  purple: "#74328F",
+  deep: "#542267",
+  lavender: "#F3ECF9",
+  paper: "#FFFDFC",
+  line: "#EEE8F0",
+  rose: "#C34A67",
+  redBg: "#FFF0F1",
+  green: "#24986E",
   white: "#FFFFFF",
 };
 export const S = StyleSheet.create({
-  page: { paddingHorizontal: 24, paddingTop: 22, paddingBottom: 32, gap: 22 },
+  page: { paddingHorizontal: 22, paddingTop: 18, paddingBottom: 38, gap: 20 },
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   between: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 8,
+    gap: 10,
   },
   title: {
     fontFamily: "DMSans_700Bold",
-    fontSize: 30,
-    lineHeight: 38,
-    letterSpacing: -0.6,
+    fontSize: 32,
+    lineHeight: 39,
+    letterSpacing: -0.8,
     color: C.ink,
   },
   h2: {
-    fontFamily: "DMSans_600SemiBold",
-    fontSize: 23,
-    lineHeight: 30,
-    letterSpacing: -0.3,
+    fontFamily: "DMSans_700Bold",
+    fontSize: 22,
+    lineHeight: 29,
+    letterSpacing: -0.35,
     color: C.ink,
   },
   h3: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 16,
-    lineHeight: 23,
+    lineHeight: 22,
     color: C.ink,
   },
   body: {
@@ -78,34 +78,44 @@ export const S = StyleSheet.create({
   eyebrow: {
     fontFamily: "DMSans_700Bold",
     fontSize: 10,
-    letterSpacing: 1.7,
+    letterSpacing: 2.1,
     color: C.purple,
     textTransform: "uppercase",
   },
   card: {
     backgroundColor: C.white,
-    borderRadius: 18,
+    borderRadius: 24,
     padding: 20,
     borderWidth: 1,
     borderColor: C.line,
     gap: 12,
+    shadowColor: "#35223F",
+    shadowOpacity: 0.045,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#DCD1E0",
-    borderRadius: 14,
+    borderColor: "#E6DCE9",
+    borderRadius: 20,
     padding: 15,
     fontSize: 15,
     fontFamily: "DMSans_400Regular",
     color: C.ink,
     backgroundColor: C.white,
-    minHeight: 52,
+    minHeight: 54,
+    shadowColor: "#35223F",
+    shadowOpacity: 0.025,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1,
   },
   pill: {
     backgroundColor: C.lavender,
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
   },
   divider: { height: 1, backgroundColor: C.line },
 });
@@ -151,10 +161,11 @@ export function Button({
       accessibilityState={{ disabled }}
       onPress={onPress}
       style={({ pressed }) => ({
-        minHeight: 52,
-        backgroundColor: secondary ? C.lavender : C.purple,
-        borderRadius: 16,
-        padding: 15,
+        minHeight: 54,
+        backgroundColor: secondary ? "#F3ECF9" : C.purple,
+        borderRadius: 27,
+        paddingHorizontal: 20,
+        paddingVertical: 14,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
@@ -166,7 +177,10 @@ export function Button({
         <Icon name={icon} color={secondary ? C.deep : C.white} size={19} />
       )}
       <Text
-        style={[S.h3, { fontSize: 14, color: secondary ? C.deep : C.white }]}
+        style={[
+          S.h3,
+          { fontSize: 14, color: secondary ? C.purple : C.white },
+        ]}
       >
         {title}
       </Text>
@@ -286,14 +300,15 @@ export function Row({
         alignItems: "center",
         padding: 16,
         gap: 14,
+        borderRadius: 22,
       }}
     >
       <View
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 14,
-          backgroundColor: C.lavender,
+          width: 46,
+          height: 46,
+          borderRadius: 16,
+          backgroundColor: "#F2EAF8",
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -358,13 +373,13 @@ export function Safety({ onPress }: { onPress: () => void }) {
       onPress={onPress}
       style={{
         backgroundColor: C.redBg,
-        borderRadius: 16,
-        padding: 15,
+        borderRadius: 22,
+        padding: 16,
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
         borderWidth: 1,
-        borderColor: "#F5DBD9",
+        borderColor: "#F3DADF",
       }}
     >
       <Icon name="alert-circle-outline" color={C.rose} />
@@ -393,8 +408,8 @@ export function Landscape({ height = 145 }: { height?: number }) {
     >
       <Defs>
         <LinearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#F3E7ED" />
-          <Stop offset="1" stopColor="#E8DAEC" />
+          <Stop offset="0" stopColor="#FFF4F7" />
+          <Stop offset="1" stopColor="#EEE2F7" />
         </LinearGradient>
       </Defs>
       <Path d="M0 0H400V180H0Z" fill="url(#sky)" />
