@@ -6,8 +6,6 @@ import type { RootStack } from "../navigation";
 import { useCare } from "../store";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
-import { FamilyCareDashboard } from "../components/FamilyCareDashboard";
-import { CareSyncBanner } from "../components/CareSyncBanner";
 import {
   loadToolPreferences,
   rankToolTitles,
@@ -38,327 +36,619 @@ export const useNav = () =>
 export function HomeScreen() {
   const n = useNav();
   const { state } = useCare();
+
   const logged = state.entries.length > 0;
-  const doseRecorded = state.medicationRecords.some((record) => !record.correctedAt);
-  const completed = Number(logged) + Number(doseRecorded);
-  const smartNext =
+  const doseRecorded = state.medicationRecords.some(
+    (record) => !record.correctedAt,
+  );
+  const attentionCount =
+    Number(!logged) +
+    Number(state.medications.length > 0 && !doseRecorded);
+  const upcomingCount = state.appointment.date.trim() ? 1 : 0;
+  const displayName = state.name.trim() || "Caregiver";
+  const profileInitial = displayName.slice(0, 1).toUpperCase();
+
+  const priority =
     !state.careRecipientId
       ? {
           title: "Set up shared care",
-          body: "Create or join a care profile so schedules, tasks, records, and family updates stay connected.",
+          body: "Create or join a care profile so your care team stays connected.",
           icon: "people-outline",
           onPress: () => n.navigate("CareTeam"),
         }
       : !logged
         ? {
             title: "Start today’s check-in",
-            body: "Record the observations you already have so the rest of the care team can see today’s picture.",
+            body: "Record updates so your care team has today’s complete picture.",
             icon: "pulse-outline",
             onPress: () => n.navigate("Tracker", { kind: "Vitals" }),
           }
-        : state.accessRole === "caregiver"
-          ? {
-              title: "See what needs you today",
-              body: "Open the shift board for assigned work, handoffs, overdue items, and shared responsibilities.",
-              icon: "people-outline",
-              onPress: () => n.navigate("CareShiftBoard"),
-            }
-          : state.accessRole === "owner"
-            ? {
-                title: "Review today’s coordination",
-                body: "Check conflicts, uncovered work, and follow-ups that may need an owner decision.",
-                icon: "sparkles-outline",
-                onPress: () => n.navigate("CareCoordinationInbox"),
-              }
-            : {
-                title: "Review the care summary",
-                body: "See the latest care information in one place without changing shared records.",
-                icon: "document-text-outline",
-                onPress: () => n.navigate("Summary"),
-              };
+        : {
+            title: "Review today’s care",
+            body: "See what matters next across your care plan, tasks, and appointments.",
+            icon: "checkmark-circle-outline",
+            onPress: () => n.navigate("CarePlan"),
+          };
+
   return (
     <Page>
       <Fade>
         <View style={S.between}>
           <Brand />
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Emergency and warning signs"
-              onPress={() => n.navigate("Emergency")}
-              style={{
-                backgroundColor: C.redBg,
-                paddingHorizontal: 11,
-                minHeight: 43,
-                borderRadius: 22,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
-              }}
-            >
-              <Icon name="alert-circle-outline" color={C.rose} size={18} />
-              <Text
-                style={[
-                  S.small,
-                  { color: C.rose, fontFamily: "DMSans_600SemiBold" },
-                ]}
-              >
-                Help
-              </Text>
-            </Pressable>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <NotificationBell onPress={() => n.navigate("Notifications")} />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Open your profile"
               onPress={() => n.navigate("Profile")}
               style={{
-                width: 43,
-                height: 43,
-                borderRadius: 22,
-                backgroundColor: "#ECE2F1",
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: "#EFE4F6",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Text style={[S.h3, { color: C.purple }]}>
-                {state.name.slice(0, 1).toUpperCase()}
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 20,
+                  color: "#6F2F8E",
+                }}
+              >
+                {profileInitial}
               </Text>
             </Pressable>
           </View>
         </View>
-        <CareSyncBanner />
 
-        <View style={{ gap: 7 }}>
-          <Text style={S.eyebrow}>YOUR CARE COMPANION</Text>
-          <Text style={[S.title, { fontFamily: "DMSans_600SemiBold" }]}>
-            Welcome, {state.name}.
-          </Text>
-          <Txt>
-            {state.careRecipientName
-              ? `${state.careRecipientName} · ${state.accessRole === "owner" ? "Owner" : state.accessRole === "caregiver" ? "Caregiver" : "Viewer"} access`
-              : "Your care tools and support, together."}
-          </Txt>
-        </View>
-
-        <Card
-          onPress={() => smartNext.onPress()}
-          label={smartNext.title}
+        <View
           style={{
-            backgroundColor: "#F6F0F8",
-            borderColor: "#E2D7E8",
-            padding: 18,
-            gap: 12,
+            position: "relative",
+            minHeight: 236,
+            borderRadius: 28,
+            overflow: "hidden",
+            backgroundColor: "#FFFDFC",
+            marginHorizontal: -6,
+            paddingHorizontal: 6,
+            paddingTop: 2,
           }}
         >
-          <View style={S.between}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              left: -26,
+              right: -26,
+              bottom: -8,
+              opacity: 0.62,
+            }}
+          >
+            <Landscape height={150} />
+          </View>
+
+          <View style={{ gap: 9, paddingHorizontal: 4 }}>
+            <Text
+              style={[
+                S.eyebrow,
+                {
+                  color: "#72408F",
+                  letterSpacing: 2.7,
+                  fontSize: 11,
+                  marginTop: 2,
+                },
+              ]}
+            >
+              YOUR CARE COMPANION
+            </Text>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 42,
+                lineHeight: 50,
+                letterSpacing: -1.1,
+                color: "#18163C",
+                maxWidth: 320,
+              }}
+            >
+              Welcome back,{"\n"}{displayName}.
+            </Text>
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 18,
+                lineHeight: 26,
+                color: "#77758B",
+                maxWidth: 330,
+              }}
+            >
+              You’re making a difference every day.{"\n"}Here’s what matters
+              most today.
+            </Text>
+          </View>
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={priority.title}
+          onPress={priority.onPress}
+          style={({ pressed }) => ({
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 26,
+            backgroundColor: "#6E3288",
+            padding: 22,
+            minHeight: 184,
+            opacity: pressed ? 0.88 : 1,
+            transform: [{ scale: pressed ? 0.99 : 1 }],
+            shadowColor: "#6E3288",
+            shadowOpacity: 0.18,
+            shadowRadius: 18,
+            shadowOffset: { width: 0, height: 9 },
+            elevation: 4,
+          })}
+        >
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              width: 180,
+              height: 180,
+              borderRadius: 90,
+              right: -54,
+              top: -72,
+              backgroundColor: "#FFFFFF0D",
+            }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              width: 130,
+              height: 130,
+              borderRadius: 65,
+              right: 46,
+              bottom: -82,
+              backgroundColor: "#FFFFFF0A",
+            }}
+          />
+
+          <Text
+            style={[
+              S.eyebrow,
+              {
+                color: "#F3DFF9",
+                fontSize: 11,
+                letterSpacing: 2.6,
+                marginBottom: 18,
+              },
+            ]}
+          >
+            TODAY’S PRIORITY
+          </Text>
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 22,
+                backgroundColor: "#F8ECFB",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name={priority.icon} size={34} color="#A65FC0" />
+            </View>
+
+            <View style={{ flex: 1, gap: 7 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 23,
+                  lineHeight: 29,
+                  color: C.white,
+                }}
+              >
+                {priority.title}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 15,
+                  lineHeight: 22,
+                  color: "#F0E4F4",
+                }}
+              >
+                {priority.body}
+              </Text>
+            </View>
+
+            <View
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 26,
+                backgroundColor: C.white,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="arrow-forward" size={25} color="#6E3288" />
+            </View>
+          </View>
+        </Pressable>
+
+        <Card
+          style={{
+            borderRadius: 25,
+            padding: 22,
+            gap: 18,
+            borderColor: "#EEE8EF",
+            shadowColor: "#34213C",
+            shadowOpacity: 0.05,
+            shadowRadius: 15,
+            shadowOffset: { width: 0, height: 8 },
+            elevation: 2,
+          }}
+        >
+          <Text
+            style={[
+              S.eyebrow,
+              { color: "#72408F", fontSize: 11, letterSpacing: 2.6 },
+            ]}
+          >
+            TODAY AT A GLANCE
+          </Text>
+
+          <View style={{ flexDirection: "row", alignItems: "stretch" }}>
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                paddingRight: 14,
+              }}
+            >
               <View
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 14,
-                  backgroundColor: C.white,
+                  width: 52,
+                  height: 52,
+                  borderRadius: 26,
+                  backgroundColor: "#E9F5F0",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon name={smartNext.icon} size={21} />
+                <Icon name="checkmark-circle-outline" color="#24986E" size={28} />
               </View>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={S.eyebrow}>SMART NEXT STEP</Text>
-                <Text style={S.h3}>{smartNext.title}</Text>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_700Bold",
+                    fontSize: 28,
+                    lineHeight: 33,
+                    color: "#19163C",
+                  }}
+                >
+                  {attentionCount}
+                </Text>
+                <Text style={[S.small, { fontSize: 13, lineHeight: 18 }]}>
+                  Items need attention
+                </Text>
               </View>
             </View>
-            <Icon name="arrow-forward" size={18} />
+
+            <View
+              style={{
+                width: 1,
+                backgroundColor: "#ECE7ED",
+                marginHorizontal: 4,
+              }}
+            />
+
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                paddingLeft: 14,
+              }}
+            >
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 26,
+                  backgroundColor: "#F2EBFA",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="calendar-outline" color="#7B3E9E" size={27} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_700Bold",
+                    fontSize: 28,
+                    lineHeight: 33,
+                    color: "#19163C",
+                  }}
+                >
+                  {upcomingCount}
+                </Text>
+                <Text style={[S.small, { fontSize: 13, lineHeight: 18 }]}>
+                  Upcoming visits or tasks
+                </Text>
+              </View>
+            </View>
           </View>
-          <Txt>{smartNext.body}</Txt>
         </Card>
 
-        <FamilyCareDashboard
-          careRecipientId={state.careRecipientId}
-          careRecipientName={state.careRecipientName}
-          accessRole={state.accessRole}
-          medicationRecords={state.medicationRecords}
-          onOpenSchedule={() => n.navigate("CareSchedule")}
-          onOpenAppointments={() => n.navigate("Appointments")}
-          onOpenTasks={() => n.navigate("CareTasks")}
-          onOpenMedications={() => n.navigate("Medications")}
-          onOpenCommunications={() => n.navigate("CareCommunicationLog")}
-          onOpenCoordination={() => n.navigate("CareCoordinationInbox")}
-          onOpenCarePlan={() => n.navigate("CarePlan")}
-          onOpenDocuments={() => n.navigate("CareDocuments")}
-          onOpenFamilyCommunication={() => n.navigate("FamilyCommunication")}
-          onOpenTransition={() => n.navigate("Transition")}
-          onOpenEmergency={() => n.navigate("Emergency")}
-        />
+        <View style={{ gap: 14 }}>
+          <Section
+            title="Quick actions"
+            action="View all tools"
+            onPress={() => n.navigate("Main", { screen: "Toolkit" })}
+          />
+
+          <View style={{ flexDirection: "row", gap: 9 }}>
+            <HomeActionCard
+              title="Care plan"
+              subtitle="See what matters today"
+              icon="list-outline"
+              background="#F5F1FF"
+              iconBackground="#EEE6FF"
+              onPress={() => n.navigate("CarePlan")}
+            />
+            <HomeActionCard
+              title="Medications"
+              subtitle="Open medication log"
+              icon="pulse-outline"
+              background="#FFF2F6"
+              iconBackground="#FFE3EC"
+              iconColor="#C43873"
+              onPress={() => n.navigate("Medications")}
+            />
+            <HomeActionCard
+              title="Calendar"
+              subtitle="Visits, tasks & shifts"
+              icon="calendar-outline"
+              background="#F7F1FA"
+              iconBackground="#EEE5F8"
+              onPress={() => n.navigate("CareCalendar")}
+            />
+            <HomeActionCard
+              title="Check-in"
+              subtitle="Record health updates"
+              icon="people-outline"
+              background="#FFF4EF"
+              iconBackground="#FFE6DF"
+              iconColor="#D34D62"
+              onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
+            />
+          </View>
+        </View>
 
         <Card
           onPress={() => n.navigate("Assistant")}
           label="Ask EnVizion Assistant"
           style={{
-            backgroundColor: "#F0EBF4",
-            borderColor: "#DCCEE5",
-            gap: 16,
-          }}
-        >
-          <View style={S.between}>
-            <View style={S.row}>
-              <Icon name="chatbubbles-outline" />
-              <Text style={S.h3}>EnVizion Assistant</Text>
-            </View>
-            <Text style={[S.small, { color: C.purple }]}>Support</Text>
-          </View>
-          <Text
-            style={[S.h2, { fontFamily: "DMSans_600SemiBold", fontSize: 24 }]}
-          >
-            A question is a good{`\n`}place to start.
-          </Text>
-          <Txt>
-            Find guidance for everyday tasks or bring a person into the
-            conversation.
-          </Txt>
-          <View
-            style={[
-              S.between,
-              { borderRadius: 12, backgroundColor: C.white, padding: 14 },
-            ]}
-          >
-            <Text style={S.body}>How can we help today?</Text>
-            <Icon name="arrow-forward" />
-          </View>
-        </Card>
-        <Card
-          style={{
-            backgroundColor: C.deep,
-            borderWidth: 0,
-            padding: 0,
+            position: "relative",
             overflow: "hidden",
+            borderRadius: 27,
+            minHeight: 250,
+            padding: 22,
+            paddingRight: 134,
+            backgroundColor: "#F7F0FB",
+            borderColor: "#E7D9F0",
           }}
         >
-          <View style={{ padding: 22, gap: 12 }}>
-            <View style={S.between}>
-              <Text style={[S.eyebrow, { color: "#E0C6E8" }]}>
-                ONE DAY AT A TIME
-              </Text>
-              <Icon name="sunny-outline" color="#E6CE98" size={24} />
-            </View>
-            <Text style={[S.h2, { color: C.white, fontSize: 25 }]}>
-              Small steps, meaningful care.
-            </Text>
-            <Txt style={{ color: "#E3D5E9", fontSize: 13 }}>
-              Make a little space for today’s check-in.
-            </Txt>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              width: 170,
+              height: 170,
+              borderRadius: 85,
+              right: -38,
+              bottom: -38,
+              backgroundColor: "#EBDDFA",
+            }}
+          />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              width: 116,
+              height: 116,
+              borderRadius: 58,
+              right: 22,
+              bottom: 5,
+              backgroundColor: "#DCC7F2",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <View
               style={{
-                backgroundColor: "#FFFFFF",
-                borderRadius: 12,
-                padding: 13,
-                alignSelf: "flex-start",
+                width: 86,
+                height: 62,
+                borderRadius: 25,
+                backgroundColor: "#7040A6",
+                borderWidth: 7,
+                borderColor: "#F0E9FF",
                 flexDirection: "row",
-                gap: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 14,
               }}
             >
-              <Text style={[S.h3, { fontSize: 13, color: C.deep }]}>
-                {logged ? "Add another check-in" : "Start daily check-in"}
-              </Text>
-              <Icon name="arrow-forward" size={18} />
-            </Pressable>
+              <View
+                style={{
+                  width: 11,
+                  height: 11,
+                  borderRadius: 6,
+                  backgroundColor: C.white,
+                }}
+              />
+              <View
+                style={{
+                  width: 11,
+                  height: 11,
+                  borderRadius: 6,
+                  backgroundColor: C.white,
+                }}
+              />
+            </View>
           </View>
-          <Landscape height={75} />
-        </Card>
-        <View style={{ gap: 12 }}>
-          <Section
-            title="Quick actions"
-            action="All tools"
-            onPress={() => n.navigate("Main", { screen: "Toolkit" })}
-          />
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            <QuickCard
-              title="Care plan"
-              subtitle="See what matters today"
-              icon="list-outline"
-              onPress={() => n.navigate("CarePlan")}
-            />
-            <QuickCard
-              title="Check-in"
-              subtitle={logged ? "Add another record" : "Record health"}
-              icon="pulse-outline"
-              onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
-            />
-          </View>
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            <QuickCard
-              title="Medications"
-              subtitle={doseRecorded ? "Record updated" : "Open medication log"}
-              icon="medical-outline"
-              onPress={() => n.navigate("Medications")}
-            />
-            <QuickCard
-              title="Calendar"
-              subtitle="Visits, tasks & shifts"
-              icon="calendar-outline"
-              onPress={() => n.navigate("CareCalendar")}
-            />
-          </View>
-          <Row
-            title="Find any care tool"
-            subtitle="Search the full toolkit by what you need to do"
-            icon="search-outline"
-            onPress={() => n.navigate("Main", { screen: "Toolkit" })}
-          />
-        </View>
-        <Safety onPress={() => n.navigate("Emergency")} />
-        <View style={{ gap: 13 }}>
-          <Section title="Support for your journey" />
-          <Card
-            onPress={() => n.navigate("Transition")}
-            label="Walking Through the Transition"
-            style={{ padding: 0, overflow: "hidden" }}
-          >
-            <Landscape height={110} />
-            <View style={{ padding: 18, gap: 6 }}>
-              <Text style={S.eyebrow}>FROM HOSPITAL TO HOME</Text>
-              <Text style={S.h2}>Walking Through{"\n"}the Transition</Text>
-              <Txt>A thoughtful next step, at every step.</Txt>
+
+          <View style={{ gap: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Icon name="sparkles-outline" color="#B54E9E" size={20} />
               <Text
-                style={[S.h3, { fontSize: 13, color: C.purple, marginTop: 4 }]}
+                style={[
+                  S.eyebrow,
+                  { color: "#7C4696", fontSize: 11, letterSpacing: 2.2 },
+                ]}
               >
-                Explore your homecoming checklist →
+                ENVIZION ASSISTANT
               </Text>
             </View>
-          </Card>
-          <Row
-            title="An advocate in your corner"
-            subtitle="Explore patient advocate coaching"
-            icon="people-outline"
-            onPress={() => n.navigate("Coaching")}
-          />
-        </View>
-        {state.faith && (
-          <Card style={{ backgroundColor: "#F2EDF5", borderWidth: 0 }}>
-            <Icon name="sparkles-outline" />
-            <Text style={[S.h2, { fontSize: 21 }]}>You deserve care, too.</Text>
-            <Txt>A quiet moment to breathe, reflect, and reconnect.</Txt>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => n.navigate("Wellness")}
-              style={{ paddingVertical: 8 }}
+
+            <Text
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 27,
+                lineHeight: 34,
+                color: "#19163C",
+              }}
             >
-              <Text style={[S.h3, { fontSize: 13, color: C.purple }]}>
-                Find a moment of peace →
+              Questions? I’m here to help.
+            </Text>
+
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 15,
+                lineHeight: 22,
+                color: "#77758B",
+              }}
+            >
+              Get guidance, find resources, or talk through what’s on your mind.
+            </Text>
+
+            <View
+              style={{
+                marginTop: 4,
+                minHeight: 52,
+                borderRadius: 26,
+                backgroundColor: "#73328F",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 18,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 15,
+                  color: C.white,
+                }}
+              >
+                Ask a question
               </Text>
-            </Pressable>
-          </Card>
-        )}
-        <Text style={[S.small, { textAlign: "center" }]}>
-          Made with faith, clarity & compassion.{"\n"}Secure care tools • Educational support
-        </Text>
+              <Icon name="arrow-forward" color={C.white} size={22} />
+            </View>
+          </View>
+        </Card>
       </Fade>
     </Page>
   );
 }
+
+function HomeActionCard({
+  title,
+  subtitle,
+  icon,
+  background,
+  iconBackground,
+  iconColor = "#7B3E9E",
+  onPress,
+}: {
+  title: string;
+  subtitle: string;
+  icon: string;
+  background: string;
+  iconBackground: string;
+  iconColor?: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flex: 1,
+        minWidth: 0,
+        minHeight: 142,
+        borderRadius: 20,
+        backgroundColor: background,
+        padding: 12,
+        gap: 10,
+        borderWidth: 1,
+        borderColor: "#EFE8F0",
+        opacity: pressed ? 0.76 : 1,
+      })}
+    >
+      <View
+        style={{
+          width: 42,
+          height: 42,
+          borderRadius: 21,
+          backgroundColor: iconBackground,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon name={icon} size={23} color={iconColor} />
+      </View>
+      <View style={{ gap: 4 }}>
+        <Text
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          style={{
+            fontFamily: "DMSans_600SemiBold",
+            fontSize: 13,
+            lineHeight: 18,
+            color: "#18163C",
+          }}
+        >
+          {title}
+        </Text>
+        <Text
+          numberOfLines={3}
+          style={{
+            fontFamily: "DMSans_400Regular",
+            fontSize: 11,
+            lineHeight: 15,
+            color: "#77758B",
+          }}
+        >
+          {subtitle}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
 function QuickCard({
   title,
   subtitle,
@@ -380,6 +670,7 @@ function QuickCard({
     </Card>
   );
 }
+
 type ToolItem = {
   title: string;
   subtitle: string;
