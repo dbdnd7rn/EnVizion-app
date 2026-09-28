@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
@@ -23,6 +23,7 @@ import {
   Fade,
   Heading,
   Icon,
+  HomeLandscape,
   Landscape,
   Page,
   Row,
@@ -139,6 +140,11 @@ function HomeFloat({
 export function HomeScreen() {
   const n = useNav();
   const { state } = useCare();
+  const { width: windowWidth } = useWindowDimensions();
+  const compact = windowWidth < 430;
+  const contentWidth = Math.min(Math.max(windowWidth - 40, 280), 440);
+  const heroTextWidth = Math.min(compact ? 215 : 255, contentWidth * 0.62);
+  const heroArtLeft = Math.max(contentWidth * 0.50, compact ? 178 : 205);
 
   const logged = state.entries.length > 0;
   const doseRecorded = state.medicationRecords.some(
@@ -231,14 +237,14 @@ export function HomeScreen() {
               pointerEvents="none"
               style={{
                 position: "absolute",
-                left: 116,
-                right: -66,
-                bottom: -8,
-                opacity: 0.78,
+                left: heroArtLeft,
+                right: -20,
+                bottom: -4,
+                opacity: 0.94,
               }}
             >
               <HomeFloat distance={4} duration={3300}>
-                <Landscape height={205} />
+                <HomeLandscape height={190} />
               </HomeFloat>
             </View>
 
@@ -247,7 +253,7 @@ export function HomeScreen() {
                 gap: 8,
                 paddingTop: 7,
                 paddingHorizontal: 4,
-                maxWidth: 310,
+                maxWidth: heroTextWidth,
               }}
             >
               <Text
@@ -262,8 +268,8 @@ export function HomeScreen() {
                 accessibilityRole="header"
                 style={{
                   fontFamily: "DMSans_700Bold",
-                  fontSize: 42,
-                  lineHeight: 49,
+                  fontSize: compact ? 36 : 40,
+                  lineHeight: compact ? 42 : 47,
                   letterSpacing: -1.15,
                   color: "#17153A",
                 }}
@@ -276,7 +282,7 @@ export function HomeScreen() {
                   fontSize: 18,
                   lineHeight: 25,
                   color: "#77758B",
-                  maxWidth: 280,
+                  maxWidth: heroTextWidth,
                 }}
               >
                 Here for a calmer, more confident day of care.
@@ -644,7 +650,7 @@ export function HomeScreen() {
               }}
             >
               <HomeFloat distance={3} duration={3600}>
-                <Landscape height={116} />
+                <HomeLandscape height={116} />
               </HomeFloat>
             </View>
             <View style={{ maxWidth: 250, gap: 10 }}>
