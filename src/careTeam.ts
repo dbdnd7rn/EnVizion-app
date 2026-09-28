@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 
-export type CareRole = "owner" | "caregiver" | "viewer";
+export type CareRole = "owner" | "caregiver" | "patient" | "viewer";
 export type CareMemberStatus = "invited" | "active" | "declined" | "revoked";
 
 export type CareInvitation = {
