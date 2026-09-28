@@ -818,7 +818,7 @@ export function AssistantScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open guided support"
-          onPress={() => n.navigate("Guide")}
+          onPress={() => n.navigate("Resources")}
           style={({ pressed }) => [
             styles.assistantGuideBadge,
             { opacity: pressed ? 0.7 : 1 },
@@ -911,7 +911,7 @@ export function AssistantScreen() {
               <Text style={styles.assistantSectionTitle}>Popular questions</Text>
               <Pressable
                 accessibilityRole="button"
-                onPress={() => n.navigate("Guide")}
+                onPress={() => n.navigate("Resources")}
                 style={{ flexDirection: "row", alignItems: "center", gap: 2 }}
               >
                 <Text style={styles.assistantViewAll}>View all</Text>
