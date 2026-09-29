@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -10,6 +13,15 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Svg, {
+  Circle,
+  Defs,
+  Ellipse,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+} from "react-native-svg";
 import { useCare } from "../store";
 import {
   createSupportRequest,
@@ -151,7 +163,7 @@ const styles = StyleSheet.create({
   assistantHero: {
     marginHorizontal: 20,
     borderRadius: 30,
-    minHeight: 300,
+    minHeight: 320,
     padding: 22,
     overflow: "hidden",
     backgroundColor: "#F0EEFF",
@@ -160,23 +172,23 @@ const styles = StyleSheet.create({
   },
   assistantHeroGlowOne: {
     position: "absolute",
-    width: 240,
-    height: 240,
-    borderRadius: 120,
-    right: -70,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    right: -72,
     top: -76,
-    backgroundColor: "#E1E7FF",
-    opacity: 0.8,
+    backgroundColor: "#E4E8FF",
+    opacity: 0.9,
   },
   assistantHeroGlowTwo: {
     position: "absolute",
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    right: 4,
-    bottom: -115,
-    backgroundColor: "#EADDFC",
-    opacity: 0.75,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    right: -4,
+    bottom: -128,
+    backgroundColor: "#E9DEFB",
+    opacity: 0.78,
   },
   assistantGreeting: {
     fontFamily: "DMSans_700Bold",
@@ -185,14 +197,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   assistantHeroTitle: {
-    width: "64%",
+    width: "60%",
     fontFamily: "DMSans_700Bold",
-    fontSize: 32,
+    fontSize: 31,
     lineHeight: 37,
+    letterSpacing: -0.5,
     color: "#10133F",
   },
   assistantHeroBody: {
-    width: "62%",
+    width: "58%",
     marginTop: 10,
     fontFamily: "DMSans_400Regular",
     fontSize: 14,
@@ -201,72 +214,31 @@ const styles = StyleSheet.create({
   },
   assistantRobot: {
     position: "absolute",
-    right: 5,
-    top: 46,
-    width: 142,
-    height: 166,
-    alignItems: "center",
-    justifyContent: "flex-start",
-  },
-  assistantRobotAntennaStem: {
-    width: 6,
-    height: 20,
-    borderRadius: 3,
-    backgroundColor: "#252755",
-  },
-  assistantRobotAntenna: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginTop: -2,
-    marginBottom: -2,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 4,
-    borderColor: "#E4E8FF",
-  },
-  assistantRobotShell: {
-    width: 112,
-    height: 88,
-    borderRadius: 35,
-    padding: 8,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E4E5F4",
-    shadowColor: "#39345A",
-    shadowOpacity: 0.14,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
-  },
-  assistantRobotFace: {
-    flex: 1,
-    borderRadius: 28,
+    right: -1,
+    top: 39,
+    width: 178,
+    height: 198,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#17194A",
   },
-  assistantRobotBody: {
-    width: 72,
-    height: 62,
-    marginTop: -5,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E4E5F4",
-  },
-  assistantRobotArm: {
+  assistantRobotAura: {
     position: "absolute",
-    left: 0,
-    bottom: 18,
-    width: 38,
-    height: 16,
-    borderRadius: 10,
-    transform: [{ rotate: "-25deg" }],
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E4E5F4",
+    width: 156,
+    height: 156,
+    borderRadius: 78,
+    top: 13,
+    right: 6,
+    backgroundColor: "#DCE2FF",
+  },
+  assistantRobotWaveArm: {
+    position: "absolute",
+    left: 2,
+    top: 92,
+    width: 66,
+    height: 68,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 4,
   },
   assistantHeroPills: {
     marginTop: 26,
@@ -662,20 +634,268 @@ function AssistantFeaturePill({
 }
 
 function AssistantRobot() {
+  const floatY = useRef(new Animated.Value(0)).current;
+  const wave = useRef(new Animated.Value(0)).current;
+  const glow = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let active = true;
+    let loops: Animated.CompositeAnimation[] = [];
+
+    AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
+      if (!active || reduced) return;
+
+      const floatLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(floatY, {
+            toValue: -6,
+            duration: 1850,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+          Animated.timing(floatY, {
+            toValue: 0,
+            duration: 1850,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+        ]),
+      );
+
+      const waveLoop = Animated.loop(
+        Animated.sequence([
+          Animated.delay(950),
+          Animated.timing(wave, {
+            toValue: 1,
+            duration: 430,
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+          Animated.timing(wave, {
+            toValue: 0,
+            duration: 430,
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+          Animated.delay(1650),
+        ]),
+      );
+
+      const glowLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(glow, {
+            toValue: 1,
+            duration: 1500,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+          Animated.timing(glow, {
+            toValue: 0,
+            duration: 1500,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: Platform.OS !== "web",
+          }),
+        ]),
+      );
+
+      loops = [floatLoop, waveLoop, glowLoop];
+      loops.forEach((animation) => animation.start());
+    });
+
+    return () => {
+      active = false;
+      loops.forEach((animation) => animation.stop());
+    };
+  }, [floatY, glow, wave]);
+
+  const armRotate = wave.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["-8deg", "-28deg"],
+  });
+
+  const glowOpacity = glow.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.28, 0.58],
+  });
+
   return (
-    <View pointerEvents="none" style={styles.assistantRobot}>
-      <View style={styles.assistantRobotAntenna} />
-      <View style={styles.assistantRobotAntennaStem} />
-      <View style={styles.assistantRobotShell}>
-        <View style={styles.assistantRobotFace}>
-          <Icon name="happy-outline" color="#8BA2FF" size={46} />
-        </View>
-      </View>
-      <View style={styles.assistantRobotBody}>
-        <Icon name="heart" color="#B977CE" size={24} />
-      </View>
-      <View style={styles.assistantRobotArm} />
-    </View>
+    <Animated.View
+      pointerEvents="none"
+      style={[
+        styles.assistantRobot,
+        { transform: [{ translateY: floatY }] },
+      ]}
+    >
+      <Animated.View
+        style={[
+          styles.assistantRobotAura,
+          {
+            opacity: glowOpacity,
+            transform: [
+              {
+                scale: glow.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.94, 1.05],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+
+      <Svg width={174} height={190} viewBox="0 0 174 190">
+        <Defs>
+          <LinearGradient id="robotShell" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#FFFFFF" />
+            <Stop offset="0.55" stopColor="#FCFCFF" />
+            <Stop offset="1" stopColor="#E9ECFA" />
+          </LinearGradient>
+          <LinearGradient id="robotBody" x1="0" y1="0" x2="0.85" y2="1">
+            <Stop offset="0" stopColor="#FFFFFF" />
+            <Stop offset="0.62" stopColor="#F8F8FE" />
+            <Stop offset="1" stopColor="#E7EAF8" />
+          </LinearGradient>
+          <LinearGradient id="robotFace" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#101542" />
+            <Stop offset="0.58" stopColor="#171B52" />
+            <Stop offset="1" stopColor="#27215D" />
+          </LinearGradient>
+          <LinearGradient id="robotBlue" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#A5C2FF" />
+            <Stop offset="1" stopColor="#6E7FF4" />
+          </LinearGradient>
+          <LinearGradient id="robotHeart" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor="#CE8BE1" />
+            <Stop offset="1" stopColor="#9E62CF" />
+          </LinearGradient>
+        </Defs>
+
+        <Ellipse cx="99" cy="174" rx="50" ry="8" fill="#AAB1D1" opacity="0.18" />
+
+        {/* right arm */}
+        <Path
+          d="M131 122 C149 119 158 125 162 138 C164 146 160 151 154 151 C148 151 145 143 142 138 C139 133 135 132 129 133 Z"
+          fill="url(#robotShell)"
+          stroke="#E4E6F2"
+          strokeWidth="1.5"
+        />
+
+        {/* torso */}
+        <Rect
+          x="61"
+          y="108"
+          width="79"
+          height="62"
+          rx="29"
+          fill="url(#robotBody)"
+          stroke="#E1E4F1"
+          strokeWidth="1.5"
+        />
+        <Ellipse cx="100" cy="118" rx="29" ry="8" fill="#FFFFFF" opacity="0.7" />
+        <Path
+          d="M99 142 C95 135 84 135 82 143 C80 151 89 157 99 164 C109 157 118 151 116 143 C114 135 103 135 99 142 Z"
+          fill="url(#robotHeart)"
+        />
+
+        {/* side ear pods */}
+        <Rect x="33" y="59" width="17" height="37" rx="8.5" fill="#EEF0FA" />
+        <Rect x="146" y="59" width="17" height="37" rx="8.5" fill="#EEF0FA" />
+
+        {/* head shell */}
+        <Rect
+          x="39"
+          y="38"
+          width="118"
+          height="83"
+          rx="35"
+          fill="url(#robotShell)"
+          stroke="#E1E4F1"
+          strokeWidth="1.5"
+        />
+
+        {/* shell highlight */}
+        <Path
+          d="M58 47 C76 40 118 40 137 48"
+          fill="none"
+          stroke="#FFFFFF"
+          strokeWidth="5"
+          strokeLinecap="round"
+          opacity="0.75"
+        />
+
+        {/* face screen */}
+        <Rect x="51" y="49" width="94" height="61" rx="26" fill="url(#robotFace)" />
+        <Ellipse cx="80" cy="65" rx="25" ry="12" fill="#4B5AA5" opacity="0.10" />
+
+        {/* happy crescent eyes */}
+        <Path
+          d="M70 74 C70 67 76 64 82 68"
+          fill="none"
+          stroke="url(#robotBlue)"
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+        <Path
+          d="M113 68 C119 64 125 67 125 74"
+          fill="none"
+          stroke="url(#robotBlue)"
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+
+        {/* smile */}
+        <Path
+          d="M88 87 C95 97 106 97 113 87"
+          fill="none"
+          stroke="#8FAAFF"
+          strokeWidth="5"
+          strokeLinecap="round"
+        />
+
+        {/* antenna */}
+        <Rect x="95.5" y="18" width="7" height="23" rx="3.5" fill="#282B67" />
+        <Circle cx="99" cy="13" r="11" fill="#FFFFFF" stroke="#E4E7F3" strokeWidth="2" />
+        <Circle cx="96" cy="10" r="4" fill="#FFFFFF" opacity="0.85" />
+
+        {/* tiny collar */}
+        <Ellipse cx="100" cy="113" rx="17" ry="5" fill="#EAECF7" />
+      </Svg>
+
+      {/* waving left arm, animated separately so the mascot feels alive */}
+      <Animated.View
+        style={[
+          styles.assistantRobotWaveArm,
+          {
+            transform: [
+              { translateX: 18 },
+              { translateY: 15 },
+              { rotate: armRotate },
+              { translateX: -18 },
+              { translateY: -15 },
+            ],
+          },
+        ]}
+      >
+        <Svg width={66} height={68} viewBox="0 0 66 68">
+          <Defs>
+            <LinearGradient id="waveShell" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor="#FFFFFF" />
+              <Stop offset="1" stopColor="#E7EAF8" />
+            </LinearGradient>
+          </Defs>
+          <Path
+            d="M47 50 C40 48 35 43 31 37 L20 22 C16 16 7 17 4 23 C1 29 5 34 10 38 L27 54 C33 60 43 62 51 57 Z"
+            fill="url(#waveShell)"
+            stroke="#E1E4F1"
+            strokeWidth="1.5"
+          />
+          <Circle cx="12" cy="22" r="10" fill="#FFFFFF" stroke="#E1E4F1" strokeWidth="1.5" />
+          <Path d="M8 17 L5 9" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" />
+          <Path d="M12 16 L12 7" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" />
+          <Path d="M16 18 L20 10" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" />
+        </Svg>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
