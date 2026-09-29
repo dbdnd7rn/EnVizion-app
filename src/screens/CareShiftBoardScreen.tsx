@@ -263,10 +263,6 @@ function ShiftHeroGraphic() {
     <View style={{ width: 190, height: 176 }}>
       <Svg width="100%" height="100%" viewBox="0 0 190 176">
         <Defs>
-          <LinearGradient id="boardLavender" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#F1E7FF" />
-            <Stop offset="1" stopColor="#D9C7FB" />
-          </LinearGradient>
           <LinearGradient id="boardPurple" x1="0" y1="0" x2="1" y2="1">
             <Stop offset="0" stopColor="#9D5BDC" />
             <Stop offset="1" stopColor="#6530A2" />
@@ -515,7 +511,581 @@ export function CareShiftBoardScreen() {
   const [expandedHandoffId, setExpandedHandoffId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    const profileName = state.careRecipientName || "Care profile";
+    if (!careRecipientId) {
+      setTasks([]);
+      setCompletions([]);
+      setHandoffs([]);
+      setAcknowledgements([]);
+      setShifts([]);
+      setAvailability([]);
+      setAttendance([]);
+      setAgenda({
+        appointments: [],
+        tasks: [],
+        shifts: [],
+        handoffs: [],
+        followUps: [],
+      });
+      setCommunications([]);
+      setHandoffMedicationRecords([]);
+      setWorkflow({ resolutions: [], comments: [], history: [] });
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const userId = await currentCareTaskUserId();
+      const rangeStart = new Date();
+      rangeStart.setHours(0, 0, 0, 0);
+      const rangeEnd = new Date(rangeStart);
+      rangeEnd.setDate(rangeEnd.getDate() + 7);
+
+      const [
+        taskRows,
+        completionRows,
+        team,
+        handoffRows,
+        acknowledgementRows,
+        schedule,
+        attendanceRows,
+        agendaRows,
+        communicationRows,
+        medicationRows,
+        workflowRows,
+      ] = await Promise.all([
+        loadCareTasks(careRecipientId),
+        loadCareTaskCompletions(careRecipientId),
+        loadCareTeam(careRecipientId),
+        loadCareShiftHandoffs(careRecipientId),
+        loadCareShiftHandoffAcknowledgements(careRecipientId),
+        loadCareSchedule(careRecipientId),
+        loadShiftAttendance(careRecipientId),
+        loadCareAgendaData({
+          careRecipientId,
+          rangeStartIso: rangeStart.toISOString(),
+          rangeEndIso: rangeEnd.toISOString(),
+        }),
+        loadCareCommunications(careRecipientId),
+        loadHandoffMedicationRecords(careRecipientId),
+        loadCoordinationWorkflow(careRecipientId),
+      ]);
+
+      setCurrentUserId(userId);
+      setTasks(taskRows);
+      setCompletions(completionRows);
+      setRoster(team);
+      setHandoffs(handoffRows);
+      setAcknowledgements(acknowledgementRows);
+      setShifts(schedule.shifts);
+      setAvailability(schedule.availability);
+      setAttendance(attendanceRows);
+      setAgenda(agendaRows);
+      setCommunications(communicationRows);
+      setHandoffMedicationRecords(medicationRows);
+      setWorkflow(workflowRows);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not load the caregiver shift board.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [careRecipientId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!careRecipientId) return;
+
+    const channel = supabase
+      .channel(`care-shift-board:${careRecipientId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_tasks",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_task_completions",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shift_handoffs",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shift_handoff_acknowledgements",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shifts",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_shift_attendance",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_communications",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "care_coordination_resolutions",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "appointments",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "medication_records",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [careRecipientId, refresh]);
+
+  const members = useMemo(() => {
+    const rows =
+      roster?.members.filter(
+        (member) =>
+          member.status === "active" &&
+          (member.role === "owner" || member.role === "caregiver"),
+      ) ?? [];
+
+    if (
+      currentUserId &&
+      state.accessRole !== "viewer" &&
+      !rows.some((member) => member.userId === currentUserId)
+    ) {
+      return [
+        {
+          userId: currentUserId,
+          displayName: state.name || "Me",
+          email: "",
+          role: state.accessRole,
+          status: "active",
+          invitedAt: null,
+          acceptedAt: null,
+          revokedAt: null,
+          isCurrentUser: true,
+        } as CareTeamMember,
+        ...rows,
+      ];
+    }
+
+    return rows;
+  }, [currentUserId, roster, state.accessRole, state.name]);
+
+  const memberMap = useMemo(
+    () => new Map((roster?.members ?? members).map((item) => [item.userId, item])),
+    [members, roster],
+  );
+
+  const taskMap = useMemo(
+    () => new Map(tasks.map((task) => [task.id, task])),
+    [tasks],
+  );
+
+  const openTasks = useMemo(
+    () =>
+      openTasksForShift(tasks).sort(
+        (a, b) => new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime(),
+      ),
+    [tasks],
+  );
+
+  const todaysCompletions = useMemo(
+    () => todayCompletions(completions),
+    [completions],
+  );
+
+  const counts = useMemo(
+    () => shiftBoardCounts(tasks, completions, currentUserId),
+    [completions, currentUserId, tasks],
+  );
+
+  const actualCoverage = useMemo(
+    () => actualCoverageNow(shifts, attendance),
+    [attendance, shifts],
+  );
+  const coverageGaps = useMemo(
+    () => uncoveredUpcomingTasks(tasks, shifts),
+    [shifts, tasks],
+  );
+
+  const coordinationConflicts = useMemo(() => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+
+    return detectCoordinationConflicts({
+      agenda,
+      shifts,
+      availability,
+      rangeStart: start.toISOString(),
+      rangeEnd: end.toISOString(),
+    });
+  }, [agenda, availability, shifts]);
+
+  const actionableCoordination = useMemo(
+    () =>
+      currentActionableConflicts(
+        coordinationConflicts,
+        workflow.resolutions,
+      ),
+    [coordinationConflicts, workflow.resolutions],
+  );
+
+  const nextAppointment = useMemo(
+    () => nextDashboardAppointment(agenda.appointments),
+    [agenda.appointments],
+  );
+
+  const briefingWindowStart = useMemo(
+    () => handoffWindowStart(handoffs),
+    [handoffs],
+  );
+
+  const medicationActivitySnapshot = useMemo(
+    () =>
+      handoffMedicationActivity(
+        handoffMedicationRecords,
+        briefingWindowStart,
+      ),
+    [briefingWindowStart, handoffMedicationRecords],
+  );
+
+  const communicationSnapshot = useMemo(
+    () =>
+      handoffCommunicationActivity(
+        communications,
+        briefingWindowStart,
+      ),
+    [briefingWindowStart, communications],
+  );
+
+  const coordinationSnapshot = useMemo(
+    () => handoffCoordinationActivity(actionableCoordination),
+    [actionableCoordination],
+  );
+
+  const nextAppointmentSnapshot = useMemo(
+    () => handoffAppointmentSnapshot(nextAppointment),
+    [nextAppointment],
+  );
+
+  const followUpSnapshot = useMemo(
+    () => handoffFollowUps(communications),
+    [communications],
+  );
+
+  const briefingCounts = useMemo(
+    () =>
+      handoffBriefingCounts({
+        openTasks,
+        completedTasks: todaysCompletions,
+        medications: medicationActivitySnapshot,
+        communications: communicationSnapshot,
+        coordination: coordinationSnapshot,
+        followUps: followUpSnapshot,
+        nextAppointment: nextAppointmentSnapshot,
+      }),
+    [
+      communicationSnapshot,
+      coordinationSnapshot,
+      followUpSnapshot,
+      medicationActivitySnapshot,
+      nextAppointmentSnapshot,
+      openTasks,
+      todaysCompletions,
+    ],
+  );
+
+  const acknowledgementMap = useMemo(
+    () =>
+      new Map(
+        acknowledgements.map((acknowledgement) => [
+          acknowledgement.handoffId,
+          acknowledgement,
+        ]),
+      ),
+    [acknowledgements],
+  );
+
+  const pendingTakeover = useMemo(
+    () =>
+      latestAcceptableHandoff({
+        handoffs,
+        acknowledgements,
+        currentUserId,
+        readOnly,
+      }),
+    [acknowledgements, currentUserId, handoffs, readOnly],
+  );
+
+  const takeoverWork = useMemo(
+    () => takeoverResponsibilities(tasks, currentUserId),
+    [currentUserId, tasks],
+  );
+
+  const coverage = useMemo(() => {
+    const rows = members.map((member) => {
+      const assigned = openTasks.filter(
+        (task) => task.assignedTo === member.userId,
+      );
+      return {
+        member,
+        open: assigned.length,
+        overdue: assigned.filter(
+          (task) => shiftTaskBucket(task) === "overdue",
+        ).length,
+        dueToday: assigned.filter((task) => {
+          const bucket = shiftTaskBucket(task);
+          return bucket === "due_soon" || bucket === "later_today";
+        }).length,
+      };
+    });
+
+    const unassigned = openTasks.filter((task) => !task.assignedTo);
+    return {
+      rows,
+      unassigned: {
+        open: unassigned.length,
+        overdue: unassigned.filter(
+          (task) => shiftTaskBucket(task) === "overdue",
+        ).length,
+      },
+    };
+  }, [members, openTasks]);
+
+  function memberName(userId: string | null) {
+    if (!userId) return "Shared care team";
+    const member = memberMap.get(userId);
+    if (!member) return "Caregiver";
+    return member.isCurrentUser
+      ? `${member.displayName || "Me"} (me)`
+      : member.displayName || "Caregiver";
+  }
+
+  async function complete(task: CareTask) {
+    if (!careRecipientId || readOnly || busyId) return;
+
+    setBusyId(task.id);
+    setMessage("");
+    try {
+      await completeCareTask(careRecipientId, task.id, "");
+      await refresh();
+      setMessage(
+        task.recurrence === "none"
+          ? "Task completed."
+          : "Occurrence completed and the next one was scheduled.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not complete this task.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function reassign(taskId: string, userId: string | null) {
+    if (!careRecipientId || readOnly || busyId) return;
+
+    setBusyId(taskId);
+    setMessage("");
+    try {
+      await reassignCareTask(careRecipientId, taskId, userId);
+      setReassigningId(null);
+      await refresh();
+      setMessage(
+        userId
+          ? `Responsibility reassigned to ${memberName(userId)}.`
+          : "Task returned to shared responsibility.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not reassign this task.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  function openHandoff() {
+    setShiftLabel(defaultShiftLabel());
+    setHandoffNote("");
+    setHandoffTo(null);
+    setHandoffOpen(true);
+    setMessage("");
+  }
+
+  async function saveHandoff() {
+    if (!careRecipientId || readOnly || busyId) return;
+
+    setBusyId("handoff");
+    setMessage("");
+    try {
+      const openSnapshot = openTasks.map((task) =>
+        shiftSnapshotTask(task, memberName(task.assignedTo)),
+      );
+      const completedSnapshot = todaysCompletions.map((completion) =>
+        shiftSnapshotCompletion(
+          completion,
+          taskMap.get(completion.taskId)?.title || "Care task",
+          memberName(completion.completedBy),
+        ),
+      );
+
+      await createCareShiftHandoff({
+        careRecipientId,
+        handoffTo,
+        shiftLabel,
+        note: handoffNote,
+        openTaskSnapshot: openSnapshot,
+        completedTaskSnapshot: completedSnapshot,
+        briefingWindowStart,
+        medicationActivitySnapshot,
+        communicationSnapshot,
+        coordinationSnapshot,
+        nextAppointmentSnapshot,
+        followUpSnapshot,
+      });
+
+      setHandoffOpen(false);
+      setHandoffNote("");
+      setHandoffTo(null);
+      await refresh();
+      setMessage("Caregiver shift briefing saved and shared.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not save this handoff.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function acceptTakeover(flagConcern = false) {
+    if (
+      !careRecipientId ||
+      !pendingTakeover ||
+      readOnly ||
+      busyId
+    ) {
+      return;
+    }
+
+    setBusyId(`takeover:${pendingTakeover.id}`);
+    setMessage("");
+    try {
+      const acknowledgement = await acceptCareShiftHandoff({
+        careRecipientId,
+        handoffId: pendingTakeover.id,
+        note: takeoverNote,
+        concernFlagged: flagConcern,
+        concernText: flagConcern ? takeoverNote : "",
+        reviewedUrgentItems: true,
+      });
+
+      setTakeoverNote("");
+      await refresh();
+      setMessage(
+        flagConcern
+          ? `Takeover confirmed with a flagged concern at ${new Date(
+              acknowledgement.acceptedAt,
+            ).toLocaleString()}. Your active caregiver shift has started and the concern remains visible in handoff history.`
+          : `Takeover confirmed at ${new Date(
+              acknowledgement.acceptedAt,
+            ).toLocaleString()}. Your active caregiver shift has started and existing task ownership was preserved.`,
+      );
+      n.navigate("OnShiftCaregiver");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not confirm this caregiver takeover.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const profileName = state.careRecipientName || "Care profile";
   const profileInitials = profileName
     .split(/\s+/)
     .filter(Boolean)
