@@ -3,7 +3,7 @@ import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, TextInp
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
-import Svg, { Circle, Ellipse, G, Line, Path, Rect } from "react-native-svg";
+import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
@@ -1530,47 +1530,135 @@ export function ToolkitScreen() {
 
 function LearnHeroGraphic() {
   return (
-    <Svg width="100%" height="100%" viewBox="0 0 260 220">
-      <Circle cx="166" cy="102" r="84" fill="#F1E9FA" />
-      <Ellipse cx="213" cy="67" rx="17" ry="49" fill="#C9B3E5" transform="rotate(24 213 67)" />
-      <Ellipse cx="190" cy="52" rx="14" ry="43" fill="#B79AD7" transform="rotate(-12 190 52)" />
-      <Ellipse cx="234" cy="103" rx="13" ry="38" fill="#D8C7EC" transform="rotate(36 234 103)" />
-      <Path d="M118 88c-5-39 23-68 58-67 37 1 62 25 60 58-1 22-10 36-26 48h-87c-5-14-5-25-5-39Z" fill="#4E3558" />
-      <Circle cx="177" cy="78" r="33" fill="#F1C9B7" />
-      <Path d="M147 71c5-24 26-37 51-29 15 5 24 17 26 30-13-10-23-15-37-14-16 1-25 7-40 13Z" fill="#4E3558" />
-      <Circle cx="166" cy="79" r="2.3" fill="#7B4E4F" />
-      <Circle cx="188" cy="79" r="2.3" fill="#7B4E4F" />
-      <Path d="M171 93c5 4 10 4 15 0" stroke="#C87F78" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      <Path d="M131 210c1-45 26-79 70-79 39 0 59 31 58 79H131Z" fill="#FFF8F4" />
-      <Path d="M129 174c17 0 35 6 48 19v27h-64c0-19 4-34 16-46Z" fill="#E8DDF5" />
-      <Path d="M100 148l72 5-6 60-81-11c-5-17-1-38 15-54Z" fill="#68357F" />
-      <Path d="M100 148l34 6-5 53-44-5c-5-17-1-38 15-54Z" fill="#7D45A0" />
-      <Path d="M171 153l33-4-4 55-34 9 5-60Z" fill="#5C2E72" />
-      <Path d="M107 151c15-10 26-12 42-8" stroke="#9B6CB0" strokeWidth="3" strokeLinecap="round" fill="none" />
-      <Ellipse cx="122" cy="152" rx="13" ry="21" fill="#F1C9B7" transform="rotate(-16 122 152)" />
-      <Ellipse cx="202" cy="139" rx="13" ry="22" fill="#F1C9B7" transform="rotate(8 202 139)" />
-      <Rect x="205" y="109" width="34" height="39" rx="8" fill="#FFFFFF" stroke="#E7DCE9" strokeWidth="2.5" />
-      <Path d="M238 120c10 0 12 18 1 20" stroke="#DCCFE1" strokeWidth="3" fill="none" strokeLinecap="round" />
+    <Svg width="100%" height="100%" viewBox="0 0 300 240">
+      <Defs>
+        <LinearGradient id="learnHalo" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#F7F1FC" />
+          <Stop offset="1" stopColor="#E7D9F5" />
+        </LinearGradient>
+        <LinearGradient id="learnHair" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#51375F" />
+          <Stop offset="1" stopColor="#36263F" />
+        </LinearGradient>
+        <LinearGradient id="learnTop" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#8150A2" />
+          <Stop offset="1" stopColor="#64357F" />
+        </LinearGradient>
+        <LinearGradient id="learnBook" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#75408F" />
+          <Stop offset="1" stopColor="#4F2967" />
+        </LinearGradient>
+      </Defs>
+
+      {/* soft illustration halo */}
+      <Circle cx="178" cy="105" r="92" fill="url(#learnHalo)" />
+
+      {/* layered leaves behind the reader */}
+      <Ellipse cx="224" cy="50" rx="17" ry="55" fill="#C7AFE3" transform="rotate(17 224 50)" />
+      <Ellipse cx="252" cy="79" rx="14" ry="47" fill="#B89AD8" transform="rotate(34 252 79)" />
+      <Ellipse cx="270" cy="121" rx="14" ry="43" fill="#D7C6EB" transform="rotate(51 270 121)" />
+      <Ellipse cx="197" cy="37" rx="12" ry="37" fill="#DCCEF0" transform="rotate(-10 197 37)" />
+
+      {/* shoulders / cardigan */}
+      <Path
+        d="M119 194 C126 151 153 127 191 127 C228 127 255 153 261 196 L261 222 L113 222 C113 211 115 202 119 194 Z"
+        fill="#FFF9F6"
+      />
+      <Path
+        d="M119 185 C132 161 147 149 162 145 L174 219 L108 219 C107 205 110 193 119 185 Z"
+        fill="url(#learnTop)"
+      />
+      <Path
+        d="M218 145 C237 151 250 166 260 188 L266 219 L207 219 L208 161 Z"
+        fill="#F5ECE7"
+      />
+
+      {/* hair mass */}
+      <Path
+        d="M126 92 C126 46 154 22 194 22 C233 22 259 49 257 89 C256 111 248 127 234 141 L146 141 C132 124 126 109 126 92 Z"
+        fill="url(#learnHair)"
+      />
+
+      {/* face and neck */}
+      <Rect x="181" y="119" width="24" height="25" rx="10" fill="#EDC0AC" />
+      <Circle cx="193" cy="84" r="38" fill="#F0C8B5" />
+      <Path
+        d="M158 72 C168 43 198 36 223 47 C239 54 248 67 249 83 C239 70 226 63 208 62 C188 61 172 66 158 72 Z"
+        fill="url(#learnHair)"
+      />
+      <Path d="M164 58 C151 72 150 95 156 113 C143 102 139 84 145 69 C149 59 155 52 164 47 Z" fill="#4B3255" />
+
+      {/* face details */}
+      <Circle cx="181" cy="84" r="2.6" fill="#74505A" />
+      <Circle cx="206" cy="84" r="2.6" fill="#74505A" />
+      <Path d="M184 101 C190 106 198 106 204 101" stroke="#C77976" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <Path d="M181 75 C176 73 172 73 168 75" stroke="#B07C76" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <Path d="M207 75 C212 73 216 73 220 75" stroke="#B07C76" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+
+      {/* open book */}
+      <Path
+        d="M101 166 C126 154 151 156 177 170 L171 222 C146 208 124 206 99 215 Z"
+        fill="#7A45A0"
+      />
+      <Path
+        d="M177 170 C200 156 225 154 250 166 L252 215 C228 206 204 208 171 222 Z"
+        fill="url(#learnBook)"
+      />
+      <Path d="M177 171 L171 222" stroke="#A983BC" strokeWidth="2" />
+      <Path d="M112 173 C131 167 148 169 165 178" stroke="#AA7CC0" strokeWidth="3" strokeLinecap="round" fill="none" />
+      <Path d="M113 184 C131 180 146 181 160 187" stroke="#AA7CC0" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+
+      {/* hands */}
+      <Ellipse cx="126" cy="161" rx="14" ry="22" fill="#F0C8B5" transform="rotate(-19 126 161)" />
+      <Ellipse cx="228" cy="154" rx="14" ry="23" fill="#F0C8B5" transform="rotate(10 228 154)" />
+
+      {/* mug */}
+      <Rect x="234" y="121" width="42" height="43" rx="10" fill="#FFFFFF" stroke="#E8DDEB" strokeWidth="3" />
+      <Path d="M275 132 C287 131 291 151 278 154" stroke="#D9CCE0" strokeWidth="4" fill="none" strokeLinecap="round" />
+      <Path d="M241 128 C249 124 260 124 269 128" stroke="#F4EDF6" strokeWidth="3" strokeLinecap="round" />
     </Svg>
   );
 }
 
 function LearnFeaturedGraphic() {
   return (
-    <Svg width="100%" height="100%" viewBox="0 0 180 170">
-      <Circle cx="119" cy="86" r="60" fill="#EEE2F8" />
-      <Ellipse cx="48" cy="112" rx="18" ry="56" fill="#BFA7DC" transform="rotate(26 48 112)" />
-      <Ellipse cx="72" cy="111" rx="16" ry="49" fill="#D1BEE7" transform="rotate(-8 72 111)" />
-      <Ellipse cx="148" cy="95" rx="17" ry="54" fill="#D6C4EA" transform="rotate(25 148 95)" />
-      <G transform="translate(64 23) rotate(8 52 65)">
-        <Rect x="16" y="8" width="96" height="124" rx="14" fill="#E8DCF2" />
-        <Rect x="0" y="0" width="96" height="124" rx="14" fill="#FFFDFE" />
-        <Circle cx="48" cy="33" r="20" fill="#E7D7F2" />
-        <Path d="M48 44c-14-10-16-18-8-22 6-3 8 2 8 2s2-5 8-2c8 4 6 12-8 22Z" fill="#9F70B6" />
-        <Rect x="24" y="65" width="53" height="7" rx="3.5" fill="#D7C4E5" />
-        <Rect x="24" y="81" width="61" height="7" rx="3.5" fill="#D7C4E5" />
-        <Rect x="24" y="97" width="48" height="7" rx="3.5" fill="#D7C4E5" />
+    <Svg width="100%" height="100%" viewBox="0 0 190 178">
+      <Defs>
+        <LinearGradient id="featuredPaper" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" />
+          <Stop offset="1" stopColor="#F8F4FB" />
+        </LinearGradient>
+        <LinearGradient id="featuredLeaf" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#D7C3EB" />
+          <Stop offset="1" stopColor="#B495D4" />
+        </LinearGradient>
+      </Defs>
+
+      <Circle cx="126" cy="90" r="65" fill="#EDE0F7" />
+      <Ellipse cx="47" cy="121" rx="19" ry="61" fill="url(#featuredLeaf)" transform="rotate(28 47 121)" />
+      <Ellipse cx="76" cy="116" rx="15" ry="50" fill="#D2BDE7" transform="rotate(-8 76 116)" />
+      <Ellipse cx="160" cy="105" rx="18" ry="57" fill="#D9C9EC" transform="rotate(24 160 105)" />
+
+      {/* rear paper */}
+      <G transform="translate(76 30) rotate(10 50 62)">
+        <Rect x="18" y="11" width="93" height="122" rx="15" fill="#DCCFE8" opacity="0.85" />
       </G>
+
+      {/* front resource card */}
+      <G transform="translate(63 22) rotate(8 50 62)">
+        <Rect x="0" y="0" width="101" height="127" rx="15" fill="url(#featuredPaper)" />
+        <Circle cx="50" cy="34" r="21" fill="#E7D6F2" />
+        <Path
+          d="M50 47 C35 36 33 27 41 23 C47 20 50 25 50 25 C50 25 53 20 59 23 C67 27 65 36 50 47 Z"
+          fill="#9D6FB8"
+        />
+        <Rect x="22" y="68" width="58" height="7" rx="3.5" fill="#D6C2E5" />
+        <Rect x="22" y="84" width="66" height="7" rx="3.5" fill="#D6C2E5" />
+        <Rect x="22" y="100" width="51" height="7" rx="3.5" fill="#D6C2E5" />
+      </G>
+
+      {/* small sparkle */}
+      <Path d="M156 26 L160 36 L170 40 L160 44 L156 54 L152 44 L142 40 L152 36 Z" fill="#B489CC" opacity="0.75" />
     </Svg>
   );
 }
@@ -1657,11 +1745,11 @@ export function LibraryScreen() {
         <View
           style={{
             position: "relative",
-            minHeight: 215,
+            minHeight: 236,
             overflow: "hidden",
           }}
         >
-          <View style={{ gap: 8, maxWidth: 310, paddingTop: 4, paddingRight: 72 }}>
+          <View style={{ gap: 10, maxWidth: 300, paddingTop: 4, paddingRight: 96 }}>
             <Text
               style={[
                 S.eyebrow,
@@ -1674,8 +1762,8 @@ export function LibraryScreen() {
               accessibilityRole="header"
               style={{
                 fontFamily: "DMSans_700Bold",
-                fontSize: 39,
-                lineHeight: 44,
+                fontSize: 40,
+                lineHeight: 45,
                 letterSpacing: -1.05,
                 color: "#141238",
               }}
@@ -1686,9 +1774,9 @@ export function LibraryScreen() {
               style={{
                 fontFamily: "DMSans_400Regular",
                 fontSize: 16,
-                lineHeight: 23,
+                lineHeight: 24,
                 color: "#7A748A",
-                maxWidth: 250,
+                maxWidth: 245,
               }}
             >
               Trusted, easy-to-understand resources for your caregiving journey.
@@ -1699,10 +1787,10 @@ export function LibraryScreen() {
             pointerEvents="none"
             style={{
               position: "absolute",
-              right: -6,
-              top: 0,
-              width: 184,
-              height: 205,
+              right: -14,
+              top: 2,
+              width: 210,
+              height: 224,
             }}
           >
             <HomeFloat distance={4} duration={3000}>
@@ -1793,8 +1881,8 @@ export function LibraryScreen() {
             accessibilityLabel="Explore trusted care guides"
             onPress={() => n.navigate("Resources")}
             style={({ pressed }) => ({
-              minHeight: 240,
-              borderRadius: 28,
+              minHeight: 252,
+              borderRadius: 30,
               overflow: "hidden",
               backgroundColor: "#F4ECFA",
               padding: 22,
@@ -1863,10 +1951,10 @@ export function LibraryScreen() {
               pointerEvents="none"
               style={{
                 position: "absolute",
-                right: -2,
+                right: -4,
                 bottom: 0,
-                width: 158,
-                height: 170,
+                width: 172,
+                height: 182,
               }}
             >
               <HomeFloat distance={4} duration={2400}>
