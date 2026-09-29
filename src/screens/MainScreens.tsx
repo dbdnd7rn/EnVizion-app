@@ -826,6 +826,170 @@ function HomeActionCard({
   );
 }
 
+function ToolkitWave({ tint = "#F4ECFB" }: { tint?: string }) {
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        right: -26,
+        bottom: -30,
+        width: 190,
+        height: 118,
+        opacity: 0.72,
+      }}
+    >
+      <Svg width="100%" height="100%" viewBox="0 0 190 118">
+        <Path
+          d="M8 118 C54 86 72 36 190 10 L190 118 Z"
+          fill={tint}
+          opacity="0.75"
+        />
+        <Path
+          d="M54 118 C99 91 113 66 190 48 L190 118 Z"
+          fill="#FBF8FE"
+          opacity="0.88"
+        />
+      </Svg>
+    </View>
+  );
+}
+
+function ToolkitHeroGraphic() {
+  return (
+    <View style={{ width: 176, height: 156 }}>
+      <View
+        style={{
+          position: "absolute",
+          width: 96,
+          height: 96,
+          borderRadius: 48,
+          right: 2,
+          top: 0,
+          backgroundColor: "#EEE4FB",
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          width: 74,
+          height: 74,
+          borderRadius: 37,
+          left: 9,
+          bottom: 8,
+          backgroundColor: "#FBECEE",
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          width: 112,
+          height: 112,
+          borderRadius: 56,
+          right: 0,
+          top: 28,
+          borderWidth: 2,
+          borderStyle: "dotted",
+          borderColor: "#B998F2",
+          opacity: 0.9,
+        }}
+      />
+
+      <HomeFloat distance={5} duration={2500}>
+        <View
+          style={{
+            position: "absolute",
+            right: 32,
+            top: 18,
+            width: 94,
+            height: 94,
+            borderRadius: 26,
+            backgroundColor: "#F7F1FF",
+            borderWidth: 1,
+            borderColor: "#ECE2F6",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: [{ rotate: "-10deg" }],
+            shadowColor: "#6F4D8A",
+            shadowOpacity: 0.08,
+            shadowRadius: 12,
+            shadowOffset: { width: 0, height: 6 },
+            elevation: 2,
+          }}
+        >
+          <Icon name="heart-outline" size={44} color="#8739B2" />
+          <View
+            style={{
+              position: "absolute",
+              top: 13,
+              right: 27,
+              width: 4,
+              height: 14,
+              borderRadius: 2,
+              backgroundColor: "#A75BCE",
+              transform: [{ rotate: "18deg" }],
+            }}
+          />
+          <View
+            style={{
+              position: "absolute",
+              top: 20,
+              right: 14,
+              width: 13,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: "#A75BCE",
+              transform: [{ rotate: "20deg" }],
+            }}
+          />
+        </View>
+      </HomeFloat>
+
+      <HomeFloat distance={3} duration={2050}>
+        <View
+          style={{
+            position: "absolute",
+            left: 23,
+            bottom: 20,
+            width: 57,
+            height: 57,
+            borderRadius: 17,
+            backgroundColor: "#F4EEFF",
+            borderWidth: 1,
+            borderColor: "#E9DFF3",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: [{ rotate: "8deg" }],
+          }}
+        >
+          <Icon name="calendar-outline" size={27} color="#8739B2" />
+        </View>
+      </HomeFloat>
+
+      <HomeFloat distance={4} duration={2300}>
+        <View
+          style={{
+            position: "absolute",
+            right: 1,
+            bottom: 9,
+            width: 58,
+            height: 58,
+            borderRadius: 17,
+            backgroundColor: "#FFF2F1",
+            borderWidth: 1,
+            borderColor: "#F4DFE2",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: [{ rotate: "10deg" }],
+          }}
+        >
+          <Icon name="checkbox-outline" size={28} color="#B34B83" />
+        </View>
+      </HomeFloat>
+    </View>
+  );
+}
+
 function QuickCard({
   title,
   subtitle,
@@ -838,13 +1002,80 @@ function QuickCard({
   onPress: () => void;
 }) {
   return (
-    <Card onPress={onPress} label={title} style={{ flex: 1, padding: 17 }}>
-      <Icon name={icon} size={26} />
-      <View style={{ gap: 4 }}>
-        <Text style={[S.h3, { fontSize: 14 }]}>{title}</Text>
-        <Text style={S.small}>{subtitle}</Text>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flex: 1,
+        minHeight: 130,
+        borderRadius: 24,
+        overflow: "hidden",
+        padding: 16,
+        backgroundColor: "#FFFFFF",
+        borderWidth: 1,
+        borderColor: "#EDE6F1",
+        shadowColor: "#43324E",
+        shadowOpacity: 0.035,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 7 },
+        elevation: 2,
+        opacity: pressed ? 0.76 : 1,
+        transform: [{ scale: pressed ? 0.985 : 1 }],
+      })}
+    >
+      <ToolkitWave />
+      <View
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 18,
+          backgroundColor: "#F4ECFB",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon name={icon} size={27} color="#8233A6" />
       </View>
-    </Card>
+
+      <View style={{ marginTop: 18, gap: 4 }}>
+        <Text
+          style={{
+            fontFamily: "DMSans_700Bold",
+            fontSize: 17,
+            color: "#15153D",
+          }}
+        >
+          {title}
+        </Text>
+        <Text
+          style={{
+            fontFamily: "DMSans_400Regular",
+            fontSize: 13,
+            lineHeight: 18,
+            color: "#817B91",
+          }}
+        >
+          {subtitle}
+        </Text>
+      </View>
+
+      <View
+        style={{
+          position: "absolute",
+          right: 15,
+          bottom: 17,
+          width: 34,
+          height: 34,
+          borderRadius: 17,
+          backgroundColor: "#F3EBFA",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon name="chevron-forward" color="#7F2FA1" size={18} />
+      </View>
+    </Pressable>
   );
 }
 
@@ -869,25 +1100,31 @@ function ToolItemRow({
 }) {
   return (
     <View
-      style={[
-        S.card,
-        {
-          padding: 0,
-          flexDirection: "row",
-          alignItems: "stretch",
-          overflow: "hidden",
-        },
-      ]}
+      style={{
+        minHeight: 104,
+        borderRadius: 24,
+        overflow: "hidden",
+        backgroundColor: "#FFFFFF",
+        borderWidth: 1,
+        borderColor: "#ECE6F0",
+        flexDirection: "row",
+        alignItems: "stretch",
+        shadowColor: "#44334E",
+        shadowOpacity: 0.035,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 7 },
+        elevation: 2,
+      }}
     >
+      <ToolkitWave tint="#F7F0FD" />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${item.title}. ${item.subtitle}`}
-        accessibilityHint="Open this care tool"
         onPress={() => onOpen(item)}
         style={({ pressed }) => ({
           flex: 1,
-          minHeight: 76,
-          padding: 15,
+          paddingHorizontal: 14,
+          paddingVertical: 14,
           flexDirection: "row",
           alignItems: "center",
           gap: 14,
@@ -896,21 +1133,52 @@ function ToolItemRow({
       >
         <View
           style={{
-            width: 42,
-            height: 42,
-            borderRadius: 13,
-            backgroundColor: C.lavender,
+            width: 54,
+            height: 54,
+            borderRadius: 18,
+            backgroundColor: "#F3EAFB",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Icon name={item.icon} size={21} />
+          <Icon name={item.icon} size={27} color="#8233A6" />
         </View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={S.h3}>{item.title}</Text>
-          <Text style={S.small}>{item.subtitle}</Text>
+
+        <View style={{ flex: 1, gap: 5 }}>
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 15.5,
+              lineHeight: 20,
+              color: "#15153D",
+            }}
+          >
+            {item.title}
+          </Text>
+          <Text
+            style={{
+              fontFamily: "DMSans_400Regular",
+              fontSize: 12.5,
+              lineHeight: 18,
+              color: "#7E788F",
+            }}
+          >
+            {item.subtitle}
+          </Text>
         </View>
-        <Icon name="chevron-forward" color="#A092A6" size={17} />
+
+        <View
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 17,
+            backgroundColor: "#F4ECFB",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name="chevron-forward" color="#7F2FA1" size={18} />
+        </View>
       </Pressable>
 
       <Pressable
@@ -919,19 +1187,19 @@ function ToolItemRow({
         accessibilityState={{ selected: pinned }}
         onPress={() => onTogglePin(item.title)}
         style={({ pressed }) => ({
-          width: 50,
+          width: 55,
+          borderLeftWidth: 1,
+          borderLeftColor: "#EEE8F1",
           alignItems: "center",
           justifyContent: "center",
-          borderLeftWidth: 1,
-          borderLeftColor: C.line,
-          backgroundColor: pinned ? "#F7F1F9" : C.white,
-          opacity: pressed ? 0.65 : 1,
+          backgroundColor: pinned ? "#FBF7FD" : "transparent",
+          opacity: pressed ? 0.6 : 1,
         })}
       >
         <Icon
           name={pinned ? "star" : "star-outline"}
-          color={pinned ? C.purple : C.muted}
-          size={20}
+          color={pinned ? "#8D3CAA" : "#7D7B95"}
+          size={25}
         />
       </Pressable>
     </View>
@@ -958,6 +1226,17 @@ function ToolGroup({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const turn = useRef(new Animated.Value(defaultOpen ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.spring(turn, {
+      toValue: open ? 1 : 0,
+      damping: 16,
+      stiffness: 170,
+      mass: 0.7,
+      useNativeDriver: Platform.OS !== "web",
+    }).start();
+  }, [open, turn]);
 
   return (
     <View style={{ gap: 10 }}>
@@ -966,51 +1245,88 @@ function ToolGroup({
         accessibilityState={{ expanded: open }}
         accessibilityLabel={`${title}. ${subtitle}`}
         onPress={() => setOpen((value) => !value)}
-        style={({ pressed }) => [
-          S.card,
-          {
-            padding: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 14,
-            backgroundColor: open ? "#F7F1F9" : C.white,
-            opacity: pressed ? 0.8 : 1,
-          },
-        ]}
+        style={({ pressed }) => ({
+          minHeight: 116,
+          borderRadius: 25,
+          overflow: "hidden",
+          backgroundColor: "#FFFFFF",
+          borderWidth: 1,
+          borderColor: "#ECE6F0",
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 15,
+          gap: 15,
+          shadowColor: "#44334E",
+          shadowOpacity: 0.035,
+          shadowRadius: 14,
+          shadowOffset: { width: 0, height: 7 },
+          elevation: 2,
+          opacity: pressed ? 0.77 : 1,
+          transform: [{ scale: pressed ? 0.99 : 1 }],
+        })}
       >
+        <ToolkitWave />
         <View
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            backgroundColor: C.lavender,
+            width: 58,
+            height: 58,
+            borderRadius: 19,
+            backgroundColor: "#F3EAFB",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Icon name={icon} />
+          <Icon name={icon} size={29} color="#8233A6" />
         </View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={S.h3}>{title}</Text>
-          <Text style={S.small}>{subtitle}</Text>
+
+        <View style={{ flex: 1, gap: 6 }}>
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 18,
+              lineHeight: 22,
+              color: "#15153D",
+            }}
+          >
+            {title}
+          </Text>
+          <Text
+            style={{
+              fontFamily: "DMSans_400Regular",
+              fontSize: 13,
+              lineHeight: 19,
+              color: "#7D788F",
+            }}
+          >
+            {subtitle}
+          </Text>
         </View>
-        <View
+
+        <Animated.View
           style={{
-            minWidth: 28,
-            height: 28,
-            borderRadius: 14,
-            backgroundColor: C.white,
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: "#F3EBFA",
             alignItems: "center",
             justifyContent: "center",
+            transform: [
+              {
+                rotate: turn.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ["0deg", "180deg"],
+                }),
+              },
+            ],
           }}
         >
-          <Icon name={open ? "chevron-up" : "chevron-down"} size={17} />
-        </View>
+          <Icon name="chevron-down" color="#7F2FA1" size={20} />
+        </Animated.View>
       </Pressable>
 
       {open && (
         <Fade>
-          <View style={{ gap: 10, paddingLeft: 6 }}>
+          <View style={{ gap: 10 }}>
             {items.map((item) => (
               <ToolItemRow
                 key={item.title}
@@ -1042,482 +1358,399 @@ export function ToolkitScreen() {
     loadToolPreferences().then((saved) => {
       if (active) setPreferences(saved);
     });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const groups: Array<{
-    title: string;
-    subtitle: string;
-    icon: string;
-    items: ToolItem[];
-  }> = [
-    {
-      title: "Daily care",
-      subtitle: "Check-ins, observations, summaries, and trends",
-      icon: "pulse-outline",
-      items: [
-        {
-          title: "Vitals",
-          subtitle: "Blood pressure, pulse, and temperature",
-          icon: "pulse-outline",
-          keywords: "health check in blood pressure temperature",
-          onPress: () => n.navigate("Tracker", { kind: "Vitals" }),
-        },
-        {
-          title: "Blood sugar",
-          subtitle: "Record a reading and its context",
-          icon: "water-outline",
-          keywords: "glucose diabetes health check in",
-          onPress: () => n.navigate("Tracker", { kind: "Blood sugar" }),
-        },
-        {
-          title: "CHF symptoms",
-          subtitle: "Weight, breathing, and swelling",
-          icon: "heart-outline",
-          keywords: "heart failure breathing swelling weight",
-          onPress: () => n.navigate("Tracker", { kind: "CHF symptoms" }),
-        },
-        {
-          title: "Behavior & delirium monitoring",
-          subtitle: "Notice changes from their usual self",
-          icon: "flower-outline",
-          keywords: "memory behavior confusion delirium",
-          onPress: () => n.navigate("Tracker", { kind: "Behavior & memory" }),
-        },
-        {
-          title: "Red-flag symptoms",
-          subtitle: "Keep a record after seeking help",
-          icon: "flag-outline",
-          keywords: "warning red flag symptoms urgent",
-          onPress: () => n.navigate("Tracker", { kind: "Red-flag symptoms" }),
-        },
-        {
-          title: "Care summary",
-          subtitle: "Observations, medicines, and visit questions",
-          icon: "document-text-outline",
-          keywords: "summary overview records",
-          onPress: () => n.navigate("Summary"),
-        },
-        {
-          title: "Care timeline & insights",
-          subtitle: "Visual trends and recent care activity",
-          icon: "analytics-outline",
-          keywords: "timeline trends charts insights history",
-          onPress: () => n.navigate("Insights"),
-        },
-      ],
-    },
-    {
-      title: "Plan & prepare",
-      subtitle: "Routines, medicines, appointments, documents, and transitions",
-      icon: "calendar-outline",
-      items: [
-        {
-          title: "Daily care plan & routines",
-          subtitle: "Meals, medications, mobility, hygiene, monitoring, and everyday care",
-          icon: "list-outline",
-          keywords: "routine daily plan meals mobility hygiene",
-          onPress: () => n.navigate("CarePlan"),
-        },
-        {
-          title: "Medication management",
-          subtitle: "Medication list, PRN records, refills, and reconciliation",
-          icon: "medical-outline",
-          keywords: "medicine medication refill prn dose",
-          onPress: () => n.navigate("Medications"),
-        },
-        {
-          title: "Appointment prep",
-          subtitle: "Bring your questions and observations",
-          icon: "calendar-outline",
-          keywords: "visit doctor appointment questions",
-          onPress: () => n.navigate("Appointments"),
-        },
-        {
-          title: "Care Document Vault",
-          subtitle: "Private discharge papers, care plans, insurance files, and more",
-          icon: "folder-open-outline",
-          keywords: "documents files discharge insurance papers",
-          onPress: () => n.navigate("CareDocuments"),
-        },
-        {
-          title: "Care contacts & providers",
-          subtitle: "Keep the people and organizations around this care profile together",
-          icon: "call-outline",
-          keywords: "doctor provider pharmacy insurance phone contacts",
-          onPress: () => n.navigate("CareContacts"),
-        },
-        {
-          title: "Care packet & printable summary",
-          subtitle: "Build privacy-controlled visit, handoff, and emergency PDFs",
-          icon: "reader-outline",
-          keywords: "packet pdf print summary handoff",
-          onPress: () => n.navigate("CarePacket"),
-        },
-        {
-          title: "Hospital-to-home transition",
-          subtitle: "Discharge plan, equipment, warning signs, and follow-ups",
-          icon: "home-outline",
-          keywords: "hospital home discharge transition",
-          onPress: () => n.navigate("Transition"),
-        },
-        {
-          title: "Emergency Information Center",
-          subtitle: "Quick contacts, key records, medication reconciliation, and preparedness",
-          icon: "alert-circle-outline",
-          keywords: "emergency urgent warning safety",
-          onPress: () => n.navigate("Emergency"),
-        },
-      ],
-    },
-    {
-      title: "Care team & coordination",
-      subtitle: "People, schedules, tasks, coverage, communication, and handoffs",
-      icon: "people-outline",
-      items: [
-        {
-          title: "Care team & sharing",
-          subtitle: "Invite family, switch care profiles, and manage access",
-          icon: "people-outline",
-          keywords: "family invite access roles team share",
-          onPress: () => n.navigate("CareTeam"),
-        },
-        {
-          title: "Today & caregiver shift board",
-          subtitle: "Coverage, due work, reassignment, and shift handoffs",
-          icon: "people-outline",
-          keywords: "today shift board handoff caregiver",
-          onPress: () => n.navigate("CareShiftBoard"),
-        },
-        {
-          title: "On-shift caregiver mode",
-          subtitle: "My work, shared work, notes, care context, and shift closeout",
-          icon: "pulse-outline",
-          keywords: "shift caregiver work takeover closeout",
-          onPress: () => n.navigate("OnShiftCaregiver"),
-        },
-        {
-          title: "Live care team & continuity",
-          subtitle: "Current caregiver, next shift, coverage bridge, and handoff history",
-          icon: "git-compare-outline",
-          keywords: "continuity current caregiver handoff next shift",
-          onPress: () => n.navigate("CareContinuity"),
-        },
-        {
-          title: "Recurring care coverage",
-          subtitle: "Define repeatable times when caregiver coverage is required",
-          icon: "time-outline",
-          keywords: "recurring coverage requirement schedule",
-          onPress: () => n.navigate("CareCoverageRequirements"),
-        },
-        {
-          title: "Weekly coverage approval",
-          subtitle: "Review the week, publish assignments, and track caregiver responses",
-          icon: "checkmark-done-outline",
-          keywords: "weekly approval publish assignment response deadline",
-          onPress: () => n.navigate("WeeklyCoveragePlan"),
-        },
-        {
-          title: "Smart Coverage Planner",
-          subtitle: "Scan the next 7 days, match caregivers, and review coverage suggestions",
-          icon: "sparkles-outline",
-          keywords: "smart planner match caregiver suggestions coverage",
-          onPress: () => n.navigate("SmartCoveragePlanner"),
-        },
-        {
-          title: "Open caregiver coverage",
-          subtitle: "Request help for an uncovered window or claim available coverage",
-          icon: "megaphone-outline",
-          keywords: "open coverage uncovered request claim backup",
-          onPress: () => n.navigate("CareCoverageRequests"),
-        },
-        {
-          title: "Caregiver availability & schedule",
-          subtitle: "Plan shifts, check-ins, attendance, swaps, and uncovered responsibilities",
-          icon: "calendar-outline",
-          keywords: "availability schedule shifts swap attendance",
-          onPress: () => n.navigate("CareSchedule"),
-        },
-        {
-          title: "Care coordination analytics",
-          subtitle: "Weekly workload, attendance, tasks, and coverage trends",
-          icon: "bar-chart-outline",
-          keywords: "analytics workload coverage attendance trends",
-          onPress: () => n.navigate("CareAnalytics"),
-        },
-        {
-          title: "Needs coordination",
-          subtitle: "Overlaps, uncovered work, appointment clashes, and long care days",
-          icon: "warning-outline",
-          keywords: "conflicts inbox coordination overlap uncovered",
-          onPress: () => n.navigate("CareCoordinationInbox"),
-        },
-        {
-          title: "Care tasks & shared care plan",
-          subtitle: "Assign responsibilities and track what the care team completes",
-          icon: "checkbox-outline",
-          keywords: "tasks assign responsibilities follow up",
-          onPress: () => n.navigate("CareTasks"),
-        },
-        {
-          title: "Family care calendar & agenda",
-          subtitle: "One day and week view across the shared care plan",
-          icon: "notifications-outline",
-          keywords: "calendar agenda day week reminder",
-          onPress: () => n.navigate("CareCalendar"),
-        },
-        {
-          title: "Family communication center",
-          subtitle: "Share family care updates and track acknowledgements",
-          icon: "chatbubbles-outline",
-          keywords: "family communication updates acknowledgement",
-          onPress: () => n.navigate("FamilyCommunication"),
-        },
-        {
-          title: "Provider & insurance communication",
-          subtitle: "Calls, portal messages, decisions, and follow-ups",
-          icon: "document-text-outline",
-          keywords: "provider insurance calls messages portal follow up",
-          onPress: () => n.navigate("CareCommunicationLog"),
-        },
-      ],
-    },
-    {
-      title: "Understand & advocate",
-      subtitle: "Healthcare navigation and clinically governed guidance",
-      icon: "shield-checkmark-outline",
-      items: [
-        {
-          title: "Healthcare navigation",
-          subtitle: "Understand each specialist’s role",
-          icon: "compass-outline",
-          keywords: "specialists healthcare navigation doctors",
-          onPress: () => n.navigate("Specialists"),
-        },
-        {
-          title: "Patient rights",
-          subtitle: "Available after EnVizion clinical publication",
-          icon: "shield-checkmark-outline",
-          keywords: "rights advocacy patient",
-          onPress: () => n.navigate("Guide", { id: "rights" }),
-        },
-        {
-          title: "Advance directive starter",
-          subtitle: "Available after EnVizion clinical publication",
-          icon: "chatbubbles-outline",
-          keywords: "advance directive wishes planning advocate",
-          onPress: () => n.navigate("Guide", { id: "advance" }),
-        },
-      ],
-    },
-  ];
-
-  const allItems = groups.flatMap((group) => group.items);
-
-  function openTool(item: ToolItem) {
-    const next = withRecordedUse(preferences, item.title);
-    setPreferences(next);
-    void recordToolUse(preferences, item.title);
-    item.onPress();
-  }
-
-  function togglePin(title: string) {
-    const next = withToggledPin(preferences, title);
-    setPreferences(next);
-    void togglePinnedTool(preferences, title);
-  }
-
-  const learnedTitles = rankToolTitles(preferences);
-  const roleSuggestions = !state.careRecipientId
-    ? ["Care team & sharing", "Daily care plan & routines", "Appointment prep"]
-    : state.accessRole === "owner"
-      ? [
-          "Needs coordination",
-          "Weekly coverage approval",
-          "Care team & sharing",
-          "Family care calendar & agenda",
-        ]
-      : state.accessRole === "caregiver"
-        ? [
-            "Today & caregiver shift board",
-            "On-shift caregiver mode",
-            "Daily care plan & routines",
-            "Family care calendar & agenda",
-          ]
-        : [
-            "Care summary",
-            "Care timeline & insights",
-            "Family communication center",
-            "Care contacts & providers",
-          ];
-
-  const forYouTitles = [...learnedTitles, ...roleSuggestions].filter(
-    (title, index, items) => items.indexOf(title) === index,
-  );
-
-  const personalizedItems = forYouTitles
-    .map((title) => allItems.find((item) => item.title === title))
-    .filter((item): item is ToolItem => Boolean(item))
-    .slice(0, 4);
-
-  const hasLearnedPreferences =
-    preferences.pinned.length > 0 || preferences.recent.length > 0;
-
-  const normalizedQuery = query.trim().toLowerCase();
-  const matches = groups.flatMap((group) =>
-    group.items.filter((item) =>
-      `${item.title} ${item.subtitle} ${item.keywords || ""}`
-        .toLowerCase()
-        .includes(normalizedQuery),
-    ),
-  );
-
-  return (
+    return (
     <Page>
       <Fade>
-        <Heading
-          eyebrow="FIND WHAT YOU NEED"
-          title="Care tools, without the clutter"
-          body="Search by what you want to do, open a category, or pin the tools you use most. Every existing care feature is still here."
-        />
+        <View
+          style={{
+            minHeight: 245,
+            position: "relative",
+            overflow: "hidden",
+            paddingTop: 4,
+          }}
+        >
+          <View style={{ maxWidth: 300, paddingRight: 80, gap: 10 }}>
+            <Text
+              style={[
+                S.eyebrow,
+                {
+                  color: "#7A2F9E",
+                  fontSize: 10.5,
+                  letterSpacing: 2.6,
+                },
+              ]}
+            >
+              FIND WHAT YOU NEED
+            </Text>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 39,
+                lineHeight: 44,
+                letterSpacing: -1.05,
+                color: "#12133D",
+              }}
+            >
+              Care tools, without the clutter
+            </Text>
+            <Text
+              style={{
+                marginTop: 4,
+                maxWidth: 280,
+                fontFamily: "DMSans_400Regular",
+                fontSize: 15.5,
+                lineHeight: 23,
+                color: "#777489",
+              }}
+            >
+              Search by what you want to do, open a category, or pin the tools
+              you use most. Every existing care feature is still here.
+            </Text>
+          </View>
 
-        <View style={[S.input, S.row]}>
-          <Icon name="search-outline" size={20} />
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              right: -14,
+              top: 5,
+            }}
+          >
+            <ToolkitHeroGraphic />
+          </View>
+        </View>
+
+        <View
+          style={{
+            minHeight: 60,
+            borderRadius: 24,
+            borderWidth: 1,
+            borderColor: "#E7DDEE",
+            backgroundColor: "#FFFFFF",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingLeft: 17,
+            shadowColor: "#5B3C6B",
+            shadowOpacity: 0.03,
+            shadowRadius: 12,
+            shadowOffset: { width: 0, height: 5 },
+            elevation: 1,
+          }}
+        >
+          <Icon name="search-outline" size={24} color="#7F2FA1" />
           <TextInput
             accessibilityLabel="Search care tools"
             placeholder="Try “medication”, “coverage”, “documents”…"
-            placeholderTextColor="#AAA0AF"
+            placeholderTextColor="#AAA0B2"
             value={query}
             onChangeText={setQuery}
             style={{
               flex: 1,
+              minHeight: 58,
+              paddingHorizontal: 13,
               fontFamily: "DMSans_400Regular",
               fontSize: 14,
               color: C.ink,
             }}
           />
-          {Boolean(query) && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Clear tool search"
-              onPress={() => setQuery("")}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={query ? "Clear tool search" : "Show all care tools"}
+            onPress={() => setQuery("")}
+            style={({ pressed }) => ({
+              width: 56,
+              minHeight: 58,
+              borderLeftWidth: 1,
+              borderLeftColor: "#EEE6F2",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: pressed ? 0.6 : 1,
+            })}
+          >
+            <Icon name="options-outline" size={24} color="#7F2FA1" />
+          </Pressable>
+        </View>
+
+        <HomeReveal delay={70}>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <QuickCard
+              title="Today"
+              subtitle="Tasks & handoffs"
+              icon="checkbox-outline"
+              onPress={() => {
+                const item = allItems.find(
+                  (tool) => tool.title === "Today & caregiver shift board",
+                );
+                if (item) openTool(item);
+              }}
+            />
+            <QuickCard
+              title="Calendar"
+              subtitle="Visits & shifts"
+              icon="calendar-outline"
+              onPress={() => {
+                const item = allItems.find(
+                  (tool) => tool.title === "Family care calendar & agenda",
+                );
+                if (item) openTool(item);
+              }}
+            />
+          </View>
+        </HomeReveal>
+
+        <HomeReveal delay={110}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Emergency and warning signs"
+            onPress={() => n.navigate("Emergency")}
+            style={({ pressed }) => ({
+              minHeight: 88,
+              borderRadius: 24,
+              overflow: "hidden",
+              paddingHorizontal: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 14,
+              backgroundColor: "#FFF0F1",
+              borderWidth: 1,
+              borderColor: "#F5CFD5",
+              opacity: pressed ? 0.78 : 1,
+            })}
+          >
+            <ToolkitWave tint="#FFE3E7" />
+            <View
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: 17,
+                width: 52,
+                height: 52,
+                borderRadius: 26,
+                backgroundColor: "#FFE0E6",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name="close" size={18} color={C.muted} />
-            </Pressable>
-          )}
-        </View>
-
-        <View style={{ flexDirection: "row", gap: 10 }}>
-          <QuickCard
-            title="Today"
-            subtitle="Tasks & handoffs"
-            icon="checkbox-outline"
-            onPress={() => {
-              const item = allItems.find(
-                (tool) => tool.title === "Today & caregiver shift board",
-              );
-              if (item) openTool(item);
-            }}
-          />
-          <QuickCard
-            title="Calendar"
-            subtitle="Visits & shifts"
-            icon="calendar-outline"
-            onPress={() => {
-              const item = allItems.find(
-                (tool) => tool.title === "Family care calendar & agenda",
-              );
-              if (item) openTool(item);
-            }}
-          />
-        </View>
-
-        <Safety onPress={() => n.navigate("Emergency")} />
+              <Icon name="alert-circle-outline" size={29} color="#CE365C" />
+            </View>
+            <View style={{ flex: 1, gap: 3 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 15.5,
+                  color: "#A92F47",
+                }}
+              >
+                Emergency & warning signs
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 13,
+                  color: "#A95865",
+                }}
+              >
+                Know when to get help
+              </Text>
+            </View>
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "#FFDDE4",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="chevron-forward" size={19} color="#D1395D" />
+            </View>
+          </Pressable>
+        </HomeReveal>
 
         {normalizedQuery ? (
-          <View style={{ gap: 10 }}>
-            <Section title={`${matches.length} matching ${matches.length === 1 ? "tool" : "tools"}`} />
-            {matches.map((item) => (
-              <ToolItemRow
-                key={item.title}
-                item={item}
-                pinned={preferences.pinned.includes(item.title)}
-                onOpen={openTool}
-                onTogglePin={togglePin}
-              />
+          <View style={{ gap: 12 }}>
+            <View style={{ gap: 4, marginTop: 5 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 23,
+                  color: "#15153D",
+                }}
+              >
+                Search results
+              </Text>
+              <Text style={[S.small, { fontSize: 12.5 }]}>
+                {matches.length} matching {matches.length === 1 ? "tool" : "tools"}
+              </Text>
+            </View>
+
+            {matches.map((item, index) => (
+              <HomeReveal key={item.title} delay={Math.min(80 + index * 40, 280)}>
+                <ToolItemRow
+                  item={item}
+                  pinned={preferences.pinned.includes(item.title)}
+                  onOpen={openTool}
+                  onTogglePin={togglePin}
+                />
+              </HomeReveal>
             ))}
+
             {!matches.length && (
-              <Card>
-                <Icon name="search-outline" />
+              <View
+                style={{
+                  borderRadius: 24,
+                  padding: 20,
+                  backgroundColor: "#F7F2FA",
+                  borderWidth: 1,
+                  borderColor: "#ECE4F1",
+                  gap: 10,
+                }}
+              >
+                <Icon name="search-outline" size={27} />
                 <Text style={S.h3}>No tool matched that search.</Text>
                 <Txt>
-                  Try a task word such as medication, documents, coverage,
-                  calendar, family, appointment, or emergency.
+                  Try medication, documents, coverage, calendar, family,
+                  appointment, or emergency.
                 </Txt>
-              </Card>
+              </View>
             )}
           </View>
         ) : (
-          <View style={{ gap: 14 }}>
+          <View style={{ gap: 18 }}>
             {personalizedItems.length > 0 && (
-              <View style={{ gap: 10 }}>
-                <Section
-                  title={
-                    preferences.pinned.length
-                      ? "Your shortcuts"
+              <View style={{ gap: 11 }}>
+                <View style={{ marginTop: 4, gap: 5 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <Text
+                      style={{
+                        fontFamily: "DMSans_700Bold",
+                        fontSize: 24,
+                        lineHeight: 30,
+                        color: "#14153D",
+                      }}
+                    >
+                      {preferences.pinned.length
+                        ? "Your shortcuts"
+                        : hasLearnedPreferences
+                          ? "Pick up where you left off"
+                          : "Suggested for you"}
+                    </Text>
+                    <HomeFloat distance={3} duration={1700}>
+                      <View style={{ flexDirection: "row", gap: 4 }}>
+                        <View
+                          style={{
+                            width: 5,
+                            height: 16,
+                            borderRadius: 3,
+                            backgroundColor: "#C486ED",
+                            transform: [{ rotate: "32deg" }],
+                          }}
+                        />
+                        <View
+                          style={{
+                            marginTop: 11,
+                            width: 13,
+                            height: 5,
+                            borderRadius: 3,
+                            backgroundColor: "#D2A0F3",
+                            transform: [{ rotate: "12deg" }],
+                          }}
+                        />
+                      </View>
+                    </HomeFloat>
+                  </View>
+                  <Text
+                    style={{
+                      fontFamily: "DMSans_400Regular",
+                      fontSize: 13,
+                      lineHeight: 19,
+                      color: "#777489",
+                    }}
+                  >
+                    {preferences.pinned.length
+                      ? "Pinned tools stay first. Recent activity fills the remaining spots."
                       : hasLearnedPreferences
-                        ? "Pick up where you left off"
-                        : "Suggested for you"
-                  }
-                />
-                <Txt style={S.small}>
-                  {preferences.pinned.length
-                    ? "Pinned tools stay first. Recent activity helps fill the remaining spots."
-                    : hasLearnedPreferences
-                      ? "Recent and frequently used tools rise automatically."
-                      : state.accessRole === "owner"
-                        ? "Owner-focused shortcuts for coordination, coverage, and shared care."
-                        : state.accessRole === "caregiver"
-                          ? "Caregiver-focused shortcuts for today’s work and handoffs."
-                          : state.accessRole === "viewer"
-                            ? "Quick ways to stay informed without changing shared care records."
-                            : "Start with the tools that help organize a shared care profile."}
-                </Txt>
-                {personalizedItems.map((item) => (
-                  <ToolItemRow
+                        ? "Recent and frequently used tools rise automatically."
+                        : "Useful tools for this care profile, ready when you need them."}
+                  </Text>
+                </View>
+
+                {personalizedItems.map((item, index) => (
+                  <HomeReveal
                     key={`personal-${item.title}`}
-                    item={item}
-                    pinned={preferences.pinned.includes(item.title)}
-                    onOpen={openTool}
-                    onTogglePin={togglePin}
-                  />
+                    delay={Math.min(100 + index * 55, 300)}
+                  >
+                    <ToolItemRow
+                      item={item}
+                      pinned={preferences.pinned.includes(item.title)}
+                      onOpen={openTool}
+                      onTogglePin={togglePin}
+                    />
+                  </HomeReveal>
                 ))}
               </View>
             )}
 
-            <Section title="All care tools" />
+            <View style={{ gap: 5, marginTop: 4 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_700Bold",
+                    fontSize: 27,
+                    lineHeight: 33,
+                    color: "#14153D",
+                  }}
+                >
+                  All care tools
+                </Text>
+                <HomeFloat distance={3} duration={1800}>
+                  <View style={{ flexDirection: "row", gap: 4 }}>
+                    <View
+                      style={{
+                        width: 5,
+                        height: 16,
+                        borderRadius: 3,
+                        backgroundColor: "#C486ED",
+                        transform: [{ rotate: "32deg" }],
+                      }}
+                    />
+                    <View
+                      style={{
+                        marginTop: 11,
+                        width: 13,
+                        height: 5,
+                        borderRadius: 3,
+                        backgroundColor: "#D2A0F3",
+                        transform: [{ rotate: "12deg" }],
+                      }}
+                    />
+                  </View>
+                </HomeFloat>
+              </View>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 14,
+                  lineHeight: 20,
+                  color: "#777489",
+                }}
+              >
+                Everything you need, organized by what you want to do.
+              </Text>
+            </View>
 
             {groups.map((group, index) => (
-              <ToolGroup
-                key={group.title}
-                title={group.title}
-                subtitle={group.subtitle}
-                icon={group.icon}
-                items={group.items}
-                preferences={preferences}
-                onOpenTool={openTool}
-                onTogglePin={togglePin}
-                defaultOpen={index === 0 && personalizedItems.length === 0}
-              />
+              <HomeReveal key={group.title} delay={Math.min(80 + index * 55, 280)}>
+                <ToolGroup
+                  title={group.title}
+                  subtitle={group.subtitle}
+                  icon={group.icon}
+                  items={group.items}
+                  preferences={preferences}
+                  onOpenTool={openTool}
+                  onTogglePin={togglePin}
+                  defaultOpen={false}
+                />
+              </HomeReveal>
             ))}
           </View>
         )}
