@@ -163,7 +163,7 @@ function worksheetIconSvg(name: string) {
 
 function worksheetHeroSvg(kind: "daily" | "advance") {
   if (kind === "daily") {
-    return \`<svg viewBox="0 0 310 250" width="100%" height="100%" aria-hidden="true">
+    return `<svg viewBox="0 0 310 250" width="100%" height="100%" aria-hidden="true">
       <defs>
         <linearGradient id="clip" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#b69ae1"/><stop offset="1" stop-color="#6744a7"/>
@@ -196,10 +196,10 @@ function worksheetHeroSvg(kind: "daily" | "advance") {
         <rect x="74" y="153" width="31" height="6" rx="3" fill="#d9cdef"/>
       </g>
       <path d="M218 174c-23-27-65-3-48 28 13 24 48 43 48 43s35-20 47-44c15-31-26-53-47-27Z" fill="url(#heart)"/>
-    </svg>\`;
+    </svg>`;
   }
 
-  return \`<svg viewBox="0 0 360 280" width="100%" height="100%" aria-hidden="true">
+  return `<svg viewBox="0 0 360 280" width="100%" height="100%" aria-hidden="true">
     <path d="M26 229c-7-60 17-121 70-160 53-39 129-48 190-14 52 29 70 83 56 135-13 48-55 74-111 78H80c-28 0-50-12-54-39Z" fill="#f1ecfb"/>
     <ellipse cx="64" cy="204" rx="22" ry="74" fill="#f8c9d8" transform="rotate(-32 64 204)"/>
     <ellipse cx="310" cy="185" rx="22" ry="72" fill="#c9b9e8" transform="rotate(28 310 185)"/>
@@ -231,7 +231,7 @@ function worksheetHeroSvg(kind: "daily" | "advance") {
       <path d="M48 90c-19 5-31 17-41 29" stroke="#f2c4ae" stroke-width="12" stroke-linecap="round"/>
       <path d="M7 119c-8-3-13-1-18 5" stroke="#f2c4ae" stroke-width="8" stroke-linecap="round"/>
     </g>
-  </svg>\`;
+  </svg>`;
 }
 
 function worksheetResourceHtml(title: string): string | null {
@@ -264,26 +264,26 @@ function worksheetResourceHtml(title: string): string | null {
       const tint = index % 2 === 0 ? "lavender" : "blush";
       const control =
         type === "datetime-local"
-          ? \`<input class="control single" type="datetime-local" aria-label="\${escapeHtml(label as string)}"/>\`
-          : \`<textarea class="control \${multiline ? "multi" : "single"}" aria-label="\${escapeHtml(label as string)}" placeholder="\${escapeHtml(placeholder as string)}"></textarea>\`;
-      return \`<div class="field-row">
-        <div class="icon-box \${tint}">\${worksheetIconSvg(icon as string)}</div>
+          ? `<input class="control single" type="datetime-local" aria-label="${escapeHtml(label as string)}"/>`
+          : `<textarea class="control ${multiline ? "multi" : "single"}" aria-label="${escapeHtml(label as string)}" placeholder="${escapeHtml(placeholder as string)}"></textarea>`;
+      return `<div class="field-row">
+        <div class="icon-box ${tint}">${worksheetIconSvg(icon as string)}</div>
         <div class="field-main">
-          <label>\${escapeHtml(label as string)}</label>
-          \${control}
+          <label>${escapeHtml(label as string)}</label>
+          ${control}
         </div>
-      </div>\`;
+      </div>`;
     })
     .join("");
 
   const action = isDaily ? "Save record" : "Save notes";
 
-  return \`<!doctype html>
+  return `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>\${escapeHtml(title)}</title>
+  <title>${escapeHtml(title)}</title>
   <style>
     :root{
       --ink:#20143f;
@@ -363,16 +363,16 @@ function worksheetResourceHtml(title: string): string | null {
     <div class="brand">ENVIZION LIFE • CAREGIVER TOOLKIT</div>
     <section class="hero">
       <div class="hero-copy">
-        <h1>\${escapeHtml(title)}</h1>
-        <p class="subtitle">\${escapeHtml(subtitle)}</p>
+        <h1>${escapeHtml(title)}</h1>
+        <p class="subtitle">${escapeHtml(subtitle)}</p>
       </div>
-      <div class="hero-art">\${hero}</div>
+      <div class="hero-art">${hero}</div>
     </section>
 
     <section class="form-card">
-      \${fieldHtml}
+      ${fieldHtml}
       <button class="save" type="button" onclick="window.print()">
-        \${escapeHtml(action)}
+        ${escapeHtml(action)}
         <span class="arrow">→</span>
       </button>
       <div class="disclaimer">
@@ -382,11 +382,11 @@ function worksheetResourceHtml(title: string): string | null {
     </section>
   </main>
 </body>
-</html>\`;
+</html>`;
 }
 
 export function resourceHtml(title: string, lines: string[]) {
   const worksheet = worksheetResourceHtml(title);
   if (worksheet) return worksheet;
-  return \`<!doctype html><html><head><meta charset="utf-8"><title>\${escapeHtml(title)}</title><style>body{font:16px Arial;line-height:1.7;color:#302239;padding:40px}h1{color:#75418b}li{margin:16px 0}footer{font-size:12px;margin-top:40px}</style></head><body><p>ENVIZION LIFE • CAREGIVER TOOLKIT</p><h1>\${escapeHtml(title)}</h1><ul>\${lines.map((line) => \`<li>\${escapeHtml(line)}</li>\`).join("")}</ul><p>My notes: __________________________________________________</p><p>___________________________________________________________</p><footer>Educational draft for review. Not a diagnosis or an individualized care plan. Discuss care decisions with your healthcare team.</footer></body></html>\`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>body{font:16px Arial;line-height:1.7;color:#302239;padding:40px}h1{color:#75418b}li{margin:16px 0}footer{font-size:12px;margin-top:40px}</style></head><body><p>ENVIZION LIFE • CAREGIVER TOOLKIT</p><h1>${escapeHtml(title)}</h1><ul>${lines.map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul><p>My notes: __________________________________________________</p><p>___________________________________________________________</p><footer>Educational draft for review. Not a diagnosis or an individualized care plan. Discuss care decisions with your healthcare team.</footer></body></html>`;
 }
