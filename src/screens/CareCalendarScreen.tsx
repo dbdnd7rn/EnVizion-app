@@ -956,7 +956,7 @@ const categoryCounts = useMemo(
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open help"
-          onPress={() => n.navigate("Guide")}
+          onPress={() => n.navigate("Resources")}
           style={({ pressed }) => ({
             width: 48,
             height: 48,
