@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react-native";
+import { ActivityIndicator, Image, Linking, Pressable, Switch, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
@@ -548,38 +548,376 @@ export function SpecialistScreen({
 }: NativeStackScreenProps<RootStack, "Specialist">) {
   const n = useNav();
   const item = specialists[route.params.index];
+
   if (!item)
     return (
       <Page>
         <Heading title="Specialist not found" />
       </Page>
     );
+
+  const questions = [
+    {
+      text: "What is the next step in our care plan?",
+      icon: "chatbubble-ellipses-outline",
+      background: "#F1E9FA",
+      color: "#74329A",
+    },
+    {
+      text: "What changes should prompt us to call?",
+      icon: "call-outline",
+      background: "#FBE7F5",
+      color: "#8C36A4",
+    },
+    {
+      text: "How will you coordinate with the rest of the care team?",
+      icon: "people",
+      background: "#F0E8FA",
+      color: "#74329A",
+    },
+  ];
+
   return (
     <Page>
-      <Heading eyebrow="MEET YOUR CARE TEAM" title={item[0]} body={item[1]} />
-      <Card>
-        <Icon name="medical-outline" size={32} />
-        <Text style={S.h2}>Before your visit</Text>
-        <Txt>{item[2]}</Txt>
-      </Card>
-      <Section title="A few questions to ask" />
-      {[
-        "What is the next step in our care plan?",
-        "What changes should prompt us to call?",
-        "How will you coordinate with the rest of the care team?",
-      ].map((q) => (
-        <Card key={q}>
-          <Txt style={{ color: C.ink }}>{q}</Txt>
-        </Card>
-      ))}
-      <Button
-        title="Open my appointment questions"
+      <View
+        style={{
+          position: "relative",
+          minHeight: 238,
+          overflow: "hidden",
+          marginHorizontal: -2,
+        }}
+      >
+        <View
+          style={{
+            maxWidth: 225,
+            gap: 8,
+            paddingTop: 8,
+            zIndex: 2,
+          }}
+        >
+          <Text
+            style={[
+              S.eyebrow,
+              {
+                color: "#74329A",
+                fontSize: 10.5,
+                letterSpacing: 2.55,
+              },
+            ]}
+          >
+            MEET YOUR CARE TEAM
+          </Text>
+
+          <Text
+            accessibilityRole="header"
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 38,
+              lineHeight: 43,
+              letterSpacing: -0.9,
+              color: "#17143D",
+            }}
+          >
+            {item[0]}
+          </Text>
+
+          <Text
+            style={{
+              fontFamily: "DMSans_400Regular",
+              fontSize: 17,
+              lineHeight: 25,
+              color: "#747184",
+              maxWidth: 210,
+            }}
+          >
+            {item[1]}
+          </Text>
+        </View>
+
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            right: -16,
+            top: 0,
+            width: 245,
+            height: 215,
+          }}
+        >
+          <Image
+            source={require("../assets/specialist-primary-care-hero.webp")}
+            resizeMode="contain"
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </View>
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Before your visit"
         onPress={() => n.navigate("Appointments")}
-      />
-      <Txt style={S.small}>
-        This guide explains general roles. Your primary care team can help with
-        individual referral questions.
-      </Txt>
+        style={({ pressed }) => ({
+          minHeight: 136,
+          borderRadius: 28,
+          paddingHorizontal: 18,
+          paddingVertical: 18,
+          backgroundColor: "#F7F1FC",
+          borderWidth: 1,
+          borderColor: "#E7DCEF",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 16,
+          opacity: pressed ? 0.82 : 1,
+          transform: [{ scale: pressed ? 0.992 : 1 }],
+          shadowColor: "#54315F",
+          shadowOpacity: 0.065,
+          shadowRadius: 18,
+          shadowOffset: { width: 0, height: 8 },
+          elevation: 2,
+        })}
+      >
+        <View
+          style={{
+            width: 78,
+            height: 78,
+            borderRadius: 24,
+            backgroundColor: "#FFFFFF",
+            alignItems: "center",
+            justifyContent: "center",
+            shadowColor: "#553066",
+            shadowOpacity: 0.05,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 5 },
+            elevation: 1,
+          }}
+        >
+          <View style={{ position: "relative" }}>
+            <Icon name="clipboard-outline" size={39} color="#6F3E9B" />
+            <View
+              style={{
+                position: "absolute",
+                right: -9,
+                bottom: -8,
+                width: 29,
+                height: 29,
+                borderRadius: 9,
+                backgroundColor: "#7D48AA",
+                alignItems: "center",
+                justifyContent: "center",
+                borderWidth: 3,
+                borderColor: "#FFFFFF",
+              }}
+            >
+              <Icon name="add" size={18} color="#FFFFFF" />
+            </View>
+          </View>
+        </View>
+
+        <View style={{ flex: 1, gap: 7 }}>
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 22,
+              lineHeight: 27,
+              color: "#17143D",
+            }}
+          >
+            Before your visit
+          </Text>
+          <Text
+            style={{
+              fontFamily: "DMSans_400Regular",
+              fontSize: 14.5,
+              lineHeight: 21,
+              color: "#777187",
+            }}
+          >
+            {item[2]}
+          </Text>
+        </View>
+
+        <Icon name="chevron-forward" size={27} color="#76369B" />
+      </Pressable>
+
+      <View style={{ gap: 14 }}>
+        <Text
+          style={{
+            fontFamily: "DMSans_700Bold",
+            fontSize: 27,
+            lineHeight: 33,
+            letterSpacing: -0.5,
+            color: "#17143D",
+          }}
+        >
+          A few questions to ask
+        </Text>
+
+        {questions.map((question) => (
+          <Pressable
+            key={question.text}
+            accessibilityRole="button"
+            accessibilityLabel={question.text}
+            onPress={() => n.navigate("Appointments")}
+            style={({ pressed }) => ({
+              minHeight: 91,
+              borderRadius: 25,
+              paddingHorizontal: 15,
+              paddingVertical: 14,
+              backgroundColor: "#FFFFFF",
+              borderWidth: 1,
+              borderColor: "#EEE8F0",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 14,
+              opacity: pressed ? 0.78 : 1,
+              transform: [{ scale: pressed ? 0.99 : 1 }],
+              shadowColor: "#3D2649",
+              shadowOpacity: 0.035,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 5 },
+              elevation: 1,
+            })}
+          >
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: question.background,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon
+                name={question.icon}
+                size={27}
+                color={question.color}
+              />
+            </View>
+
+            <Text
+              style={{
+                flex: 1,
+                fontFamily: "DMSans_500Medium",
+                fontSize: 15.5,
+                lineHeight: 22,
+                color: "#17143D",
+              }}
+            >
+              {question.text}
+            </Text>
+
+            <Icon name="chevron-forward" size={24} color="#79349B" />
+          </Pressable>
+        ))}
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Open my appointment questions"
+        onPress={() => n.navigate("Appointments")}
+        style={({ pressed }) => ({
+          minHeight: 62,
+          borderRadius: 31,
+          paddingHorizontal: 22,
+          backgroundColor: "#7D38A0",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 12,
+          opacity: pressed ? 0.84 : 1,
+          transform: [{ scale: pressed ? 0.99 : 1 }],
+          shadowColor: "#6F2E89",
+          shadowOpacity: 0.2,
+          shadowRadius: 18,
+          shadowOffset: { width: 0, height: 8 },
+          elevation: 4,
+        })}
+      >
+        <Icon name="document-text-outline" size={23} color="#FFFFFF" />
+        <Text
+          style={{
+            flex: 1,
+            textAlign: "center",
+            fontFamily: "DMSans_600SemiBold",
+            fontSize: 15.5,
+            color: "#FFFFFF",
+          }}
+        >
+          Open my appointment questions
+        </Text>
+        <Icon name="chevron-forward" size={22} color="#FFFFFF" />
+      </Pressable>
+
+      <View
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          minHeight: 88,
+          paddingHorizontal: 10,
+          paddingBottom: 14,
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: 12,
+        }}
+      >
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: -70,
+            right: -70,
+            bottom: -62,
+            height: 105,
+            borderRadius: 70,
+            backgroundColor: "#F4ECFB",
+            transform: [{ rotate: "-3deg" }],
+          }}
+        />
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: 100,
+            right: -110,
+            bottom: -72,
+            height: 100,
+            borderRadius: 70,
+            backgroundColor: "#FCECF7",
+            transform: [{ rotate: "4deg" }],
+          }}
+        />
+
+        <View
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 17,
+            backgroundColor: "#EFE4F7",
+            alignItems: "center",
+            justifyContent: "center",
+            marginTop: 1,
+          }}
+        >
+          <Icon name="information-outline" size={20} color="#7A4A94" />
+        </View>
+
+        <Text
+          style={{
+            flex: 1,
+            fontFamily: "DMSans_400Regular",
+            fontSize: 12.5,
+            lineHeight: 18,
+            color: "#777187",
+          }}
+        >
+          This guide explains general roles. Your primary care team can help with
+          individual referral questions.
+        </Text>
+      </View>
     </Page>
   );
 }
