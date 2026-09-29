@@ -1358,7 +1358,339 @@ export function ToolkitScreen() {
     loadToolPreferences().then((saved) => {
       if (active) setPreferences(saved);
     });
-    return (
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const groups: Array<{
+    title: string;
+    subtitle: string;
+    icon: string;
+    items: ToolItem[];
+  }> = [
+    {
+      title: "Daily care",
+      subtitle: "Check-ins, observations, summaries, and trends",
+      icon: "pulse-outline",
+      items: [
+        {
+          title: "Vitals",
+          subtitle: "Blood pressure, pulse, and temperature",
+          icon: "pulse-outline",
+          keywords: "health check in blood pressure temperature",
+          onPress: () => n.navigate("Tracker", { kind: "Vitals" }),
+        },
+        {
+          title: "Blood sugar",
+          subtitle: "Record a reading and its context",
+          icon: "water-outline",
+          keywords: "glucose diabetes health check in",
+          onPress: () => n.navigate("Tracker", { kind: "Blood sugar" }),
+        },
+        {
+          title: "CHF symptoms",
+          subtitle: "Weight, breathing, and swelling",
+          icon: "heart-outline",
+          keywords: "heart failure breathing swelling weight",
+          onPress: () => n.navigate("Tracker", { kind: "CHF symptoms" }),
+        },
+        {
+          title: "Behavior & delirium monitoring",
+          subtitle: "Notice changes from their usual self",
+          icon: "flower-outline",
+          keywords: "memory behavior confusion delirium",
+          onPress: () => n.navigate("Tracker", { kind: "Behavior & memory" }),
+        },
+        {
+          title: "Red-flag symptoms",
+          subtitle: "Keep a record after seeking help",
+          icon: "flag-outline",
+          keywords: "warning red flag symptoms urgent",
+          onPress: () => n.navigate("Tracker", { kind: "Red-flag symptoms" }),
+        },
+        {
+          title: "Care summary",
+          subtitle: "Observations, medicines, and visit questions",
+          icon: "document-text-outline",
+          keywords: "summary overview records",
+          onPress: () => n.navigate("Summary"),
+        },
+        {
+          title: "Care timeline & insights",
+          subtitle: "Visual trends and recent care activity",
+          icon: "analytics-outline",
+          keywords: "timeline trends charts insights history",
+          onPress: () => n.navigate("Insights"),
+        },
+      ],
+    },
+    {
+      title: "Plan & prepare",
+      subtitle: "Routines, medicines, appointments, documents, and transitions",
+      icon: "calendar-outline",
+      items: [
+        {
+          title: "Daily care plan & routines",
+          subtitle: "Meals, medications, mobility, hygiene, monitoring, and everyday care",
+          icon: "list-outline",
+          keywords: "routine daily plan meals mobility hygiene",
+          onPress: () => n.navigate("CarePlan"),
+        },
+        {
+          title: "Medication management",
+          subtitle: "Medication list, PRN records, refills, and reconciliation",
+          icon: "medical-outline",
+          keywords: "medicine medication refill prn dose",
+          onPress: () => n.navigate("Medications"),
+        },
+        {
+          title: "Appointment prep",
+          subtitle: "Bring your questions and observations",
+          icon: "calendar-outline",
+          keywords: "visit doctor appointment questions",
+          onPress: () => n.navigate("Appointments"),
+        },
+        {
+          title: "Care Document Vault",
+          subtitle: "Private discharge papers, care plans, insurance files, and more",
+          icon: "folder-open-outline",
+          keywords: "documents files discharge insurance papers",
+          onPress: () => n.navigate("CareDocuments"),
+        },
+        {
+          title: "Care contacts & providers",
+          subtitle: "Keep the people and organizations around this care profile together",
+          icon: "call-outline",
+          keywords: "doctor provider pharmacy insurance phone contacts",
+          onPress: () => n.navigate("CareContacts"),
+        },
+        {
+          title: "Care packet & printable summary",
+          subtitle: "Build privacy-controlled visit, handoff, and emergency PDFs",
+          icon: "reader-outline",
+          keywords: "packet pdf print summary handoff",
+          onPress: () => n.navigate("CarePacket"),
+        },
+        {
+          title: "Hospital-to-home transition",
+          subtitle: "Discharge plan, equipment, warning signs, and follow-ups",
+          icon: "home-outline",
+          keywords: "hospital home discharge transition",
+          onPress: () => n.navigate("Transition"),
+        },
+        {
+          title: "Emergency Information Center",
+          subtitle: "Quick contacts, key records, medication reconciliation, and preparedness",
+          icon: "alert-circle-outline",
+          keywords: "emergency urgent warning safety",
+          onPress: () => n.navigate("Emergency"),
+        },
+      ],
+    },
+    {
+      title: "Care team & coordination",
+      subtitle: "People, schedules, tasks, coverage, communication, and handoffs",
+      icon: "people-outline",
+      items: [
+        {
+          title: "Care team & sharing",
+          subtitle: "Invite family, switch care profiles, and manage access",
+          icon: "people-outline",
+          keywords: "family invite access roles team share",
+          onPress: () => n.navigate("CareTeam"),
+        },
+        {
+          title: "Today & caregiver shift board",
+          subtitle: "Coverage, due work, reassignment, and shift handoffs",
+          icon: "people-outline",
+          keywords: "today shift board handoff caregiver",
+          onPress: () => n.navigate("CareShiftBoard"),
+        },
+        {
+          title: "On-shift caregiver mode",
+          subtitle: "My work, shared work, notes, care context, and shift closeout",
+          icon: "pulse-outline",
+          keywords: "shift caregiver work takeover closeout",
+          onPress: () => n.navigate("OnShiftCaregiver"),
+        },
+        {
+          title: "Live care team & continuity",
+          subtitle: "Current caregiver, next shift, coverage bridge, and handoff history",
+          icon: "git-compare-outline",
+          keywords: "continuity current caregiver handoff next shift",
+          onPress: () => n.navigate("CareContinuity"),
+        },
+        {
+          title: "Recurring care coverage",
+          subtitle: "Define repeatable times when caregiver coverage is required",
+          icon: "time-outline",
+          keywords: "recurring coverage requirement schedule",
+          onPress: () => n.navigate("CareCoverageRequirements"),
+        },
+        {
+          title: "Weekly coverage approval",
+          subtitle: "Review the week, publish assignments, and track caregiver responses",
+          icon: "checkmark-done-outline",
+          keywords: "weekly approval publish assignment response deadline",
+          onPress: () => n.navigate("WeeklyCoveragePlan"),
+        },
+        {
+          title: "Smart Coverage Planner",
+          subtitle: "Scan the next 7 days, match caregivers, and review coverage suggestions",
+          icon: "sparkles-outline",
+          keywords: "smart planner match caregiver suggestions coverage",
+          onPress: () => n.navigate("SmartCoveragePlanner"),
+        },
+        {
+          title: "Open caregiver coverage",
+          subtitle: "Request help for an uncovered window or claim available coverage",
+          icon: "megaphone-outline",
+          keywords: "open coverage uncovered request claim backup",
+          onPress: () => n.navigate("CareCoverageRequests"),
+        },
+        {
+          title: "Caregiver availability & schedule",
+          subtitle: "Plan shifts, check-ins, attendance, swaps, and uncovered responsibilities",
+          icon: "calendar-outline",
+          keywords: "availability schedule shifts swap attendance",
+          onPress: () => n.navigate("CareSchedule"),
+        },
+        {
+          title: "Care coordination analytics",
+          subtitle: "Weekly workload, attendance, tasks, and coverage trends",
+          icon: "bar-chart-outline",
+          keywords: "analytics workload coverage attendance trends",
+          onPress: () => n.navigate("CareAnalytics"),
+        },
+        {
+          title: "Needs coordination",
+          subtitle: "Overlaps, uncovered work, appointment clashes, and long care days",
+          icon: "warning-outline",
+          keywords: "conflicts inbox coordination overlap uncovered",
+          onPress: () => n.navigate("CareCoordinationInbox"),
+        },
+        {
+          title: "Care tasks & shared care plan",
+          subtitle: "Assign responsibilities and track what the care team completes",
+          icon: "checkbox-outline",
+          keywords: "tasks assign responsibilities follow up",
+          onPress: () => n.navigate("CareTasks"),
+        },
+        {
+          title: "Family care calendar & agenda",
+          subtitle: "One day and week view across the shared care plan",
+          icon: "notifications-outline",
+          keywords: "calendar agenda day week reminder",
+          onPress: () => n.navigate("CareCalendar"),
+        },
+        {
+          title: "Family communication center",
+          subtitle: "Share family care updates and track acknowledgements",
+          icon: "chatbubbles-outline",
+          keywords: "family communication updates acknowledgement",
+          onPress: () => n.navigate("FamilyCommunication"),
+        },
+        {
+          title: "Provider & insurance communication",
+          subtitle: "Calls, portal messages, decisions, and follow-ups",
+          icon: "document-text-outline",
+          keywords: "provider insurance calls messages portal follow up",
+          onPress: () => n.navigate("CareCommunicationLog"),
+        },
+      ],
+    },
+    {
+      title: "Understand & advocate",
+      subtitle: "Healthcare navigation and clinically governed guidance",
+      icon: "shield-checkmark-outline",
+      items: [
+        {
+          title: "Healthcare navigation",
+          subtitle: "Understand each specialist’s role",
+          icon: "compass-outline",
+          keywords: "specialists healthcare navigation doctors",
+          onPress: () => n.navigate("Specialists"),
+        },
+        {
+          title: "Patient rights",
+          subtitle: "Available after EnVizion clinical publication",
+          icon: "shield-checkmark-outline",
+          keywords: "rights advocacy patient",
+          onPress: () => n.navigate("Guide", { id: "rights" }),
+        },
+        {
+          title: "Advance directive starter",
+          subtitle: "Available after EnVizion clinical publication",
+          icon: "chatbubbles-outline",
+          keywords: "advance directive wishes planning advocate",
+          onPress: () => n.navigate("Guide", { id: "advance" }),
+        },
+      ],
+    },
+  ];
+
+  const allItems = groups.flatMap((group) => group.items);
+
+  function openTool(item: ToolItem) {
+    const next = withRecordedUse(preferences, item.title);
+    setPreferences(next);
+    void recordToolUse(preferences, item.title);
+    item.onPress();
+  }
+
+  function togglePin(title: string) {
+    const next = withToggledPin(preferences, title);
+    setPreferences(next);
+    void togglePinnedTool(preferences, title);
+  }
+
+  const learnedTitles = rankToolTitles(preferences);
+  const roleSuggestions = !state.careRecipientId
+    ? ["Care team & sharing", "Daily care plan & routines", "Appointment prep"]
+    : state.accessRole === "owner"
+      ? [
+          "Needs coordination",
+          "Weekly coverage approval",
+          "Care team & sharing",
+          "Family care calendar & agenda",
+        ]
+      : state.accessRole === "caregiver"
+        ? [
+            "Today & caregiver shift board",
+            "On-shift caregiver mode",
+            "Daily care plan & routines",
+            "Family care calendar & agenda",
+          ]
+        : [
+            "Care summary",
+            "Care timeline & insights",
+            "Family communication center",
+            "Care contacts & providers",
+          ];
+
+  const forYouTitles = [...learnedTitles, ...roleSuggestions].filter(
+    (title, index, items) => items.indexOf(title) === index,
+  );
+
+  const personalizedItems = forYouTitles
+    .map((title) => allItems.find((item) => item.title === title))
+    .filter((item): item is ToolItem => Boolean(item))
+    .slice(0, 4);
+
+  const hasLearnedPreferences =
+    preferences.pinned.length > 0 || preferences.recent.length > 0;
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const matches = groups.flatMap((group) =>
+    group.items.filter((item) =>
+      `${item.title} ${item.subtitle} ${item.keywords || ""}`
+        .toLowerCase()
+        .includes(normalizedQuery),
+    ),
+  );
+
+  return (
     <Page>
       <Fade>
         <View
@@ -1758,7 +2090,6 @@ export function ToolkitScreen() {
     </Page>
   );
 }
-
 
 
 function LearnHeroGraphic() {
