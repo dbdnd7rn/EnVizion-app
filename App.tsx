@@ -403,7 +403,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="CareShiftBoard"
             component={CareShiftBoardScreen}
-            options={{ title: "Caregiver shift board" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="OnShiftCaregiver"
