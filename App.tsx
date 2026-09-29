@@ -373,7 +373,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="CareCalendar"
             component={CareCalendarScreen}
-            options={{ title: "Family care calendar & agenda" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="CareDocuments"
