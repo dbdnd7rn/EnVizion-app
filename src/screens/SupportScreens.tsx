@@ -1512,15 +1512,23 @@ export function ProfileScreen() {
   return (
     <Page>
       <Heading
-        eyebrow="YOUR CARE COMPANION"
+        eyebrow={state.careMode === "self" ? "YOUR CARE DASHBOARD" : "YOUR CARE COMPANION"}
         title={`Hello, ${state.name}.`}
-        body={`You’re here caring for ${state.relationship.toLowerCase()}.`}
+        body={
+          state.careMode === "self"
+            ? "Your care information, preferences, and support settings live here."
+            : `You’re here caring for ${state.relationship.toLowerCase()}.`
+        }
       />
 
       <Card>
         <Text style={S.h3}>Your account</Text>
         <Txt>{user?.email ?? "Signed in"}</Txt>
-        <Txt>Your caregiver profile is connected to your EnVizion Life account.</Txt>
+        <Txt>
+          {state.careMode === "self"
+            ? "Your personal care profile is connected to your EnVizion Life account."
+            : "Your advocate profile is connected to your EnVizion Life account."}
+        </Txt>
       </Card>
 
       <Card>
@@ -1537,7 +1545,7 @@ export function ProfileScreen() {
 
       <Row
         title="Care team & sharing"
-        subtitle={`${state.careRecipientName || "Care profile"} · ${state.accessRole === "owner" ? "Owner" : state.accessRole === "caregiver" ? "Caregiver" : "Viewer"} access`}
+        subtitle={`${state.careRecipientName || "Care profile"} · ${state.accessRole === "owner" ? "Primary Advocate" : state.accessRole === "caregiver" ? "Co-Caregiver" : state.accessRole === "patient" ? "Care Recipient" : "Family Member"} access`}
         icon="people-outline"
         onPress={() => n.navigate("CareTeam")}
       />
