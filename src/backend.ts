@@ -3,11 +3,14 @@ import type { Appointment, Entry, TrackerKind } from "./domain";
 import type { Medication, MedicationRecord } from "./medications";
 import { recordCareWorkspaceOpen, type CareRole } from "./careTeam";
 
+export type CareMode = "advocate" | "self";
+
 export type SavedOnboarding = {
   name: string;
   careName: string;
   relationship: string;
   faith: boolean;
+  careMode: CareMode;
   careRecipientId: string;
   accessRole: CareRole;
 };
@@ -17,7 +20,7 @@ async function resolveCareContextForUser(userId: string) {
     await Promise.all([
       supabase
         .from("user_preferences")
-        .select("active_care_recipient_id")
+        .select("active_care_recipient_id, care_mode")
         .eq("user_id", userId)
         .maybeSingle(),
       supabase
@@ -50,6 +53,8 @@ async function resolveCareContextForUser(userId: string) {
     careRecipientName: recipient.display_name as string,
     relationship: (recipient.relationship || "A loved one") as string,
     accessRole: selected.role as CareRole,
+    careMode: ((preferences?.care_mode as CareMode | null) ??
+      (recipient.relationship === "Myself" ? "self" : "advocate")) as CareMode,
   };
 }
 
@@ -77,6 +82,7 @@ export async function loadSavedOnboarding(): Promise<SavedOnboarding | null> {
     careName: context.careRecipientName,
     relationship: context.relationship,
     faith: preferences?.faith_encouragement ?? false,
+    careMode: context.careMode,
     careRecipientId: context.careRecipientId,
     accessRole: context.accessRole,
   };
@@ -87,6 +93,7 @@ export async function saveOnboarding(input: {
   careName: string;
   relationship: string;
   faith: boolean;
+  careMode: CareMode;
 }): Promise<SavedOnboarding> {
   const {
     data: { user },
@@ -111,6 +118,7 @@ export async function saveOnboarding(input: {
     .upsert({
       user_id: user.id,
       faith_encouragement: input.faith,
+      care_mode: input.careMode,
     });
   if (preferenceError) throw preferenceError;
 
@@ -162,6 +170,7 @@ export async function saveOnboarding(input: {
     careName,
     relationship: input.relationship,
     faith: input.faith,
+    careMode: input.careMode,
     careRecipientId,
     accessRole: "owner",
   };
@@ -313,6 +322,7 @@ export type CareSnapshot = {
   careRecipientName: string;
   accessRole: CareRole;
   relationship: string;
+  careMode: CareMode;
   entries: Entry[];
   medications: Medication[];
   medicationRecords: MedicationRecord[];
@@ -417,7 +427,13 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
   const context = await resolveCareContextForUser(user.id);
   if (!context) return null;
 
-  const { careRecipientId, careRecipientName, accessRole, relationship } = context;
+  const {
+    careRecipientId,
+    careRecipientName,
+    accessRole,
+    relationship,
+    careMode,
+  } = context;
   void recordCareWorkspaceOpen(careRecipientId);
 
   const [
@@ -543,6 +559,7 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
     careRecipientName,
     accessRole,
     relationship,
+    careMode,
     entries,
     medications,
     medicationRecords,
