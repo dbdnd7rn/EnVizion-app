@@ -36,10 +36,10 @@ import { useNav } from "./MainScreens";
 
 function roleLabel(role: CareRole) {
   return {
-    owner: "Owner",
-    caregiver: "Caregiver",
-    patient: "Patient / care recipient",
-    viewer: "Viewer",
+    owner: "Primary Advocate",
+    caregiver: "Co-Caregiver",
+    patient: "Care Recipient",
+    viewer: "Family Member",
   }[role];
 }
 
@@ -471,9 +471,9 @@ export function CareTeamScreen() {
               onChange={setInviteRole}
             />
             <Txt style={S.small}>
-              Caregiver can view and update shared care records. Patient / care
-              recipient can view their shared care record. Viewer can read the
-              shared care record but cannot change it.
+              Co-Caregiver can view and update shared care records. Care
+              Recipient can view their shared care record. Family Member can
+              read shared updates but cannot change medical data.
             </Txt>
             <Button
               title={busyId === "invite-new" ? "Sending invitation…" : "Invite to care team"}
