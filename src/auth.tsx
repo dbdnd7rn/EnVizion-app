@@ -53,45 +53,6 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const GOOGLE_WEB_CLIENT_ID =
-  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "";
-
-type GoogleCredentialResponse = {
-  credential?: string;
-};
-
-type GoogleIdentityButtonText = "signin_with" | "signup_with";
-
-type GoogleIdentityApi = {
-  initialize: (options: {
-    client_id: string;
-    callback: (response: GoogleCredentialResponse) => void;
-    auto_select?: boolean;
-  }) => void;
-  renderButton: (
-    parent: HTMLElement,
-    options: {
-      type?: "standard";
-      theme?: "outline";
-      size?: "large";
-      text?: GoogleIdentityButtonText;
-      shape?: "rectangular";
-      logo_alignment?: "left";
-      width?: number;
-    },
-  ) => void;
-};
-
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: GoogleIdentityApi;
-      };
-    };
-  }
-}
-
 function GoogleLogo({ size = 20 }: { size?: number }) {
   return (
     <Svg
@@ -509,7 +470,6 @@ export function AuthScreen() {
   const {
     signIn,
     signInWithGoogle,
-    signInWithGoogleIdToken,
     signUp,
     requestPasswordReset,
     resendConfirmation,
@@ -643,85 +603,6 @@ export function AuthScreen() {
     }
   }
 
-  useEffect(() => {
-    if (
-      Platform.OS !== "web" ||
-      mode === "forgot" ||
-      !GOOGLE_WEB_CLIENT_ID ||
-      typeof window === "undefined" ||
-      typeof document === "undefined"
-    ) {
-      return;
-    }
-
-    let cancelled = false;
-
-    function renderGoogleButton() {
-      if (cancelled) return;
-
-      const googleIdentity = window.google?.accounts?.id;
-      const container = document.getElementById("envizion-google-signin");
-      if (!googleIdentity || !container) return;
-
-      container.innerHTML = "";
-      googleIdentity.initialize({
-        client_id: GOOGLE_WEB_CLIENT_ID,
-        auto_select: false,
-        callback: (response) => {
-          if (!response.credential) {
-            setMessage("Google sign-in did not return a valid credential.");
-            return;
-          }
-
-          setGoogleBusy(true);
-          setMessage("");
-          void signInWithGoogleIdToken(response.credential)
-            .then((error) => {
-              if (error) setMessage(error);
-            })
-            .finally(() => {
-              setGoogleBusy(false);
-            });
-        },
-      });
-
-      googleIdentity.renderButton(container, {
-        type: "standard",
-        theme: "outline",
-        size: "large",
-        text: mode === "signup" ? "signup_with" : "signin_with",
-        shape: "rectangular",
-        logo_alignment: "left",
-        width: 320,
-      });
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>(
-      'script[data-envizion-google-identity="true"]',
-    );
-
-    if (existingScript) {
-      if (window.google?.accounts?.id) {
-        renderGoogleButton();
-      } else {
-        existingScript.addEventListener("load", renderGoogleButton, {
-          once: true,
-        });
-      }
-    } else {
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.dataset.envizionGoogleIdentity = "true";
-      script.addEventListener("load", renderGoogleButton, { once: true });
-      document.head.appendChild(script);
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mode, signInWithGoogleIdToken]);
 
   const successMessage =
     message.toLowerCase().includes("check your email") ||
@@ -843,65 +724,44 @@ export function AuthScreen() {
               <Text style={[S.small, { color: C.muted }]}>or</Text>
               <View style={{ height: 1, flex: 1, backgroundColor: C.line }} />
             </View>
-            {Platform.OS === "web" && GOOGLE_WEB_CLIENT_ID ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                mode === "signup" ? "Sign up with Google" : "Sign in with Google"
+              }
+              disabled={busy || googleBusy}
+              onPress={() => void continueWithGoogle()}
+              style={({ pressed }) => ({
+                minHeight: 52,
+                borderRadius: 15,
+                borderWidth: 1,
+                borderColor: C.line,
+                backgroundColor: pressed ? "#F7F1F8" : C.white,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 11,
+                opacity: busy || googleBusy ? 0.55 : 1,
+              })}
+            >
               <View
                 style={{
-                  minHeight: 52,
+                  width: 26,
+                  height: 26,
                   alignItems: "center",
                   justifyContent: "center",
-                  opacity: busy || googleBusy ? 0.55 : 1,
                 }}
-                pointerEvents={busy || googleBusy ? "none" : "auto"}
               >
-                <View
-                  nativeID="envizion-google-signin"
-                  style={{
-                    minHeight: 44,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                />
+                <GoogleLogo size={22} />
               </View>
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={
-                  mode === "signup" ? "Sign up with Google" : "Sign in with Google"
-                }
-                disabled={busy || googleBusy}
-                onPress={() => void continueWithGoogle()}
-                style={({ pressed }) => ({
-                  minHeight: 52,
-                  borderRadius: 15,
-                  borderWidth: 1,
-                  borderColor: C.line,
-                  backgroundColor: pressed ? "#F7F1F8" : C.white,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 11,
-                  opacity: busy || googleBusy ? 0.55 : 1,
-                })}
-              >
-                <View
-                  style={{
-                    width: 26,
-                    height: 26,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <GoogleLogo size={22} />
-                </View>
-                <Text style={[S.h3, { color: C.ink, fontSize: 14 }]}>
-                  {googleBusy
-                    ? "Opening Google…"
-                    : mode === "signup"
-                      ? "Sign up with Google"
-                      : "Sign in with Google"}
-                </Text>
-              </Pressable>
-            )}
+              <Text style={[S.h3, { color: C.ink, fontSize: 14 }]}>
+                {googleBusy
+                  ? "Opening Google…"
+                  : mode === "signup"
+                    ? "Sign up with Google"
+                    : "Sign in with Google"}
+              </Text>
+            </Pressable>
           </>
         )}
 
