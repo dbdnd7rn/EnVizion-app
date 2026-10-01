@@ -221,6 +221,267 @@ function VitalMetricField({
   );
 }
 
+function TrackerTopBar({
+  onBack,
+  onHelp,
+}: {
+  onBack: () => void;
+  onHelp: () => void;
+}) {
+  return (
+    <View
+      style={{
+        minHeight: 58,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 2,
+      }}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        onPress={onBack}
+        style={({ pressed }) => ({
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#F5F0FD",
+          opacity: pressed ? 0.68 : 1,
+        })}
+      >
+        <Icon name="chevron-back-outline" size={25} color="#20164B" />
+      </Pressable>
+
+      <Text
+        accessibilityRole="header"
+        style={{
+          fontFamily: "DMSans_700Bold",
+          fontSize: 19,
+          lineHeight: 24,
+          color: C.ink,
+        }}
+      >
+        Daily care
+      </Text>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Daily care help"
+        onPress={onHelp}
+        style={({ pressed }) => ({
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#F5F0FD",
+          opacity: pressed ? 0.68 : 1,
+        })}
+      >
+        <Icon name="help-circle-outline" size={25} color="#4A3CB3" />
+      </Pressable>
+    </View>
+  );
+}
+
+function BloodSugarHeroGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 230 190">
+      <Defs>
+        <LinearGradient id="meterBody" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#A66CE8" />
+          <Stop offset="0.55" stopColor="#7940C5" />
+          <Stop offset="1" stopColor="#5B2AA7" />
+        </LinearGradient>
+        <LinearGradient id="meterGlow" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FBF9FF" />
+          <Stop offset="1" stopColor="#EADFFD" />
+        </LinearGradient>
+      </Defs>
+
+      <Circle cx="115" cy="96" r="84" fill="#F4EEFF" />
+      <Circle cx="175" cy="41" r="42" fill="#EEE4FD" opacity={0.88} />
+      <Path d="M16 163C30 128 50 105 78 91C103 79 132 80 156 90C188 104 214 131 223 162H16Z" fill="#F1E8FC" />
+      <Path d="M27 158C34 133 49 119 61 111" stroke="#DCCAF3" strokeWidth="6" strokeLinecap="round" />
+      <Path d="M196 160C188 131 176 116 162 105" stroke="#D6C2F0" strokeWidth="6" strokeLinecap="round" />
+
+      <G transform="translate(72 23) rotate(7 55 75)">
+        <Rect x="8" y="6" width="104" height="130" rx="31" fill="#6E43B8" opacity={0.16} />
+        <Rect x="0" y="0" width="104" height="130" rx="31" fill="url(#meterBody)" />
+        <Rect x="19" y="18" width="66" height="63" rx="16" fill="url(#meterGlow)" />
+        <Rect x="27" y="27" width="50" height="46" rx="12" fill="#FBFAFF" />
+        <Text x="52" y="53" textAnchor="middle" fontSize="25" fontWeight="700" fill="#3B3174">
+          98
+        </Text>
+        <Text x="52" y="67" textAnchor="middle" fontSize="8.5" fontWeight="600" fill="#6D6590">
+          mg/dL
+        </Text>
+        <Circle cx="25" cy="99" r="8" fill="#C0A6E9" />
+        <Circle cx="52" cy="101" r="13" fill="#D8C7F3" />
+        <Circle cx="52" cy="101" r="7" fill="#F5F0FE" />
+        <Circle cx="79" cy="99" r="8" fill="#C0A6E9" />
+        <Rect x="44" y="120" width="16" height="39" rx="8" fill="#6C35B8" />
+        <Rect x="49" y="145" width="6" height="13" rx="3" fill="#9C67E3" />
+      </G>
+
+      <G transform="translate(164 34) rotate(7 30 26)">
+        <Rect x="0" y="0" width="58" height="48" rx="13" fill="#FFFFFF" opacity={0.96} />
+        <Path d="M9 33C17 26 22 17 30 20C38 23 42 35 51 25" fill="none" stroke="#8E4FE0" strokeWidth="3" strokeLinecap="round" />
+        <Circle cx="50" cy="24" r="5" fill="#7C40CE" />
+      </G>
+
+      <G transform="translate(166 98) rotate(-6 24 22)">
+        <Rect x="0" y="0" width="48" height="44" rx="12" fill="#FFFFFF" opacity={0.96} />
+        <Path d="M24 33S12 26 12 18C12 12 17 9 21 12C22 13 23 14 24 16C25 14 26 13 27 12C31 9 36 12 36 18C36 26 24 33 24 33Z" fill="#9855DF" />
+      </G>
+    </Svg>
+  );
+}
+
+function BloodSugarEmptyGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 155 95">
+      <Defs>
+        <LinearGradient id="emptyBubble" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#F8F4FF" />
+          <Stop offset="1" stopColor="#E9DEFC" />
+        </LinearGradient>
+      </Defs>
+      <Rect x="8" y="12" width="139" height="72" rx="24" fill="url(#emptyBubble)" />
+      <G transform="translate(19 17)">
+        <Rect x="6" y="5" width="40" height="50" rx="9" fill="#FFFFFF" stroke="#E2D7F3" strokeWidth="2" />
+        <Rect x="12" y="13" width="23" height="5" rx="2.5" fill="#B89BE4" />
+        <Rect x="12" y="25" width="27" height="4" rx="2" fill="#D6C5EF" />
+        <Rect x="12" y="35" width="22" height="4" rx="2" fill="#D6C5EF" />
+        <Path d="M39 50C35 43 39 36 45 36C52 36 55 43 51 50C48 55 45 58 45 58C45 58 42 55 39 50Z" fill="#8044C7" />
+      </G>
+      <G transform="translate(93 28)">
+        <Rect x="0" y="0" width="38" height="43" rx="10" fill="#FFFFFF" opacity={0.95} />
+        <Path d="M8 28L14 22L19 25L26 14L31 19" fill="none" stroke="#9B55DE" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        <Circle cx="30" cy="19" r="4" fill="#7F3FD0" />
+      </G>
+      <Path d="M59 14L62 8M68 16L73 12M65 22L71 24" stroke="#A87AE1" strokeWidth="2.2" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function BloodSugarField({
+  label,
+  value,
+  onChange,
+  icon,
+  placeholder,
+  numeric,
+  multiline = false,
+  unit,
+  trailing,
+  editable,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  icon: string;
+  placeholder: string;
+  numeric?: boolean;
+  multiline?: boolean;
+  unit?: string;
+  trailing?: React.ReactNode;
+  editable: boolean;
+}) {
+  return (
+    <View style={{ gap: 9 }}>
+      <Text
+        style={{
+          fontFamily: "DMSans_600SemiBold",
+          fontSize: 14,
+          lineHeight: 19,
+          color: C.ink,
+        }}
+      >
+        {label}
+      </Text>
+
+      <View
+        style={{
+          minHeight: multiline ? 116 : 58,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: "#DED5E9",
+          backgroundColor: C.white,
+          flexDirection: "row",
+          alignItems: multiline ? "flex-start" : "center",
+          overflow: "hidden",
+          opacity: editable ? 1 : 0.72,
+        }}
+      >
+        <View
+          style={{
+            width: 52,
+            alignItems: "center",
+            justifyContent: multiline ? "flex-start" : "center",
+            paddingTop: multiline ? 17 : 0,
+          }}
+        >
+          <Icon name={icon} size={21} color="#7F3BC0" />
+        </View>
+
+        <TextInput
+          accessibilityLabel={label}
+          editable={editable}
+          multiline={multiline}
+          keyboardType={numeric ? "decimal-pad" : "default"}
+          placeholder={placeholder}
+          placeholderTextColor="#A8A1B4"
+          value={value}
+          onChangeText={onChange}
+          style={{
+            flex: 1,
+            minHeight: multiline ? 114 : 56,
+            paddingVertical: multiline ? 15 : 0,
+            paddingRight: unit ? 8 : 14,
+            fontFamily: "DMSans_400Regular",
+            fontSize: 14,
+            lineHeight: 20,
+            color: C.ink,
+            textAlignVertical: multiline ? "top" : "center",
+            outlineStyle: "none" as any,
+          }}
+        />
+
+        {unit && (
+          <View
+            style={{
+              minHeight: 58,
+              minWidth: 84,
+              paddingHorizontal: 15,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#F6F0FD",
+              borderLeftWidth: 1,
+              borderLeftColor: "#E7DDF2",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 13,
+                color: "#7B42B8",
+              }}
+            >
+              {unit}
+            </Text>
+          </View>
+        )}
+
+        {trailing}
+      </View>
+    </View>
+  );
+}
+
 export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
@@ -267,6 +528,7 @@ export function TrackerScreen({
 
     return (
       <Page>
+        <TrackerTopBar onBack={() => n.goBack()} onHelp={() => n.navigate("Resources")} />
         <View
           style={{
             minHeight: 214,
@@ -789,8 +1051,516 @@ export function TrackerScreen({
     );
   }
 
+  if (kind === "Blood sugar") {
+    const setBloodSugar = (key: string, value: string) => {
+      setValues((old) => ({ ...old, [key]: value }));
+      setSuccess(false);
+    };
+
+    const todayLabel = new Date().toLocaleDateString(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    return (
+      <Page>
+        <TrackerTopBar onBack={() => n.goBack()} onHelp={() => n.navigate("Resources")} />
+
+        <View
+          style={{
+            minHeight: 250,
+            position: "relative",
+            overflow: "hidden",
+            marginHorizontal: -20,
+            paddingHorizontal: 20,
+            paddingTop: 18,
+          }}
+        >
+          <Svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 440 250"
+            preserveAspectRatio="none"
+            style={{ position: "absolute", inset: 0 }}
+            accessibilityElementsHidden
+          >
+            <Defs>
+              <LinearGradient id="bloodHeroBg" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor="#FFFFFF" />
+                <Stop offset="0.64" stopColor="#FCFAFF" />
+                <Stop offset="1" stopColor="#F1E8FD" />
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="440" height="250" fill="url(#bloodHeroBg)" />
+            <Circle cx="410" cy="58" r="92" fill="#F4EEFF" opacity={0.84} />
+          </Svg>
+
+          <View style={{ maxWidth: 245, gap: 9, paddingTop: 4 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+              <View
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 13,
+                  backgroundColor: "#E9D8FF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="water-outline" size={23} color="#813DCA" />
+              </View>
+              <Text
+                style={[
+                  S.eyebrow,
+                  { color: "#74328F", fontSize: 10.5, letterSpacing: 2.35 },
+                ]}
+              >
+                DAILY CARE JOURNAL
+              </Text>
+            </View>
+
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 41,
+                lineHeight: 45,
+                letterSpacing: -1.05,
+                color: "#17143D",
+              }}
+            >
+              Blood sugar
+            </Text>
+
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 15.5,
+                lineHeight: 22,
+                color: "#747184",
+                maxWidth: 250,
+              }}
+            >
+              Notice, record, and share with your healthcare team.
+            </Text>
+          </View>
+
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              right: -4,
+              top: 15,
+              width: 206,
+              height: 192,
+            }}
+          >
+            <BloodSugarHeroGraphic />
+          </View>
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Emergency and warning signs"
+          onPress={() => n.navigate("Emergency")}
+          style={({ pressed }) => ({
+            minHeight: 94,
+            borderRadius: 24,
+            borderWidth: 1,
+            borderColor: "#F3C8D0",
+            backgroundColor: "#FFF2F2",
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 18,
+            gap: 14,
+            opacity: pressed ? 0.75 : 1,
+          })}
+        >
+          <View
+            style={{
+              width: 54,
+              height: 54,
+              borderRadius: 27,
+              backgroundColor: "#FFE0E4",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="warning-outline" size={29} color="#D83354" />
+          </View>
+
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 16,
+                lineHeight: 21,
+                color: "#A4243C",
+              }}
+            >
+              Emergency & warning signs
+            </Text>
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 13,
+                lineHeight: 18,
+                color: "#B05C6B",
+              }}
+            >
+              Know when to get help and what to watch for.
+            </Text>
+          </View>
+
+          <Icon name="chevron-forward" size={22} color="#CF3552" />
+        </Pressable>
+
+        {readOnly && <ReadOnlyCareNotice />}
+
+        <Card
+          style={{
+            borderRadius: 28,
+            padding: 18,
+            gap: 18,
+            backgroundColor: "#FFFEFF",
+            borderColor: "#EDE6F2",
+            shadowColor: "#382840",
+            shadowOpacity: 0.045,
+            shadowRadius: 18,
+            shadowOffset: { width: 0, height: 9 },
+            elevation: 2,
+          }}
+        >
+          <View style={S.between}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 14,
+                  backgroundColor: "#F0E4FF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="document-text-outline" size={22} color="#7C3ABE" />
+              </View>
+              <Text style={[S.h2, { fontSize: 20, lineHeight: 25 }]}>New observation</Text>
+            </View>
+
+            <View
+              style={{
+                minHeight: 38,
+                borderRadius: 19,
+                backgroundColor: "#F3EAFE",
+                paddingHorizontal: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 7,
+              }}
+            >
+              <Icon name="time-outline" size={17} color="#7E3BBE" />
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 11.5,
+                  color: "#6F35A5",
+                }}
+              >
+                {todayLabel}
+              </Text>
+            </View>
+          </View>
+
+          <BloodSugarField
+            label="Blood glucose (mg/dL) *"
+            value={values.glucose || ""}
+            onChange={(value) => setBloodSugar("glucose", value)}
+            icon="water-outline"
+            placeholder="Enter reading"
+            numeric
+            unit="mg/dL"
+            editable={!readOnly && !saving}
+          />
+
+          <BloodSugarField
+            label="Timing, such as before breakfast *"
+            value={values.timing || ""}
+            onChange={(value) => setBloodSugar("timing", value)}
+            icon="alarm-outline"
+            placeholder="Select timing"
+            editable={!readOnly && !saving}
+            trailing={
+              <View
+                pointerEvents="none"
+                style={{
+                  width: 48,
+                  height: 58,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="chevron-down-outline" size={19} color="#2D2852" />
+              </View>
+            }
+          />
+
+          <BloodSugarField
+            label="Additional notes (optional)"
+            value={values.notes || ""}
+            onChange={(value) => setBloodSugar("notes", value)}
+            icon="document-text-outline"
+            placeholder="Write any notes..."
+            multiline
+            editable={!readOnly && !saving}
+            trailing={
+              <Text
+                style={{
+                  position: "absolute",
+                  right: 15,
+                  bottom: 12,
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 11.5,
+                  color: "#9B93A8",
+                }}
+              >
+                {(values.notes || "").length}/300
+              </Text>
+            }
+          />
+
+          {Boolean(error) && (
+            <Text
+              accessibilityRole="alert"
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 12.5,
+                lineHeight: 18,
+                color: C.rose,
+              }}
+            >
+              {error}
+            </Text>
+          )}
+
+          {success && (
+            <Text
+              accessibilityRole="alert"
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 13,
+                color: C.green,
+              }}
+            >
+              Observation saved securely.
+            </Text>
+          )}
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Save observation"
+            accessibilityState={{ disabled: saving || readOnly }}
+            disabled={saving || readOnly}
+            onPress={() => void save()}
+            style={({ pressed }) => ({
+              minHeight: 58,
+              borderRadius: 29,
+              overflow: "hidden",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              opacity: readOnly || saving ? 0.55 : pressed ? 0.82 : 1,
+              shadowColor: "#6B2A93",
+              shadowOpacity: 0.14,
+              shadowRadius: 13,
+              shadowOffset: { width: 0, height: 7 },
+              elevation: 3,
+            })}
+          >
+            <Svg
+              width="100%"
+              height="100%"
+              viewBox="0 0 400 58"
+              preserveAspectRatio="none"
+              style={{ position: "absolute", inset: 0 }}
+              accessibilityElementsHidden
+            >
+              <Defs>
+                <LinearGradient id="saveGradient" x1="0" y1="0" x2="1" y2="0">
+                  <Stop offset="0" stopColor="#8B3FC7" />
+                  <Stop offset="0.5" stopColor="#9C45D2" />
+                  <Stop offset="1" stopColor="#7130A8" />
+                </LinearGradient>
+              </Defs>
+              <Rect x="0" y="0" width="400" height="58" rx="29" fill="url(#saveGradient)" />
+            </Svg>
+            <Icon
+              name={saving ? "hourglass-outline" : "checkmark-outline"}
+              size={23}
+              color={C.white}
+            />
+            <Text
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 15,
+                color: C.white,
+              }}
+            >
+              {saving ? "Saving observation…" : "Save observation"}
+            </Text>
+          </Pressable>
+
+          <Text
+            style={{
+              fontFamily: "DMSans_400Regular",
+              fontSize: 12,
+              lineHeight: 18,
+              color: "#77758B",
+            }}
+          >
+            * Required. Readings are stored with your account and are not interpreted as a diagnosis.
+          </Text>
+        </Card>
+
+        <View style={S.between}>
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 25,
+              lineHeight: 31,
+              letterSpacing: -0.45,
+              color: C.ink,
+            }}
+          >
+            Your recent observations
+          </Text>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => n.navigate("Insights")}
+            style={({ pressed }) => ({
+              minHeight: 42,
+              paddingHorizontal: 5,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+              opacity: pressed ? 0.65 : 1,
+            })}
+          >
+            <Text
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 13,
+                color: "#7D36B5",
+              }}
+            >
+              View all
+            </Text>
+            <Icon name="arrow-forward-outline" size={17} color="#7D36B5" />
+          </Pressable>
+        </View>
+
+        {!history.length ? (
+          <View
+            style={{
+              minHeight: 154,
+              borderRadius: 26,
+              padding: 16,
+              borderWidth: 1,
+              borderColor: "#EAE4F0",
+              backgroundColor: "#F8F4FE",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              overflow: "hidden",
+            }}
+          >
+            <View style={{ width: 112, height: 88 }}>
+              <BloodSugarEmptyGraphic />
+            </View>
+            <View style={{ flex: 1, gap: 6 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 16,
+                  lineHeight: 21,
+                  color: C.ink,
+                }}
+              >
+                A fresh page for today.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 12.5,
+                  lineHeight: 18,
+                  color: C.muted,
+                }}
+              >
+                Your saved observations will appear here. No readings have been added yet.
+              </Text>
+            </View>
+          </View>
+        ) : (
+          history.map((entry) => (
+            <Card key={entry.id} style={{ borderRadius: 22, gap: 11 }}>
+              <Text style={S.eyebrow}>
+                {new Date(entry.recordedAt).toLocaleString()}
+              </Text>
+              {trackerFields[kind]
+                .filter((field) => entry.values[field.key])
+                .map((field) => (
+                  <View
+                    key={field.key}
+                    style={{
+                      backgroundColor: "#F8F4FC",
+                      borderRadius: 16,
+                      padding: 12,
+                    }}
+                  >
+                    <Text style={S.small}>{field.label}</Text>
+                    <Text style={[S.h3, { marginTop: 3 }]}>{entry.values[field.key]}</Text>
+                  </View>
+                ))}
+              {Boolean(entry.values.notes) && <Txt>{entry.values.notes}</Txt>}
+            </Card>
+          ))
+        )}
+
+        <View
+          style={{
+            minHeight: 86,
+            borderRadius: 24,
+            backgroundColor: "#F7F3FD",
+            paddingHorizontal: 16,
+            paddingVertical: 15,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <Icon name="information-circle-outline" size={24} color="#6657B1" />
+          <Text
+            style={{
+              flex: 1,
+              fontFamily: "DMSans_400Regular",
+              fontSize: 12.5,
+              lineHeight: 18,
+              color: "#68647A",
+            }}
+          >
+            Readings are recorded without diagnostic interpretation. Follow the individual care plan provided by the healthcare team.
+          </Text>
+        </View>
+      </Page>
+    );
+  }
+
   return (
     <Page>
+      <TrackerTopBar onBack={() => n.goBack()} onHelp={() => n.navigate("Resources")} />
       <Heading
         eyebrow="DAILY CARE JOURNAL"
         title={kind}
