@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useReducer, useState } from "react";
 import { AppState } from "react-native";
 import type { Appointment, Entry } from "./domain";
-import { loadCareData, type CareSnapshot } from "./backend";
+import { loadCareData, type CareMode, type CareSnapshot } from "./backend";
 import type { CareRole } from "./careTeam";
 import type { CareSyncStatus } from "./careResilience";
 import {
@@ -23,6 +23,7 @@ type State = {
   careRecipientId: string | null;
   careRecipientName: string;
   accessRole: CareRole;
+  careMode: CareMode;
   entries: Entry[];
   medications: Medication[];
   meds: Record<string, boolean>;
@@ -46,6 +47,7 @@ type Action =
       name: string;
       relationship: string;
       faith: boolean;
+      careMode?: CareMode;
     }
   | {
       type: "entry";
@@ -91,6 +93,7 @@ const initial: State = {
   careRecipientId: null,
   careRecipientName: "",
   accessRole: "viewer",
+  careMode: "advocate",
   entries: [],
   medications: [],
   meds: {},
@@ -156,6 +159,7 @@ function reducer(state: State, action: Action): State {
         name: action.name.trim() || "Caregiver",
         relationship: action.relationship,
         faith: action.faith,
+        careMode: action.careMode ?? state.careMode,
       };
     case "entry":
       return { ...state, entries: [action.entry, ...state.entries] };
