@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Linking, Pressable, Text, TextInput, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop, Text as SvgText } from "react-native-svg";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
 import {
@@ -313,12 +313,12 @@ function BloodSugarHeroGraphic() {
         <Rect x="0" y="0" width="104" height="130" rx="31" fill="url(#meterBody)" />
         <Rect x="19" y="18" width="66" height="63" rx="16" fill="url(#meterGlow)" />
         <Rect x="27" y="27" width="50" height="46" rx="12" fill="#FBFAFF" />
-        <Text x="52" y="53" textAnchor="middle" fontSize="25" fontWeight="700" fill="#3B3174">
+        <SvgText x="52" y="53" textAnchor="middle" fontSize="25" fontWeight="700" fill="#3B3174">
           98
-        </Text>
-        <Text x="52" y="67" textAnchor="middle" fontSize="8.5" fontWeight="600" fill="#6D6590">
+        </SvgText>
+        <SvgText x="52" y="67" textAnchor="middle" fontSize="8.5" fontWeight="600" fill="#6D6590">
           mg/dL
-        </Text>
+        </SvgText>
         <Circle cx="25" cy="99" r="8" fill="#C0A6E9" />
         <Circle cx="52" cy="101" r="13" fill="#D8C7F3" />
         <Circle cx="52" cy="101" r="7" fill="#F5F0FE" />
@@ -447,7 +447,6 @@ function BloodSugarField({
             lineHeight: 20,
             color: C.ink,
             textAlignVertical: multiline ? "top" : "center",
-            outlineStyle: "none" as any,
           }}
         />
 
