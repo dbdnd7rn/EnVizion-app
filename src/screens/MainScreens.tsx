@@ -5,6 +5,11 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
+import {
+  loadCareSpaces,
+  setActiveCareRecipient,
+  type CareSpace,
+} from "../careTeam";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
 import {
@@ -140,7 +145,10 @@ function HomeFloat({
 
 export function HomeScreen() {
   const n = useNav();
-  const { state } = useCare();
+  const { state, refresh: refreshCare } = useCare();
+  const [careSpaces, setCareSpaces] = useState<CareSpace[]>([]);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [switchingCareId, setSwitchingCareId] = useState<string | null>(null);
   const { width: windowWidth } = useWindowDimensions();
   const compact = windowWidth < 430;
   const contentWidth = Math.min(Math.max(windowWidth - 40, 280), 440);
@@ -159,6 +167,45 @@ export function HomeScreen() {
   const fullName = state.name.trim() || "Caregiver";
   const displayName = fullName.split(/\s+/)[0];
   const profileInitial = displayName.slice(0, 1).toUpperCase();
+
+  useEffect(() => {
+    let active = true;
+
+    loadCareSpaces()
+      .then((spaces) => {
+        if (active) setCareSpaces(spaces);
+      })
+      .catch(() => {
+        if (active) setCareSpaces([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [state.careRecipientId]);
+
+  const activeSpace =
+    careSpaces.find((space) => space.active) ??
+    careSpaces.find((space) => space.careRecipientId === state.careRecipientId) ??
+    null;
+
+  async function switchCareSpace(space: CareSpace) {
+    if (space.active || switchingCareId) {
+      setSwitcherOpen(false);
+      return;
+    }
+
+    setSwitchingCareId(space.careRecipientId);
+    try {
+      await setActiveCareRecipient(space.careRecipientId);
+      await refreshCare();
+      const spaces = await loadCareSpaces();
+      setCareSpaces(spaces);
+      setSwitcherOpen(false);
+    } finally {
+      setSwitchingCareId(null);
+    }
+  }
 
   const hour = new Date().getHours();
   const greeting =
@@ -223,6 +270,222 @@ export function HomeScreen() {
           </View>
         </HomeReveal>
 
+        {state.careRecipientId && (
+          <HomeReveal delay={35}>
+            <View style={{ gap: 8 }}>
+              <Text
+                style={[
+                  S.eyebrow,
+                  {
+                    color: "#8C8290",
+                    fontSize: 10,
+                    letterSpacing: 2.2,
+                    marginLeft: 2,
+                  },
+                ]}
+              >
+                {state.careMode === "self" ? "MY CARE PROFILE" : "CARING FOR"}
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  careSpaces.length > 1
+                    ? `Switch care profile. Currently ${state.careRecipientName}`
+                    : `Open care team for ${state.careRecipientName}`
+                }
+                onPress={() => {
+                  if (careSpaces.length > 1) {
+                    setSwitcherOpen((value) => !value);
+                  } else {
+                    n.navigate("CareTeam");
+                  }
+                }}
+                style={({ pressed }) => ({
+                  minHeight: 68,
+                  borderRadius: 22,
+                  borderWidth: 1,
+                  borderColor: switcherOpen ? "#CAB1D6" : "#E9E1EB",
+                  backgroundColor: switcherOpen ? "#F8F2FA" : C.white,
+                  paddingHorizontal: 15,
+                  paddingVertical: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  opacity: pressed ? 0.82 : 1,
+                })}
+              >
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 16,
+                    backgroundColor:
+                      state.careMode === "self" ? "#FCEAF1" : "#EEE3F4",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon
+                    name={state.careMode === "self" ? "person-outline" : "heart-outline"}
+                    size={23}
+                    color={state.careMode === "self" ? "#B13D70" : C.purple}
+                  />
+                </View>
+
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontFamily: "DMSans_700Bold",
+                      fontSize: 17,
+                      color: "#211B2C",
+                    }}
+                  >
+                    {state.careRecipientName || "Care profile"}
+                  </Text>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      fontFamily: "DMSans_400Regular",
+                      fontSize: 12.5,
+                      color: "#817789",
+                    }}
+                  >
+                    {state.careMode === "self"
+                      ? "Your personal care space"
+                      : activeSpace?.relationship || state.relationship}
+                  </Text>
+                </View>
+
+                <View
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 13,
+                    backgroundColor: "#F4EDF7",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon
+                    name={
+                      careSpaces.length > 1
+                        ? switcherOpen
+                          ? "chevron-up"
+                          : "chevron-down"
+                        : "people-outline"
+                    }
+                    size={18}
+                    color={C.purple}
+                  />
+                </View>
+              </Pressable>
+
+              {switcherOpen && careSpaces.length > 1 && (
+                <Card style={{ gap: 7, padding: 9, backgroundColor: "#FFFEFF" }}>
+                  {careSpaces.map((space) => {
+                    const selected =
+                      space.active ||
+                      space.careRecipientId === state.careRecipientId;
+                    return (
+                      <Pressable
+                        key={space.careRecipientId}
+                        disabled={switchingCareId !== null}
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                          selected
+                            ? `${space.careRecipientName}, current care profile`
+                            : `Switch to ${space.careRecipientName}`
+                        }
+                        onPress={() => void switchCareSpace(space)}
+                        style={({ pressed }) => ({
+                          minHeight: 58,
+                          borderRadius: 17,
+                          paddingHorizontal: 11,
+                          paddingVertical: 9,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 10,
+                          backgroundColor: selected ? "#F4EBF8" : "transparent",
+                          opacity:
+                            switchingCareId === space.careRecipientId
+                              ? 0.55
+                              : pressed
+                                ? 0.7
+                                : 1,
+                        })}
+                      >
+                        <View
+                          style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 13,
+                            backgroundColor: selected ? "#E8D8F0" : "#F4F0F5",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontFamily: "DMSans_700Bold",
+                              color: C.purple,
+                              fontSize: 15,
+                            }}
+                          >
+                            {space.careRecipientName.slice(0, 1).toUpperCase()}
+                          </Text>
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <Text style={[S.h3, { fontSize: 14.5 }]}>
+                            {space.careRecipientName}
+                          </Text>
+                          <Text style={S.small}>
+                            {space.relationship} · {space.role === "owner" ? "Primary Advocate" : space.role === "caregiver" ? "Caregiver" : space.role === "patient" ? "Care Recipient" : "Family Member"}
+                          </Text>
+                        </View>
+                        {selected && (
+                          <Icon
+                            name="checkmark-circle"
+                            size={20}
+                            color={C.purple}
+                          />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Manage care profiles and sharing"
+                    onPress={() => n.navigate("CareTeam")}
+                    style={({ pressed }) => ({
+                      minHeight: 44,
+                      borderRadius: 14,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "row",
+                      gap: 7,
+                      opacity: pressed ? 0.7 : 1,
+                    })}
+                  >
+                    <Icon name="settings-outline" size={17} color={C.purple} />
+                    <Text
+                      style={{
+                        fontFamily: "DMSans_600SemiBold",
+                        fontSize: 12.5,
+                        color: C.purple,
+                      }}
+                    >
+                      Manage care profiles
+                    </Text>
+                  </Pressable>
+                </Card>
+              )}
+            </View>
+          </HomeReveal>
+        )}
+
         <HomeReveal delay={65}>
           <View
             style={{
@@ -263,7 +526,7 @@ export function HomeScreen() {
                   { color: "#7A3F96", fontSize: 11, letterSpacing: 2.8 },
                 ]}
               >
-                YOUR CARE COMPANION
+                {state.careMode === "self" ? "YOUR CARE DASHBOARD" : "YOUR CARE COMPANION"}
               </Text>
               <Text
                 accessibilityRole="header"
@@ -286,7 +549,9 @@ export function HomeScreen() {
                   maxWidth: heroTextWidth,
                 }}
               >
-                Here for a calmer, more confident day of care.
+                {state.careMode === "self"
+                  ? "Your health, appointments, and next steps in one calm place."
+                  : "Here for a calmer, more confident day of care."}
               </Text>
             </View>
           </View>
