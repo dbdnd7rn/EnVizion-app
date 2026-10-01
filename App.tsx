@@ -363,7 +363,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="Tracker"
             component={TrackerScreen}
-            options={{ title: "Daily care" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Insights"
