@@ -39,6 +39,7 @@ export function OnboardingScreen() {
   const n = useNav();
   const { dispatch, refresh } = useCare();
   const [step, setStep] = useState(0);
+  const [careMode, setCareMode] = useState<"advocate" | "self" | null>(null);
   const [name, setName] = useState("");
   const [careName, setCareName] = useState("");
   const [relationship, setRelationship] = useState("A parent");
@@ -61,6 +62,7 @@ export function OnboardingScreen() {
             name: saved.name,
             relationship: saved.relationship,
             faith: saved.faith,
+            careMode: saved.careMode,
           });
           await refresh();
           n.reset({ index: 0, routes: [{ name: "Main" }] });
@@ -105,6 +107,7 @@ export function OnboardingScreen() {
         name: saved.name,
         relationship: saved.relationship,
         faith: saved.faith,
+        careMode: saved.careMode,
       });
       await refresh();
       n.reset({ index: 0, routes: [{ name: "Main" }] });
@@ -119,16 +122,37 @@ export function OnboardingScreen() {
     }
   }
 
+  function chooseMode(mode: "advocate" | "self") {
+    setCareMode(mode);
+    setMessage("");
+    if (mode === "self") {
+      setRelationship("Myself");
+    } else if (relationship === "Myself") {
+      setRelationship("A parent");
+    }
+  }
+
   async function finish() {
     setMessage("");
 
+    if (!careMode) {
+      setMessage("Choose how you plan to use EnVizion Life.");
+      setStep(1);
+      return;
+    }
+
+    const resolvedRelationship = careMode === "self" ? "Myself" : relationship;
     const resolvedCareName =
-      relationship === "Myself"
+      careMode === "self"
         ? careName.trim() || name.trim()
         : careName.trim();
 
     if (!name.trim() || !resolvedCareName) {
-      setMessage("Add your name and the name of the person you are caring for.");
+      setMessage(
+        careMode === "self"
+          ? "Add your name to create your personal care profile."
+          : "Add your name and the name of the person you are caring for.",
+      );
       return;
     }
 
@@ -137,8 +161,9 @@ export function OnboardingScreen() {
       const saved = await saveOnboarding({
         name,
         careName: resolvedCareName,
-        relationship,
+        relationship: resolvedRelationship,
         faith,
+        careMode,
       });
 
       dispatch({
@@ -146,6 +171,7 @@ export function OnboardingScreen() {
         name: saved.name,
         relationship: saved.relationship,
         faith: saved.faith,
+        careMode: saved.careMode,
       });
       await refresh();
       n.reset({ index: 0, routes: [{ name: "Main" }] });
@@ -173,23 +199,30 @@ export function OnboardingScreen() {
   }
 
   if (pendingInvite) {
+    const invitedRole =
+      pendingInvite.role === "caregiver"
+        ? "Caregiver access"
+        : pendingInvite.role === "patient"
+          ? "Patient / care recipient access"
+          : "Family member access";
+
     return (
       <Page>
         <Brand />
         <Heading
           eyebrow="CARE TEAM INVITATION"
-          title={`You’ve been invited to help care for ${pendingInvite.careRecipientName}.`}
+          title={`You’ve been invited to join ${pendingInvite.careRecipientName}’s care space.`}
           body="Your access remains private and inactive until you choose to accept."
         />
         <Card style={{ backgroundColor: C.lavender }}>
           <Icon name="people-outline" size={34} />
-          <Text style={S.h2}>
-            {pendingInvite.role === "caregiver" ? "Caregiver access" : "Viewer access"}
-          </Text>
+          <Text style={S.h2}>{invitedRole}</Text>
           <Txt>
             {pendingInvite.role === "caregiver"
               ? "You’ll be able to view and update the shared care record."
-              : "You’ll be able to read the shared care record, but not change it."}
+              : pendingInvite.role === "patient"
+                ? "You’ll be able to view the care information being shared with you."
+                : "You’ll be able to read shared updates without changing medical records."}
           </Txt>
         </Card>
         <Button
@@ -210,8 +243,8 @@ export function OnboardingScreen() {
           </Text>
         )}
         <Txt style={S.small}>
-          Accepting adds you to the care team. The care owner can later change
-          your role or revoke access.
+          Accepting adds you to this care team. The Primary Advocate can later
+          update your access or remove it.
         </Txt>
       </Page>
     );
@@ -221,8 +254,9 @@ export function OnboardingScreen() {
     <Page>
       <View style={S.between}>
         <Brand />
-        <Text style={S.small}>WELCOME • {step + 1} / 2</Text>
+        <Text style={S.small}>WELCOME • {step + 1} / 3</Text>
       </View>
+
       {step === 0 ? (
         <>
           <View style={{ borderRadius: 28, overflow: "hidden" }}>
@@ -231,24 +265,24 @@ export function OnboardingScreen() {
           <Heading
             eyebrow="FAITH. CLARITY. COMPASSION."
             title={"Care is a journey.\nLet’s walk together."}
-            body="A little guidance for the big responsibility of caring for someone you love."
+            body="A calmer place to organize care, prepare for appointments, coordinate family, and keep important information close."
           />
           <View style={{ gap: 17 }}>
             {[
               [
                 "heart-outline",
                 "Organize everyday care",
-                "Keep observations, medicines, and questions together.",
+                "Keep medicines, appointments, observations, and tasks together.",
               ],
               [
-                "compass-outline",
-                "Find your next step",
-                "Understand resources and the people on your care team.",
+                "people-outline",
+                "Coordinate the people around care",
+                "Share the right information with family and caregivers.",
               ],
               [
-                "sparkles-outline",
-                "Make room for yourself",
-                "Find encouragement and spiritual support.",
+                "shield-checkmark-outline",
+                "Be ready when it matters",
+                "Keep important care information easier to find in urgent moments.",
               ],
             ].map(([icon, title, body]) => (
               <View key={title} style={S.row}>
@@ -266,57 +300,245 @@ export function OnboardingScreen() {
             onPress={() => setStep(1)}
           />
         </>
+      ) : step === 1 ? (
+        <>
+          <Heading
+            eyebrow="CHOOSE YOUR EXPERIENCE"
+            title="How will you use EnVizion?"
+            body="We’ll personalize the words, dashboard, and care tools around the way you’re using the app."
+          />
+
+          <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ selected: careMode === "advocate" }}
+            accessibilityLabel="Managing care for a loved one"
+            onPress={() => chooseMode("advocate")}
+            style={({ pressed }) => ({
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 28,
+              borderWidth: careMode === "advocate" ? 2 : 1,
+              borderColor: careMode === "advocate" ? C.purple : "#E9E0EC",
+              backgroundColor: careMode === "advocate" ? "#F7F0FA" : C.white,
+              padding: 20,
+              gap: 14,
+              opacity: pressed ? 0.86 : 1,
+              transform: [{ scale: pressed ? 0.99 : 1 }],
+            })}
+          >
+            <View style={S.between}>
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 18,
+                  backgroundColor: "#EBDDF3",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="people-outline" size={27} color={C.purple} />
+              </View>
+              <View
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  borderWidth: 2,
+                  borderColor: careMode === "advocate" ? C.purple : "#CFC4D3",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: C.white,
+                }}
+              >
+                {careMode === "advocate" && (
+                  <View
+                    style={{
+                      width: 14,
+                      height: 14,
+                      borderRadius: 7,
+                      backgroundColor: C.purple,
+                    }}
+                  />
+                )}
+              </View>
+            </View>
+            <View style={{ gap: 5 }}>
+              <Text style={[S.h2, { fontSize: 22 }]}>Managing care for a loved one</Text>
+              <Txt>
+                Coordinate a parent, partner, relative, or another person’s care
+                with the people helping you.
+              </Txt>
+            </View>
+          </Pressable>
+
+          <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ selected: careMode === "self" }}
+            accessibilityLabel="Managing my own care"
+            onPress={() => chooseMode("self")}
+            style={({ pressed }) => ({
+              position: "relative",
+              overflow: "hidden",
+              borderRadius: 28,
+              borderWidth: careMode === "self" ? 2 : 1,
+              borderColor: careMode === "self" ? C.purple : "#E9E0EC",
+              backgroundColor: careMode === "self" ? "#F7F0FA" : C.white,
+              padding: 20,
+              gap: 14,
+              opacity: pressed ? 0.86 : 1,
+              transform: [{ scale: pressed ? 0.99 : 1 }],
+            })}
+          >
+            <View style={S.between}>
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 18,
+                  backgroundColor: "#FCEAF1",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="person-outline" size={27} color="#B13D70" />
+              </View>
+              <View
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 14,
+                  borderWidth: 2,
+                  borderColor: careMode === "self" ? C.purple : "#CFC4D3",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: C.white,
+                }}
+              >
+                {careMode === "self" && (
+                  <View
+                    style={{
+                      width: 14,
+                      height: 14,
+                      borderRadius: 7,
+                      backgroundColor: C.purple,
+                    }}
+                  />
+                )}
+              </View>
+            </View>
+            <View style={{ gap: 5 }}>
+              <Text style={[S.h2, { fontSize: 22 }]}>Managing my own care</Text>
+              <Txt>
+                Keep your appointments, medicines, questions, care team, and
+                important information organized for yourself.
+              </Txt>
+            </View>
+          </Pressable>
+
+          {Boolean(message) && (
+            <Text accessibilityRole="alert" style={[S.small, { color: C.rose }]}>
+              {message}
+            </Text>
+          )}
+
+          <Button
+            title="Continue"
+            icon="arrow-forward"
+            disabled={!careMode}
+            onPress={() => setStep(2)}
+          />
+          <Button title="Back" secondary onPress={() => setStep(0)} />
+        </>
       ) : (
         <>
           <Heading
-            eyebrow="MAKE YOURSELF AT HOME"
-            title="A companion for your kind of care."
-            body="Set up the care profile that will stay connected to your account."
+            eyebrow={careMode === "self" ? "YOUR CARE PROFILE" : "YOUR FAMILY CARE SPACE"}
+            title={
+              careMode === "self"
+                ? "Make this care space yours."
+                : "Tell us who you’re caring for."
+            }
+            body={
+              careMode === "self"
+                ? "We’ll use your name throughout your personal care dashboard."
+                : "This creates the care profile your family and caregivers can coordinate around."
+            }
           />
+
           <Field
             label="What should we call you?"
             value={name}
-            onChange={setName}
+            onChange={(value) => {
+              setName(value);
+              if (careMode === "self" && !careName.trim()) setCareName(value);
+            }}
           />
-          <Field
-            label={
-              relationship === "Myself"
-                ? "Your name for the care profile"
-                : "What should we call the person you’re caring for?"
-            }
-            value={careName}
-            onChange={setCareName}
-          />
-          <Text style={S.h3}>Who are you caring for?</Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
-            {["A parent", "My partner", "A loved one", "Myself"].map((r) => (
-              <Pressable
-                key={r}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: r === relationship }}
-                onPress={() => setRelationship(r)}
-                style={[
-                  S.pill,
-                  {
-                    padding: 14,
-                    backgroundColor: r === relationship ? C.purple : C.lavender,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    S.h3,
-                    {
-                      fontSize: 13,
-                      color: r === relationship ? C.white : C.deep,
-                    },
-                  ]}
+
+          {careMode === "advocate" ? (
+            <>
+              <Field
+                label="What should we call the person you’re caring for?"
+                value={careName}
+                onChange={setCareName}
+              />
+              <Text style={S.h3}>Your relationship to them</Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
+                {["A parent", "My partner", "A loved one", "A friend"].map((r) => (
+                  <Pressable
+                    key={r}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: r === relationship }}
+                    onPress={() => setRelationship(r)}
+                    style={[
+                      S.pill,
+                      {
+                        padding: 14,
+                        backgroundColor: r === relationship ? C.purple : C.lavender,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        S.h3,
+                        {
+                          fontSize: 13,
+                          color: r === relationship ? C.white : C.deep,
+                        },
+                      ]}
+                    >
+                      {r}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          ) : (
+            <Card style={{ backgroundColor: "#F7F1FA" }}>
+              <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 16,
+                    backgroundColor: "#E9DCF0",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  {r}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+                  <Icon name="person-outline" size={23} color={C.purple} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={S.h3}>Personal care profile</Text>
+                  <Txt>
+                    This profile is for you. You can still invite trusted family
+                    or caregivers later.
+                  </Txt>
+                </View>
+              </View>
+            </Card>
+          )}
+
           <Card>
             <View style={S.between}>
               <View style={{ flex: 1 }}>
@@ -331,22 +553,33 @@ export function OnboardingScreen() {
               />
             </View>
           </Card>
+
           <Txt style={S.small}>
             EnVizion Life helps organize care and educational resources. It does
             not diagnose, monitor emergencies, or replace professional care.
           </Txt>
+
           {Boolean(message) && (
             <Text accessibilityRole="alert" style={[S.small, { color: C.rose }]}>
               {message}
             </Text>
           )}
+
           <Button
-            title={saving ? "Saving your care profile…" : "Open my care companion"}
+            title={
+              saving
+                ? "Saving your care profile…"
+                : careMode === "self"
+                  ? "Open my care dashboard"
+                  : "Open our care space"
+            }
             disabled={saving}
             onPress={finish}
           />
+          <Button title="Back" secondary disabled={saving} onPress={() => setStep(1)} />
         </>
       )}
+
       <Text style={[S.small, { textAlign: "center" }]}>
         ENVIZION LIFE • CAREGIVER & PATIENT ADVOCATE SUPPORT
       </Text>
