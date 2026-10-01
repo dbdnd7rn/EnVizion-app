@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Linking, Pressable, Switch, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
 import { specialists, trustedResources } from "../content";
@@ -776,6 +777,103 @@ export function SpecialistsScreen() {
     </Page>
   );
 }
+
+function SpecialistHeroGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 420 315">
+      <Defs>
+        <LinearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FBF7FF" />
+          <Stop offset="1" stopColor="#EEE3FB" />
+        </LinearGradient>
+        <LinearGradient id="heart" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFB7D0" />
+          <Stop offset="0.55" stopColor="#DB8BDB" />
+          <Stop offset="1" stopColor="#9B64D5" />
+        </LinearGradient>
+        <LinearGradient id="coat" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" />
+          <Stop offset="1" stopColor="#F3EEF9" />
+        </LinearGradient>
+        <LinearGradient id="clipboard" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#8C65C5" />
+          <Stop offset="1" stopColor="#5D3C9A" />
+        </LinearGradient>
+        <LinearGradient id="hair" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#51304F" />
+          <Stop offset="1" stopColor="#2D1732" />
+        </LinearGradient>
+      </Defs>
+
+      <Path
+        d="M38 268C8 223 21 158 58 111C93 66 148 46 202 55C253 18 333 20 382 62C427 100 437 169 403 221C372 268 319 292 255 292H88C66 292 49 285 38 268Z"
+        fill="url(#bg)"
+      />
+
+      <Ellipse cx="52" cy="246" rx="20" ry="72" fill="#B998E1" transform="rotate(-32 52 246)" />
+      <Ellipse cx="89" cy="250" rx="18" ry="63" fill="#D6C2F0" transform="rotate(22 89 250)" />
+      <Ellipse cx="362" cy="233" rx="20" ry="72" fill="#AF8ADC" transform="rotate(24 362 233)" />
+      <Ellipse cx="392" cy="257" rx="17" ry="61" fill="#DCC8F1" transform="rotate(32 392 257)" />
+
+      <G>
+        <Path
+          d="M104 94C104 75 119 63 136 63C152 63 162 73 167 85C172 73 183 63 198 63C216 63 230 75 230 94C230 123 202 145 167 169C133 146 104 124 104 94Z"
+          fill="url(#heart)"
+        />
+        <Path d="M124 111h19l8-19 11 35 10-22 8 11h25" stroke="#FFF" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </G>
+
+      <G transform="translate(50 142)">
+        <Rect x="0" y="12" width="97" height="116" rx="15" fill="#FFF" opacity="0.95" />
+        <Rect x="34" y="0" width="38" height="22" rx="7" fill="#8E64C2" />
+        <Circle cx="53" cy="3" r="6" fill="#F4EFFB" />
+        <Path d="M18 45l9 9 17-20" stroke="#8760BE" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M18 77l9 9 17-20" stroke="#8760BE" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M18 109l9 9 17-20" stroke="#8760BE" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Rect x="51" y="38" width="30" height="7" rx="3.5" fill="#C8B5E3" />
+        <Rect x="51" y="70" width="33" height="7" rx="3.5" fill="#D4C6E8" />
+        <Rect x="51" y="102" width="26" height="7" rx="3.5" fill="#D4C6E8" />
+      </G>
+
+      <G transform="translate(328 78)">
+        <Rect x="0" y="0" width="74" height="74" rx="20" fill="#FFF" opacity="0.88" />
+        <Path d="M31 16h13v15h15v13H44v15H31V44H16V31h15Z" fill="#9A68CE" />
+      </G>
+
+      <G>
+        <Path d="M179 122C174 74 205 45 248 47C293 49 322 80 319 125C317 160 303 181 282 198H194C183 179 181 153 179 122Z" fill="url(#hair)" />
+        <Path d="M218 101C224 72 249 58 278 68C296 74 308 90 309 108C294 96 281 92 266 93C249 94 236 97 218 101Z" fill="#3E2143" />
+        <Circle cx="251" cy="114" r="43" fill="#F1BDA4" />
+        <Circle cx="237" cy="114" r="3" fill="#4A324D" />
+        <Circle cx="267" cy="114" r="3" fill="#4A324D" />
+        <Path d="M242 133C249 139 257 139 266 132" stroke="#C9766D" strokeWidth="3" fill="none" strokeLinecap="round" />
+        <Path d="M212 147C205 184 212 221 221 260H307C320 213 319 176 300 147C280 162 232 163 212 147Z" fill="url(#coat)" />
+        <Path d="M246 160L258 180L272 160V258H244Z" fill="#B89BE5" />
+        <Path d="M219 160L242 176L229 197L240 258H218C209 219 205 185 219 160Z" fill="#FFF" />
+        <Path d="M297 160L274 176L287 197L276 258H307C317 218 316 184 297 160Z" fill="#FFF" />
+        <Path d="M229 162C214 187 212 214 218 242" stroke="#3D3159" strokeWidth="6" fill="none" strokeLinecap="round" />
+        <Path d="M286 162C301 188 302 213 295 240" stroke="#3D3159" strokeWidth="6" fill="none" strokeLinecap="round" />
+        <Circle cx="220" cy="244" r="9" fill="#2F2548" />
+        <Circle cx="294" cy="242" r="15" fill="#76719A" stroke="#39344F" strokeWidth="5" />
+        <Path d="M222 247c11 13 24 15 35 15s22-2 36-14" stroke="#5C5476" strokeWidth="4" fill="none" strokeLinecap="round" />
+
+        <G transform="translate(262 201) rotate(-7 55 48)">
+          <Rect x="0" y="0" width="112" height="94" rx="13" fill="url(#clipboard)" />
+          <Rect x="40" y="-4" width="42" height="12" rx="6" fill="#69469D" />
+          <Rect x="10" y="12" width="92" height="70" rx="9" fill="#7854AE" opacity="0.32" />
+        </G>
+        <Path d="M269 264c-13-3-24-2-31 3-8 5-8 15 0 22 8 7 21 10 32 8" fill="#F1BDA4" />
+      </G>
+
+      <Path d="M365 197c12-27 21-42 35-50-1 22-10 40-35 50Z" fill="#A98BDC" />
+      <Path d="M357 223c17-25 29-36 44-40-6 21-18 36-44 40Z" fill="#C8AFE9" />
+      <Path d="M351 248c19-22 34-31 48-31-10 19-24 31-48 31Z" fill="#E0C9F2" />
+      <Path d="M82 216c-14-24-26-34-41-38 7 19 19 33 41 38Z" fill="#CBB2EA" />
+      <Path d="M91 241c-18-21-33-29-48-28 10 18 25 28 48 28Z" fill="#B18EDC" />
+    </Svg>
+  );
+}
+
 export function SpecialistScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Specialist">) {
@@ -814,18 +912,21 @@ export function SpecialistScreen({
     <Page>
       <View
         style={{
-          position: "relative",
-          minHeight: 238,
+          minHeight: 236,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 4,
           overflow: "hidden",
           marginHorizontal: -2,
         }}
       >
         <View
           style={{
-            maxWidth: 225,
+            flex: 1,
+            minWidth: 0,
             gap: 8,
-            paddingTop: 8,
-            zIndex: 2,
+            paddingTop: 4,
+            paddingLeft: 2,
           }}
         >
           <Text
@@ -845,9 +946,9 @@ export function SpecialistScreen({
             accessibilityRole="header"
             style={{
               fontFamily: "DMSans_700Bold",
-              fontSize: 38,
-              lineHeight: 43,
-              letterSpacing: -0.9,
+              fontSize: 36,
+              lineHeight: 41,
+              letterSpacing: -0.85,
               color: "#17143D",
             }}
           >
@@ -857,10 +958,10 @@ export function SpecialistScreen({
           <Text
             style={{
               fontFamily: "DMSans_400Regular",
-              fontSize: 17,
-              lineHeight: 25,
+              fontSize: 15.5,
+              lineHeight: 23,
               color: "#747184",
-              maxWidth: 210,
+              maxWidth: 180,
             }}
           >
             {item[1]}
@@ -870,21 +971,12 @@ export function SpecialistScreen({
         <View
           pointerEvents="none"
           style={{
-            position: "absolute",
-            right: -16,
-            top: 0,
-            width: 245,
-            height: 215,
+            width: 198,
+            height: 214,
+            marginRight: -8,
           }}
         >
-          <Image
-            source={require("../assets/specialist-primary-care-hero.webp")}
-            resizeMode="contain"
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
-          />
+          <SpecialistHeroGraphic />
         </View>
       </View>
 
