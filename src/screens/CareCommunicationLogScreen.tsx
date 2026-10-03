@@ -180,7 +180,7 @@ function priorityBackground(priority: CareCommunicationPriority) {
 export function CareCommunicationLogScreen() {
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const viewer = state.accessRole === "viewer";
+  const viewer =\n    state.accessRole === "viewer" || state.accessRole === "patient";
   const [communications, setCommunications] = useState<CareCommunication[]>([]);
   const [contacts, setContacts] = useState<CareContact[]>([]);
   const [query, setQuery] = useState("");
