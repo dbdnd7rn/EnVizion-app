@@ -243,6 +243,8 @@ export function DoctorVisitCompanionScreen() {
 
     setRawNotes(selected.visit.rawNotes);
     setTranscriptText(selected.visit.transcriptText);
+    setLocalRecordingUri(null);
+    setLocalRecordingDurationMs(0);
 
     if (activeSummary) {
       setSummaryDraft({
@@ -357,6 +359,177 @@ export function DoctorVisitCompanionScreen() {
         error instanceof Error
           ? error.message
           : "We could not update recording consent.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function startRecording() {
+    if (!selected || readOnly || busy || recorderState.isRecording) return;
+
+    if (!selected.visit.recordingConsentConfirmed) {
+      setMessage("Confirm recording consent before starting the microphone.");
+      return;
+    }
+
+    setBusy("record-start");
+    setMessage("");
+    try {
+      const permission = await AudioModule.requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        setMessage(
+          "Microphone access was not granted. You can still type visit notes manually.",
+        );
+        return;
+      }
+
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
+      });
+
+      await audioRecorder.prepareToRecordAsync();
+      audioRecorder.record();
+      setLocalRecordingUri(null);
+      setLocalRecordingDurationMs(0);
+      setMessage("Recording started. Keep the phone near the conversation.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The microphone could not start recording.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function stopRecording() {
+    if (!selected || !recorderState.isRecording) return;
+
+    setBusy("record-stop");
+    try {
+      const durationMs =
+        recorderState.durationMillis ??
+        Math.round(Math.max(0, audioRecorder.currentTime) * 1000);
+
+      await audioRecorder.stop();
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
+      });
+
+      const uri = audioRecorder.uri;
+      if (!uri) throw new Error("The recording could not be saved on this device.");
+
+      setLocalRecordingUri(uri);
+      setLocalRecordingDurationMs(durationMs);
+      setMessage(
+        "Recording stopped. Review it, then save it securely to the visit.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The recording could not be stopped safely.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  function playLocalRecording() {
+    if (!localRecordingUri) return;
+    audioPlayer.replace(localRecordingUri);
+    audioPlayer.play();
+  }
+
+  async function playStoredRecording() {
+    if (!selected?.visit.audioPath || busy) return;
+    setBusy("play-audio");
+    try {
+      const url = await getDoctorVisitAudioUrl(selected.visit);
+      if (!url) throw new Error("The stored recording could not be opened.");
+      audioPlayer.replace(url);
+      audioPlayer.play();
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The stored recording could not be played.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function saveRecordingSecurely() {
+    if (!selected || !localRecordingUri || readOnly || busy) return;
+
+    setBusy("upload-audio");
+    setMessage("");
+    try {
+      await uploadDoctorVisitAudio({
+        visit: selected.visit,
+        uri: localRecordingUri,
+        mimeType: recordingMimeType(localRecordingUri),
+        durationMs: localRecordingDurationMs,
+      });
+      setLocalRecordingUri(null);
+      setLocalRecordingDurationMs(0);
+      await refresh();
+      setMessage(
+        "Visit audio saved in the private recording vault. It is not public.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The recording could not be uploaded securely.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function removeStoredRecording() {
+    if (!selected || !selected.visit.audioPath || readOnly || busy) return;
+
+    setBusy("delete-audio");
+    try {
+      audioPlayer.pause();
+      await deleteDoctorVisitAudio(selected.visit);
+      await refresh();
+      setMessage("The stored visit recording was deleted.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The stored recording could not be deleted.",
+      );
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function transcribeRecording() {
+    if (!selected || !selected.visit.audioPath || readOnly || busy) return;
+
+    setBusy("transcribe");
+    setMessage("");
+    try {
+      const transcript = await transcribeDoctorVisitAudio(selected.visit.id);
+      setTranscriptText(transcript);
+      await refresh();
+      setMessage(
+        "Transcript created from the visit audio. Review names, medicines, doses, and instructions before using it.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "The recording could not be transcribed.",
       );
     } finally {
       setBusy("");
