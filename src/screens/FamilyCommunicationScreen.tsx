@@ -100,7 +100,8 @@ export function FamilyCommunicationScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const viewer = state.accessRole === "viewer";
+  const viewer =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [updates, setUpdates] = useState<FamilyUpdate[]>([]);
   const [acknowledgements, setAcknowledgements] = useState<any[]>([]);
@@ -310,8 +311,8 @@ export function FamilyCommunicationScreen() {
     <Page>
       <Heading
         eyebrow="FAMILY COMMUNICATION CENTER"
-        title="Keep the family care team aligned without mixing family updates into provider notes."
-        body="Share care changes, appointment context, medication-list updates, transition information, or coverage notes. Important posts can require acknowledgement."
+        title="One calm feed for the whole care team."
+        body="Share care updates, appointment recaps, medication changes, transition notes, and coverage updates without relying on scattered group chats."
       />
 
       <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
@@ -343,10 +344,14 @@ export function FamilyCommunicationScreen() {
       {viewer && (
         <Card style={{ backgroundColor: C.lavender }}>
           <Icon name="eye-outline" />
-          <Text style={S.h3}>Viewer access is read-only.</Text>
+          <Text style={S.h3}>
+            {state.accessRole === "patient"
+              ? "Care Recipient access is read-only."
+              : "Family Member access is read-only."}
+          </Text>
           <Txt>
-            You can follow family updates, but acknowledgement and posting are
-            reserved for active Owners and Caregivers.
+            You can follow shared care updates, but posting and acknowledgement
+            are reserved for the Primary Advocate and Co-Caregivers.
           </Txt>
         </Card>
       )}
@@ -456,7 +461,7 @@ export function FamilyCommunicationScreen() {
         </Card>
       )}
 
-      <Section title="Family update feed" />
+      <Section title="Shared Care Feed" />
 
       <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
         {(
