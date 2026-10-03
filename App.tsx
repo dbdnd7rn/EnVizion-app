@@ -32,6 +32,7 @@ import { CareCommunicationLogScreen } from "./src/screens/CareCommunicationLogSc
 import { FamilyCommunicationScreen } from "./src/screens/FamilyCommunicationScreen";
 import { EmergencyCenterScreen } from "./src/screens/EmergencyCenterScreen";
 import { CareTasksScreen } from "./src/screens/CareTasksScreen";
+import { DoctorVisitCompanionScreen } from "./src/screens/DoctorVisitCompanionScreen";
 import { CareShiftBoardScreen } from "./src/screens/CareShiftBoardScreen";
 import { OnShiftCaregiverScreen } from "./src/screens/OnShiftCaregiverScreen";
 import { CareScheduleScreen } from "./src/screens/CareScheduleScreen";
@@ -499,6 +500,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="Appointments"
             component={AppointmentScreen}
             options={{ title: "Appointment prep" }}
+          />
+          <Stack.Screen
+            name="DoctorVisitCompanion"
+            component={DoctorVisitCompanionScreen}
+            options={{ title: "Doctor Visit Companion" }}
           />
           <Stack.Screen
             name="Transition"
