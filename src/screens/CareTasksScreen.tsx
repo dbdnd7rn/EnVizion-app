@@ -284,7 +284,8 @@ export function CareTasksScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [tasks, setTasks] = useState<CareTask[]>([]);
   const [completions, setCompletions] = useState<CareTaskCompletion[]>([]);
@@ -416,7 +417,7 @@ export function CareTasksScreen() {
 
     if (
       currentUserId &&
-      state.accessRole !== "viewer" &&
+      !readOnly &&
       !members.some((member) => member.userId === currentUserId)
     ) {
       return [
@@ -436,7 +437,7 @@ export function CareTasksScreen() {
     }
 
     return members;
-  }, [currentUserId, roster, state.accessRole, state.name]);
+  }, [currentUserId, readOnly, roster, state.accessRole, state.name]);
 
   const memberById = useMemo(() => {
     const members = roster?.members ?? [];
@@ -444,7 +445,7 @@ export function CareTasksScreen() {
 
     if (
       currentUserId &&
-      state.accessRole !== "viewer" &&
+      !readOnly &&
       !map.has(currentUserId)
     ) {
       map.set(currentUserId, {
@@ -461,7 +462,7 @@ export function CareTasksScreen() {
     }
 
     return map;
-  }, [currentUserId, roster, state.accessRole, state.name]);
+  }, [currentUserId, readOnly, roster, state.accessRole, state.name]);
 
   const contactsById = useMemo(
     () => new Map(contacts.map((contact) => [contact.id, contact])),
@@ -844,10 +845,12 @@ export function CareTasksScreen() {
         </Text>
         <Txt style={{ color: "#E9DDED" }}>
           {state.accessRole === "owner"
-            ? "Owner"
+            ? "Primary Advocate"
             : state.accessRole === "caregiver"
-              ? "Caregiver"
-              : "Viewer"}{" "}
+              ? "Co-Caregiver"
+              : state.accessRole === "patient"
+                ? "Care Recipient"
+                : "Family Member"}{" "}
           access · {counts.open} open task{counts.open === 1 ? "" : "s"}
         </Txt>
       </Card>
@@ -880,10 +883,15 @@ export function CareTasksScreen() {
       {readOnly && (
         <Card style={{ backgroundColor: C.lavender }}>
           <Icon name="eye-outline" />
-          <Text style={S.h3}>Viewer access is read-only.</Text>
+          <Text style={S.h3}>
+            {state.accessRole === "patient"
+              ? "Care Recipient access is read-only."
+              : "Family Member access is read-only."}
+          </Text>
           <Txt>
             You can see the shared care plan and completion history. Only the
-            Owner or a Caregiver can assign, edit, complete, or cancel tasks.
+            Primary Advocate or a Co-Caregiver can assign, edit, complete, or
+            cancel shared tasks.
           </Txt>
         </Card>
       )}
@@ -924,7 +932,7 @@ export function CareTasksScreen() {
             <Text style={S.h3}>Assign to</Text>
             <SelectCard
               title="Unassigned / shared responsibility"
-              subtitle="Any Owner or Caregiver can pick this up."
+              subtitle="Any Primary Advocate or Co-Caregiver can pick this up."
               selected={draft.assignedTo === null}
               disabled={busy}
               onPress={() =>
@@ -940,7 +948,7 @@ export function CareTasksScreen() {
                     : member.displayName || "Caregiver"
                 }
                 subtitle={
-                  member.role === "owner" ? "Care owner" : "Caregiver"
+                  member.role === "owner" ? "Primary Advocate" : "Co-Caregiver"
                 }
                 selected={draft.assignedTo === member.userId}
                 disabled={busy}
@@ -1577,7 +1585,7 @@ export function CareTasksScreen() {
             {tasks.length
               ? "Try another filter or search."
               : readOnly
-                ? "The Owner or a Caregiver can add shared responsibilities here."
+                ? "The Primary Advocate or a Co-Caregiver can add shared responsibilities here."
                 : "Add the next responsibility, assign it, and keep the whole care team clear on what comes next."}
           </Txt>
           {!readOnly && !tasks.length && (
