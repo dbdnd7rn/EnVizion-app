@@ -23,6 +23,7 @@ export type CareDocument = {
   documentDate: string;
   reviewDueOn: string;
   isKeyDocument: boolean;
+  requiresBiometric: boolean;
   archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -51,6 +52,7 @@ function mapDocument(row: any): CareDocument {
     documentDate: row.document_date ?? "",
     reviewDueOn: row.review_due_on ?? "",
     isKeyDocument: Boolean(row.is_key_document),
+    requiresBiometric: Boolean(row.requires_biometric),
     archivedAt: row.archived_at ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -74,7 +76,7 @@ export async function loadCareDocuments(
   let query = supabase
     .from("care_documents")
     .select(
-      "id, care_recipient_id, uploaded_by, original_name, display_name, category, mime_type, size_bytes, notes, source_name, document_date, review_due_on, is_key_document, archived_at, created_at, updated_at",
+      "id, care_recipient_id, uploaded_by, original_name, display_name, category, mime_type, size_bytes, notes, source_name, document_date, review_due_on, is_key_document, requires_biometric, archived_at, created_at, updated_at",
     )
     .eq("care_recipient_id", careRecipientId)
     .eq("status", "ready");
@@ -136,6 +138,7 @@ export async function uploadCareDocument(input: {
   documentDate?: string;
   reviewDueOn?: string;
   isKeyDocument?: boolean;
+  requiresBiometric?: boolean;
 }) {
   let payload: File | Blob | ArrayBuffer;
   let sizeBytes = input.picked.sizeBytes;
@@ -170,6 +173,10 @@ export async function uploadCareDocument(input: {
     documentDate: input.documentDate?.trim() || "",
     reviewDueOn: input.reviewDueOn?.trim() || "",
     isKeyDocument: Boolean(input.isKeyDocument),
+    requiresBiometric:
+      input.category === "advance_directive"
+        ? input.requiresBiometric !== false
+        : Boolean(input.requiresBiometric),
   });
 
   try {
@@ -253,6 +260,7 @@ export async function updateCareDocumentMetadata(input: {
   documentDate?: string;
   reviewDueOn?: string;
   isKeyDocument?: boolean;
+  requiresBiometric?: boolean;
 }) {
   const result = await invokeVault<{ document: any }>({
     action: "update_metadata",
@@ -264,6 +272,10 @@ export async function updateCareDocumentMetadata(input: {
     documentDate: input.documentDate?.trim() || "",
     reviewDueOn: input.reviewDueOn?.trim() || "",
     isKeyDocument: Boolean(input.isKeyDocument),
+    requiresBiometric:
+      input.category === "advance_directive"
+        ? input.requiresBiometric !== false
+        : Boolean(input.requiresBiometric),
   });
 
   return mapDocument(result.document);
