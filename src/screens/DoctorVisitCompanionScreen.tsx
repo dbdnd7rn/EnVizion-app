@@ -958,6 +958,207 @@ export function DoctorVisitCompanionScreen() {
               </Card>
             )}
 
+            {!readOnly && (
+              <Card
+                style={{
+                  backgroundColor: recorderState.isRecording ? "#FFF1F3" : "#F8F3FB",
+                  borderColor: recorderState.isRecording ? "#F2C8D2" : "#E7DCEF",
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
+                  <View
+                    style={{
+                      width: 54,
+                      height: 54,
+                      borderRadius: 27,
+                      backgroundColor: recorderState.isRecording ? "#E84E6B" : "#E8DCF0",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon
+                      name={recorderState.isRecording ? "mic" : "mic-outline"}
+                      size={27}
+                      color={recorderState.isRecording ? C.white : C.purple}
+                    />
+                  </View>
+                  <View style={{ flex: 1, gap: 3 }}>
+                    <Text style={S.h3}>
+                      {recorderState.isRecording
+                        ? "Recording visit audio"
+                        : "Voice visit recording"}
+                    </Text>
+                    <Txt style={S.small}>
+                      {recorderState.isRecording
+                        ? `Recording • ${formatRecordingDuration(recorderState.durationMillis)}`
+                        : "Audio stays private and is attached only to this care profile."}
+                    </Txt>
+                  </View>
+                </View>
+
+                {recorderState.isRecording ? (
+                  <Button
+                    title={busy === "record-stop" ? "Stopping…" : "Stop recording"}
+                    icon="stop-circle-outline"
+                    disabled={Boolean(busy)}
+                    onPress={() => void stopRecording()}
+                  />
+                ) : (
+                  <Button
+                    title={busy === "record-start" ? "Starting microphone…" : "Start recording"}
+                    icon="mic-outline"
+                    disabled={
+                      Boolean(busy) ||
+                      !selected.visit.recordingConsentConfirmed
+                    }
+                    onPress={() => void startRecording()}
+                  />
+                )}
+
+                {!selected.visit.recordingConsentConfirmed && (
+                  <Txt style={S.small}>
+                    Turn on the consent confirmation above before recording.
+                  </Txt>
+                )}
+              </Card>
+            )}
+
+            {localRecordingUri && !readOnly && (
+              <Card style={{ backgroundColor: "#F4F7FB" }}>
+                <View style={S.between}>
+                  <View style={{ flex: 1, gap: 3 }}>
+                    <Text style={S.h3}>New recording ready</Text>
+                    <Txt style={S.small}>
+                      {formatRecordingDuration(localRecordingDurationMs)} • not uploaded yet
+                    </Txt>
+                  </View>
+                  <Icon name="musical-notes-outline" color={C.purple} />
+                </View>
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View style={{ flex: 1 }}>
+                    <Button
+                      title={playerStatus.playing ? "Pause" : "Play"}
+                      secondary
+                      disabled={Boolean(busy)}
+                      onPress={() => {
+                        if (playerStatus.playing) {
+                          audioPlayer.pause();
+                        } else {
+                          playLocalRecording();
+                        }
+                      }}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Button
+                      title={
+                        busy === "upload-audio"
+                          ? "Saving securely…"
+                          : "Save securely"
+                      }
+                      icon="cloud-upload-outline"
+                      disabled={Boolean(busy)}
+                      onPress={() => void saveRecordingSecurely()}
+                    />
+                  </View>
+                </View>
+                <Button
+                  title="Discard local recording"
+                  secondary
+                  disabled={Boolean(busy)}
+                  onPress={() => {
+                    audioPlayer.pause();
+                    setLocalRecordingUri(null);
+                    setLocalRecordingDurationMs(0);
+                    setMessage("Local recording discarded.");
+                  }}
+                />
+              </Card>
+            )}
+
+            {selected.visit.audioPath && (
+              <Card style={{ backgroundColor: "#EFF6F3" }}>
+                <View style={S.between}>
+                  <View style={{ flex: 1, gap: 3 }}>
+                    <Text style={S.h3}>Secure recording saved</Text>
+                    <Txt style={S.small}>
+                      {formatRecordingDuration(selected.visit.audioDurationMs)}
+                      {selected.visit.audioSizeBytes
+                        ? ` • ${(selected.visit.audioSizeBytes / 1024 / 1024).toFixed(1)} MB`
+                        : ""}
+                    </Txt>
+                  </View>
+                  <Icon name="lock-closed-outline" color={C.green} />
+                </View>
+
+                <View
+                  style={{
+                    borderRadius: 16,
+                    backgroundColor: "#FFFFFFB8",
+                    padding: 12,
+                    gap: 3,
+                  }}
+                >
+                  <Text style={S.h3}>Transcription status</Text>
+                  <Txt style={S.small}>
+                    {selected.visit.transcriptionStatus === "completed"
+                      ? "Transcript ready — review it below."
+                      : selected.visit.transcriptionStatus === "processing"
+                        ? "Transcription is processing."
+                        : selected.visit.transcriptionStatus === "failed"
+                          ? selected.visit.transcriptionError ||
+                            "Automatic transcription failed."
+                          : "Ready for transcription."}
+                  </Txt>
+                </View>
+
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View style={{ flex: 1 }}>
+                    <Button
+                      title={playerStatus.playing ? "Pause audio" : "Play audio"}
+                      secondary
+                      disabled={Boolean(busy)}
+                      onPress={() => {
+                        if (playerStatus.playing) {
+                          audioPlayer.pause();
+                        } else {
+                          void playStoredRecording();
+                        }
+                      }}
+                    />
+                  </View>
+                  {!readOnly && (
+                    <View style={{ flex: 1 }}>
+                      <Button
+                        title={
+                          busy === "transcribe"
+                            ? "Transcribing…"
+                            : selected.visit.transcriptionStatus === "completed"
+                              ? "Transcribe again"
+                              : "Create transcript"
+                        }
+                        icon="document-text-outline"
+                        disabled={
+                          Boolean(busy) ||
+                          selected.visit.transcriptionStatus === "processing"
+                        }
+                        onPress={() => void transcribeRecording()}
+                      />
+                    </View>
+                  )}
+                </View>
+
+                {!readOnly && (
+                  <Button
+                    title="Delete stored recording"
+                    secondary
+                    disabled={Boolean(busy)}
+                    onPress={() => void removeStoredRecording()}
+                  />
+                )}
+              </Card>
+            )}
+
             <Field
               label="Quick visit notes"
               value={rawNotes}
