@@ -354,7 +354,7 @@ function EmptyDirectoryArt() {
 export function CareContactsScreen() {
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const viewer = state.accessRole === "viewer";
+  const viewer =\n    state.accessRole === "viewer" || state.accessRole === "patient";
   const [contacts, setContacts] = useState<CareContact[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<"all" | CareContactCategory>("all");
