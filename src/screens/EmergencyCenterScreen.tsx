@@ -406,6 +406,83 @@ export function EmergencyCenterScreen() {
     [data],
   );
 
+  const criticalSummary = useMemo(() => {
+    if (data.profile) {
+      return buildEmergencyOfflineSummary(careRecipientId, data);
+    }
+    return offlineSummary;
+  }, [careRecipientId, data, offlineSummary]);
+
+  async function createShare() {
+    if (!careRecipientId || readOnly || busy) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      const created = await createEmergencyShareLink({
+        careRecipientId,
+        expiresInMinutes: shareMinutes,
+      });
+      setCreatedShare(created);
+      setShareLinks(await loadEmergencyShareLinks(careRecipientId));
+      setMessage(
+        `Temporary emergency link created. It expires ${new Date(
+          created.expiresAt,
+        ).toLocaleString()}.`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not create the temporary emergency link.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revokeShare(shareId: string) {
+    if (readOnly || busy) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      await revokeEmergencyShareLink(shareId);
+      if (createdShare?.id === shareId) setCreatedShare(null);
+      if (careRecipientId) {
+        setShareLinks(await loadEmergencyShareLinks(careRecipientId));
+      }
+      setMessage("Temporary emergency link revoked.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not revoke the temporary emergency link.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function exportOnePageSummary() {
+    if (!criticalSummary || busy) return;
+    setBusy(true);
+    setMessage("");
+    try {
+      await printHtmlResource(
+        "Emergency Care Summary",
+        buildEmergencyOnePageHtml(criticalSummary),
+      );
+      setMessage("Emergency one-page summary prepared for printing or PDF sharing.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not create the emergency summary.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function save(markReviewed = false) {
     if (!careRecipientId || readOnly || busy) return;
 
