@@ -40,6 +40,14 @@ try {
 }
 
 const vulnerabilities = report.vulnerabilities ?? {};
+
+function advisoryId(value) {
+  const text = [value?.url, value?.name, value?.title]
+    .filter(Boolean)
+    .join(" ");
+  return [...exceptions.keys()].find((id) => text.includes(id)) ?? null;
+}
+
 function collectAdvisoryIds(name, trail = new Set()) {
   if (trail.has(name)) return new Set();
 
