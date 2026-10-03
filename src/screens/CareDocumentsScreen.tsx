@@ -570,7 +570,13 @@ export function CareDocumentsScreen() {
               <CategoryChoices
                 value={uploadCategory}
                 disabled={busy !== null}
-                onChange={setUploadCategory}
+                onChange={(category) => {
+                  setUploadCategory(category);
+                  if (category === "advance_directive") {
+                    setUploadBiometric(true);
+                    setUploadKey(true);
+                  }
+                }}
               />
 
               <Field
@@ -606,6 +612,54 @@ export function CareDocumentsScreen() {
                 onPress={() => setUploadKey((value) => !value)}
               />
 
+              <Card style={{ backgroundColor: "#F4EFF8" }}>
+                <View style={S.between}>
+                  <View style={{ flex: 1, gap: 4, paddingRight: 10 }}>
+                    <Text style={S.h3}>Biometric document lock</Text>
+                    <Txt style={S.small}>
+                      {Platform.OS === "web"
+                        ? "Protected files can only be opened from the mobile app using Face ID, Touch ID, or fingerprint."
+                        : "Require Face ID, Touch ID, or fingerprint before this file can be opened."}
+                    </Txt>
+                  </View>
+                  <Pressable
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: uploadBiometric }}
+                    disabled={busy !== null}
+                    onPress={() =>
+                      setUploadBiometric((value) => !value)
+                    }
+                    style={({ pressed }) => ({
+                      minWidth: 66,
+                      minHeight: 42,
+                      borderRadius: 21,
+                      paddingHorizontal: 10,
+                      backgroundColor: uploadBiometric ? C.purple : "#E6E0E8",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: pressed ? 0.7 : 1,
+                    })}
+                  >
+                    <Text
+                      style={[
+                        S.small,
+                        {
+                          color: uploadBiometric ? C.white : C.deep,
+                          fontFamily: "DMSans_600SemiBold",
+                        },
+                      ]}
+                    >
+                      {uploadBiometric ? "ON" : "OFF"}
+                    </Text>
+                  </Pressable>
+                </View>
+                {uploadCategory === "advance_directive" && (
+                  <Txt style={S.small}>
+                    Advance directives are protected by default.
+                  </Txt>
+                )}
+              </Card>
+
               <Button
                 title={
                   busy === "upload"
@@ -636,10 +690,14 @@ export function CareDocumentsScreen() {
       {readOnly && (
         <Card style={{ backgroundColor: C.lavender }}>
           <Icon name="eye-outline" />
-          <Text style={S.h3}>Viewer access is read-only.</Text>
+          <Text style={S.h3}>
+            {state.accessRole === "patient"
+              ? "Care Recipient access is read-only."
+              : "Family Member access is read-only."}
+          </Text>
           <Txt>
-            You can securely preview and download documents, but cannot upload,
-            rename, recategorize, or delete them.
+            You can securely view shared documents. Protected legal files still
+            require device biometric unlock on mobile.
           </Txt>
         </Card>
       )}
@@ -654,7 +712,13 @@ export function CareDocumentsScreen() {
             <CategoryChoices
               value={editCategory}
               disabled={busy !== null}
-              onChange={setEditCategory}
+              onChange={(category) => {
+                setEditCategory(category);
+                if (category === "advance_directive") {
+                  setEditBiometric(true);
+                  setEditKey(true);
+                }
+              }}
             />
             <Field
               label="Source / provider (optional)"
@@ -687,6 +751,17 @@ export function CareDocumentsScreen() {
               disabled={busy !== null}
               icon={editKey ? "star" : "star-outline"}
               onPress={() => setEditKey((value) => !value)}
+            />
+            <Button
+              title={
+                editBiometric
+                  ? "Biometric lock enabled"
+                  : "Require biometric unlock"
+              }
+              secondary
+              disabled={busy !== null}
+              icon={editBiometric ? "finger-print-outline" : "lock-open-outline"}
+              onPress={() => setEditBiometric((value) => !value)}
             />
             <Button
               title="Save document details"
@@ -811,6 +886,12 @@ export function CareDocumentsScreen() {
                             <Text style={S.small}>Key document</Text>
                           </View>
                         )}
+                        {document.requiresBiometric && (
+                          <View style={[S.pill, { backgroundColor: "#F0E9F6" }]}>
+                            <Icon name="finger-print-outline" size={13} color={C.purple} />
+                            <Text style={S.small}>Biometric lock</Text>
+                          </View>
+                        )}
                         {document.archivedAt && (
                           <View style={[S.pill, { backgroundColor: "#EFECEF" }]}>
                             <Text style={S.small}>Archived</Text>
@@ -867,13 +948,25 @@ export function CareDocumentsScreen() {
 
               {manageable && (
                 <>
-                  <Button
-                    title="Share secure 10-minute link"
-                    secondary
-                    icon="share-outline"
-                    disabled={busy !== null}
-                    onPress={() => void shareDocument(document)}
-                  />
+                  {!document.requiresBiometric && (
+                    <Button
+                      title="Share secure 10-minute link"
+                      secondary
+                      icon="share-outline"
+                      disabled={busy !== null}
+                      onPress={() => void shareDocument(document)}
+                    />
+                  )}
+                  {document.requiresBiometric && (
+                    <Card style={{ backgroundColor: "#F7F1FA" }}>
+                      <Icon name="finger-print-outline" color={C.purple} />
+                      <Text style={S.h3}>Sensitive legal document</Text>
+                      <Txt style={S.small}>
+                        External share links are disabled. Open the file on mobile
+                        and unlock it with device biometrics.
+                      </Txt>
+                    </Card>
+                  )}
                   <Button
                     title="Edit details"
                     secondary
@@ -910,8 +1003,10 @@ export function CareDocumentsScreen() {
         <Text style={S.h3}>Private by design</Text>
         <Txt>
           Care Vault files are never public. EnVizion creates short-lived secure
-          links only when an authorized care-team member previews or downloads
-          a document, and that access is recorded in the care audit history.
+          links only for authorized access, and that access is recorded in the
+          care audit history. Sensitive legal documents can require Face ID,
+          Touch ID, or fingerprint unlock and cannot be exposed through external
+          share links.
         </Txt>
       </Card>
     </Page>
