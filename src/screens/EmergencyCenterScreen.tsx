@@ -10,7 +10,24 @@ import {
   emergencyProfileCompleteness,
   emergencyReviewLabel,
 } from "../emergencyCenterHelpers";
+import {
+  buildEmergencyOfflineSummary,
+  buildEmergencyOnePageHtml,
+  cacheEmergencyOfflineSummary,
+  emergencyCodeStatusLabel,
+  emergencyPoaStatusLabel,
+  loadEmergencyOfflineSummary,
+  type EmergencyOfflineSummary,
+} from "../emergencyOffline";
+import {
+  createEmergencyShareLink,
+  loadEmergencyShareLinks,
+  revokeEmergencyShareLink,
+  type CreatedEmergencyShareLink,
+  type EmergencyShareLink,
+} from "../emergencyShare";
 import { medicationReconciliationLabel } from "../medicationManagementHelpers";
+import { printHtmlResource } from "../printing";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
 import {
@@ -266,13 +283,20 @@ export function EmergencyCenterScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [data, setData] = useState<EmergencyCenterData>(emptyData);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [offlineSummary, setOfflineSummary] =
+    useState<EmergencyOfflineSummary | null>(null);
+  const [shareLinks, setShareLinks] = useState<EmergencyShareLink[]>([]);
+  const [createdShare, setCreatedShare] =
+    useState<CreatedEmergencyShareLink | null>(null);
+  const [shareMinutes, setShareMinutes] = useState(60);
 
   const [localEmergencyNumber, setLocalEmergencyNumber] = useState("");
   const [preferredHospital, setPreferredHospital] = useState("");
@@ -281,6 +305,15 @@ export function EmergencyCenterScreen() {
   const [medicalDevices, setMedicalDevices] = useState("");
   const [advanceDirectiveLocation, setAdvanceDirectiveLocation] = useState("");
   const [emergencyNotes, setEmergencyNotes] = useState("");
+  const [bloodType, setBloodType] = useState("");
+  const [primaryLanguage, setPrimaryLanguage] = useState("");
+  const [codeStatus, setCodeStatus] =
+    useState<NonNullable<EmergencyCenterData["profile"]>["codeStatus"]>("unknown");
+  const [dnrLocation, setDnrLocation] = useState("");
+  const [poaStatus, setPoaStatus] =
+    useState<NonNullable<EmergencyCenterData["profile"]>["poaStatus"]>("unknown");
+  const [poaName, setPoaName] = useState("");
+  const [poaPhone, setPoaPhone] = useState("");
 
   const applyProfile = useCallback((next: EmergencyCenterData) => {
     setData(next);
@@ -292,6 +325,13 @@ export function EmergencyCenterScreen() {
     setMedicalDevices(profile?.medicalDevices ?? "");
     setAdvanceDirectiveLocation(profile?.advanceDirectiveLocation ?? "");
     setEmergencyNotes(profile?.emergencyNotes ?? "");
+    setBloodType(profile?.bloodType ?? "");
+    setPrimaryLanguage(profile?.primaryLanguage ?? "");
+    setCodeStatus(profile?.codeStatus ?? "unknown");
+    setDnrLocation(profile?.dnrLocation ?? "");
+    setPoaStatus(profile?.poaStatus ?? "unknown");
+    setPoaName(profile?.poaName ?? "");
+    setPoaPhone(profile?.poaPhone ?? "");
   }, []);
 
   const refresh = useCallback(async () => {
@@ -303,17 +343,37 @@ export function EmergencyCenterScreen() {
 
     setLoading(true);
     try {
-      applyProfile(await loadEmergencyCenterData(careRecipientId));
+      const next = await loadEmergencyCenterData(careRecipientId);
+      applyProfile(next);
+      const cached = await cacheEmergencyOfflineSummary(careRecipientId, next);
+      setOfflineSummary(cached);
+
+      if (!readOnly) {
+        try {
+          setShareLinks(await loadEmergencyShareLinks(careRecipientId));
+        } catch {
+          setShareLinks([]);
+        }
+      } else {
+        setShareLinks([]);
+      }
+
+      setMessage("");
     } catch (error) {
+      const cached = await loadEmergencyOfflineSummary(careRecipientId);
+      setOfflineSummary(cached);
+      setShareLinks([]);
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not load emergency information.",
+        cached
+          ? "You appear to be offline. Showing the last securely cached emergency snapshot."
+          : error instanceof Error
+            ? error.message
+            : "We could not load emergency information.",
       );
     } finally {
       setLoading(false);
     }
-  }, [applyProfile, careRecipientId]);
+  }, [applyProfile, careRecipientId, readOnly]);
 
   useEffect(() => {
     void refresh();
@@ -362,6 +422,13 @@ export function EmergencyCenterScreen() {
         medicalDevices,
         advanceDirectiveLocation,
         emergencyNotes,
+        bloodType,
+        primaryLanguage,
+        codeStatus,
+        dnrLocation,
+        poaStatus,
+        poaName,
+        poaPhone,
         markReviewed,
       });
       setEditing(false);
