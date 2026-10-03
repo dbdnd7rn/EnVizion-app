@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Linking, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
+import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import {
   loadEmergencyCenterData,
   saveEmergencyProfile,
@@ -45,6 +46,220 @@ async function callNumber(value: string) {
   const normalized = value.replace(/[^+0-9*#]/g, "");
   if (!normalized) throw new Error("No phone number is recorded.");
   await Linking.openURL("tel:" + normalized);
+}
+
+function EmergencyHeroArt() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 230 190" accessibilityElementsHidden>
+      <Defs>
+        <LinearGradient id="kitBody" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" />
+          <Stop offset="1" stopColor="#DDD0F8" />
+        </LinearGradient>
+        <LinearGradient id="kitEdge" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#A66BF0" />
+          <Stop offset="1" stopColor="#6235B6" />
+        </LinearGradient>
+        <LinearGradient id="cross" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FF7892" />
+          <Stop offset="1" stopColor="#F04462" />
+        </LinearGradient>
+      </Defs>
+
+      <Circle cx="126" cy="91" r="84" fill="#F2EAFF" />
+      <Circle cx="186" cy="45" r="40" fill="#E3D4FF" opacity={0.88} />
+      <Ellipse cx="45" cy="96" rx="35" ry="56" fill="#EFE7FF" transform="rotate(-28 45 96)" />
+      <Ellipse cx="194" cy="137" rx="31" ry="56" fill="#D9C8FA" transform="rotate(28 194 137)" />
+
+      <G transform="translate(71 42) rotate(7 59 62)">
+        <Rect x="5" y="8" width="116" height="108" rx="25" fill="#6540B0" opacity={0.14} />
+        <Rect x="0" y="0" width="116" height="108" rx="25" fill="url(#kitBody)" stroke="#C8B5EB" strokeWidth="2" />
+        <Rect x="32" y="-14" width="52" height="29" rx="12" fill="url(#kitEdge)" />
+        <Rect x="43" y="-7" width="30" height="14" rx="7" fill="#7F52C8" />
+        <Path d="M49 28H67V45H84V63H67V80H49V63H32V45H49Z" fill="url(#cross)" />
+        <Path d="M84 72C84 59 94 50 106 50C118 50 127 59 127 72V98H84V72Z" fill="#6D40BE" />
+        <Path d="M101 60H110V70H120V79H110V89H101V79H92V70H101Z" fill="#F6F0FF" />
+      </G>
+
+      <Path d="M32 154C46 137 55 123 64 107" stroke="#D1BCEE" strokeWidth="5" strokeLinecap="round" />
+      <Path d="M207 158C199 137 193 121 180 108" stroke="#CAB4EC" strokeWidth="5" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function SmallStatusCard({
+  icon,
+  eyebrow,
+  value,
+  accent,
+  background,
+}: {
+  icon: string;
+  eyebrow: string;
+  value: string;
+  accent: string;
+  background: string;
+}) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        minHeight: 124,
+        borderRadius: 24,
+        padding: 15,
+        backgroundColor: background,
+        borderWidth: 1,
+        borderColor: "#EAE4F2",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+      }}
+    >
+      <View
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: "#FFFFFFB8",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon name={icon} size={24} color={accent} />
+      </View>
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={[S.eyebrow, { color: accent, letterSpacing: 1.8 }]}>{eyebrow}</Text>
+        <Text
+          numberOfLines={2}
+          style={{
+            fontFamily: "DMSans_700Bold",
+            fontSize: 18,
+            lineHeight: 22,
+            color: C.ink,
+          }}
+        >
+          {value}
+        </Text>
+        <View style={{ height: 7, borderRadius: 4, backgroundColor: "#FFFFFF9C", overflow: "hidden", marginTop: 4 }}>
+          <View style={{ width: "18%", height: 7, borderRadius: 4, backgroundColor: accent + "30" }} />
+        </View>
+      </View>
+      <Icon name="chevron-forward-outline" size={18} color={accent} />
+    </View>
+  );
+}
+
+function ContactTile({
+  title,
+  icon,
+  accent,
+  background,
+  dashed,
+  onPress,
+}: {
+  title: string;
+  icon: string;
+  accent: string;
+  background: string;
+  dashed?: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flex: 1,
+        minHeight: 128,
+        borderRadius: 22,
+        backgroundColor: background,
+        borderWidth: dashed ? 1.5 : 0,
+        borderStyle: dashed ? "dashed" : "solid",
+        borderColor: dashed ? "#B98AE3" : "transparent",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+        opacity: pressed ? 0.72 : 1,
+      })}
+    >
+      <View
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: "#FFFFFFA8",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon name={icon} size={24} color={accent} />
+      </View>
+      <Text
+        style={[
+          S.h3,
+          { fontSize: 13, lineHeight: 17, textAlign: "center", color: accent },
+        ]}
+      >
+        {title}
+      </Text>
+    </Pressable>
+  );
+}
+
+function ProfileTile({
+  title,
+  value,
+  icon,
+  accent,
+  background,
+  onPress,
+}: {
+  title: string;
+  value: string;
+  icon: string;
+  accent: string;
+  background: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        width: "48.5%",
+        minHeight: 104,
+        borderRadius: 22,
+        backgroundColor: background,
+        padding: 14,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 11,
+        opacity: pressed ? 0.72 : 1,
+      })}
+    >
+      <View
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          backgroundColor: "#FFFFFFA8",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon name={icon} size={23} color={accent} />
+      </View>
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={[S.h3, { fontSize: 13, lineHeight: 17 }]}>{title}</Text>
+        <Text style={[S.small, { color: C.muted }]} numberOfLines={1}>
+          {value || "Not set"}
+        </Text>
+      </View>
+      <Icon name="chevron-forward-outline" size={17} color={accent} />
+    </Pressable>
+  );
 }
 
 export function EmergencyCenterScreen() {
@@ -180,63 +395,266 @@ export function EmergencyCenterScreen() {
 
   return (
     <Page>
-      <Heading
-        eyebrow="EMERGENCY INFORMATION CENTER"
-        title="Keep the information someone may need quickly in one place."
-        body="This is a preparedness record for the care team. EnVizion does not monitor symptoms or contact emergency services automatically."
-      />
+      <View
+        style={{
+          minHeight: 58,
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 2,
+        }}
+      >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          onPress={() => n.goBack()}
+          style={({ pressed }) => ({
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#F6F0FD",
+            opacity: pressed ? 0.68 : 1,
+          })}
+        >
+          <Icon name="chevron-back-outline" size={25} color="#241B53" />
+        </Pressable>
 
-      <Card style={{ backgroundColor: C.redBg, borderColor: "#EAC9C9" }}>
-        <Icon name="alert-circle" color={C.rose} size={34} />
-        <Text style={[S.h2, { color: "#963845" }]}>
-          For a possible medical emergency, do not wait on the app.
+        <Text
+          accessibilityRole="header"
+          style={{
+            fontFamily: "DMSans_700Bold",
+            fontSize: 19,
+            lineHeight: 24,
+            color: C.ink,
+          }}
+        >
+          Emergency information
         </Text>
-        <Txt>
-          Call the appropriate local emergency service and follow dispatcher
-          instructions. The information below is caregiver-entered and should
-          be checked against the healthcare team’s records.
-        </Txt>
-        {data.profile?.localEmergencyNumber ? (
-          <Button
-            title={"Call " + data.profile.localEmergencyNumber}
-            icon="call-outline"
-            onPress={async () => {
-              try {
-                await callNumber(data.profile!.localEmergencyNumber);
-              } catch (error) {
-                setMessage(
-                  error instanceof Error
-                    ? error.message
-                    : "Use your phone to call the local emergency number.",
-                );
-              }
-            }}
-          />
-        ) : (
-          <Txt style={S.small}>
-            No local emergency number has been saved for this care profile yet.
-          </Txt>
-        )}
-      </Card>
 
-      <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-        <Card style={{ flex: 1, minWidth: 125 }}>
-          <Text style={S.eyebrow}>PREPAREDNESS</Text>
-          <Text style={S.h2}>
-            {completeness.completed}/{completeness.total}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Emergency information help"
+          onPress={() => n.navigate("Resources")}
+          style={({ pressed }) => ({
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#F6F0FD",
+            opacity: pressed ? 0.68 : 1,
+          })}
+        >
+          <Icon name="help-circle-outline" size={25} color="#5144B8" />
+        </Pressable>
+      </View>
+
+      <View
+        style={{
+          minHeight: 300,
+          borderRadius: 30,
+          overflow: "hidden",
+          padding: 22,
+          paddingRight: 155,
+          justifyContent: "center",
+          borderWidth: 1,
+          borderColor: "#ECE4F8",
+          shadowColor: "#5B3470",
+          shadowOpacity: 0.06,
+          shadowRadius: 22,
+          shadowOffset: { width: 0, height: 10 },
+          elevation: 3,
+        }}
+      >
+        <Svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 420 300"
+          preserveAspectRatio="none"
+          style={{ position: "absolute", inset: 0 }}
+          accessibilityElementsHidden
+        >
+          <Defs>
+            <LinearGradient id="emergencyHeroBg" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor="#FBF8FF" />
+              <Stop offset="0.55" stopColor="#F3ECFF" />
+              <Stop offset="1" stopColor="#EADFFF" />
+            </LinearGradient>
+          </Defs>
+          <Rect x="0" y="0" width="420" height="300" rx="30" fill="url(#emergencyHeroBg)" />
+          <Circle cx="374" cy="54" r="85" fill="#FFFFFF" opacity={0.42} />
+          <Circle cx="390" cy="238" r="96" fill="#DCCAF9" opacity={0.42} />
+        </Svg>
+
+        <View style={{ gap: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+            <View
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 13,
+                backgroundColor: "#E7D6FF",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="shield-checkmark-outline" size={22} color="#7B3ACA" />
+            </View>
+            <Text
+              style={[
+                S.eyebrow,
+                { color: "#7432AF", letterSpacing: 1.8, fontSize: 10.5 },
+              ]}
+            >
+              EMERGENCY INFORMATION
+            </Text>
+          </View>
+
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 39,
+              lineHeight: 43,
+              letterSpacing: -1.15,
+              color: "#17143D",
+              maxWidth: 265,
+            }}
+          >
+            Be prepared{"\n"}when{" "}
+            <Text style={{ color: "#8C3ED1" }}>it matters.</Text>
           </Text>
-          <Txt style={S.small}>core items recorded</Txt>
-        </Card>
-        <Card style={{ flex: 1, minWidth: 170 }}>
-          <Text style={S.eyebrow}>LAST REVIEW</Text>
-          <Text style={[S.h3, { fontSize: 14 }]}>
-            {emergencyReviewLabel(data.profile?.lastReviewedAt)}
+
+          <View style={{ flexDirection: "row", gap: 9, marginTop: 4 }}>
+            {[
+              ["pulse-outline", "#E83C64", "#FFE5EC"],
+              ["business-outline", "#2784D8", "#E6F5FF"],
+              ["call-outline", "#7438C4", "#EFE6FF"],
+            ].map(([icon, color, bg]) => (
+              <View
+                key={icon}
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: bg,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name={icon} size={22} color={color} />
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            right: 0,
+            top: 40,
+            width: 210,
+            height: 192,
+          }}
+        >
+          <EmergencyHeroArt />
+        </View>
+      </View>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Emergency alert"
+        onPress={async () => {
+          if (data.profile?.localEmergencyNumber) {
+            try {
+              await callNumber(data.profile.localEmergencyNumber);
+            } catch (error) {
+              setMessage(error instanceof Error ? error.message : "Could not start the call.");
+            }
+          } else if (!readOnly) {
+            setEditing(true);
+          }
+        }}
+        style={({ pressed }) => ({
+          minHeight: 110,
+          borderRadius: 26,
+          borderWidth: 1,
+          borderColor: "#F3CBD3",
+          backgroundColor: "#FFF0F3",
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 18,
+          gap: 15,
+          opacity: pressed ? 0.74 : 1,
+        })}
+      >
+        <View
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: "#E93D62",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 27,
+              lineHeight: 30,
+              color: C.white,
+            }}
+          >
+            !
           </Text>
-        </Card>
+        </View>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text
+            style={{
+              fontFamily: "DMSans_700Bold",
+              fontSize: 17,
+              lineHeight: 22,
+              color: "#C8284C",
+            }}
+          >
+            Emergency alert
+          </Text>
+          <Text
+            style={{
+              fontFamily: "DMSans_400Regular",
+              fontSize: 14,
+              lineHeight: 19,
+              color: "#B64E64",
+            }}
+          >
+            Know what to do
+          </Text>
+        </View>
+        <Icon name="chevron-forward-outline" size={23} color="#D63A56" />
+      </Pressable>
+
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <SmallStatusCard
+          icon="document-text-outline"
+          eyebrow="PREPAREDNESS"
+          value={completeness.completed + "/" + completeness.total}
+          accent="#7B3ACA"
+          background="#F7F1FF"
+        />
+        <SmallStatusCard
+          icon="time-outline"
+          eyebrow="LAST REVIEW"
+          value={emergencyReviewLabel(data.profile?.lastReviewedAt)}
+          accent="#3265E8"
+          background="#F2F6FF"
+        />
       </View>
 
       {Boolean(message) && (
-        <Card>
+        <Card style={{ borderRadius: 22 }}>
           <Text accessibilityRole="alert" style={S.body}>
             {message}
           </Text>
@@ -244,260 +662,332 @@ export function EmergencyCenterScreen() {
       )}
 
       {loading ? (
-        <Card>
+        <Card style={{ borderRadius: 24 }}>
           <ActivityIndicator color={C.purple} />
           <Txt>Loading emergency information…</Txt>
         </Card>
       ) : (
         <>
-          <Section title="Quick contacts" />
-          <Card>
-            <Text style={S.h3}>
-              {data.recipient.emergencyContactName ||
-                "Primary emergency contact not recorded"}
+          <View style={S.between}>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 25,
+                lineHeight: 31,
+                color: C.ink,
+              }}
+            >
+              Emergency contacts
             </Text>
-            <Txt style={S.small}>
-              {data.recipient.emergencyContactPhone || "No phone recorded"}
-            </Txt>
-            {Boolean(data.recipient.emergencyContactPhone) && (
-              <Button
-                title="Call primary emergency contact"
-                secondary
-                icon="call-outline"
-                onPress={() =>
-                  void callNumber(data.recipient.emergencyContactPhone).catch(
-                    (error) =>
-                      setMessage(
-                        error instanceof Error
-                          ? error.message
-                          : "Could not start the call.",
-                      ),
-                  )
-                }
-              />
-            )}
-            <Button
-              title="Manage care contacts"
-              secondary
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => n.navigate("CareContacts")}
+              style={({ pressed }) => ({
+                minHeight: 46,
+                borderRadius: 23,
+                borderWidth: 1.5,
+                borderColor: "#B36CE2",
+                paddingHorizontal: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <Icon name="add-outline" size={18} color="#823CB9" />
+              <Text style={[S.h3, { fontSize: 12.5, color: "#823CB9" }]}>Add contact</Text>
+            </Pressable>
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 9 }}>
+            <ContactTile
+              title={data.recipient.emergencyContactName || "Add primary contact"}
+              icon="add-outline"
+              accent="#7D35B5"
+              background="#FCFAFF"
+              dashed
               onPress={() => n.navigate("CareContacts")}
             />
-          </Card>
+            <ContactTile
+              title="Care team"
+              icon="people-outline"
+              accent="#7D35B5"
+              background="#F4ECFF"
+              onPress={() => n.navigate("CareContacts")}
+            />
+            <ContactTile
+              title="Family"
+              icon="people-circle-outline"
+              accent="#238ED0"
+              background="#EEF7FF"
+              onPress={() => n.navigate("CareContacts")}
+            />
+          </View>
 
-          {data.contacts.slice(0, 5).map((contact) => (
-            <Card key={contact.id}>
-              <Text style={S.h3}>{contact.providerName}</Text>
-              <Txt style={S.small}>
-                {[contact.specialty, contact.organizationName, contact.phone]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </Txt>
-              <Button
-                title="Call"
-                secondary
-                icon="call-outline"
-                onPress={() =>
-                  void callNumber(contact.phone).catch((error) =>
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : "Could not start the call.",
-                    ),
-                  )
-                }
-              />
-            </Card>
-          ))}
+          <View style={{ gap: 7 }}>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 25,
+                lineHeight: 31,
+                color: C.ink,
+              }}
+            >
+              Medication & transition
+            </Text>
 
-          <Section title="Emergency profile" />
-          {!editing ? (
-            <Card style={{ backgroundColor: C.lavender }}>
-              <Text style={S.h3}>
-                Preferred hospital / facility
-              </Text>
-              <Txt>{data.profile?.preferredHospital || "Not recorded"}</Txt>
-
-              <Text style={S.h3}>Known allergies</Text>
-              <Txt>{data.profile?.allergies || "Not recorded"}</Txt>
-
-              <Text style={S.h3}>Important conditions</Text>
-              <Txt>{data.profile?.importantConditions || "Not recorded"}</Txt>
-
-              <Text style={S.h3}>Medical devices / equipment</Text>
-              <Txt>{data.profile?.medicalDevices || "Not recorded"}</Txt>
-
-              <Text style={S.h3}>Advance directive / document location</Text>
-              <Txt>
-                {data.profile?.advanceDirectiveLocation || "Not recorded"}
-              </Txt>
-
-              <Text style={S.h3}>Emergency notes</Text>
-              <Txt>{data.profile?.emergencyNotes || "Not recorded"}</Txt>
-
-              {!readOnly && (
-                <>
-                  <Button
-                    title="Edit emergency information"
-                    secondary
-                    icon="create-outline"
-                    onPress={() => setEditing(true)}
-                  />
-                  <Button
-                    title={busy ? "Saving review…" : "Confirm information reviewed"}
-                    disabled={busy}
-                    icon="checkmark-done-outline"
-                    onPress={() => void save(true)}
-                  />
-                </>
-              )}
-            </Card>
-          ) : (
-            <Card>
-              <Field
-                label="Local emergency number"
-                value={localEmergencyNumber}
-                onChange={setLocalEmergencyNumber}
-              />
-              <Field
-                label="Preferred hospital / facility"
-                value={preferredHospital}
-                onChange={setPreferredHospital}
-              />
-              <Field
-                label="Known allergies"
-                value={allergies}
-                onChange={setAllergies}
-                multiline
-              />
-              <Field
-                label="Important conditions"
-                value={importantConditions}
-                onChange={setImportantConditions}
-                multiline
-              />
-              <Field
-                label="Medical devices / equipment"
-                value={medicalDevices}
-                onChange={setMedicalDevices}
-                multiline
-              />
-              <Field
-                label="Advance directive / document location"
-                value={advanceDirectiveLocation}
-                onChange={setAdvanceDirectiveLocation}
-                multiline
-              />
-              <Field
-                label="Emergency notes"
-                value={emergencyNotes}
-                onChange={setEmergencyNotes}
-                multiline
-              />
-              <Button
-                title={busy ? "Saving…" : "Save emergency information"}
-                disabled={busy}
-                onPress={() => void save(false)}
-              />
-              <Button
-                title="Cancel"
-                secondary
-                disabled={busy}
-                onPress={() => {
-                  setEditing(false);
-                  applyProfile(data);
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => n.navigate("Medications")}
+              style={({ pressed }) => ({
+                minHeight: 110,
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: "#E9E3EF",
+                backgroundColor: C.white,
+                paddingHorizontal: 16,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 14,
+                opacity: pressed ? 0.74 : 1,
+              })}
+            >
+              <View
+                style={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 27,
+                  backgroundColor: "#FFE7EE",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-              />
-            </Card>
-          )}
-
-          <Section title="Medication & transition context" />
-          <Card>
-            <View style={S.between}>
-              <View style={{ flex: 1 }}>
-                <Text style={S.h3}>Current medication list</Text>
+              >
+                <Icon name="medical-outline" size={25} color="#E34168" />
+              </View>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={S.h3}>Medication list</Text>
                 <Txt style={S.small}>
-                  {data.medications.length} active medication
-                  {data.medications.length === 1 ? "" : "s"} ·{" "}
-                  {medicationReconciliationLabel(data.latestReconciliation)}
+                  {data.medications.length} active
                 </Txt>
               </View>
-              <Icon name="medical-outline" />
-            </View>
-            {data.medications.slice(0, 6).map((medication) => (
-              <Txt key={medication.id} style={S.small}>
-                • {medication.name}
-                {medication.dose ? " · " + medication.dose : ""}
-                {medication.route ? " · " + medication.route : ""}
-              </Txt>
-            ))}
-            <Button
-              title="Open medication management"
-              secondary
-              onPress={() => n.navigate("Medications")}
-            />
-          </Card>
+              <Icon name="chevron-forward-outline" size={19} color="#7D35B5" />
+            </Pressable>
+          </View>
 
-          {data.transitionPlan && (
-            <Card style={{ backgroundColor: "#FFF9F2" }}>
-              <Text style={S.h3}>Active hospital-to-home transition</Text>
-              {Boolean(data.transitionPlan.warningSigns) && (
-                <>
-                  <Text style={[S.h3, { color: C.rose }]}>
-                    Discharge-team warning signs
-                  </Text>
-                  <Txt>{data.transitionPlan.warningSigns}</Txt>
-                </>
+          <View style={{ gap: 12 }}>
+            <View style={S.between}>
+              <Text
+                accessibilityRole="header"
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 25,
+                  lineHeight: 31,
+                  color: C.ink,
+                }}
+              >
+                Emergency profile
+              </Text>
+
+              {!readOnly && (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setEditing(true)}
+                  style={({ pressed }) => ({
+                    minHeight: 44,
+                    borderRadius: 22,
+                    borderWidth: 1.5,
+                    borderColor: "#AE69DE",
+                    paddingHorizontal: 15,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 7,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Icon name="create-outline" size={17} color="#7D35B5" />
+                  <Text style={[S.h3, { fontSize: 12.5, color: "#7D35B5" }]}>Edit</Text>
+                </Pressable>
               )}
-              {Boolean(data.transitionPlan.afterHoursContact) && (
-                <Txt>
-                  After-hours instructions:{" "}
-                  {data.transitionPlan.afterHoursContact}
-                </Txt>
-              )}
-              <Txt style={S.small}>
-                {data.transitionFollowUps.length} open transition follow-up
-                {data.transitionFollowUps.length === 1 ? "" : "s"}.
-              </Txt>
-              <Button
-                title="Open hospital-to-home plan"
-                secondary
-                onPress={() => n.navigate("Transition")}
-              />
-            </Card>
+            </View>
+
+            {!editing ? (
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+                <ProfileTile
+                  title="Hospital"
+                  value={data.profile?.preferredHospital || ""}
+                  icon="business-outline"
+                  accent="#2C8FD6"
+                  background="#EEF7FF"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
+                <ProfileTile
+                  title="Allergies"
+                  value={data.profile?.allergies || ""}
+                  icon="medical-outline"
+                  accent="#E34168"
+                  background="#FFF0F4"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
+                <ProfileTile
+                  title="Conditions"
+                  value={data.profile?.importantConditions || ""}
+                  icon="heart-outline"
+                  accent="#1E9D79"
+                  background="#EEF9F5"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
+                <ProfileTile
+                  title="Advance directive"
+                  value={data.profile?.advanceDirectiveLocation || ""}
+                  icon="document-text-outline"
+                  accent="#A05A4E"
+                  background="#FFF5F0"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
+              </View>
+            ) : (
+              <Card style={{ borderRadius: 26, gap: 14 }}>
+                <Field
+                  label="Local emergency number"
+                  value={localEmergencyNumber}
+                  onChange={setLocalEmergencyNumber}
+                />
+                <Field
+                  label="Preferred hospital / facility"
+                  value={preferredHospital}
+                  onChange={setPreferredHospital}
+                />
+                <Field label="Known allergies" value={allergies} onChange={setAllergies} multiline />
+                <Field
+                  label="Important conditions"
+                  value={importantConditions}
+                  onChange={setImportantConditions}
+                  multiline
+                />
+                <Field
+                  label="Medical devices / equipment"
+                  value={medicalDevices}
+                  onChange={setMedicalDevices}
+                  multiline
+                />
+                <Field
+                  label="Advance directive / document location"
+                  value={advanceDirectiveLocation}
+                  onChange={setAdvanceDirectiveLocation}
+                  multiline
+                />
+                <Field
+                  label="Emergency notes"
+                  value={emergencyNotes}
+                  onChange={setEmergencyNotes}
+                  multiline
+                />
+                <Button
+                  title={busy ? "Saving…" : "Save emergency information"}
+                  disabled={busy}
+                  onPress={() => void save(false)}
+                />
+                <Button
+                  title="Cancel"
+                  secondary
+                  disabled={busy}
+                  onPress={() => {
+                    setEditing(false);
+                    applyProfile(data);
+                  }}
+                />
+              </Card>
+            )}
+          </View>
+
+          {!readOnly && !editing && (
+            <Button
+              title={busy ? "Saving review…" : "Confirm information reviewed"}
+              icon="checkmark-done-outline"
+              disabled={busy}
+              secondary
+              onPress={() => void save(true)}
+            />
           )}
 
-          <Section title="Key documents" />
-          <Card>
-            <Txt>
-              {data.keyDocuments.length
-                ? `${data.keyDocuments.length} document${data.keyDocuments.length === 1 ? "" : "s"} marked as key for quick reference.`
-                : "No Care Vault documents are marked as key yet."}
-            </Txt>
-            {data.keyDocuments.slice(0, 6).map((document) => (
-              <Txt key={document.id} style={S.small}>
-                • {document.displayName}
-              </Txt>
-            ))}
-            <Button
-              title="Open Care Document Vault"
-              secondary
-              icon="folder-open-outline"
-              onPress={() => n.navigate("CareDocuments")}
-            />
-          </Card>
-
-          <Button
-            title="Create printable emergency packet"
-            icon="document-text-outline"
+          <Pressable
+            accessibilityRole="button"
             onPress={() => n.navigate("CarePacket")}
-          />
+            style={({ pressed }) => ({
+              minHeight: 62,
+              borderRadius: 31,
+              overflow: "hidden",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              opacity: pressed ? 0.8 : 1,
+              shadowColor: "#6B2A93",
+              shadowOpacity: 0.15,
+              shadowRadius: 14,
+              shadowOffset: { width: 0, height: 7 },
+              elevation: 3,
+            })}
+          >
+            <Svg
+              width="100%"
+              height="100%"
+              viewBox="0 0 420 62"
+              preserveAspectRatio="none"
+              style={{ position: "absolute", inset: 0 }}
+              accessibilityElementsHidden
+            >
+              <Defs>
+                <LinearGradient id="packetGradient" x1="0" y1="0" x2="1" y2="0">
+                  <Stop offset="0" stopColor="#7B2FA6" />
+                  <Stop offset="0.55" stopColor="#9A3EC9" />
+                  <Stop offset="1" stopColor="#7127A4" />
+                </LinearGradient>
+              </Defs>
+              <Rect x="0" y="0" width="420" height="62" rx="31" fill="url(#packetGradient)" />
+            </Svg>
+
+            <Icon name="document-text-outline" size={22} color={C.white} />
+            <Text
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 15,
+                color: C.white,
+              }}
+            >
+              Create printable emergency packet
+            </Text>
+            <Icon name="arrow-forward-outline" size={20} color={C.white} />
+          </Pressable>
         </>
       )}
 
-      <Txt style={S.small}>
-        Emergency information is a caregiver-entered preparedness aid. It is not
-        verified clinical data, emergency monitoring, or a substitute for
-        emergency services.
-      </Txt>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          gap: 10,
+          paddingHorizontal: 3,
+        }}
+      >
+        <Icon name="information-circle-outline" size={20} color="#68647A" />
+        <Text
+          style={{
+            flex: 1,
+            fontFamily: "DMSans_400Regular",
+            fontSize: 11.5,
+            lineHeight: 17,
+            color: "#77758B",
+          }}
+        >
+          Emergency information is a caregiver-entered preparedness aid, not emergency monitoring.
+        </Text>
+      </View>
     </Page>
   );
+}
 }
