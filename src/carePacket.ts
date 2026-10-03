@@ -173,7 +173,7 @@ export async function loadCarePacketSupportingData(
     supabase
       .from("care_emergency_profiles")
       .select(
-        "local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, last_reviewed_at",
+        "local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, blood_type, primary_language, code_status, dnr_location, poa_status, poa_name, poa_phone, last_reviewed_at",
       )
       .eq("care_recipient_id", careRecipientId)
       .maybeSingle(),
@@ -235,6 +235,13 @@ export async function loadCarePacketSupportingData(
           advanceDirectiveLocation:
             emergencyResult.data.advance_directive_location ?? "",
           emergencyNotes: emergencyResult.data.emergency_notes ?? "",
+          bloodType: emergencyResult.data.blood_type ?? "",
+          primaryLanguage: emergencyResult.data.primary_language ?? "",
+          codeStatus: emergencyResult.data.code_status ?? "unknown",
+          dnrLocation: emergencyResult.data.dnr_location ?? "",
+          poaStatus: emergencyResult.data.poa_status ?? "unknown",
+          poaName: emergencyResult.data.poa_name ?? "",
+          poaPhone: emergencyResult.data.poa_phone ?? "",
           lastReviewedAt: emergencyResult.data.last_reviewed_at ?? null,
         }
       : null;
