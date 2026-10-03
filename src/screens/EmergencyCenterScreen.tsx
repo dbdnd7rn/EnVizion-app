@@ -711,9 +711,13 @@ export function EmergencyCenterScreen() {
         accessibilityRole="button"
         accessibilityLabel="Emergency alert"
         onPress={async () => {
-          if (data.profile?.localEmergencyNumber) {
+          const emergencyNumber =
+            data.profile?.localEmergencyNumber ||
+            criticalSummary?.localEmergencyNumber ||
+            "";
+          if (emergencyNumber) {
             try {
-              await callNumber(data.profile.localEmergencyNumber);
+              await callNumber(emergencyNumber);
             } catch (error) {
               setMessage(error instanceof Error ? error.message : "Could not start the call.");
             }
@@ -796,6 +800,139 @@ export function EmergencyCenterScreen() {
           background="#F2F6FF"
         />
       </View>
+
+      {criticalSummary && (
+        <Card
+          style={{
+            borderRadius: 28,
+            backgroundColor: "#21162D",
+            borderWidth: 0,
+            gap: 14,
+          }}
+        >
+          <View style={S.between}>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={[S.eyebrow, { color: "#D8BFE3" }]}>
+                ONE-TAP EMERGENCY SUMMARY
+              </Text>
+              <Text style={[S.h2, { color: C.white, fontSize: 22 }]}>
+                {criticalSummary.recipientName}
+              </Text>
+              <Txt style={{ color: "#E6DCE9" }}>
+                {data.profile
+                  ? "Live care information"
+                  : "Offline cached emergency snapshot"}
+              </Txt>
+            </View>
+            <View
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 18,
+                backgroundColor: "#FFFFFF14",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="medical-outline" size={28} color="#F4D9FF" />
+            </View>
+          </View>
+
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            {[
+              ["Blood type", criticalSummary.bloodType || "Not set"],
+              ["Allergies", criticalSummary.allergies || "Not set"],
+              [
+                "Code status",
+                emergencyCodeStatusLabel(criticalSummary.codeStatus),
+              ],
+              [
+                "Healthcare POA",
+                emergencyPoaStatusLabel(criticalSummary.poaStatus),
+              ],
+            ].map(([label, value]) => (
+              <View
+                key={label}
+                style={{
+                  width: "48%",
+                  minHeight: 76,
+                  borderRadius: 17,
+                  backgroundColor: "#FFFFFF0F",
+                  padding: 12,
+                  gap: 4,
+                }}
+              >
+                <Text style={[S.eyebrow, { color: "#CBBAD1", fontSize: 9 }]}>
+                  {label}
+                </Text>
+                <Text
+                  style={[
+                    S.h3,
+                    { color: C.white, fontSize: 13, lineHeight: 18 },
+                  ]}
+                  numberOfLines={3}
+                >
+                  {value}
+                </Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={{ gap: 5 }}>
+            <Text style={[S.h3, { color: C.white }]}>
+              Active medications · {criticalSummary.medications.length}
+            </Text>
+            {criticalSummary.medications.slice(0, 4).map((medication, index) => (
+              <Txt
+                key={`${medication.name}-${index}`}
+                style={{ color: "#E5D9E8" }}
+              >
+                •{" "}
+                {[
+                  medication.name,
+                  medication.dose,
+                  medication.route,
+                  medication.isPrn ? "PRN" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </Txt>
+            ))}
+            {criticalSummary.medications.length > 4 && (
+              <Txt style={{ color: "#CBBAD1" }}>
+                + {criticalSummary.medications.length - 4} more medication
+                {criticalSummary.medications.length - 4 === 1 ? "" : "s"}
+              </Txt>
+            )}
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <Button
+                title="One-page PDF"
+                icon="document-text-outline"
+                secondary
+                disabled={busy}
+                onPress={() => void exportOnePageSummary()}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                title="Care Vault"
+                icon="lock-closed-outline"
+                secondary
+                disabled={busy}
+                onPress={() => n.navigate("CareDocuments")}
+              />
+            </View>
+          </View>
+
+          <Txt style={{ color: "#BFAFC4", fontSize: 10.5 }}>
+            Offline copy updated{" "}
+            {new Date(criticalSummary.cachedAt).toLocaleString()}.
+          </Txt>
+        </Card>
+      )}
 
       {Boolean(message) && (
         <Card style={{ borderRadius: 22 }}>
