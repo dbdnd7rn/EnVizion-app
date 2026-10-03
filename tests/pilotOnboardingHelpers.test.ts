@@ -170,5 +170,5 @@ test("role readiness stays explicit instead of granting admin-side clinical acce
 
   const roleStep = pilotOnboardingSteps(item).find((step) => step.id === "role");
   assert.equal(roleStep?.complete, false);
-  assert.match(roleStep?.detail ?? "", /care owner must grant/i);
+  assert.match(roleStep?.detail ?? "", /Primary Advocate must grant/i);
 });
