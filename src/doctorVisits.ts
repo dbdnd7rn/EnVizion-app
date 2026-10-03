@@ -22,6 +22,13 @@ export type DoctorVisit = {
   recordingConsentConfirmed: boolean;
   recordingConsentAt: string | null;
   recordingConsentBy: string | null;
+  audioPath: string | null;
+  audioMimeType: string | null;
+  audioSizeBytes: number | null;
+  audioDurationMs: number | null;
+  audioUploadedAt: string | null;
+  transcriptionStatus: "none" | "queued" | "processing" | "completed" | "failed";
+  transcriptionError: string | null;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
@@ -67,7 +74,7 @@ export type DoctorVisitBundle = {
 };
 
 const visitFields =
-  "id, care_recipient_id, appointment_id, physician_name, specialty, appointment_datetime, location, status, raw_notes, transcript_text, recording_consent_confirmed, recording_consent_at, recording_consent_by, created_by, created_at, updated_at";
+  "id, care_recipient_id, appointment_id, physician_name, specialty, appointment_datetime, location, status, raw_notes, transcript_text, recording_consent_confirmed, recording_consent_at, recording_consent_by, audio_path, audio_mime_type, audio_size_bytes, audio_duration_ms, audio_uploaded_at, transcription_status, transcription_error, created_by, created_at, updated_at";
 
 const questionFields =
   "id, visit_id, care_recipient_id, question_text, category, is_answered, answer_notes, position, created_by, created_at, updated_at";
@@ -90,6 +97,24 @@ function mapVisit(row: any): DoctorVisit {
     recordingConsentConfirmed: Boolean(row.recording_consent_confirmed),
     recordingConsentAt: row.recording_consent_at ?? null,
     recordingConsentBy: row.recording_consent_by ?? null,
+    audioPath: row.audio_path ?? null,
+    audioMimeType: row.audio_mime_type ?? null,
+    audioSizeBytes:
+      row.audio_size_bytes === null || row.audio_size_bytes === undefined
+        ? null
+        : Number(row.audio_size_bytes),
+    audioDurationMs:
+      row.audio_duration_ms === null || row.audio_duration_ms === undefined
+        ? null
+        : Number(row.audio_duration_ms),
+    audioUploadedAt: row.audio_uploaded_at ?? null,
+    transcriptionStatus: (row.transcription_status ?? "none") as
+      | "none"
+      | "queued"
+      | "processing"
+      | "completed"
+      | "failed",
+    transcriptionError: row.transcription_error ?? null,
     createdBy: row.created_by,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -535,4 +560,138 @@ export async function publishDoctorVisitSummary(input: {
   if (visitError) throw visitError;
 
   return { postId: post.id as string, alreadyPublished: false };
+}
+
+
+function audioExtension(mimeType: string, uri: string) {
+  const mime = mimeType.toLowerCase();
+  if (mime.includes("webm")) return "webm";
+  if (mime.includes("3gpp")) return "3gp";
+  if (mime.includes("wav")) return "wav";
+  if (mime.includes("aac")) return "aac";
+  if (mime.includes("m4a") || mime.includes("mp4")) return "m4a";
+
+  const match = uri.match(/\.([a-zA-Z0-9]+)(?:\?|$)/);
+  return match?.[1]?.toLowerCase() || "m4a";
+}
+
+export async function uploadDoctorVisitAudio(input: {
+  visit: DoctorVisit;
+  uri: string;
+  mimeType: string;
+  durationMs: number;
+}) {
+  if (!input.visit.recordingConsentConfirmed) {
+    throw new Error("Confirm recording consent before uploading visit audio.");
+  }
+
+  const response = await fetch(input.uri);
+  if (!response.ok) {
+    throw new Error("The recorded audio could not be opened.");
+  }
+
+  const bytes = await response.arrayBuffer();
+  if (!bytes.byteLength) throw new Error("The recording is empty.");
+
+  if (bytes.byteLength > 100 * 1024 * 1024) {
+    throw new Error("This recording is too large to upload.");
+  }
+
+  const extension = audioExtension(input.mimeType, input.uri);
+  const path =
+    `${input.visit.careRecipientId}/${input.visit.id}/${Date.now()}-visit.${extension}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("doctor-visit-audio")
+    .upload(path, bytes, {
+      contentType: input.mimeType || "audio/mp4",
+      upsert: false,
+    });
+
+  if (uploadError) throw uploadError;
+
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from("doctor_visits")
+    .update({
+      audio_path: path,
+      audio_mime_type: input.mimeType || "audio/mp4",
+      audio_size_bytes: bytes.byteLength,
+      audio_duration_ms: Math.max(0, Math.round(input.durationMs)),
+      audio_uploaded_at: now,
+      transcription_status: "none",
+      transcription_error: null,
+      updated_at: now,
+    })
+    .eq("id", input.visit.id)
+    .eq("care_recipient_id", input.visit.careRecipientId)
+    .select(visitFields)
+    .single();
+
+  if (error) {
+    await supabase.storage.from("doctor-visit-audio").remove([path]);
+    throw error;
+  }
+
+  if (input.visit.audioPath && input.visit.audioPath !== path) {
+    await supabase.storage
+      .from("doctor-visit-audio")
+      .remove([input.visit.audioPath])
+      .catch(() => undefined);
+  }
+
+  return mapVisit(data);
+}
+
+export async function getDoctorVisitAudioUrl(visit: DoctorVisit) {
+  if (!visit.audioPath) return null;
+
+  const { data, error } = await supabase.storage
+    .from("doctor-visit-audio")
+    .createSignedUrl(visit.audioPath, 30 * 60);
+
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+export async function deleteDoctorVisitAudio(visit: DoctorVisit) {
+  if (!visit.audioPath) return;
+
+  const { error: storageError } = await supabase.storage
+    .from("doctor-visit-audio")
+    .remove([visit.audioPath]);
+
+  if (storageError) throw storageError;
+
+  const { error } = await supabase
+    .from("doctor_visits")
+    .update({
+      audio_path: null,
+      audio_mime_type: null,
+      audio_size_bytes: null,
+      audio_duration_ms: null,
+      audio_uploaded_at: null,
+      transcription_status: "none",
+      transcription_error: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", visit.id)
+    .eq("care_recipient_id", visit.careRecipientId);
+
+  if (error) throw error;
+}
+
+export async function transcribeDoctorVisitAudio(visitId: string) {
+  const { data, error } = await supabase.functions.invoke(
+    "doctor-visit-transcribe",
+    { body: { visitId } },
+  );
+
+  if (error) throw error;
+  if (data?.error) throw new Error(String(data.error));
+  if (!data?.transcriptText) {
+    throw new Error("The transcription service returned no transcript.");
+  }
+
+  return String(data.transcriptText);
 }
