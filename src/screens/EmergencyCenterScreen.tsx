@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import QRCode from "react-native-qrcode-svg";
 import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import {
@@ -1452,6 +1453,38 @@ export function EmergencyCenterScreen() {
                     </Txt>
                   </View>
                   <Icon name="shield-checkmark-outline" color={C.green} />
+                </View>
+
+                <View
+                  accessibilityLabel="Emergency QR code for the temporary read-only emergency summary"
+                  style={{
+                    borderRadius: 22,
+                    backgroundColor: C.white,
+                    padding: 18,
+                    alignItems: "center",
+                    gap: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      padding: 12,
+                      borderRadius: 18,
+                      backgroundColor: C.white,
+                    }}
+                  >
+                    <QRCode
+                      value={createdShare.shareUrl}
+                      size={204}
+                      color="#1E1730"
+                      backgroundColor="#FFFFFF"
+                    />
+                  </View>
+                  <Text style={S.h3}>Scan at ER or triage</Text>
+                  <Txt style={[S.small, { textAlign: "center" }]}>
+                    This QR opens the same temporary read-only emergency summary.
+                    It expires automatically with the secure link and can be revoked
+                    at any time.
+                  </Txt>
                 </View>
 
                 <View
