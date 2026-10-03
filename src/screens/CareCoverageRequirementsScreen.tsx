@@ -101,7 +101,8 @@ export function CareCoverageRequirementsScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [requirements, setRequirements] = useState<
     CareCoverageRequirement[]
