@@ -22,6 +22,13 @@ export type CareEmergencyProfile = {
   medicalDevices: string;
   advanceDirectiveLocation: string;
   emergencyNotes: string;
+  bloodType: string;
+  primaryLanguage: string;
+  codeStatus: "unknown" | "full_code" | "dnr" | "dni" | "dnr_dni" | "other";
+  dnrLocation: string;
+  poaStatus: "unknown" | "none" | "on_file" | "not_on_file";
+  poaName: string;
+  poaPhone: string;
   lastReviewedBy: string | null;
   lastReviewedAt: string | null;
   createdAt: string;
@@ -54,6 +61,13 @@ function mapProfile(row: any): CareEmergencyProfile {
     medicalDevices: String(row.medical_devices ?? ""),
     advanceDirectiveLocation: String(row.advance_directive_location ?? ""),
     emergencyNotes: String(row.emergency_notes ?? ""),
+    bloodType: String(row.blood_type ?? ""),
+    primaryLanguage: String(row.primary_language ?? ""),
+    codeStatus: (row.code_status ?? "unknown") as CareEmergencyProfile["codeStatus"],
+    dnrLocation: String(row.dnr_location ?? ""),
+    poaStatus: (row.poa_status ?? "unknown") as CareEmergencyProfile["poaStatus"],
+    poaName: String(row.poa_name ?? ""),
+    poaPhone: String(row.poa_phone ?? ""),
     lastReviewedBy: row.last_reviewed_by ?? null,
     lastReviewedAt: row.last_reviewed_at ?? null,
     createdAt: String(row.created_at),
@@ -85,7 +99,7 @@ export async function loadEmergencyCenterData(
     supabase
       .from("care_emergency_profiles")
       .select(
-        "id, care_recipient_id, local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, last_reviewed_by, last_reviewed_at, created_at, updated_at",
+        "id, care_recipient_id, local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, blood_type, primary_language, code_status, dnr_location, poa_status, poa_name, poa_phone, last_reviewed_by, last_reviewed_at, created_at, updated_at",
       )
       .eq("care_recipient_id", careRecipientId)
       .maybeSingle(),
@@ -138,6 +152,13 @@ export async function saveEmergencyProfile(input: {
   medicalDevices: string;
   advanceDirectiveLocation: string;
   emergencyNotes: string;
+  bloodType: string;
+  primaryLanguage: string;
+  codeStatus: CareEmergencyProfile["codeStatus"];
+  dnrLocation: string;
+  poaStatus: CareEmergencyProfile["poaStatus"];
+  poaName: string;
+  poaPhone: string;
   markReviewed?: boolean;
 }) {
   const userId = await currentUserId();
@@ -153,6 +174,13 @@ export async function saveEmergencyProfile(input: {
     advance_directive_location:
       input.advanceDirectiveLocation.trim().slice(0, 1000) || null,
     emergency_notes: input.emergencyNotes.trim().slice(0, 3000) || null,
+    blood_type: input.bloodType.trim().slice(0, 40) || null,
+    primary_language: input.primaryLanguage.trim().slice(0, 120) || null,
+    code_status: input.codeStatus,
+    dnr_location: input.dnrLocation.trim().slice(0, 1000) || null,
+    poa_status: input.poaStatus,
+    poa_name: input.poaName.trim().slice(0, 200) || null,
+    poa_phone: input.poaPhone.trim().slice(0, 80) || null,
     ...(input.markReviewed
       ? {
           last_reviewed_by: userId,
@@ -169,7 +197,7 @@ export async function saveEmergencyProfile(input: {
       .eq("id", input.id)
       .eq("care_recipient_id", input.careRecipientId)
       .select(
-        "id, care_recipient_id, local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, last_reviewed_by, last_reviewed_at, created_at, updated_at",
+        "id, care_recipient_id, local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, blood_type, primary_language, code_status, dnr_location, poa_status, poa_name, poa_phone, last_reviewed_by, last_reviewed_at, created_at, updated_at",
       )
       .single();
 
@@ -185,7 +213,7 @@ export async function saveEmergencyProfile(input: {
       ...values,
     })
     .select(
-      "id, care_recipient_id, local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, last_reviewed_by, last_reviewed_at, created_at, updated_at",
+      "id, care_recipient_id, local_emergency_number, preferred_hospital, allergies, important_conditions, medical_devices, advance_directive_location, emergency_notes, blood_type, primary_language, code_status, dnr_location, poa_status, poa_name, poa_phone, last_reviewed_by, last_reviewed_at, created_at, updated_at",
     )
     .single();
 
