@@ -44,6 +44,7 @@ export type RootStack = {
   Handoff: undefined;
   TeamConversation: undefined;
   Appointments: undefined;
+  DoctorVisitCompanion: undefined;
   Transition: undefined;
   Specialists: undefined;
   Specialist: {
