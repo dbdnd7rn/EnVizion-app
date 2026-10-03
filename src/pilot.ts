@@ -64,6 +64,7 @@ export type PilotParticipant = {
   roles: {
     owner: number;
     caregiver: number;
+    patient: number;
     viewer: number;
     careProfileCount: number;
     ready: boolean;
