@@ -77,7 +77,7 @@ export function CareAnalyticsScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const viewer = state.accessRole === "viewer";
+  const viewer =\n    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [data, setData] = useState<CareAnalyticsData | null>(null);
