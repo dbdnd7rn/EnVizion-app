@@ -2,7 +2,7 @@ import { supabase } from "./supabase";
 
 export type LaunchPlatform = "ios" | "android" | "web";
 export type LaunchDeviceClass = "phone" | "tablet" | "desktop";
-export type LaunchRole = "owner" | "caregiver" | "viewer";
+export type LaunchRole = "owner" | "caregiver" | "patient" | "viewer";
 export type LaunchRunStatus = "in_progress" | "passed" | "failed" | "blocked";
 export type LaunchWaveStatus = "draft" | "active" | "completed" | "cancelled";
 export type RecoveryDrillType =
@@ -295,6 +295,7 @@ export async function loadLaunchAdminDashboard(): Promise<LaunchAdminDashboard> 
         roleCoverage: {
           owner: Number(item.roleCoverage?.owner ?? 0),
           caregiver: Number(item.roleCoverage?.caregiver ?? 0),
+          patient: Number(item.roleCoverage?.patient ?? 0),
           viewer: Number(item.roleCoverage?.viewer ?? 0),
         },
         activationBlockers: item.activationBlockers ?? [],
