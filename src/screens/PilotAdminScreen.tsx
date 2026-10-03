@@ -563,7 +563,7 @@ export function PilotAdminScreen() {
         <Icon name="flag-outline" size={28} />
         <Text style={S.h3}>Final launch evidence & sign-off</Text>
         <Txt>
-          Create pilot launch waves, review real Owner/Caregiver/Viewer
+          Create pilot launch waves, review real Primary Advocate/Co-Caregiver/Care Recipient/Family Member
           journeys, device QA and recovery drills, then record a controlled
           hold or approval.
         </Txt>
@@ -662,7 +662,7 @@ export function PilotAdminScreen() {
           <Txt style={S.small}>
             Activation unlocks automatically after invitation acceptance,
             first sign-in, all current participation documents, and a real
-            Owner/Caregiver/Viewer care-profile role are complete.
+            Primary Advocate/Co-Caregiver/Care Recipient/Family Member care-profile role are complete.
           </Txt>
         </Card>
       ) : (
@@ -804,8 +804,9 @@ export function PilotAdminScreen() {
                 <View style={{ flex: 1, minWidth: 130 }}>
                   <Text style={S.h3}>Care roles</Text>
                   <Txt style={S.small}>
-                    Owner {participant.roles.owner} · Caregiver{" "}
-                    {participant.roles.caregiver} · Viewer{" "}
+                    Primary Advocate {participant.roles.owner} · Co-Caregiver{" "}
+                    {participant.roles.caregiver} · Care Recipient{" "}
+                    {participant.roles.patient} · Family Member{" "}
                     {participant.roles.viewer}
                   </Txt>
                 </View>
@@ -905,7 +906,7 @@ export function PilotAdminScreen() {
                 participant.status !== "exited" && (
                   <Txt style={S.small}>
                     Care-role access is intentionally not assigned from Pilot
-                    Admin. A care owner must grant it through the normal
+                    Admin. A Primary Advocate must grant it through the normal
                     care-team invitation and consent workflow.
                   </Txt>
                 )}
