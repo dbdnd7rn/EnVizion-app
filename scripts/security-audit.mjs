@@ -40,38 +40,42 @@ try {
 }
 
 const vulnerabilities = report.vulnerabilities ?? {};
-const memo = new Map();
-
-function advisoryId(value) {
-  const text = [value?.url, value?.name, value?.title]
-    .filter(Boolean)
-    .join(" ");
-  return [...exceptions.keys()].find((id) => text.includes(id)) ?? null;
-}
-
-function vulnerabilityIsExcepted(name, trail = new Set()) {
-  if (memo.has(name)) return memo.get(name);
-  if (trail.has(name)) return false;
+function collectAdvisoryIds(name, trail = new Set()) {
+  if (trail.has(name)) return new Set();
 
   const vulnerability = vulnerabilities[name];
-  if (!vulnerability) return false;
+  if (!vulnerability) return new Set();
 
   const nextTrail = new Set(trail);
   nextTrail.add(name);
+  const ids = new Set();
 
-  const via = Array.isArray(vulnerability.via) ? vulnerability.via : [];
-  if (!via.length) return false;
-
-  const accepted = via.every((entry) => {
+  for (const entry of Array.isArray(vulnerability.via) ? vulnerability.via : []) {
     if (typeof entry === "string") {
-      return vulnerabilityIsExcepted(entry, nextTrail);
+      for (const id of collectAdvisoryIds(entry, nextTrail)) ids.add(id);
+      continue;
     }
-    const id = advisoryId(entry);
-    return Boolean(id && exceptions.has(id));
-  });
 
-  memo.set(name, accepted);
-  return accepted;
+    const id = advisoryId(entry);
+    if (id) {
+      ids.add(id);
+      continue;
+    }
+
+    const externalId =
+      [entry?.url, entry?.name, entry?.title]
+        .filter(Boolean)
+        .join(" ")
+        .match(/GHSA-[a-z0-9-]+/i)?.[0] ?? "UNIDENTIFIED-ADVISORY";
+    ids.add(externalId);
+  }
+
+  return ids;
+}
+
+function vulnerabilityIsExcepted(name) {
+  const ids = collectAdvisoryIds(name);
+  return ids.size > 0 && [...ids].every((id) => exceptions.has(id));
 }
 
 const unapproved = Object.keys(vulnerabilities).filter(
