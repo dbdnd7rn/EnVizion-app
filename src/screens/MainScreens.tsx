@@ -805,6 +805,46 @@ export function HomeScreen() {
         </HomeReveal>
 
         {state.careRecipientId && (
+          <HomeReveal delay={248}>
+            <Card
+              onPress={() => n.navigate("DoctorVisitCompanion")}
+              label="Open Doctor Visit Companion"
+              style={{
+                borderRadius: 25,
+                padding: 17,
+                backgroundColor: "#F7F2FB",
+                borderColor: "#E5D9EC",
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                <View
+                  style={{
+                    width: 54,
+                    height: 54,
+                    borderRadius: 19,
+                    backgroundColor: "#EADDF2",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="medkit-outline" size={27} color={C.purple} />
+                </View>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={S.eyebrow}>DOCTOR VISIT COMPANION</Text>
+                  <Text style={[S.h2, { fontSize: 18 }]}>
+                    Prepare → capture → review → share
+                  </Text>
+                  <Txt style={S.small}>
+                    Keep questions and the visit recap together.
+                  </Txt>
+                </View>
+                <Icon name="chevron-forward" size={20} color={C.purple} />
+              </View>
+            </Card>
+          </HomeReveal>
+        )}
+
+        {state.careRecipientId && (
           <HomeReveal delay={255}>
             <View style={{ gap: 13 }}>
               <Section
@@ -1746,6 +1786,13 @@ export function ToolkitScreen() {
           icon: "calendar-outline",
           keywords: "visit doctor appointment questions",
           onPress: () => n.navigate("Appointments"),
+        },
+        {
+          title: "Doctor Visit Companion",
+          subtitle: "Prepare questions, capture notes, review the recap, and share it",
+          icon: "medkit-outline",
+          keywords: "doctor visit companion transcript summary questions appointment recap",
+          onPress: () => n.navigate("DoctorVisitCompanion"),
         },
         {
           title: "Care Document Vault",
