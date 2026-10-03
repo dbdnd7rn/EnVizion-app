@@ -11,6 +11,7 @@ import {
 test("each care role has a real acceptance journey", () => {
   assert.equal(acceptanceStepsForRole("owner").length >= 5, true);
   assert.equal(acceptanceStepsForRole("caregiver").length >= 5, true);
+  assert.equal(acceptanceStepsForRole("patient").length >= 5, true);
   assert.equal(acceptanceStepsForRole("viewer").length >= 5, true);
 });
 
