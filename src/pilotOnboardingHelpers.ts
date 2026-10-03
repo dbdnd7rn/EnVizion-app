@@ -59,8 +59,8 @@ export function pilotOnboardingSteps(
       id: "role",
       title: "Real care-team role available",
       detail: participant.roles.ready
-        ? `Owner ${participant.roles.owner} · Caregiver ${participant.roles.caregiver} · Viewer ${participant.roles.viewer}`
-        : "A care owner must grant and the participant must accept real care-profile access.",
+        ? `Primary Advocate ${participant.roles.owner} · Co-Caregiver ${participant.roles.caregiver} · Care Recipient ${participant.roles.patient} · Family Member ${participant.roles.viewer}`
+        : "A Primary Advocate must grant and the participant must accept real care-profile access.",
       complete: participant.roles.ready,
     },
     {
