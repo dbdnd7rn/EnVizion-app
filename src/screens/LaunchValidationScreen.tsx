@@ -44,6 +44,14 @@ import {
 } from "../ui";
 import { useNav } from "./MainScreens";
 
+function launchRoleLabel(role: string) {
+  if (role === "owner") return "Primary Advocate";
+  if (role === "caregiver") return "Co-Caregiver";
+  if (role === "patient") return "Care Recipient";
+  if (role === "viewer") return "Family Member";
+  return role;
+}
+
 function currentPlatform(): LaunchPlatform {
   if (Platform.OS === "ios") return "ios";
   if (Platform.OS === "android") return "android";
@@ -450,8 +458,8 @@ export function LaunchValidationScreen() {
           {!workspace.profiles.length ? (
             <Card>
               <Txt>
-                No active Owner, Caregiver or Viewer membership is available for
-                this pilot account.
+                No active Primary Advocate, Co-Caregiver, Care Recipient or Family Member
+                membership is available for this pilot account.
               </Txt>
             </Card>
           ) : (
@@ -481,7 +489,7 @@ export function LaunchValidationScreen() {
                       <View style={{ flex: 1 }}>
                         <Text style={S.h3}>{profile.displayName}</Text>
                         <Txt style={S.small}>
-                          Server-verified role: {profile.role}
+                          Server-verified role: {launchRoleLabel(profile.role)}
                         </Txt>
                       </View>
                       {profile.careRecipientId === selectedProfileId && (
@@ -501,7 +509,7 @@ export function LaunchValidationScreen() {
                 <View style={S.between}>
                   <View style={{ flex: 1 }}>
                     <Text style={S.eyebrow}>
-                      {selectedProfile.role.toUpperCase()} ·{" "}
+                      {launchRoleLabel(selectedProfile.role).toUpperCase()} ·{" "}
                       {platform.toUpperCase()} · {deviceClass.toUpperCase()}
                     </Text>
                     <Text style={S.h3}>
