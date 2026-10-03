@@ -178,3 +178,15 @@ test("Care Recipient role stays read-only across mutating care workspaces", () =
     "backend mutation guard must keep Care Recipient access read-only",
   );
 });
+
+
+test("Emergency QR uses the temporary secure share link", () => {
+  const emergency = source("src/screens/EmergencyCenterScreen.tsx");
+  const packageJson = source("package.json");
+
+  assert.match(packageJson, /react-native-qrcode-svg/);
+  assert.match(emergency, /react-native-qrcode-svg/);
+  assert.match(emergency, /<QRCode/);
+  assert.match(emergency, /value=\{createdShare\.shareUrl\}/);
+  assert.match(emergency, /Scan at ER or triage/);
+});
