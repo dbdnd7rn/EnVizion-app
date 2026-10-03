@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-10-03",
+  "exceptions": [
+    {
+      "id": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "severity": "high",
+      "expiresOn": "2026-10-31",
+      "reason": "Upstream advisory currently publishes no patched version. Exposure is through Expo/Metro/Jest build tooling; keep monitoring and remove this exception immediately when upstream ships a compatible fix."
+    },
+    {
+      "id": "GHSA-86w9-cpqp-85rv",
+      "package": "node-forge",
+      "severity": "high",
+      "expiresOn": "2026-10-31",
+      "reason": "Upstream advisory currently has no known patched version. Exposure is through Expo code-signing tooling; keep monitoring and remove this exception immediately when upstream ships a compatible fix."
+    }
+  ]
+}
