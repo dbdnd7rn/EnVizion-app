@@ -257,7 +257,8 @@ export function CareScheduleScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
   const owner = state.accessRole === "owner";
 
   const [availability, setAvailability] = useState<CaregiverAvailability[]>([]);
@@ -428,7 +429,8 @@ export function CareScheduleScreen() {
 
     if (
       currentUserId &&
-      state.accessRole !== "viewer" &&\n        state.accessRole !== "patient" &&
+      state.accessRole !== "viewer" &&
+        state.accessRole !== "patient" &&
       !active.some((member) => member.userId === currentUserId)
     ) {
       return [
