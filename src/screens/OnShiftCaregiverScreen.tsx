@@ -250,7 +250,8 @@ export function OnShiftCaregiverScreen() {
   const { state } = useCare();
   const { setActivity } = useCarePresence();
   const careRecipientId = state.careRecipientId;
-  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [session, setSession] = useState<CaregiverShiftSession | null>(null);
   const [notes, setNotes] = useState<CaregiverShiftSessionNote[]>([]);
