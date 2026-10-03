@@ -990,4 +990,3 @@ export function EmergencyCenterScreen() {
     </Page>
   );
 }
-}
