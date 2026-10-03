@@ -66,7 +66,7 @@ test("admin launch center enforces evidence-based sign-off", () => {
   const client = source("src/launchValidation.ts");
 
   assert.match(center, /Resolve blockers before approval/);
-  assert.match(center, /Owner.*Caregiver.*Viewer/s);
+  assert.match(center, /Primary Advocate.*Co-Caregiver.*Care Recipient.*Family Member/s);
   assert.match(center, /iOS.*Android.*Web/s);
   assert.match(client, /launch-admin/);
   assert.match(client, /signoff/);
