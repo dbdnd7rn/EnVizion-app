@@ -491,7 +491,7 @@ export function TrackerScreen({
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
   const history = state.entries.filter((e) => e.kind === kind);
 
   async function save() {
@@ -1674,7 +1674,7 @@ export function MedicationScreen() {
   const [time, setTime] = useState("");
   const [message, setMessage] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const closeForm = () => {
     setAdding(false);
@@ -1964,7 +1964,7 @@ export function AppointmentScreen() {
   const [draft, setDraft] = useState(state.appointment);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
 
   async function saveVisit() {
     const appointment = {
@@ -2242,7 +2242,7 @@ export function TransitionScreen() {
   const n = useNav();
   const [message, setMessage] = useState("");
   const [savingIndex, setSavingIndex] = useState<number | null>(null);
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
 
   return (
     <Page>
