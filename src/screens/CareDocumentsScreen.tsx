@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
+import * as LocalAuthentication from "expo-local-authentication";
 import {
   deleteCareDocument,
   loadCareDocuments,
@@ -101,6 +102,7 @@ export function CareDocumentsScreen() {
   const [uploadDocumentDate, setUploadDocumentDate] = useState("");
   const [uploadReviewDueOn, setUploadReviewDueOn] = useState("");
   const [uploadKey, setUploadKey] = useState(false);
+  const [uploadBiometric, setUploadBiometric] = useState(false);
 
   const [editing, setEditing] = useState<CareDocument | null>(null);
   const [editName, setEditName] = useState("");
@@ -111,13 +113,15 @@ export function CareDocumentsScreen() {
   const [editDocumentDate, setEditDocumentDate] = useState("");
   const [editReviewDueOn, setEditReviewDueOn] = useState("");
   const [editKey, setEditKey] = useState(false);
+  const [editBiometric, setEditBiometric] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
 
   const [deleting, setDeleting] = useState<CareDocument | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   const careRecipientId = state.careRecipientId;
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const refresh = useCallback(async () => {
     if (!careRecipientId) {
@@ -224,11 +228,13 @@ export function CareDocumentsScreen() {
       setUploadDocumentDate("");
       setUploadReviewDueOn("");
       setUploadKey(false);
+      setUploadBiometric(false);
       setUploadNotes("");
       setUploadSource("");
       setUploadDocumentDate("");
       setUploadReviewDueOn("");
       setUploadKey(false);
+      setUploadBiometric(false);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -254,6 +260,7 @@ export function CareDocumentsScreen() {
         documentDate: uploadDocumentDate,
         reviewDueOn: uploadReviewDueOn,
         isKeyDocument: uploadKey,
+        requiresBiometric: uploadBiometric,
       });
 
       setPicked(null);
@@ -282,6 +289,7 @@ export function CareDocumentsScreen() {
     setEditDocumentDate(document.documentDate);
     setEditReviewDueOn(document.reviewDueOn);
     setEditKey(document.isKeyDocument);
+    setEditBiometric(document.requiresBiometric);
     setMessage("");
   }
 
@@ -300,6 +308,7 @@ export function CareDocumentsScreen() {
         documentDate: editDocumentDate,
         reviewDueOn: editReviewDueOn,
         isKeyDocument: editKey,
+        requiresBiometric: editBiometric,
       });
       setEditing(null);
       setMessage("Document details updated.");
@@ -315,12 +324,51 @@ export function CareDocumentsScreen() {
     }
   }
 
+  async function unlockSensitiveDocument(document: CareDocument) {
+    if (!document.requiresBiometric) return true;
+
+    if (Platform.OS === "web") {
+      setMessage(
+        "This legal document is protected by device biometrics. Open it from the EnVizion Life mobile app to use Face ID, Touch ID, or fingerprint unlock.",
+      );
+      return false;
+    }
+
+    const [hasHardware, enrolled] = await Promise.all([
+      LocalAuthentication.hasHardwareAsync(),
+      LocalAuthentication.isEnrolledAsync(),
+    ]);
+
+    if (!hasHardware || !enrolled) {
+      setMessage(
+        "Biometric protection is enabled for this legal document, but this device has no enrolled Face ID, Touch ID, or fingerprint.",
+      );
+      return false;
+    }
+
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: `Unlock ${document.displayName}`,
+      cancelLabel: "Cancel",
+      fallbackLabel: "Use device passcode",
+      disableDeviceFallback: false,
+    });
+
+    if (!result.success) {
+      setMessage("The sensitive document stayed locked.");
+      return false;
+    }
+
+    return true;
+  }
+
   async function openDocument(
     document: CareDocument,
     mode: "preview" | "download",
   ) {
-    setBusy(`${mode}-${document.id}`);
     setMessage("");
+    if (!(await unlockSensitiveDocument(document))) return;
+
+    setBusy(`${mode}-${document.id}`);
     try {
       await openCareDocument(document.id, mode);
       setMessage(
@@ -340,8 +388,15 @@ export function CareDocumentsScreen() {
   }
 
   async function shareDocument(document: CareDocument) {
-    setBusy(`share-${document.id}`);
     setMessage("");
+    if (document.requiresBiometric) {
+      setMessage(
+        "Sensitive legal documents cannot be exposed through an external share link. Unlock and review the document inside the mobile app instead.",
+      );
+      return;
+    }
+
+    setBusy(`share-${document.id}`);
     try {
       const result = await shareCareDocument(document.id);
       setMessage(
