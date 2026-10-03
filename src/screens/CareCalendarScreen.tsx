@@ -19,7 +19,14 @@ import {
   type ReminderType,
 } from "../reminders";
 import { supabase } from "../supabase";
-import { addReminderToDeviceCalendar } from "../deviceCalendar";
+import {
+  addReminderToDeviceCalendar,
+  exportCareAgendaToIcs,
+} from "../deviceCalendar";
+import {
+  cacheCareCalendarOfflineSnapshot,
+  loadCareCalendarOfflineSnapshot,
+} from "../careCalendarOffline";
 import { loadCareAgendaData, type CareAgendaData } from "../careAgenda";
 import {
   agendaByDay,
@@ -570,6 +577,9 @@ export function CareCalendarScreen() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [usingOfflineCache, setUsingOfflineCache] = useState(false);
+  const [offlineCachedAt, setOfflineCachedAt] = useState<string | null>(null);
+  const [offlineEvents, setOfflineEvents] = useState<AgendaEvent[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -583,7 +593,8 @@ export function CareCalendarScreen() {
   const [notifyScope, setNotifyScope] =
     useState<ReminderNotifyScope>("creator");
 
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
   const careRecipientId = state.careRecipientId;
   const timezone = detectedTimezone();
   const range = useMemo(
@@ -620,16 +631,36 @@ export function CareCalendarScreen() {
       setItems(reminders);
       setAgendaData(agenda);
       setRoster(team);
+      setOfflineEvents([]);
+      setUsingOfflineCache(false);
+      setOfflineCachedAt(null);
+      setMessage("");
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not load the care calendar.",
-      );
+      const cached = await loadCareCalendarOfflineSnapshot({
+        careRecipientId,
+        rangeStartIso: range.startIso,
+        view: agendaView,
+      });
+
+      if (cached) {
+        setItems(cached.reminders);
+        setOfflineEvents(cached.events);
+        setUsingOfflineCache(true);
+        setOfflineCachedAt(cached.cachedAt);
+        setMessage(
+          "You appear to be offline. Showing the last securely cached care calendar for this view.",
+        );
+      } else {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "We could not load the care calendar.",
+        );
+      }
     } finally {
       setLoading(false);
     }
-  }, [careRecipientId, range.endIso, range.startIso]);
+  }, [agendaView, careRecipientId, range.endIso, range.startIso]);
 
   useEffect(() => {
     void refresh();
@@ -721,7 +752,7 @@ export function CareCalendarScreen() {
       : member.displayName || "Caregiver";
   }
 
-  const agendaEvents = useMemo(
+  const liveAgendaEvents = useMemo(
     () =>
       buildAgendaEvents({
         data: agendaData,
@@ -734,10 +765,43 @@ export function CareCalendarScreen() {
     [agendaData, items, memberMap, range.end, range.start, state.medications],
   );
 
+  const agendaEvents = usingOfflineCache ? offlineEvents : liveAgendaEvents;
+
   const visibleEvents = useMemo(
     () => visibleAgendaEvents(agendaEvents, agendaFilters),
     [agendaEvents, agendaFilters],
   );
+
+  useEffect(() => {
+    if (
+      !careRecipientId ||
+      loading ||
+      usingOfflineCache ||
+      !liveAgendaEvents.length
+    ) {
+      return;
+    }
+
+    void cacheCareCalendarOfflineSnapshot({
+      careRecipientId,
+      rangeStartIso: range.startIso,
+      rangeEndIso: range.endIso,
+      view: agendaView,
+      events: liveAgendaEvents,
+      reminders: items,
+    }).then((cached) => {
+      if (cached) setOfflineCachedAt(cached.cachedAt);
+    });
+  }, [
+    agendaView,
+    careRecipientId,
+    items,
+    liveAgendaEvents,
+    loading,
+    range.endIso,
+    range.startIso,
+    usingOfflineCache,
+  ]);
   const groupedAgenda = useMemo(() => agendaByDay(visibleEvents), [visibleEvents]);
   const nextEvent = useMemo(
     () => nextAgendaEvent(visibleEvents),
@@ -838,6 +902,30 @@ export function CareCalendarScreen() {
     setTitle(name ? `Medication record: ${name}` : "Medication record check-in");
     setNote("Check the care routine and record medication information if appropriate.");
     setShowForm(true);
+  }
+
+  async function exportCurrentAgenda() {
+    setBusy(true);
+    setMessage("");
+    try {
+      const result = await exportCareAgendaToIcs({
+        events: visibleEvents,
+        careRecipientName: state.careRecipientName || "Care profile",
+        calendarLabel: `${state.careRecipientName || "Care"} · ${range.label}`,
+        view: agendaView,
+      });
+      setMessage(
+        `Calendar export prepared with ${result.eventCount} event${result.eventCount === 1 ? "" : "s"}.`,
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not export this care calendar.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function save() {
@@ -1157,6 +1245,61 @@ const categoryCounts = useMemo(
           <Icon name="chevron-forward-outline" size={23} />
         </Pressable>
       </View>
+
+      <Card
+        style={{
+          borderRadius: 26,
+          backgroundColor: usingOfflineCache ? "#FFF8E9" : "#F5F0FA",
+          borderColor: usingOfflineCache ? "#EBD9A5" : "#E6DAEC",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 16,
+              backgroundColor: usingOfflineCache ? "#F8EBC5" : "#E8DDF0",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon
+              name={usingOfflineCache ? "cloud-offline-outline" : "sync-outline"}
+              size={24}
+              color={usingOfflineCache ? "#9A6B16" : C.purple}
+            />
+          </View>
+          <View style={{ flex: 1, gap: 3 }}>
+            <Text style={S.h3}>
+              {usingOfflineCache
+                ? "Offline calendar snapshot"
+                : "Calendar sync & offline copy"}
+            </Text>
+            <Txt style={S.small}>
+              {usingOfflineCache
+                ? `Showing the secure mobile snapshot saved ${offlineCachedAt ? new Date(offlineCachedAt).toLocaleString() : "earlier"}.`
+                : offlineCachedAt
+                  ? `Secure mobile copy updated ${new Date(offlineCachedAt).toLocaleString()}.`
+                  : "A secure mobile snapshot is saved after a successful calendar refresh."}
+            </Txt>
+          </View>
+        </View>
+
+        <Button
+          title={`Export ${agendaView === "day" ? "day" : "week"} as iCal (.ics)`}
+          icon="calendar-outline"
+          secondary
+          disabled={busy || !visibleEvents.some((event) => event.category !== "medication")}
+          onPress={() => void exportCurrentAgenda()}
+        />
+
+        <Txt style={S.small}>
+          The export includes appointments, care tasks, caregiver shifts,
+          reminders, follow-ups and handoffs. Medication-list times are not
+          exported as medication instructions.
+        </Txt>
+      </Card>
 
       <View style={{ flexDirection: "row", gap: 8 }}>
         <StatTile
@@ -1572,10 +1715,14 @@ const categoryCounts = useMemo(
       {readOnly && (
         <Card style={{ backgroundColor: "#F5EEFB", borderWidth: 0, borderRadius: 28 }}>
           <Icon name="eye-outline" />
-          <Text style={S.h3}>Viewer access is read-only.</Text>
+          <Text style={S.h3}>
+            {state.accessRole === "patient"
+              ? "Care Recipient access is read-only."
+              : "Family Member access is read-only."}
+          </Text>
           <Txt>
-            You can see shared reminders, but only the Owner or a Caregiver can create,
-            snooze, edit, complete, or dismiss them.
+            You can see the shared care calendar and export the visible agenda,
+            but only a Primary Advocate or Co-Caregiver can change reminders.
           </Txt>
         </Card>
       )}
