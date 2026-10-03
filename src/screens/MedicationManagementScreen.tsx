@@ -65,7 +65,8 @@ export function MedicationManagementScreen() {
   const n = useNav();
   const { state, dispatch } = useCare();
   const careRecipientId = state.careRecipientId;
-  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [medications, setMedications] = useState<ManagedMedication[]>([]);
   const [records, setRecords] = useState<ManagedMedicationRecord[]>([]);
