@@ -1353,6 +1353,198 @@ export function EmergencyCenterScreen() {
             />
           )}
 
+          <Section title="Temporary emergency sharing" />
+          <Card
+            style={{
+              borderRadius: 26,
+              backgroundColor: "#F8F3FB",
+              borderColor: "#E7DCEE",
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View
+                style={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: 17,
+                  backgroundColor: "#E9DDF1",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="link-outline" size={25} color={C.purple} />
+              </View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={S.h3}>Secure ER / triage link</Text>
+                <Txt style={S.small}>
+                  Create a temporary read-only page with the critical emergency
+                  summary. The link expires automatically and can be revoked early.
+                </Txt>
+              </View>
+            </View>
+
+            {!readOnly && (
+              <>
+                <Text style={S.h3}>Link lifetime</Text>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                  {[
+                    [15, "15 min"],
+                    [60, "1 hour"],
+                    [240, "4 hours"],
+                    [1440, "24 hours"],
+                  ].map(([minutes, label]) => (
+                    <Pressable
+                      key={String(minutes)}
+                      accessibilityRole="radio"
+                      accessibilityState={{
+                        selected: shareMinutes === Number(minutes),
+                      }}
+                      disabled={busy}
+                      onPress={() => setShareMinutes(Number(minutes))}
+                      style={[
+                        S.pill,
+                        {
+                          minHeight: 42,
+                          paddingHorizontal: 13,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor:
+                            shareMinutes === Number(minutes)
+                              ? C.purple
+                              : C.white,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          S.small,
+                          {
+                            color:
+                              shareMinutes === Number(minutes)
+                                ? C.white
+                                : C.deep,
+                            fontFamily: "DMSans_600SemiBold",
+                          },
+                        ]}
+                      >
+                        {label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                <Button
+                  title={busy ? "Working…" : "Create temporary emergency link"}
+                  icon="link-outline"
+                  disabled={busy || !data.profile}
+                  onPress={() => void createShare()}
+                />
+              </>
+            )}
+
+            {createdShare && (
+              <Card style={{ backgroundColor: "#EEF7F3" }}>
+                <View style={S.between}>
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text style={S.h3}>Temporary link ready</Text>
+                    <Txt style={S.small}>
+                      Expires {new Date(createdShare.expiresAt).toLocaleString()}
+                    </Txt>
+                  </View>
+                  <Icon name="shield-checkmark-outline" color={C.green} />
+                </View>
+
+                <View
+                  style={{
+                    borderRadius: 15,
+                    backgroundColor: C.white,
+                    padding: 12,
+                  }}
+                >
+                  <Text
+                    selectable
+                    style={[
+                      S.small,
+                      { color: C.deep, lineHeight: 18 },
+                    ]}
+                  >
+                    {createdShare.shareUrl}
+                  </Text>
+                </View>
+
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View style={{ flex: 1 }}>
+                    <Button
+                      title="Open link"
+                      secondary
+                      disabled={busy}
+                      onPress={() => void Linking.openURL(createdShare.shareUrl)}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Button
+                      title="Revoke"
+                      secondary
+                      disabled={busy}
+                      onPress={() => void revokeShare(createdShare.id)}
+                    />
+                  </View>
+                </View>
+              </Card>
+            )}
+
+            {!readOnly && shareLinks.length > 0 && (
+              <View style={{ gap: 9 }}>
+                <Text style={S.h3}>Active links</Text>
+                {shareLinks.map((share) => (
+                  <View
+                    key={share.id}
+                    style={{
+                      borderRadius: 16,
+                      backgroundColor: C.white,
+                      padding: 12,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 10,
+                    }}
+                  >
+                    <View style={{ flex: 1, gap: 3 }}>
+                      <Text style={S.small}>
+                        Expires {new Date(share.expiresAt).toLocaleString()}
+                      </Text>
+                      <Txt style={S.small}>
+                        Opened {share.accessCount} time
+                        {share.accessCount === 1 ? "" : "s"}
+                      </Txt>
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Revoke temporary emergency link"
+                      disabled={busy}
+                      onPress={() => void revokeShare(share.id)}
+                      style={({ pressed }) => ({
+                        width: 42,
+                        height: 42,
+                        borderRadius: 14,
+                        backgroundColor: "#FFF0F3",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity: pressed ? 0.65 : 1,
+                      })}
+                    >
+                      <Icon name="close-outline" color={C.rose} />
+                    </Pressable>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            <Txt style={S.small}>
+              The temporary page contains emergency-summary data only. Care Vault
+              files are not embedded in the link.
+            </Txt>
+          </Card>
+
           <Pressable
             accessibilityRole="button"
             onPress={() => n.navigate("CarePacket")}
