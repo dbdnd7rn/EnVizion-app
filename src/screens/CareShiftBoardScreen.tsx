@@ -451,7 +451,8 @@ export function CareShiftBoardScreen() {
   const { state } = useCare();
   const { setActivity } = useCarePresence();
   const careRecipientId = state.careRecipientId;
-  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   useEffect(() => {
     setActivity({
@@ -721,7 +722,8 @@ export function CareShiftBoardScreen() {
 
     if (
       currentUserId &&
-      state.accessRole !== "viewer" &&\n        state.accessRole !== "patient" &&
+      state.accessRole !== "viewer" &&
+        state.accessRole !== "patient" &&
       !rows.some((member) => member.userId === currentUserId)
     ) {
       return [
