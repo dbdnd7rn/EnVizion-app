@@ -56,10 +56,11 @@ async function resolveCareContextForUser(userId: string) {
         ? "Myself"
         : ((recipient.relationship || "A loved one") as string),
     accessRole: selected.role as CareRole,
-    careMode:
+    careMode: (
       selected.role === "patient" || recipient.relationship === "Myself"
         ? "self"
-        : "advocate",
+        : "advocate"
+    ) as CareMode,
   };
 }
 
