@@ -135,3 +135,46 @@ test("pilot intelligence closes the operational reporting loop", () => {
   assert.match(helpers, /operational pilot evidence only/i);
   assert.match(admin, /Open Pilot Intelligence/);
 });
+
+
+test("Care Recipient role stays read-only across mutating care workspaces", () => {
+  const protectedScreens = [
+    "src/screens/CareCalendarScreen.tsx",
+    "src/screens/CareTasksScreen.tsx",
+    "src/screens/CareContactsScreen.tsx",
+    "src/screens/MedicationManagementScreen.tsx",
+    "src/screens/CareScheduleScreen.tsx",
+    "src/screens/CareShiftBoardScreen.tsx",
+    "src/screens/CarePlanScreen.tsx",
+    "src/screens/CareCommunicationLogScreen.tsx",
+    "src/screens/CareCoordinationInboxScreen.tsx",
+    "src/screens/CareCoverageRequestsScreen.tsx",
+    "src/screens/CareCoverageRequirementsScreen.tsx",
+    "src/screens/SmartCoveragePlannerScreen.tsx",
+    "src/screens/WeeklyCoveragePlanScreen.tsx",
+    "src/screens/OnShiftCaregiverScreen.tsx",
+    "src/screens/CareContinuityScreen.tsx",
+    "src/screens/CareAnalyticsScreen.tsx",
+    "src/screens/CareScreens.tsx",
+    "src/screens/HospitalToHomeScreen.tsx",
+    "src/screens/DoctorVisitCompanionScreen.tsx",
+    "src/screens/EmergencyCenterScreen.tsx",
+    "src/screens/CareDocumentsScreen.tsx",
+    "src/screens/FamilyCommunicationScreen.tsx",
+  ];
+
+  for (const path of protectedScreens) {
+    assert.match(
+      source(path),
+      /accessRole\s*(?:===|!==)\s*["']patient["']/,
+      `${path} must explicitly handle the Care Recipient role`,
+    );
+  }
+
+  const backend = source("src/backend.ts");
+  assert.match(
+    backend,
+    /context\.accessRole === ["']patient["']/,
+    "backend mutation guard must keep Care Recipient access read-only",
+  );
+});
