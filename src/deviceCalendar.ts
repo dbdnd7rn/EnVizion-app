@@ -1,5 +1,12 @@
+import { File, Paths } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 import type { Appointment } from "./domain";
+import type { AgendaEvent, AgendaView } from "./careAgendaHelpers";
+import {
+  buildCareAgendaIcs,
+  calendarExportFilename,
+} from "./deviceCalendarHelpers";
 import type { CareReminder } from "./reminderHelpers";
 import { localDateTimeToIso } from "./reminderHelpers";
 
@@ -165,4 +172,49 @@ export async function addAppointmentToDeviceCalendar(
     location: appointment.location || undefined,
     notes: appointment.notes || "Added from EnVizion Life.",
   });
+}
+
+
+export async function exportCareAgendaToIcs(input: {
+  events: AgendaEvent[];
+  careRecipientName: string;
+  calendarLabel: string;
+  view: AgendaView;
+}) {
+  const exportable = input.events.filter(
+    (event) => !event.cancelled && event.category !== "medication",
+  );
+
+  if (!exportable.length) {
+    throw new Error("There are no calendar events to export in this view.");
+  }
+
+  const body = buildCareAgendaIcs({
+    events: exportable,
+    careRecipientName: input.careRecipientName,
+    calendarLabel: input.calendarLabel,
+  });
+  const filename = calendarExportFilename(input.careRecipientName, input.view);
+
+  if (Platform.OS === "web") {
+    downloadIcs(filename, body);
+    return { eventCount: exportable.length, filename };
+  }
+
+  const available = await Sharing.isAvailableAsync();
+  if (!available) {
+    throw new Error("Calendar export sharing is unavailable on this device.");
+  }
+
+  const file = new File(Paths.cache, `${Date.now()}-${filename}`);
+  file.create();
+  file.write(body);
+
+  await Sharing.shareAsync(file.uri, {
+    mimeType: "text/calendar",
+    UTI: "public.ics",
+    dialogTitle: "Export EnVizion family care calendar",
+  });
+
+  return { eventCount: exportable.length, filename };
 }
