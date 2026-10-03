@@ -57,7 +57,8 @@ export function CarePlanScreen() {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [items, setItems] = useState<CarePlanItem[]>([]);
   const [completions, setCompletions] = useState<CarePlanCompletion[]>([]);
