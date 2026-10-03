@@ -708,7 +708,7 @@ export function DoctorVisitCompanionScreen() {
             title={createOpen ? "Close new visit" : "New doctor visit"}
             icon={createOpen ? "close-outline" : "add-circle-outline"}
             secondary={createOpen}
-            disabled={readOnly || Boolean(busy)}
+            disabled={readOnly || Boolean(busy) || recorderState.isRecording}
             onPress={() => setCreateOpen((value) => !value)}
           />
         </View>
@@ -940,7 +940,9 @@ export function DoctorVisitCompanionScreen() {
               </View>
               <Switch
                 accessibilityLabel="Recording consent confirmed"
-                disabled={readOnly || Boolean(busy)}
+                disabled={
+                  readOnly || Boolean(busy) || recorderState.isRecording
+                }
                 value={selected.visit.recordingConsentConfirmed}
                 onValueChange={(value) => void toggleConsent(value)}
                 trackColor={{ true: C.purple }}
