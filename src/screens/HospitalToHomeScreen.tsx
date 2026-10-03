@@ -61,7 +61,8 @@ export function HospitalToHomeScreen() {
   const n = useNav();
   const { state, dispatch } = useCare();
   const careRecipientId = state.careRecipientId;
-  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const readOnly =
+    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [plan, setPlan] = useState<CareTransitionPlan | null>(null);
   const [followUps, setFollowUps] = useState<CareTransitionFollowUp[]>([]);
