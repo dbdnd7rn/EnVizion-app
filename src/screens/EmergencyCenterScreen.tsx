@@ -44,6 +44,22 @@ import {
 } from "../ui";
 import { useNav } from "./MainScreens";
 
+const codeStatusChoices = [
+  ["unknown", "Not recorded"],
+  ["full_code", "Full code"],
+  ["dnr", "DNR"],
+  ["dni", "DNI"],
+  ["dnr_dni", "DNR / DNI"],
+  ["other", "Other"],
+] as const;
+
+const poaStatusChoices = [
+  ["unknown", "Not recorded"],
+  ["none", "No POA"],
+  ["on_file", "POA on file"],
+  ["not_on_file", "POA identified"],
+] as const;
+
 const emptyData = (): EmergencyCenterData => ({
   profile: null,
   recipient: {
@@ -1129,6 +1145,42 @@ export function EmergencyCenterScreen() {
                   background="#FFF5F0"
                   onPress={() => !readOnly && setEditing(true)}
                 />
+                <ProfileTile
+                  title="Blood type"
+                  value={data.profile?.bloodType || ""}
+                  icon="water-outline"
+                  accent="#C43C57"
+                  background="#FFF0F3"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
+                <ProfileTile
+                  title="Code status"
+                  value={emergencyCodeStatusLabel(
+                    data.profile?.codeStatus || "unknown",
+                  )}
+                  icon="shield-checkmark-outline"
+                  accent="#6B4BBE"
+                  background="#F3EFFF"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
+                <ProfileTile
+                  title="Healthcare POA"
+                  value={emergencyPoaStatusLabel(
+                    data.profile?.poaStatus || "unknown",
+                  )}
+                  icon="person-circle-outline"
+                  accent="#21806B"
+                  background="#EDF8F4"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
+                <ProfileTile
+                  title="Primary language"
+                  value={data.profile?.primaryLanguage || ""}
+                  icon="language-outline"
+                  accent="#2C79B8"
+                  background="#EEF7FF"
+                  onPress={() => !readOnly && setEditing(true)}
+                />
               </View>
             ) : (
               <Card style={{ borderRadius: 26, gap: 14 }}>
@@ -1142,6 +1194,22 @@ export function EmergencyCenterScreen() {
                   value={preferredHospital}
                   onChange={setPreferredHospital}
                 />
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View style={{ flex: 1 }}>
+                    <Field
+                      label="Blood type"
+                      value={bloodType}
+                      onChange={setBloodType}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Field
+                      label="Primary language"
+                      value={primaryLanguage}
+                      onChange={setPrimaryLanguage}
+                    />
+                  </View>
+                </View>
                 <Field label="Known allergies" value={allergies} onChange={setAllergies} multiline />
                 <Field
                   label="Important conditions"
@@ -1155,6 +1223,96 @@ export function EmergencyCenterScreen() {
                   onChange={setMedicalDevices}
                   multiline
                 />
+                <Text style={S.h3}>Code status / resuscitation directive</Text>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                  {codeStatusChoices.map(([value, label]) => (
+                    <Pressable
+                      key={value}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: codeStatus === value }}
+                      onPress={() => setCodeStatus(value)}
+                      style={[
+                        S.pill,
+                        {
+                          minHeight: 42,
+                          paddingHorizontal: 13,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor:
+                            codeStatus === value ? C.purple : C.lavender,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          S.small,
+                          {
+                            color: codeStatus === value ? C.white : C.deep,
+                            fontFamily: "DMSans_600SemiBold",
+                          },
+                        ]}
+                      >
+                        {label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <Field
+                  label="DNR / directive document location"
+                  value={dnrLocation}
+                  onChange={setDnrLocation}
+                  multiline
+                />
+                <Text style={S.h3}>Healthcare power of attorney</Text>
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                  {poaStatusChoices.map(([value, label]) => (
+                    <Pressable
+                      key={value}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected: poaStatus === value }}
+                      onPress={() => setPoaStatus(value)}
+                      style={[
+                        S.pill,
+                        {
+                          minHeight: 42,
+                          paddingHorizontal: 13,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor:
+                            poaStatus === value ? C.purple : C.lavender,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          S.small,
+                          {
+                            color: poaStatus === value ? C.white : C.deep,
+                            fontFamily: "DMSans_600SemiBold",
+                          },
+                        ]}
+                      >
+                        {label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  <View style={{ flex: 1 }}>
+                    <Field
+                      label="POA name"
+                      value={poaName}
+                      onChange={setPoaName}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Field
+                      label="POA phone"
+                      value={poaPhone}
+                      onChange={setPoaPhone}
+                    />
+                  </View>
+                </View>
                 <Field
                   label="Advance directive / document location"
                   value={advanceDirectiveLocation}
