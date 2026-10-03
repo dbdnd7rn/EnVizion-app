@@ -150,7 +150,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
   const n = useNav();
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
-  const viewer = state.accessRole === "viewer";
+  const viewer =\n    state.accessRole === "viewer" || state.accessRole === "patient";
   const owner = state.accessRole === "owner";
   const initialStart = route.params?.startsAt;
   const initialEnd = route.params?.endsAt;
