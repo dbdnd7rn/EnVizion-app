@@ -143,7 +143,7 @@ export function WeeklyCoveragePlanScreen() {
   const { state } = useCare();
   const careRecipientId = state.careRecipientId;
   const owner = state.accessRole === "owner";
-  const viewer = state.accessRole === "viewer";
+  const viewer =\n    state.accessRole === "viewer" || state.accessRole === "patient";
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [requests, setRequests] = useState<CareCoverageRequest[]>([]);
