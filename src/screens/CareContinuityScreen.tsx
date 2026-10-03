@@ -594,7 +594,7 @@ export function CareContinuityScreen() {
         {(coverageBridge.state === "gap_ahead" ||
           coverageBridge.state === "uncovered_now" ||
           coverageBridge.state === "no_next_shift") &&
-        state.accessRole !== "viewer" ? (
+        (state.accessRole !== "viewer" && state.accessRole !== "patient") ? (
           <>
             <Button
               title="Publish this coverage gap"
@@ -769,7 +769,7 @@ export function CareContinuityScreen() {
         title="Open On-Shift Caregiver"
         secondary
         icon="pulse-outline"
-        disabled={state.accessRole === "viewer"}
+        disabled={state.accessRole === "viewer" || state.accessRole === "patient"}
         onPress={() => n.navigate("OnShiftCaregiver")}
       />
       <Button
