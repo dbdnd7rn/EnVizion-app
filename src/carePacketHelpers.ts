@@ -172,6 +172,13 @@ export type PacketEmergencyProfile = {
   medicalDevices: string;
   advanceDirectiveLocation: string;
   emergencyNotes: string;
+  bloodType: string;
+  primaryLanguage: string;
+  codeStatus: string;
+  dnrLocation: string;
+  poaStatus: string;
+  poaName: string;
+  poaPhone: string;
   lastReviewedAt: string | null;
 } | null;
 
@@ -374,6 +381,13 @@ export function buildCarePacketHtml(input: CarePacketBuildInput) {
               `Important conditions: ${profile.importantConditions || "Not recorded"}`,
               `Medical devices / equipment: ${profile.medicalDevices || "Not recorded"}`,
               `Advance directive / document location: ${profile.advanceDirectiveLocation || "Not recorded"}`,
+              `Blood type: ${profile.bloodType || "Not recorded"}`,
+              `Primary language: ${profile.primaryLanguage || "Not recorded"}`,
+              `Code status: ${profile.codeStatus || "Not recorded"}`,
+              `DNR / directive location: ${profile.dnrLocation || profile.advanceDirectiveLocation || "Not recorded"}`,
+              `Healthcare POA status: ${profile.poaStatus || "Not recorded"}`,
+              `Healthcare POA name: ${profile.poaName || "Not recorded"}`,
+              `Healthcare POA phone: ${profile.poaPhone || "Not recorded"}`,
               `Emergency notes: ${profile.emergencyNotes || "Not recorded"}`,
               profile.lastReviewedAt
                 ? `Last reviewed: ${formattedDate(profile.lastReviewedAt)}`
