@@ -75,6 +75,38 @@ const roleSteps: Record<LaunchRole, ValidationStep[]> = {
       detail: "Open handoff/continuity tools and confirm the next caregiver can understand the transition.",
     },
   ],
+  patient: [
+    {
+      id: "patient_profile_read",
+      title: "Own care profile",
+      detail: "Open the care profile and confirm the Care Recipient can review their own information without edit controls.",
+    },
+    {
+      id: "patient_medications_read",
+      title: "Medication list",
+      detail: "Open medications and confirm the current list and history are readable without medication-management controls.",
+    },
+    {
+      id: "patient_visits_read",
+      title: "Doctor visits",
+      detail: "Open doctor-visit information and confirm visit preparation, notes and summaries are readable without caregiver-only actions.",
+    },
+    {
+      id: "patient_emergency_read",
+      title: "Emergency information",
+      detail: "Open Emergency Information and confirm critical details are readable while editing and temporary-share creation stay unavailable.",
+    },
+    {
+      id: "patient_documents_read",
+      title: "Care Vault",
+      detail: "Open Care Vault and confirm permitted documents are readable without upload, edit or delete controls.",
+    },
+    {
+      id: "patient_read_only_boundaries",
+      title: "Read-only boundaries",
+      detail: "Confirm care tasks, schedules, coordination and clinical records do not expose mutation controls to the Care Recipient role.",
+    },
+  ],
   viewer: [
     {
       id: "profile_read",
