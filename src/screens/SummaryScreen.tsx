@@ -11,7 +11,8 @@ export function SummaryScreen() {
   const n = useNav();
   const [message, setMessage] = useState("");
   const [printing, setPrinting] = useState(false);
-  const viewer =\n    state.accessRole === "viewer" || state.accessRole === "patient";
+  const viewer =
+    state.accessRole === "viewer" || state.accessRole === "patient";
   const doses = state.medicationRecords.filter(
     (record) => !record.correctedAt,
   ).length;
