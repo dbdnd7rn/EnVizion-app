@@ -423,7 +423,7 @@ export function EmergencyCenterScreen() {
   );
 
   const criticalSummary = useMemo(() => {
-    if (data.profile) {
+    if (data.profile && careRecipientId) {
       return buildEmergencyOfflineSummary(careRecipientId, data);
     }
     return offlineSummary;
