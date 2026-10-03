@@ -97,6 +97,21 @@ function statusColor(status: DoctorVisitBundle["visit"]["status"]) {
   return "#F3ECFA";
 }
 
+function formatRecordingDuration(durationMs: number | null | undefined) {
+  const totalSeconds = Math.max(0, Math.round((durationMs ?? 0) / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function recordingMimeType(uri: string) {
+  if (Platform.OS === "web") return "audio/webm";
+  if (/\.3gp(?:\?|$)/i.test(uri)) return "audio/3gpp";
+  if (/\.wav(?:\?|$)/i.test(uri)) return "audio/wav";
+  if (/\.aac(?:\?|$)/i.test(uri)) return "audio/aac";
+  return "audio/mp4";
+}
+
 function SummaryList({
   title,
   items,
@@ -133,6 +148,11 @@ export function DoctorVisitCompanionScreen() {
   const readOnly =
     state.accessRole === "viewer" || state.accessRole === "patient";
 
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(audioRecorder, 250);
+  const audioPlayer = useAudioPlayer(null);
+  const playerStatus = useAudioPlayerStatus(audioPlayer);
+
   const [bundles, setBundles] = useState<DoctorVisitBundle[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -159,6 +179,8 @@ export function DoctorVisitCompanionScreen() {
   const [questionCategory, setQuestionCategory] = useState("");
   const [rawNotes, setRawNotes] = useState("");
   const [transcriptText, setTranscriptText] = useState("");
+  const [localRecordingUri, setLocalRecordingUri] = useState<string | null>(null);
+  const [localRecordingDurationMs, setLocalRecordingDurationMs] = useState(0);
   const [summaryDraft, setSummaryDraft] =
     useState<SummaryDraft>(emptySummary);
   const [shareMessage, setShareMessage] = useState("");
