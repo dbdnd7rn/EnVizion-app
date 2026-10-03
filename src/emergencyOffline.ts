@@ -138,3 +138,142 @@ export async function clearEmergencyOfflineSummary(careRecipientId: string) {
   }
   await SecureStore.deleteItemAsync(key(careRecipientId));
 }
+
+
+function htmlEscape(value: unknown) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+export function emergencyCodeStatusLabel(value: string) {
+  return {
+    unknown: "Not recorded",
+    full_code: "Full code",
+    dnr: "DNR",
+    dni: "DNI",
+    dnr_dni: "DNR / DNI",
+    other: "Other directive",
+  }[value] ?? value;
+}
+
+export function emergencyPoaStatusLabel(value: string) {
+  return {
+    unknown: "Not recorded",
+    none: "No healthcare POA recorded",
+    on_file: "Healthcare POA on file",
+    not_on_file: "POA identified · document not on file",
+  }[value] ?? value;
+}
+
+export function buildEmergencyOnePageHtml(summary: EmergencyOfflineSummary) {
+  const row = (label: string, value: unknown) =>
+    `<div class="row"><span>${htmlEscape(label)}</span><strong>${htmlEscape(
+      String(value ?? "").trim() || "Not recorded",
+    )}</strong></div>`;
+
+  const medicationItems = summary.medications.length
+    ? summary.medications
+        .slice(0, 14)
+        .map((medication) =>
+          `<li>${htmlEscape(
+            [
+              medication.name,
+              medication.dose,
+              medication.route,
+              medication.instructions,
+              medication.isPrn ? "PRN" : "",
+            ]
+              .filter(Boolean)
+              .join(" · "),
+          )}</li>`,
+        )
+        .join("")
+    : "<li>No active medications recorded.</li>";
+
+  return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Emergency Care Summary</title>
+<style>
+@page{size:A4;margin:11mm}
+*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;color:#241b2b;font-size:10.5px;line-height:1.32;margin:0}
+header{background:#4b2859;color:#fff;padding:13px 15px;border-radius:12px;margin-bottom:8px}
+.brand{font-size:8px;letter-spacing:1.3px;font-weight:700;opacity:.85}
+h1{font-size:20px;margin:3px 0}
+.meta{font-size:8.5px;opacity:.83}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+section{border:1px solid #ded3e3;border-radius:10px;padding:9px;margin-bottom:8px;break-inside:avoid}
+h2{font-size:12px;color:#6e397f;margin:0 0 6px}
+.row{display:flex;gap:8px;padding:3px 0;border-bottom:1px solid #f0eaf2}
+.row:last-child{border-bottom:0}
+.row span{width:38%;color:#746a78}
+.row strong{width:62%;font-weight:600}
+ul{margin:3px 0 0 15px;padding:0}
+li{margin:2px 0}
+.notice{font-size:8px;color:#716878;border-top:1px solid #ddd3e0;padding-top:6px;margin-top:2px}
+</style>
+</head>
+<body>
+<header>
+<div class="brand">ENVIZION LIFE · EMERGENCY CARE SUMMARY</div>
+<h1>${htmlEscape(summary.recipientName || "Care profile")}</h1>
+<div class="meta">Offline-ready snapshot · Updated ${htmlEscape(
+    new Date(summary.cachedAt).toLocaleString(),
+  )}</div>
+</header>
+
+<div class="grid">
+<section>
+<h2>Critical medical information</h2>
+${row("Blood type", summary.bloodType)}
+${row("Language", summary.primaryLanguage)}
+${row("Allergies", summary.allergies)}
+${row("Conditions / diagnoses", summary.importantConditions)}
+${row("Medical devices", summary.medicalDevices)}
+</section>
+
+<section>
+<h2>Emergency contacts</h2>
+${row("Primary contact", summary.emergencyContactName)}
+${row("Contact phone", summary.emergencyContactPhone)}
+${row("Emergency number", summary.localEmergencyNumber)}
+${row("Preferred hospital", summary.preferredHospital)}
+</section>
+</div>
+
+<section>
+<h2>Active medications</h2>
+<ul>${medicationItems}</ul>
+</section>
+
+<div class="grid">
+<section>
+<h2>Advance directives</h2>
+${row("Code status", emergencyCodeStatusLabel(summary.codeStatus))}
+${row(
+    "DNR / directive location",
+    summary.dnrLocation || summary.advanceDirectiveLocation,
+  )}
+${row("Healthcare POA", emergencyPoaStatusLabel(summary.poaStatus))}
+${row("POA name", summary.poaName)}
+${row("POA phone", summary.poaPhone)}
+</section>
+
+<section>
+<h2>Emergency notes</h2>
+<div>${htmlEscape(summary.emergencyNotes || "No additional notes recorded.")}</div>
+</section>
+</div>
+
+<div class="notice">
+Caregiver-entered preparedness information. Not a verified clinical medical record or emergency monitoring service. Confirm critical details with the treating team when possible.
+</div>
+</body>
+</html>`;
+}
