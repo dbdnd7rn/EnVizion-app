@@ -479,7 +479,7 @@ export function CareCoordinationInboxScreen() {
   const { state } = useCare();
   const { setActivity } = useCarePresence();
   const careRecipientId = state.careRecipientId;
-  const readOnly = state.accessRole === "viewer";
+  const readOnly =\n    state.accessRole === "viewer" || state.accessRole === "patient";
 
   useEffect(() => {
     setActivity({
