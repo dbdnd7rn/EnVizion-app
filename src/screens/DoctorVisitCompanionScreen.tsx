@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   Switch,
   Text,
@@ -8,17 +9,30 @@ import {
   View,
 } from "react-native";
 import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from "expo-audio";
+import {
   addDoctorVisitQuestion,
   approveDoctorVisitSummary,
   createDoctorVisit,
   deleteDoctorVisitQuestion,
   generateDoctorVisitAiSummary,
+  getDoctorVisitAudioUrl,
   loadDoctorVisitCompanion,
   publishDoctorVisitSummary,
   saveManualDoctorVisitSummary,
+  deleteDoctorVisitAudio,
   setDoctorVisitRecordingConsent,
+  transcribeDoctorVisitAudio,
   updateDoctorVisitCapture,
   updateDoctorVisitQuestion,
+  uploadDoctorVisitAudio,
   type DoctorVisitBundle,
   type DoctorVisitSummary,
 } from "../doctorVisits";
