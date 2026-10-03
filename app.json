@@ -55,6 +55,12 @@
         {
           "microphonePermission": "Allow EnVizion Life to use your microphone only when you choose to record a doctor visit."
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow EnVizion Life to use Face ID to unlock sensitive Care Vault documents."
+        }
       ]
     ],
     "scheme": "envizionlife",
