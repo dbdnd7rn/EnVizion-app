@@ -804,6 +804,37 @@ export function HomeScreen() {
           </View>
         </HomeReveal>
 
+        {state.careRecipientId && (
+          <HomeReveal delay={255}>
+            <View style={{ gap: 13 }}>
+              <Section
+                title="Family coordination"
+                action="Care team"
+                onPress={() => n.navigate("CareTeam")}
+              />
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <HomeActionCard
+                  title="Shared tasks"
+                  subtitle="Claim & complete"
+                  icon="checkbox-outline"
+                  background="#F4EFF8"
+                  iconBackground="#E9DFF0"
+                  onPress={() => n.navigate("CareTasks")}
+                />
+                <HomeActionCard
+                  title="Care feed"
+                  subtitle="Family updates"
+                  icon="chatbubbles-outline"
+                  background="#FFF2F6"
+                  iconBackground="#FFE3EC"
+                  iconColor="#BD4876"
+                  onPress={() => n.navigate("FamilyCommunication")}
+                />
+              </View>
+            </View>
+          </HomeReveal>
+        )}
+
         <HomeReveal delay={285}>
           <Card
             onPress={() => n.navigate("Assistant")}
