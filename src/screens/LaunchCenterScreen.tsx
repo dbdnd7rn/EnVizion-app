@@ -229,7 +229,7 @@ export function LaunchCenterScreen() {
       <Heading
         eyebrow="ADMIN · LAUNCH CENTER"
         title="Turn pilot evidence into a controlled launch decision."
-        body="Create real pilot waves, review Owner/Caregiver/Viewer acceptance, device coverage and recovery drills, then record an auditable hold or approval."
+        body="Create real pilot waves, review Primary Advocate, Co-Caregiver, Care Recipient and Family Member acceptance, device coverage and recovery drills, then record an auditable hold or approval."
       />
 
       {Boolean(message) && (
@@ -347,8 +347,9 @@ export function LaunchCenterScreen() {
                         {item.consentCurrent} consent current
                       </Txt>
                       <Txt style={S.small}>
-                        Role coverage: Owner {item.roleCoverage.owner} ·
-                        Caregiver {item.roleCoverage.caregiver} · Viewer{" "}
+                        Role coverage: Primary Advocate {item.roleCoverage.owner} ·
+                        Co-Caregiver {item.roleCoverage.caregiver} · Care Recipient{" "}
+                        {item.roleCoverage.patient} · Family Member{" "}
                         {item.roleCoverage.viewer}
                       </Txt>
                     </View>
@@ -585,8 +586,9 @@ export function LaunchCenterScreen() {
                   <Card style={{ backgroundColor: C.paper }}>
                     <Text style={S.h3}>Role acceptance</Text>
                     <Txt style={S.small}>
-                      Owner {gate.acceptance.rolePasses.owner ?? 0} · Caregiver{" "}
-                      {gate.acceptance.rolePasses.caregiver ?? 0} · Viewer{" "}
+                      Primary Advocate {gate.acceptance.rolePasses.owner ?? 0} · Co-Caregiver{" "}
+                      {gate.acceptance.rolePasses.caregiver ?? 0} · Care Recipient{" "}
+                      {gate.acceptance.rolePasses.patient ?? 0} · Family Member{" "}
                       {gate.acceptance.rolePasses.viewer ?? 0}
                     </Txt>
                     <Text style={S.h3}>Device coverage</Text>
