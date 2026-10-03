@@ -230,6 +230,22 @@ Deno.serve(async (req: Request) => {
       })
       .eq("id", share.id);
 
+    const snapshotRecipientId = String(
+      share.snapshot?.careRecipientId ??
+        share.snapshot?.recipient?.careRecipientId ??
+        "",
+    );
+    if (snapshotRecipientId) {
+      await admin.from("care_audit_events").insert({
+        care_recipient_id: snapshotRecipientId,
+        actor_user_id: null,
+        action: "emergency_share_open",
+        entity_type: "emergency_share_links",
+        entity_id: share.id,
+        summary: "Temporary emergency summary link opened.",
+      });
+    }
+
     return new Response(emergencyHtml(share.snapshot, share.expires_at), {
       status: 200,
       headers: {
@@ -280,6 +296,24 @@ Deno.serve(async (req: Request) => {
 
       if (error) throw error;
       if (!data?.id) return json({ error: "Share link not found or not editable." }, 404);
+
+      const { data: revokedShare } = await admin
+        .from("emergency_share_links")
+        .select("care_recipient_id")
+        .eq("id", shareId)
+        .maybeSingle();
+
+      if (revokedShare?.care_recipient_id) {
+        await admin.from("care_audit_events").insert({
+          care_recipient_id: revokedShare.care_recipient_id,
+          actor_user_id: user.id,
+          action: "emergency_share_revoke",
+          entity_type: "emergency_share_links",
+          entity_id: shareId,
+          summary: "Temporary emergency summary link revoked.",
+        });
+      }
+
       return json({ ok: true, shareId });
     }
 
@@ -381,7 +415,9 @@ Deno.serve(async (req: Request) => {
 
     const snapshot = {
       generatedAt: new Date().toISOString(),
+      careRecipientId,
       recipient: {
+        careRecipientId,
         displayName: recipient.display_name ?? "",
         emergencyContactName: recipient.emergency_contact_name ?? "",
         emergencyContactPhone: recipient.emergency_contact_phone ?? "",
@@ -419,6 +455,15 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (insertError) throw insertError;
+
+    await admin.from("care_audit_events").insert({
+      care_recipient_id: careRecipientId,
+      actor_user_id: user.id,
+      action: "emergency_share_create",
+      entity_type: "emergency_share_links",
+      entity_id: share.id,
+      summary: `Temporary emergency summary link created for ${expiresInMinutes} minutes.`,
+    });
 
     return json({
       shareId: share.id,
