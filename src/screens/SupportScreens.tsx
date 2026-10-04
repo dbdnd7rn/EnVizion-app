@@ -100,9 +100,19 @@ export function OnboardingScreen() {
   useEffect(() => {
     let active = true;
 
-    loadSavedOnboarding()
-      .then(async (saved) => {
+    Promise.all([
+      loadPendingCareInvitations(),
+      loadSavedOnboarding(),
+    ])
+      .then(async ([invitations, saved]) => {
         if (!active) return;
+
+        const invitation = invitations[0] ?? null;
+        if (invitation) {
+          setPendingInvite(invitation);
+          setChecking(false);
+          return;
+        }
 
         if (saved) {
           dispatch({
@@ -117,9 +127,6 @@ export function OnboardingScreen() {
           return;
         }
 
-        const invitations = await loadPendingCareInvitations();
-        if (!active) return;
-        setPendingInvite(invitations[0] ?? null);
         setChecking(false);
       })
       .catch(() => {
@@ -140,8 +147,36 @@ export function OnboardingScreen() {
       await respondToCareInvitation(pendingInvite.careRecipientId, response);
 
       if (response === "decline") {
+        const [remainingInvitations, saved] = await Promise.all([
+          loadPendingCareInvitations(),
+          loadSavedOnboarding(),
+        ]);
+
+        const nextInvitation = remainingInvitations[0] ?? null;
+        if (nextInvitation) {
+          setPendingInvite(nextInvitation);
+          setMessage("Invitation declined. Review the next invitation below.");
+          return;
+        }
+
         setPendingInvite(null);
-        setMessage("Invitation declined. You can set up your own care profile below.");
+
+        if (saved) {
+          dispatch({
+            type: "profile",
+            name: saved.name,
+            relationship: saved.relationship,
+            faith: saved.faith,
+            careMode: saved.careMode,
+          });
+          await refresh();
+          n.reset({ index: 0, routes: [{ name: "Main" }] });
+          return;
+        }
+
+        setMessage(
+          "Invitation declined. You can create your own EnVizion Life care profile below.",
+        );
         return;
       }
 
