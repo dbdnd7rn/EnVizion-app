@@ -282,21 +282,56 @@ export function CareTeamScreen() {
         <>
           <Section title="Invitations waiting for you" />
           {pending.map((invitation) => (
-            <Card key={invitation.careRecipientId} style={{ backgroundColor: C.lavender }}>
-              <Text style={S.eyebrow}>CARE TEAM INVITATION</Text>
-              <Text style={S.h2}>{invitation.careRecipientName}</Text>
+            <Card
+              key={invitation.careRecipientId}
+              style={{
+                backgroundColor: C.lavender,
+                borderColor: "#DCCBE4",
+                gap: 12,
+              }}
+            >
+              <View style={S.between}>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={S.eyebrow}>CARE TEAM INVITATION</Text>
+                  <Text style={S.h2}>{invitation.careRecipientName}</Text>
+                </View>
+                <View style={[S.pill, { backgroundColor: C.white }]}>
+                  <Text style={[S.small, { color: C.purple }]}>
+                    {roleLabel(invitation.role)}
+                  </Text>
+                </View>
+              </View>
+
               <Txt>
-                You were invited as {roleLabel(invitation.role)}. Access begins
-                only after you accept.
+                {invitation.inviterName} invited you to join this care space as{" "}
+                {roleLabel(invitation.role)}. Access stays inactive until you
+                accept.
               </Txt>
+
+              <View
+                style={{
+                  borderRadius: 16,
+                  backgroundColor: "#FFFFFFA8",
+                  padding: 12,
+                  flexDirection: "row",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Icon name="person-add-outline" size={20} color={C.purple} />
+                <Txt style={[S.small, { flex: 1 }]}>
+                  Invited by {invitation.inviterName}
+                </Txt>
+              </View>
+
               <Button
-                title="Accept invitation"
+                title={`Accept as ${roleLabel(invitation.role)}`}
                 disabled={busyId !== null}
                 icon="checkmark-circle-outline"
                 onPress={() => void respond(invitation, "accept")}
               />
               <Button
-                title="Decline"
+                title="Decline invitation"
                 secondary
                 disabled={busyId !== null}
                 onPress={() => void respond(invitation, "decline")}
