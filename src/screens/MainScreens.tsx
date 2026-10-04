@@ -6,9 +6,11 @@ import type { RootStack } from "../navigation";
 import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
 import {
+  loadCareAccessRecertificationAttention,
   loadCareInvitationAttention,
   loadCareSpaces,
   setActiveCareRecipient,
+  type CareAccessRecertificationAttention,
   type CareInvitationAttention,
   type CareSpace,
 } from "../careTeam";
@@ -151,6 +153,8 @@ export function HomeScreen() {
   const [careSpaces, setCareSpaces] = useState<CareSpace[]>([]);
   const [invitationAttention, setInvitationAttention] =
     useState<CareInvitationAttention | null>(null);
+  const [recertificationAttention, setRecertificationAttention] =
+    useState<CareAccessRecertificationAttention | null>(null);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [switchingCareId, setSwitchingCareId] = useState<string | null>(null);
   const { width: windowWidth } = useWindowDimensions();
@@ -193,17 +197,25 @@ export function HomeScreen() {
 
     if (!state.careRecipientId || state.accessRole !== "owner") {
       setInvitationAttention(null);
+      setRecertificationAttention(null);
       return () => {
         active = false;
       };
     }
 
-    loadCareInvitationAttention(state.careRecipientId)
-      .then((summary) => {
-        if (active) setInvitationAttention(summary);
+    Promise.all([
+      loadCareInvitationAttention(state.careRecipientId),
+      loadCareAccessRecertificationAttention(state.careRecipientId),
+    ])
+      .then(([invitationSummary, recertificationSummary]) => {
+        if (!active) return;
+        setInvitationAttention(invitationSummary);
+        setRecertificationAttention(recertificationSummary);
       })
       .catch(() => {
-        if (active) setInvitationAttention(null);
+        if (!active) return;
+        setInvitationAttention(null);
+        setRecertificationAttention(null);
       });
 
     return () => {
@@ -512,6 +524,107 @@ export function HomeScreen() {
             </View>
           </HomeReveal>
         )}
+
+        {recertificationAttention &&
+          recertificationAttention.needsAttention > 0 && (
+            <HomeReveal delay={48}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${recertificationAttention.needsAttention} care access review${recertificationAttention.needsAttention === 1 ? "" : "s"} need attention`}
+                onPress={() => n.navigate("CareAccessRecertification")}
+                style={({ pressed }) => ({
+                  borderRadius: 22,
+                  borderWidth: 1,
+                  borderColor:
+                    recertificationAttention.overdue14 > 0
+                      ? "#E9BFB2"
+                      : recertificationAttention.due > 0
+                        ? "#E4D3B1"
+                        : "#D9D1E4",
+                  backgroundColor:
+                    recertificationAttention.overdue14 > 0
+                      ? "#FFF5F1"
+                      : recertificationAttention.due > 0
+                        ? "#FFFAF0"
+                        : "#FAF7FC",
+                  paddingHorizontal: 15,
+                  paddingVertical: 14,
+                  flexDirection: "row",
+                  gap: 12,
+                  alignItems: "center",
+                  opacity: pressed ? 0.78 : 1,
+                })}
+              >
+                <View
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 15,
+                    backgroundColor:
+                      recertificationAttention.overdue14 > 0
+                        ? "#FBE3DA"
+                        : recertificationAttention.due > 0
+                          ? "#F7ECD7"
+                          : "#EFE7F5",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon
+                    name={
+                      recertificationAttention.overdue14 > 0
+                        ? "alert-circle-outline"
+                        : recertificationAttention.due > 0
+                          ? "shield-outline"
+                          : "calendar-outline"
+                    }
+                    size={22}
+                    color={
+                      recertificationAttention.overdue14 > 0
+                        ? "#B55235"
+                        : recertificationAttention.due > 0
+                          ? "#906622"
+                          : C.purple
+                    }
+                  />
+                </View>
+
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text
+                    style={[
+                      S.eyebrow,
+                      {
+                        color:
+                          recertificationAttention.overdue14 > 0
+                            ? "#A44E36"
+                            : recertificationAttention.due > 0
+                              ? "#8A6530"
+                              : C.purple,
+                      },
+                    ]}
+                  >
+                    ACCESS REVIEW
+                  </Text>
+                  <Text style={[S.h3, { fontSize: 14.5 }]}>
+                    {recertificationAttention.overdue14 > 0
+                      ? `${recertificationAttention.overdue14} review${recertificationAttention.overdue14 === 1 ? "" : "s"} overdue 14+ days`
+                      : recertificationAttention.due > 0
+                        ? `${recertificationAttention.due} 90-day review${recertificationAttention.due === 1 ? "" : "s"} due`
+                        : `${recertificationAttention.upcoming7} review${recertificationAttention.upcoming7 === 1 ? "" : "s"} due within 7 days`}
+                  </Text>
+                  <Txt style={S.small}>
+                    {recertificationAttention.next
+                      ? recertificationAttention.next.isDue
+                        ? `${recertificationAttention.next.displayName} · ${recertificationAttention.next.overdueDays > 0 ? `${recertificationAttention.next.overdueDays} days overdue` : "review due now"}`
+                        : `${recertificationAttention.next.displayName} · due ${new Date(recertificationAttention.next.dueAt).toLocaleDateString()}`
+                      : "Open the 90-day access review center."}
+                  </Txt>
+                </View>
+
+                <Icon name="chevron-forward" size={20} color={C.purple} />
+              </Pressable>
+            </HomeReveal>
+          )}
 
         {invitationAttention &&
           invitationAttention.needsAttention > 0 && (
