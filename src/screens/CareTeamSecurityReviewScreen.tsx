@@ -248,6 +248,41 @@ export function CareTeamSecurityReviewScreen() {
         </Card>
       )}
 
+      {review && review.summary.total > 0 && (
+        <Card
+          onPress={() => n.navigate("CareTeamSecurityRemediation")}
+          label="Open Security Remediation Center"
+          style={{
+            backgroundColor: "#FAF7FB",
+            borderColor: "#E4D9E8",
+            gap: 11,
+          }}
+        >
+          <View style={S.between}>
+            <View
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: 17,
+                backgroundColor: "#F1E7F5",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="git-compare-outline" size={23} color={C.purple} />
+            </View>
+            <Icon name="chevron-forward" size={20} color={C.purple} />
+          </View>
+          <View style={{ gap: 4 }}>
+            <Text style={S.h2}>Security Remediation Center</Text>
+            <Txt>
+              Preview safe before-and-after permission changes, then explicitly
+              confirm only the fix you intend to apply.
+            </Txt>
+          </View>
+        </Card>
+      )}
+
       {review && (
         <>
           <Section title="Risk summary" />
@@ -413,10 +448,10 @@ export function CareTeamSecurityReviewScreen() {
                     finding.category === "integrity" ||
                     finding.category === "invitations") && (
                     <Button
-                      title="Review in Care Team"
+                      title="Open Remediation Center"
                       secondary
-                      icon="people-outline"
-                      onPress={() => n.navigate("CareTeam")}
+                      icon="git-compare-outline"
+                      onPress={() => n.navigate("CareTeamSecurityRemediation")}
                     />
                   )}
                 </Card>
