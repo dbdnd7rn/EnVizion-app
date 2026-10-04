@@ -444,3 +444,29 @@ test("periodic care access recertification requires Primary Advocate sign-off", 
   assert.match(activity, /90-day access review completed/);
   assert.match(activity, /Periodic access recertification signed off/);
 });
+
+
+test("access recertification escalation warns without silently changing access", () => {
+  const migration = source(
+    "supabase/migrations/20261004231500_add_care_access_recertification_escalations.sql",
+  );
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+  const careTeam = source("src/careTeam.ts");
+  const home = source("src/screens/MainScreens.tsx");
+
+  assert.match(migration, /care_access_recertification_upcoming/);
+  assert.match(migration, /care_access_recertification_overdue_7d/);
+  assert.match(migration, /care_access_recertification_overdue_14d/);
+  assert.match(migration, /interval '7 days'/);
+  assert.match(migration, /interval '14 days'/);
+  assert.match(migration, /envizion-care-access-recertification-escalations/);
+  assert.match(migration, /47 \*\/6 \* \* \*/);
+  assert.doesNotMatch(migration, /update public\.care_recipient_members/i);
+  assert.doesNotMatch(migration, /update public\.care_group_members/i);
+  assert.match(admin, /action === "recertification_attention"/);
+  assert.match(admin, /overdue14/);
+  assert.match(careTeam, /loadCareAccessRecertificationAttention/);
+  assert.match(home, /ACCESS REVIEW/);
+  assert.match(home, /overdue 14\+ days/);
+  assert.match(home, /due within 7 days/);
+});
