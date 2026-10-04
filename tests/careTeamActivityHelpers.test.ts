@@ -181,3 +181,36 @@ test("care team activity summary counts accountability milestones", () => {
     revoked: 1,
   });
 });
+
+
+test("care team activity explains confirmed security remediation events", () => {
+  const items = buildCareTeamActivity(
+    [
+      {
+        id: "security-consent",
+        actorUserId: "owner",
+        subjectUserId: "member",
+        eventType: "security_remediation_applied",
+        role: "viewer",
+        note: "Co-Caregiver direct -> Family Member in both access records",
+        createdAt: "2026-10-04T14:00:00.000Z",
+      },
+    ] as any,
+    [
+      {
+        id: "security-audit",
+        actorUserId: "owner",
+        action: "security_access_confirmed",
+        entityType: "care_team_member",
+        entityId: "member",
+        summary: "Access reviewed and still needed",
+        createdAt: "2026-10-04T15:00:00.000Z",
+      },
+    ] as any,
+    names,
+  );
+
+  assert.equal(items[0].title, "Access need reconfirmed");
+  assert.equal(items[1].title, "Security remediation applied");
+  assert.match(items[1].detail, /Co-Caregiver direct/);
+});
