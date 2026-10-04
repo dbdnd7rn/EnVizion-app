@@ -9,6 +9,7 @@ import {
   loadPendingCareInvitations,
   reinviteCareTeamMember,
   respondToCareInvitation,
+  sendCareInvitationReminder,
   revokeCareTeamAccess,
   setActiveCareRecipient,
   updateCareTeamRole,
@@ -50,6 +51,39 @@ function statusLabel(status: CareTeamMember["status"]) {
     declined: "Declined",
     revoked: "Revoked",
   }[status];
+}
+
+function invitationStatusLabel(member: CareTeamMember) {
+  if (member.status === "invited" && member.isExpired) return "Expired";
+  return statusLabel(member.status);
+}
+
+function invitationDateLabel(value: string | null) {
+  if (!value) return "";
+  return new Date(value).toLocaleDateString();
+}
+
+function invitationWindowLabel(member: CareTeamMember) {
+  if (member.status !== "invited" || !member.inviteExpiresAt) return "";
+
+  const hours = Math.ceil(
+    (new Date(member.inviteExpiresAt).getTime() - Date.now()) /
+      (60 * 60 * 1000),
+  );
+
+  if (member.isExpired || hours <= 0) return "Invitation expired";
+  if (hours < 24) return `Expires in ${hours}h`;
+
+  const days = Math.ceil(hours / 24);
+  return `Expires in ${days} day${days === 1 ? "" : "s"}`;
+}
+
+function reminderCoolingDown(member: CareTeamMember) {
+  if (!member.lastRemindedAt) return false;
+  return (
+    Date.now() - new Date(member.lastRemindedAt).getTime() <
+    24 * 60 * 60 * 1000
+  );
 }
 
 function RolePicker({
@@ -168,6 +202,22 @@ export function CareTeamScreen() {
     [members],
   );
 
+  const invitationSummary = useMemo(() => {
+    const managed = members.filter((member) => member.role !== "owner");
+    return {
+      pending: managed.filter(
+        (member) => member.status === "invited" && !member.isExpired,
+      ).length,
+      expired: managed.filter(
+        (member) => member.status === "invited" && member.isExpired,
+      ).length,
+      active: managed.filter((member) => member.status === "active").length,
+      closed: managed.filter((member) =>
+        ["declined", "revoked"].includes(member.status),
+      ).length,
+    };
+  }, [members]);
+
   async function switchSpace(space: CareSpace) {
     if (space.active) return;
     setBusyId(`space-${space.careRecipientId}`);
@@ -225,8 +275,8 @@ export function CareTeamScreen() {
       setInviteRole("caregiver");
       setMessage(
         result.invitationEmailSent
-          ? "Invitation email sent. Access stays pending until they accept."
-          : "Invitation added to their EnVizion account. Access stays pending until they accept.",
+          ? "Invitation email requested and a 14-day in-app invitation is ready. Access stays pending until they accept."
+          : "A 14-day invitation is ready in their EnVizion account. Access stays pending until they accept.",
       );
       await refresh();
     } catch (error) {
@@ -370,6 +420,69 @@ export function CareTeamScreen() {
         </Card>
       ))}
 
+      {canManage && recipientId && (
+        <>
+          <Section title="Invitation management" />
+          <Card
+            style={{
+              backgroundColor: "#FBF8FC",
+              borderColor: "#E7DCEB",
+              gap: 15,
+            }}
+          >
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              {[
+                ["Pending", invitationSummary.pending, "#F6EEF9"],
+                ["Active", invitationSummary.active, "#EAF3EE"],
+                ["Expired", invitationSummary.expired, "#FFF3E6"],
+                ["Closed", invitationSummary.closed, "#F2EFF3"],
+              ].map(([label, value, background]) => (
+                <View
+                  key={String(label)}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    borderRadius: 16,
+                    paddingVertical: 11,
+                    paddingHorizontal: 8,
+                    backgroundColor: String(background),
+                    alignItems: "center",
+                    gap: 3,
+                  }}
+                >
+                  <Text style={[S.h3, { fontSize: 18 }]}>{String(value)}</Text>
+                  <Text
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    style={[S.small, { textAlign: "center" }]}
+                  >
+                    {String(label)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Icon name="time-outline" size={20} color={C.purple} />
+              <Txt style={[S.small, { flex: 1 }]}>
+                New invitations stay open for 14 days. A Primary Advocate can
+                send one in-app reminder per 24 hours or re-open an expired
+                invitation.
+              </Txt>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <Icon name="mail-outline" size={20} color={C.purple} />
+              <Txt style={[S.small, { flex: 1 }]}>
+                “Email requested” means EnVizion successfully handed the invite
+                to the email provider. It does not claim that the message was
+                delivered or opened.
+              </Txt>
+            </View>
+          </Card>
+        </>
+      )}
+
       <Section title="People with access" action="Refresh" onPress={() => void refresh()} />
       {members.map((member) => (
         <Card key={member.userId}>
@@ -396,7 +509,7 @@ export function CareTeamScreen() {
                   },
                 ]}
               >
-                {statusLabel(member.status)}
+                {invitationStatusLabel(member)}
               </Text>
             </View>
           </View>
@@ -407,6 +520,39 @@ export function CareTeamScreen() {
               ? " · read-only"
               : ""}
           </Txt>
+
+          {member.status === "invited" && (
+            <View
+              style={{
+                borderRadius: 16,
+                backgroundColor: member.isExpired ? "#FFF7ED" : "#F8F3FA",
+                padding: 12,
+                gap: 5,
+              }}
+            >
+              <View style={S.between}>
+                <Text style={[S.small, { fontFamily: "DMSans_600SemiBold" }]}>
+                  {invitationWindowLabel(member)}
+                </Text>
+                {member.inviteExpiresAt && (
+                  <Text style={S.small}>
+                    {member.isExpired ? "Expired " : "Expires "}
+                    {invitationDateLabel(member.inviteExpiresAt)}
+                  </Text>
+                )}
+              </View>
+              <Txt style={S.small}>
+                {member.emailRequestedAt
+                  ? `Email requested ${invitationDateLabel(member.emailRequestedAt)} · in-app invitation ready`
+                  : "In-app invitation ready"}
+              </Txt>
+              {member.lastRemindedAt && (
+                <Txt style={S.small}>
+                  Last reminder {new Date(member.lastRemindedAt).toLocaleString()}
+                </Txt>
+              )}
+            </View>
+          )}
 
           {canManage && member.role !== "owner" && (
             <>
@@ -435,7 +581,69 @@ export function CareTeamScreen() {
                 }}
               />
 
-              {member.status === "active" || member.status === "invited" ? (
+              {member.status === "invited" && !member.isExpired && (
+                <Button
+                  title={
+                    reminderCoolingDown(member)
+                      ? "Reminder sent recently"
+                      : "Send invitation reminder"
+                  }
+                  secondary
+                  disabled={busyId !== null || reminderCoolingDown(member)}
+                  icon="notifications-outline"
+                  onPress={async () => {
+                    if (!recipientId) return;
+                    setBusyId(`reminder-${member.userId}`);
+                    setMessage("");
+                    try {
+                      await sendCareInvitationReminder(
+                        recipientId,
+                        member.userId,
+                      );
+                      setMessage(
+                        `Reminder sent to ${member.displayName} in EnVizion Life.`,
+                      );
+                      await refresh();
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : "We could not send that reminder.",
+                      );
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}
+                />
+              )}
+
+              {member.status === "invited" && member.isExpired ? (
+                <Button
+                  title="Re-open invitation"
+                  secondary
+                  disabled={busyId !== null}
+                  icon="refresh-outline"
+                  onPress={async () => {
+                    if (!recipientId) return;
+                    setBusyId(`reinvite-${member.userId}`);
+                    try {
+                      await reinviteCareTeamMember(recipientId, member.userId);
+                      setMessage(
+                        `A fresh 14-day invitation is ready for ${member.displayName}.`,
+                      );
+                      await refresh();
+                    } catch (error) {
+                      setMessage(
+                        error instanceof Error
+                          ? error.message
+                          : "We could not re-open that invitation.",
+                      );
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}
+                />
+              ) : member.status === "active" || member.status === "invited" ? (
                 <Button
                   title="Revoke access"
                   secondary
@@ -467,6 +675,9 @@ export function CareTeamScreen() {
                     setBusyId(member.userId);
                     try {
                       await reinviteCareTeamMember(recipientId, member.userId);
+                      setMessage(
+                        `A fresh 14-day invitation is ready for ${member.displayName}.`,
+                      );
                       await refresh();
                     } catch (error) {
                       setMessage(
