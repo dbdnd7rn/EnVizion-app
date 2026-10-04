@@ -420,6 +420,327 @@ Deno.serve(async (req: Request) => {
       return json({ ok: true });
     }
 
+    if (action === "security_review") {
+      if (!canManage) {
+        return json(
+          { error: "Only a Primary Advocate can run a care-team security review." },
+          403,
+        );
+      }
+
+      const [
+        { data: directRows, error: directError },
+        { data: groupRows, error: groupError },
+        { data: auditRows, error: auditError },
+      ] = await Promise.all([
+        admin
+          .from("care_recipient_members")
+          .select(
+            "user_id, role, status, invited_name, invited_email, invited_at, accepted_at, revoked_at, invite_expires_at, updated_at",
+          )
+          .eq("care_recipient_id", careRecipientId),
+        recipient.care_group_id
+          ? admin
+              .from("care_group_members")
+              .select("user_id, role, status, joined_at, updated_at")
+              .eq("care_group_id", recipient.care_group_id)
+          : Promise.resolve({ data: [], error: null }),
+        admin
+          .from("care_audit_events")
+          .select("actor_user_id, created_at")
+          .eq("care_recipient_id", careRecipientId)
+          .not("actor_user_id", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(1000),
+      ]);
+
+      if (directError) throw directError;
+      if (groupError) throw groupError;
+      if (auditError) throw auditError;
+
+      const directMembers = directRows ?? [];
+      const groupMembers = groupRows ?? [];
+      const allUserIds = [
+        ...directMembers.map((row) => row.user_id),
+        ...groupMembers.map((row) => row.user_id),
+      ];
+      const userMap = await getUsersById(admin, allUserIds);
+      const directMap = new Map(
+        directMembers.map((row) => [row.user_id, row]),
+      );
+      const groupMap = new Map(
+        groupMembers.map((row) => [row.user_id, row]),
+      );
+      const lastCareActivity = new Map<string, string>();
+      for (const row of auditRows ?? []) {
+        if (row.actor_user_id && !lastCareActivity.has(row.actor_user_id)) {
+          lastCareActivity.set(row.actor_user_id, row.created_at);
+        }
+      }
+
+      const now = Date.now();
+      const dayMs = 24 * 60 * 60 * 1000;
+      const findings: Array<Record<string, unknown>> = [];
+
+      const displayName = (userId: string) => {
+        const direct = directMap.get(userId);
+        const account = userMap.get(userId);
+        return (
+          String(direct?.invited_name ?? "").trim() ||
+          String(account?.user_metadata?.full_name ?? "").trim() ||
+          "Care team member"
+        );
+      };
+
+      const addFinding = (input: {
+        id: string;
+        severity: "critical" | "warning" | "review";
+        category: "permissions" | "invitations" | "activity" | "integrity";
+        userId?: string | null;
+        title: string;
+        detail: string;
+        recommendation: string;
+      }) => {
+        findings.push({
+          ...input,
+          userId: input.userId ?? null,
+          memberName: input.userId ? displayName(input.userId) : null,
+        });
+      };
+
+      for (const direct of directMembers) {
+        const group = groupMap.get(direct.user_id);
+
+        if (
+          direct.role === "patient" &&
+          direct.status === "active" &&
+          group?.status === "active" &&
+          ["primary_advocate", "co_caregiver"].includes(group.role)
+        ) {
+          addFinding({
+            id: "patient-write-conflict:" + direct.user_id,
+            severity: "critical",
+            category: "permissions",
+            userId: direct.user_id,
+            title: "Care Recipient has a conflicting write-capable group role",
+            detail:
+              "This person is recorded as a read-only Care Recipient but also has an active CareGroup role that can edit shared care information.",
+            recommendation:
+              "Open Care Team and correct the role mismatch immediately. Keep Care Recipient access read-only unless their role is intentionally changed.",
+          });
+        }
+
+        if (
+          ["revoked", "declined"].includes(direct.status) &&
+          group?.status === "active"
+        ) {
+          addFinding({
+            id: "revoked-still-group-active:" + direct.user_id,
+            severity: "critical",
+            category: "permissions",
+            userId: direct.user_id,
+            title: "Closed direct access is still active through the CareGroup",
+            detail:
+              "The direct membership is revoked or declined, but an active CareGroup membership still exists for this person.",
+            recommendation:
+              "Review this member in Care Team and revoke or reconcile the remaining active access.",
+          });
+        }
+
+        if (
+          direct.status === "active" &&
+          group?.status === "revoked"
+        ) {
+          addFinding({
+            id: "group-revoked-direct-active:" + direct.user_id,
+            severity: "warning",
+            category: "integrity",
+            userId: direct.user_id,
+            title: "Membership status is inconsistent",
+            detail:
+              "CareGroup access is revoked while the direct care-recipient membership is still active.",
+            recommendation:
+              "Review the member’s intended access and synchronize the membership states.",
+          });
+        }
+
+        if (
+          direct.status === "active" &&
+          group?.status === "active" &&
+          direct.role !== "patient"
+        ) {
+          const mappedGroupRole = careRoleForGroupRole(group.role);
+          if (mappedGroupRole && mappedGroupRole !== direct.role) {
+            addFinding({
+              id: "role-mismatch:" + direct.user_id,
+              severity: "warning",
+              category: "permissions",
+              userId: direct.user_id,
+              title: "Direct and CareGroup roles do not match",
+              detail:
+                "Direct access is " + roleLabel(direct.role) +
+                " while CareGroup access resolves to " + roleLabel(mappedGroupRole) + ".",
+              recommendation:
+                "Review the intended role in Care Team and align both membership records.",
+            });
+          }
+        }
+
+        if (direct.status === "active" && direct.revoked_at) {
+          addFinding({
+            id: "active-with-revoked-date:" + direct.user_id,
+            severity: "warning",
+            category: "integrity",
+            userId: direct.user_id,
+            title: "Active membership still carries a revoked timestamp",
+            detail:
+              "The membership is active but still contains evidence of an earlier revocation state.",
+            recommendation:
+              "Review the member’s current access and reconcile the stored membership state.",
+          });
+        }
+
+        if (direct.status === "invited") {
+          const expiresAt = direct.invite_expires_at
+            ? new Date(direct.invite_expires_at).getTime()
+            : null;
+          const invitedAt = direct.invited_at
+            ? new Date(direct.invited_at).getTime()
+            : null;
+
+          if (expiresAt && expiresAt <= now) {
+            addFinding({
+              id: "expired-invite:" + direct.user_id,
+              severity: "review",
+              category: "invitations",
+              userId: direct.user_id,
+              title: "Expired invitation is still unresolved",
+              detail:
+                "This invitation can no longer be accepted and remains in the pending membership record.",
+              recommendation:
+                "Re-open the invitation if access is still needed, or revoke it to close the pending record.",
+            });
+          } else if (invitedAt && now - invitedAt >= 7 * dayMs) {
+            addFinding({
+              id: "old-pending-invite:" + direct.user_id,
+              severity: "review",
+              category: "invitations",
+              userId: direct.user_id,
+              title: "Invitation has been pending for at least 7 days",
+              detail:
+                "The invited person has not accepted or declined the invitation yet.",
+              recommendation:
+                "Confirm they still need access. Send a reminder, re-open when needed, or revoke the invitation.",
+            });
+          }
+        }
+      }
+
+      const uniqueActive = new Map<string, { role: CareRole }>();
+      for (const direct of directMembers) {
+        if (
+          direct.status === "active" &&
+          direct.role !== "owner" &&
+          direct.user_id !== recipient.owner_id
+        ) {
+          uniqueActive.set(direct.user_id, { role: direct.role });
+        }
+      }
+      for (const group of groupMembers) {
+        if (
+          group.status === "active" &&
+          group.user_id !== recipient.owner_id &&
+          !uniqueActive.has(group.user_id)
+        ) {
+          const mappedRole = careRoleForGroupRole(group.role);
+          if (mappedRole && mappedRole !== "owner") {
+            uniqueActive.set(group.user_id, { role: mappedRole });
+          }
+        }
+      }
+
+      for (const [userId, member] of uniqueActive) {
+        if (!["caregiver", "viewer"].includes(member.role)) continue;
+
+        const account = userMap.get(userId);
+        const lastSignIn = account?.last_sign_in_at
+          ? new Date(account.last_sign_in_at).getTime()
+          : null;
+        const latestAudit = lastCareActivity.get(userId);
+        const latestAuditTime = latestAudit
+          ? new Date(latestAudit).getTime()
+          : null;
+        const lastKnown = Math.max(lastSignIn ?? 0, latestAuditTime ?? 0);
+
+        if (lastKnown && now - lastKnown >= 90 * dayMs) {
+          addFinding({
+            id: "stale-active-access:" + userId,
+            severity: "review",
+            category: "activity",
+            userId,
+            title: "Active access has no recent recorded activity",
+            detail:
+              "This person still has active access, but EnVizion has not recorded a sign-in or care-workspace activity for at least 90 days.",
+            recommendation:
+              "Confirm this person still needs access. Revoke access if their caregiving or family role has ended.",
+          });
+        }
+      }
+
+      const severityRank: Record<string, number> = {
+        critical: 0,
+        warning: 1,
+        review: 2,
+      };
+      findings.sort((a: any, b: any) => {
+        const bySeverity =
+          severityRank[String(a.severity)] - severityRank[String(b.severity)];
+        if (bySeverity !== 0) return bySeverity;
+        return String(a.title).localeCompare(String(b.title));
+      });
+
+      const critical = findings.filter(
+        (finding: any) => finding.severity === "critical",
+      ).length;
+      const warning = findings.filter(
+        (finding: any) => finding.severity === "warning",
+      ).length;
+      const review = findings.filter(
+        (finding: any) => finding.severity === "review",
+      ).length;
+
+      return json({
+        reviewedAt: new Date().toISOString(),
+        thresholds: {
+          pendingInvitationDays: 7,
+          staleAccessDays: 90,
+        },
+        summary: {
+          critical,
+          warning,
+          review,
+          total: findings.length,
+          status:
+            critical > 0
+              ? "action_required"
+              : warning > 0
+                ? "attention"
+                : review > 0
+                  ? "review"
+                  : "clear",
+        },
+        findings,
+        checks: [
+          "Care Recipient write-role conflicts",
+          "Revoked or declined access still active through CareGroup",
+          "Direct and CareGroup role mismatches",
+          "Inconsistent active/revoked membership state",
+          "Expired or long-pending invitations",
+          "Active caregiver or family access with no recorded activity for 90 days",
+        ],
+      });
+    }
+
     if (action === "list") {
       const [
         { data: directMembers, error: membersError },
