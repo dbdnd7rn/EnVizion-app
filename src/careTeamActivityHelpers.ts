@@ -117,6 +117,15 @@ function consentPresentation(
         icon: "shield-checkmark-outline",
         tone: "purple",
       };
+    case "access_recertified":
+      return {
+        title: "90-day access review completed",
+        detail:
+          event.note ??
+          `${actor} reviewed ${subject}’s ${role} access.`,
+        icon: "calendar-outline",
+        tone: "green",
+      };
     default:
       return {
         title: event.eventType.replaceAll("_", " "),
@@ -184,6 +193,17 @@ function auditPresentation(
         event.summary ??
         `${actor} reviewed inactive-looking access and confirmed it is still needed.`,
       icon: "checkmark-circle-outline",
+      tone: "green",
+    };
+  }
+
+  if (event.action === "access_recertification_completed") {
+    return {
+      title: "Periodic access recertification signed off",
+      detail:
+        event.summary ??
+        `${actor} completed a 90-day care-team access review.`,
+      icon: "calendar-outline",
       tone: "green",
     };
   }
