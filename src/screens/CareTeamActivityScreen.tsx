@@ -195,6 +195,41 @@ export function CareTeamActivityScreen() {
         </Card>
       )}
 
+      {canManage && (
+        <Card
+          onPress={() => n.navigate("CareTeamAccessReport")}
+          label="Create Care Team Access Report"
+          style={{
+            backgroundColor: "#FAF7FB",
+            borderColor: "#E4D9E8",
+            gap: 11,
+          }}
+        >
+          <View style={S.between}>
+            <View
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: 17,
+                backgroundColor: "#F1E7F5",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name="document-text-outline" size={23} color={C.purple} />
+            </View>
+            <Icon name="chevron-forward" size={20} color={C.purple} />
+          </View>
+          <View style={{ gap: 4 }}>
+            <Text style={S.h2}>Create Care Team Access Report</Text>
+            <Txt>
+              Export a selected period of care-team access history and current
+              roles without exposing clinical details.
+            </Txt>
+          </View>
+        </Card>
+      )}
+
       <Section title="Access history at a glance" />
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
         {[
