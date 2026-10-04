@@ -716,6 +716,50 @@ export function CareTeamScreen() {
 
       {canManage && (
         <>
+          <Section title="90-day access review" />
+          <Card
+            onPress={() => n.navigate("CareAccessRecertification")}
+            label="Open 90-day care access recertification"
+            style={{
+              backgroundColor: "#F7FAF8",
+              borderColor: "#D7E5DB",
+              gap: 12,
+            }}
+          >
+            <View style={S.between}>
+              <View
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 17,
+                  backgroundColor: "#EAF3EE",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="calendar-outline" size={23} color={C.green} />
+              </View>
+              <Icon name="chevron-forward" size={20} color={C.purple} />
+            </View>
+            <View style={{ gap: 5 }}>
+              <Text style={S.h2}>Periodic Access Recertification</Text>
+              <Txt>
+                Every 90 days, reconfirm whether each active Co-Caregiver or
+                Family Member should keep access, change role, or be revoked.
+              </Txt>
+            </View>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {["Keep access", "Change role", "Revoke access"].map((label) => (
+                <View
+                  key={label}
+                  style={[S.pill, { backgroundColor: C.white }]}
+                >
+                  <Text style={[S.small, { color: C.green }]}>{label}</Text>
+                </View>
+              ))}
+            </View>
+          </Card>
+
           <Section title="Security review" />
           <Card
             onPress={() => n.navigate("CareTeamSecurityReview")}
