@@ -92,6 +92,34 @@ export type CareAccessReportData = {
   events: ConsentEvent[];
 };
 
+export type CareTeamSecurityFinding = {
+  id: string;
+  severity: "critical" | "warning" | "review";
+  category: "permissions" | "invitations" | "activity" | "integrity";
+  userId: string | null;
+  memberName: string | null;
+  title: string;
+  detail: string;
+  recommendation: string;
+};
+
+export type CareTeamSecurityReview = {
+  reviewedAt: string;
+  thresholds: {
+    pendingInvitationDays: number;
+    staleAccessDays: number;
+  };
+  summary: {
+    critical: number;
+    warning: number;
+    review: number;
+    total: number;
+    status: "action_required" | "attention" | "review" | "clear";
+  };
+  findings: CareTeamSecurityFinding[];
+  checks: string[];
+};
+
 async function invokeCareTeam<T>(
   body: Record<string, unknown>,
 ): Promise<T> {
@@ -139,6 +167,15 @@ export async function loadCareInvitationAttention(
 ): Promise<CareInvitationAttention> {
   return invokeCareTeam<CareInvitationAttention>({
     action: "attention",
+    careRecipientId,
+  });
+}
+
+export async function loadCareTeamSecurityReview(
+  careRecipientId: string,
+): Promise<CareTeamSecurityReview> {
+  return invokeCareTeam<CareTeamSecurityReview>({
+    action: "security_review",
     careRecipientId,
   });
 }
