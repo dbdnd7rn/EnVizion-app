@@ -9,6 +9,7 @@ export type CareInvitation = {
   relationship: string;
   role: Exclude<CareRole, "owner">;
   invitedName: string;
+  inviterName: string;
   invitedAt: string | null;
 };
 
