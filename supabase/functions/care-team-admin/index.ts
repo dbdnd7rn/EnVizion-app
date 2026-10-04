@@ -383,6 +383,43 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (action === "record_access_report") {
+      if (!canManage) {
+        return json(
+          { error: "Only a Primary Advocate can generate care access reports." },
+          403,
+        );
+      }
+
+      const allowedPeriods = new Map([
+        ["last_7_days", "Last 7 days"],
+        ["last_30_days", "Last 30 days"],
+        ["last_90_days", "Last 90 days"],
+        ["all_recorded_history", "All recorded history"],
+      ]);
+      const period = String(payload.period ?? "");
+      const periodLabel = allowedPeriods.get(period);
+
+      if (!periodLabel) {
+        return json({ error: "A valid report period is required." }, 400);
+      }
+
+      const { error: auditError } = await admin
+        .from("care_audit_events")
+        .insert({
+          care_recipient_id: careRecipientId,
+          actor_user_id: user.id,
+          action: "access_report_generated",
+          entity_type: "care_access_report",
+          entity_id: careRecipientId,
+          summary: `Care Team Access Report generated · ${periodLabel}`,
+        });
+
+      if (auditError) throw auditError;
+
+      return json({ ok: true });
+    }
+
     if (action === "list") {
       const [
         { data: directMembers, error: membersError },
