@@ -65,6 +65,7 @@ export type RootStack = {
   LaunchCenter: undefined;
   CareTeam: undefined;
   CareTeamActivity: undefined;
+  CareTeamAccessReport: undefined;
   Notifications: undefined;
   NotificationSettings: undefined;
   StaffWorkspace: undefined;
