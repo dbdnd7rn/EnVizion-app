@@ -319,3 +319,27 @@ test("care team activity center keeps access accountability filterable", () => {
   assert.match(helpers, /access_revoked/);
   assert.match(helpers, /access_reinvited/);
 });
+
+
+test("care team access report stays privacy-minimized and Primary Advocate controlled", () => {
+  const navigation = source("src/navigation.ts");
+  const app = source("App.tsx");
+  const screen = source("src/screens/CareTeamAccessReportScreen.tsx");
+  const helpers = source("src/careTeamAccessReportHelpers.ts");
+  const careTeam = source("src/careTeam.ts");
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+
+  assert.match(navigation, /CareTeamAccessReport/);
+  assert.match(app, /name=["']CareTeamAccessReport["']/);
+  assert.match(screen, /Primary Advocate access required/);
+  assert.match(screen, /Privacy-minimized export/);
+  assert.match(screen, /Open report & save PDF/);
+  assert.match(screen, /Create & share report PDF/);
+  assert.match(helpers, /intentionally excludes medications, diagnoses, observations/i);
+  assert.doesNotMatch(helpers, /member\.email/);
+  assert.match(careTeam, /loadCareAccessReportData/);
+  assert.match(careTeam, /recordCareAccessReportGeneration/);
+  assert.match(admin, /record_access_report/);
+  assert.match(admin, /Only a Primary Advocate can generate care access reports/);
+  assert.match(admin, /access_report_generated/);
+});
