@@ -36,6 +36,53 @@ import {
   respondToCareInvitation,
   type CareInvitation,
 } from "../careTeam";
+
+function invitationRolePresentation(role: CareInvitation["role"]) {
+  if (role === "caregiver") {
+    return {
+      label: "Co-Caregiver",
+      icon: "people-circle-outline",
+      summary:
+        "Help coordinate day-to-day care and keep the shared record current.",
+      permissions: [
+        ["checkmark-circle-outline", "View and update shared care information"],
+        ["calendar-outline", "Coordinate tasks, appointments and schedules"],
+        ["document-text-outline", "Review visit summaries and shared documents"],
+      ] as const,
+      boundary: "You cannot manage Primary Advocate access.",
+    };
+  }
+
+  if (role === "patient") {
+    return {
+      label: "Care Recipient",
+      icon: "person-circle-outline",
+      summary:
+        "See the care information being organized for you in one private place.",
+      permissions: [
+        ["eye-outline", "Review your shared care information"],
+        ["medical-outline", "See medicines, appointments and visit summaries"],
+        ["shield-checkmark-outline", "Open emergency information and shared documents"],
+      ] as const,
+      boundary:
+        "Your access is read-only. You cannot change care records or permissions.",
+    };
+  }
+
+  return {
+    label: "Family Member",
+    icon: "heart-circle-outline",
+    summary:
+      "Stay informed without changing the clinical or coordination record.",
+    permissions: [
+      ["eye-outline", "Read family care updates"],
+      ["calendar-outline", "See the shared care calendar and tasks"],
+      ["document-text-outline", "Open documents shared with your role"],
+    ] as const,
+    boundary: "Your access is read-only.",
+  };
+}
+
 export function OnboardingScreen() {
   const n = useNav();
   const { dispatch, refresh } = useCare();
@@ -200,34 +247,172 @@ export function OnboardingScreen() {
   }
 
   if (pendingInvite) {
-    const invitedRole =
-      pendingInvite.role === "caregiver"
-        ? "Caregiver access"
-        : pendingInvite.role === "patient"
-          ? "Patient / care recipient access"
-          : "Family member access";
+    const presentation = invitationRolePresentation(pendingInvite.role);
+    const invitedAt = pendingInvite.invitedAt
+      ? new Date(pendingInvite.invitedAt).toLocaleDateString()
+      : "";
 
     return (
       <Page>
-        <Brand />
-        <Heading
-          eyebrow="CARE TEAM INVITATION"
-          title={`You’ve been invited to join ${pendingInvite.careRecipientName}’s care space.`}
-          body="Your access remains private and inactive until you choose to accept."
-        />
-        <Card style={{ backgroundColor: C.lavender }}>
-          <Icon name="people-outline" size={34} />
-          <Text style={S.h2}>{invitedRole}</Text>
-          <Txt>
-            {pendingInvite.role === "caregiver"
-              ? "You’ll be able to view and update the shared care record."
-              : pendingInvite.role === "patient"
-                ? "You’ll be able to view the care information being shared with you."
-                : "You’ll be able to read shared updates without changing medical records."}
-          </Txt>
+        <View style={S.between}>
+          <Brand />
+          <View
+            style={[
+              S.pill,
+              {
+                backgroundColor: "#F1E8F5",
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+              },
+            ]}
+          >
+            <Icon name="lock-closed-outline" size={14} color={C.purple} />
+            <Text style={[S.small, { color: C.purple }]}>PRIVATE INVITATION</Text>
+          </View>
+        </View>
+
+        <Card
+          style={{
+            overflow: "hidden",
+            borderRadius: 30,
+            borderWidth: 0,
+            backgroundColor: C.deep,
+            padding: 22,
+            gap: 16,
+          }}
+        >
+          <View style={S.between}>
+            <View
+              style={{
+                width: 58,
+                height: 58,
+                borderRadius: 20,
+                backgroundColor: "#FFFFFF18",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon name={presentation.icon} size={30} color="#F4DDFB" />
+            </View>
+            <View
+              style={[
+                S.pill,
+                {
+                  backgroundColor: "#FFFFFF14",
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                },
+              ]}
+            >
+              <Text style={[S.small, { color: "#F2E7F5" }]}>
+                {presentation.label}
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ gap: 8 }}>
+            <Text style={[S.eyebrow, { color: "#DCC8E3" }]}>
+              INVITED BY {pendingInvite.inviterName.toUpperCase()}
+            </Text>
+            <Text
+              style={[
+                S.h2,
+                {
+                  color: C.white,
+                  fontSize: 27,
+                  lineHeight: 33,
+                },
+              ]}
+            >
+              Join {pendingInvite.careRecipientName}’s care space.
+            </Text>
+            <Txt style={{ color: "#E8DDEA", fontSize: 14, lineHeight: 21 }}>
+              {pendingInvite.inviterName} invited you to EnVizion Life as a{" "}
+              {presentation.label}. Nothing is shared with you until you accept.
+            </Txt>
+          </View>
+
+          {(pendingInvite.relationship || invitedAt) && (
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                gap: 8,
+              }}
+            >
+              {Boolean(pendingInvite.relationship) && (
+                <View style={[S.pill, { backgroundColor: "#FFFFFF12" }]}>
+                  <Icon name="heart-outline" size={14} color="#F0DEEF" />
+                  <Text style={[S.small, { color: "#F0DEEF" }]}>
+                    {pendingInvite.relationship}
+                  </Text>
+                </View>
+              )}
+              {Boolean(invitedAt) && (
+                <View style={[S.pill, { backgroundColor: "#FFFFFF12" }]}>
+                  <Icon name="calendar-outline" size={14} color="#F0DEEF" />
+                  <Text style={[S.small, { color: "#F0DEEF" }]}>
+                    Invited {invitedAt}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
         </Card>
+
+        <Heading
+          eyebrow="YOUR ACCESS"
+          title={\`What \${presentation.label} access means\`}
+          body={presentation.summary}
+        />
+
+        <Card style={{ gap: 14 }}>
+          {presentation.permissions.map(([icon, label]) => (
+            <View
+              key={label}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 14,
+                  backgroundColor: "#F4ECF8",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name={icon} size={20} color={C.purple} />
+              </View>
+              <Text style={[S.body, { flex: 1 }]}>{label}</Text>
+            </View>
+          ))}
+
+          <View
+            style={{
+              marginTop: 2,
+              borderRadius: 16,
+              backgroundColor: "#FBF7FC",
+              padding: 13,
+              flexDirection: "row",
+              gap: 10,
+            }}
+          >
+            <Icon name="information-circle-outline" size={20} color={C.purple} />
+            <Txt style={[S.small, { flex: 1 }]}>{presentation.boundary}</Txt>
+          </View>
+        </Card>
+
         <Button
-          title={saving ? "Accepting invitation…" : "Accept and open care profile"}
+          title={
+            saving
+              ? "Accepting invitation…"
+              : \`Accept as \${presentation.label}\`
+          }
           disabled={saving}
           icon="checkmark-circle-outline"
           onPress={() => void respondToInvite("accept")}
@@ -238,14 +423,16 @@ export function OnboardingScreen() {
           disabled={saving}
           onPress={() => void respondToInvite("decline")}
         />
+
         {Boolean(message) && (
           <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
             {message}
           </Text>
         )}
-        <Txt style={S.small}>
-          Accepting adds you to this care team. The Primary Advocate can later
-          update your access or remove it.
+
+        <Txt style={[S.small, { textAlign: "center" }]}>
+          You can review this invitation before joining. The Primary Advocate
+          controls care-team access and can later change or revoke it.
         </Txt>
       </Page>
     );
