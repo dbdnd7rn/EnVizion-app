@@ -57,6 +57,21 @@ function reminderCoolingDown(lastRemindedAt: string | null | undefined) {
   );
 }
 
+async function fingerprintValue(value: unknown) {
+  const bytes = new TextEncoder().encode(JSON.stringify(value));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function groupRoleForCareRole(role: CareRole) {
+  if (role === "owner") return "primary_advocate";
+  if (role === "caregiver") return "co_caregiver";
+  if (role === "viewer") return "read_only";
+  return null;
+}
+
 async function findUserByEmail(admin: any, email: string) {
   const perPage = 1000;
   for (let page = 1; page <= 100; page += 1) {
@@ -447,7 +462,7 @@ Deno.serve(async (req: Request) => {
           : Promise.resolve({ data: [], error: null }),
         admin
           .from("care_audit_events")
-          .select("actor_user_id, created_at")
+          .select("actor_user_id, action, entity_id, created_at")
           .eq("care_recipient_id", careRecipientId)
           .not("actor_user_id", "is", null)
           .order("created_at", { ascending: false })
@@ -472,8 +487,20 @@ Deno.serve(async (req: Request) => {
         groupMembers.map((row) => [row.user_id, row]),
       );
       const lastCareActivity = new Map<string, string>();
+      const lastAccessReview = new Map<string, string>();
       for (const row of auditRows ?? []) {
-        if (row.actor_user_id && !lastCareActivity.has(row.actor_user_id)) {
+        if (
+          row.action === "security_access_confirmed" &&
+          row.entity_id &&
+          !lastAccessReview.has(row.entity_id)
+        ) {
+          lastAccessReview.set(row.entity_id, row.created_at);
+        }
+        if (
+          row.actor_user_id &&
+          row.action !== "security_access_confirmed" &&
+          !lastCareActivity.has(row.actor_user_id)
+        ) {
           lastCareActivity.set(row.actor_user_id, row.created_at);
         }
       }
@@ -670,7 +697,15 @@ Deno.serve(async (req: Request) => {
         const latestAuditTime = latestAudit
           ? new Date(latestAudit).getTime()
           : null;
-        const lastKnown = Math.max(lastSignIn ?? 0, latestAuditTime ?? 0);
+        const latestReview = lastAccessReview.get(userId);
+        const latestReviewTime = latestReview
+          ? new Date(latestReview).getTime()
+          : null;
+        const lastKnown = Math.max(
+          lastSignIn ?? 0,
+          latestAuditTime ?? 0,
+          latestReviewTime ?? 0,
+        );
 
         if (lastKnown && now - lastKnown >= 90 * dayMs) {
           addFinding({
@@ -738,6 +773,501 @@ Deno.serve(async (req: Request) => {
           "Expired or long-pending invitations",
           "Active caregiver or family access with no recorded activity for 90 days",
         ],
+      });
+    }
+
+    if (
+      action === "security_remediation_options" ||
+      action === "security_remediation_apply"
+    ) {
+      if (!canManage) {
+        return json(
+          { error: "Only a Primary Advocate can remediate care-team security findings." },
+          403,
+        );
+      }
+
+      const findingId = String(payload.findingId ?? "");
+      const splitAt = findingId.indexOf(":");
+      if (splitAt <= 0) {
+        return json({ error: "A current security finding is required." }, 400);
+      }
+
+      const findingType = findingId.slice(0, splitAt);
+      const remediationTargetUserId = findingId.slice(splitAt + 1);
+      if (!remediationTargetUserId || remediationTargetUserId === recipient.owner_id) {
+        return json(
+          { error: "Primary Advocate ownership cannot be changed by remediation." },
+          400,
+        );
+      }
+
+      const [
+        { data: remediationDirect, error: remediationDirectError },
+        { data: remediationGroup, error: remediationGroupError },
+      ] = await Promise.all([
+        admin
+          .from("care_recipient_members")
+          .select(
+            "user_id, role, status, invited_name, invited_email, invited_at, accepted_at, revoked_at, invite_expires_at, updated_at",
+          )
+          .eq("care_recipient_id", careRecipientId)
+          .eq("user_id", remediationTargetUserId)
+          .maybeSingle(),
+        recipient.care_group_id
+          ? admin
+              .from("care_group_members")
+              .select("user_id, role, status, joined_at, updated_at")
+              .eq("care_group_id", recipient.care_group_id)
+              .eq("user_id", remediationTargetUserId)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+      ]);
+
+      if (remediationDirectError) throw remediationDirectError;
+      if (remediationGroupError) throw remediationGroupError;
+
+      const remediationAccount = await admin.auth.admin.getUserById(
+        remediationTargetUserId,
+      );
+      const remediationMemberName =
+        String(remediationDirect?.invited_name ?? "").trim() ||
+        String(remediationAccount?.data?.user?.user_metadata?.full_name ?? "").trim() ||
+        "Care team member";
+
+      const stateForFingerprint = {
+        careRecipientId,
+        userId: remediationTargetUserId,
+        findingType,
+        direct: remediationDirect
+          ? {
+              role: remediationDirect.role,
+              status: remediationDirect.status,
+              revokedAt: remediationDirect.revoked_at,
+              inviteExpiresAt: remediationDirect.invite_expires_at,
+              updatedAt: remediationDirect.updated_at,
+            }
+          : null,
+        group: remediationGroup
+          ? {
+              role: remediationGroup.role,
+              status: remediationGroup.status,
+              updatedAt: remediationGroup.updated_at,
+            }
+          : null,
+      };
+      const stateFingerprint = await fingerprintValue(stateForFingerprint);
+
+      const options: Array<{
+        key: string;
+        label: string;
+        before: string;
+        after: string;
+        impact: string;
+        destructive: boolean;
+        fingerprint: string;
+      }> = [];
+
+      if (
+        findingType === "patient-write-conflict" &&
+        remediationDirect?.role === "patient" &&
+        remediationDirect.status === "active" &&
+        remediationGroup?.status === "active" &&
+        ["primary_advocate", "co_caregiver"].includes(remediationGroup.role)
+      ) {
+        options.push({
+          key: "enforce_patient_read_only",
+          label: "Remove conflicting write access",
+          before:
+            "Care Recipient · read-only direct access + " +
+            remediationGroup.role.replaceAll("_", " ") +
+            " CareGroup access",
+          after: "Care Recipient · read-only patient access only",
+          impact:
+            "Revokes the conflicting CareGroup role while keeping patient-specific read-only access active.",
+          destructive: true,
+          fingerprint: stateFingerprint,
+        });
+      }
+
+      if (
+        findingType === "revoked-still-group-active" &&
+        remediationDirect &&
+        ["revoked", "declined"].includes(remediationDirect.status) &&
+        remediationGroup?.status === "active"
+      ) {
+        options.push({
+          key: "revoke_remaining_group_access",
+          label: "Revoke remaining CareGroup access",
+          before:
+            "Direct access " + remediationDirect.status +
+            " · CareGroup access active",
+          after: "Direct access closed · CareGroup access revoked",
+          impact:
+            "Closes the remaining group-level path so this person no longer keeps access through the CareGroup.",
+          destructive: true,
+          fingerprint: stateFingerprint,
+        });
+      }
+
+      if (
+        findingType === "group-revoked-direct-active" &&
+        remediationDirect?.status === "active" &&
+        remediationGroup?.status === "revoked"
+      ) {
+        options.push({
+          key: "revoke_all_access",
+          label: "Align to least privilege and revoke access",
+          before: roleLabel(remediationDirect.role) + " · direct access active · CareGroup revoked",
+          after: "Direct access revoked · CareGroup remains revoked",
+          impact:
+            "Uses the safer closed state. If this person should still have access, cancel and manage the member intentionally in Care Team instead.",
+          destructive: true,
+          fingerprint: stateFingerprint,
+        });
+      }
+
+      if (
+        findingType === "role-mismatch" &&
+        remediationDirect?.status === "active" &&
+        remediationDirect.role !== "patient" &&
+        remediationGroup?.status === "active"
+      ) {
+        const groupCareRole = careRoleForGroupRole(remediationGroup.role);
+        const directRank: Record<string, number> = {
+          viewer: 1,
+          caregiver: 2,
+          owner: 3,
+        };
+        const groupRank = groupCareRole ? directRank[groupCareRole] ?? 0 : 0;
+        const directRole = remediationDirect.role as CareRole;
+        const directRoleRank = directRank[directRole] ?? 0;
+        const leastPrivilegeRole =
+          directRoleRank <= groupRank ? directRole : groupCareRole;
+
+        if (
+          leastPrivilegeRole &&
+          leastPrivilegeRole !== "owner" &&
+          leastPrivilegeRole !== "patient" &&
+          groupCareRole &&
+          groupCareRole !== directRole
+        ) {
+          options.push({
+            key: "reduce_to_least_privilege",
+            label: "Align both records to least privilege",
+            before:
+              roleLabel(directRole) + " direct · " +
+              roleLabel(groupCareRole) + " CareGroup",
+            after: roleLabel(leastPrivilegeRole) + " in both access records",
+            impact:
+              "Aligns the mismatched records to the lower-permission role. It never upgrades access.",
+            destructive: true,
+            fingerprint: stateFingerprint,
+          });
+        }
+      }
+
+      if (
+        findingType === "active-with-revoked-date" &&
+        remediationDirect?.status === "active" &&
+        remediationDirect.revoked_at
+      ) {
+        options.push({
+          key: "clear_stale_revocation_marker",
+          label: "Clear stale revocation marker",
+          before: "Active access · old revoked timestamp still stored",
+          after: "Active access · revocation marker cleared",
+          impact:
+            "Does not change the person’s active role. It only repairs inconsistent membership metadata.",
+          destructive: false,
+          fingerprint: stateFingerprint,
+        });
+      }
+
+      if (
+        findingType === "expired-invite" &&
+        remediationDirect?.status === "invited" &&
+        remediationDirect.invite_expires_at &&
+        new Date(remediationDirect.invite_expires_at).getTime() <= Date.now()
+      ) {
+        options.push({
+          key: "close_expired_invitation",
+          label: "Close expired invitation",
+          before: "Expired invitation · unresolved",
+          after: "Invitation closed · access revoked",
+          impact:
+            "Closes the expired access request. You can invite the person again later if access is still needed.",
+          destructive: true,
+          fingerprint: stateFingerprint,
+        });
+      }
+
+      if (
+        findingType === "old-pending-invite" &&
+        remediationDirect?.status === "invited" &&
+        remediationDirect.invited_at &&
+        Date.now() - new Date(remediationDirect.invited_at).getTime() >=
+          7 * 24 * 60 * 60 * 1000
+      ) {
+        options.push({
+          key: "close_old_invitation",
+          label: "Close old pending invitation",
+          before: "Invitation pending for at least 7 days",
+          after: "Invitation closed · access revoked",
+          impact:
+            "Closes the unresolved invitation. If access is still wanted, cancel and send a reminder from Care Team instead.",
+          destructive: true,
+          fingerprint: stateFingerprint,
+        });
+      }
+
+      if (findingType === "stale-active-access") {
+        const directActive = remediationDirect?.status === "active";
+        const groupActive = remediationGroup?.status === "active";
+        if (directActive || groupActive) {
+          options.push(
+            {
+              key: "confirm_access_still_needed",
+              label: "Confirm access is still needed",
+              before: "Active access · no recent recorded activity",
+              after: "Active access kept · reviewed today",
+              impact:
+                "Keeps access unchanged and records that the Primary Advocate intentionally reviewed it. EnVizion will not flag inactivity again for 90 days unless another issue appears.",
+              destructive: false,
+              fingerprint: stateFingerprint,
+            },
+            {
+              key: "revoke_stale_access",
+              label: "Revoke stale access",
+              before: "Active access · no recent recorded activity",
+              after: "Access revoked",
+              impact:
+                "Removes access because the person no longer needs to participate in this care space.",
+              destructive: true,
+              fingerprint: stateFingerprint,
+            },
+          );
+        }
+      }
+
+      if (!options.length) {
+        return json(
+          {
+            error:
+              "This finding is no longer current or does not have a safe automated remediation. Run the security review again.",
+          },
+          409,
+        );
+      }
+
+      if (action === "security_remediation_options") {
+        return json({
+          findingId,
+          memberName: remediationMemberName,
+          options,
+        });
+      }
+
+      if (payload.confirm !== true) {
+        return json(
+          { error: "Explicit confirmation is required before changing access." },
+          400,
+        );
+      }
+
+      const remediationKey = String(payload.remediationKey ?? "");
+      const suppliedFingerprint = String(payload.fingerprint ?? "");
+      const selectedOption = options.find(
+        (option) => option.key === remediationKey,
+      );
+      if (!selectedOption) {
+        return json({ error: "That remediation is not available for this finding." }, 400);
+      }
+      if (
+        !suppliedFingerprint ||
+        suppliedFingerprint !== selectedOption.fingerprint
+      ) {
+        return json(
+          {
+            error:
+              "Care-team access changed after the preview. Run the security review and preview the remediation again.",
+          },
+          409,
+        );
+      }
+
+      const now = new Date().toISOString();
+
+      if (remediationKey === "enforce_patient_read_only") {
+        if (!recipient.care_group_id) {
+          return json({ error: "CareGroup is unavailable." }, 409);
+        }
+        const { error } = await admin
+          .from("care_group_members")
+          .update({
+            status: "revoked",
+            joined_at: null,
+            updated_at: now,
+          })
+          .eq("care_group_id", recipient.care_group_id)
+          .eq("user_id", remediationTargetUserId);
+        if (error) throw error;
+      } else if (remediationKey === "revoke_remaining_group_access") {
+        if (!recipient.care_group_id) {
+          return json({ error: "CareGroup is unavailable." }, 409);
+        }
+        const { error } = await admin
+          .from("care_group_members")
+          .update({
+            status: "revoked",
+            joined_at: null,
+            updated_at: now,
+          })
+          .eq("care_group_id", recipient.care_group_id)
+          .eq("user_id", remediationTargetUserId);
+        if (error) throw error;
+      } else if (
+        remediationKey === "revoke_all_access" ||
+        remediationKey === "close_expired_invitation" ||
+        remediationKey === "close_old_invitation" ||
+        remediationKey === "revoke_stale_access"
+      ) {
+        if (remediationDirect) {
+          const { error } = await admin
+            .from("care_recipient_members")
+            .update({
+              status: "revoked",
+              revoked_at: now,
+              updated_at: now,
+            })
+            .eq("care_recipient_id", careRecipientId)
+            .eq("user_id", remediationTargetUserId);
+          if (error) throw error;
+        } else if (recipient.care_group_id && remediationGroup) {
+          const { error } = await admin
+            .from("care_group_members")
+            .update({
+              status: "revoked",
+              joined_at: null,
+              updated_at: now,
+            })
+            .eq("care_group_id", recipient.care_group_id)
+            .eq("user_id", remediationTargetUserId);
+          if (error) throw error;
+        }
+      } else if (remediationKey === "reduce_to_least_privilege") {
+        if (!remediationDirect || !remediationGroup) {
+          return json({ error: "Membership records changed. Preview again." }, 409);
+        }
+        const groupCareRole = careRoleForGroupRole(remediationGroup.role);
+        const rank: Record<string, number> = {
+          viewer: 1,
+          caregiver: 2,
+          owner: 3,
+        };
+        const directRole = remediationDirect.role as CareRole;
+        const leastPrivilegeRole =
+          (rank[directRole] ?? 0) <= (groupCareRole ? rank[groupCareRole] ?? 0 : 0)
+            ? directRole
+            : groupCareRole;
+
+        if (
+          !leastPrivilegeRole ||
+          leastPrivilegeRole === "owner" ||
+          leastPrivilegeRole === "patient"
+        ) {
+          return json({ error: "A safe least-privilege role is unavailable." }, 409);
+        }
+
+        const { error } = await admin
+          .from("care_recipient_members")
+          .update({
+            role: leastPrivilegeRole,
+            updated_at: now,
+          })
+          .eq("care_recipient_id", careRecipientId)
+          .eq("user_id", remediationTargetUserId);
+        if (error) throw error;
+      } else if (remediationKey === "clear_stale_revocation_marker") {
+        const { error } = await admin
+          .from("care_recipient_members")
+          .update({
+            revoked_at: null,
+            updated_at: now,
+          })
+          .eq("care_recipient_id", careRecipientId)
+          .eq("user_id", remediationTargetUserId);
+        if (error) throw error;
+      } else if (remediationKey === "confirm_access_still_needed") {
+        const { error } = await admin.from("care_audit_events").insert({
+          care_recipient_id: careRecipientId,
+          actor_user_id: user.id,
+          action: "security_access_confirmed",
+          entity_type: "care_team_member",
+          entity_id: remediationTargetUserId,
+          summary:
+            "Primary Advocate reviewed stale access and confirmed it is still needed.",
+        });
+        if (error) throw error;
+      }
+
+      if (remediationKey !== "confirm_access_still_needed") {
+        const roleForEvent =
+          remediationDirect?.role &&
+          ["owner", "caregiver", "patient", "viewer"].includes(remediationDirect.role)
+            ? (remediationDirect.role as CareRole)
+            : null;
+
+        const { error: consentError } = await admin
+          .from("care_consent_events")
+          .insert({
+            care_recipient_id: careRecipientId,
+            actor_user_id: user.id,
+            subject_user_id: remediationTargetUserId,
+            event_type: "security_remediation_applied",
+            role: roleForEvent,
+            note:
+              selectedOption.before + " -> " + selectedOption.after +
+              " · " + selectedOption.label,
+          });
+        if (consentError) throw consentError;
+
+        await admin.from("notifications").insert({
+          user_id: remediationTargetUserId,
+          audience: "caregiver",
+          kind: "care_security_access_updated",
+          title: "Care team access updated",
+          body:
+            "A Primary Advocate applied a security review change to your access for " +
+            recipient.display_name + ".",
+          entity_type: "care_recipient",
+          entity_id: careRecipientId,
+        });
+      }
+
+      const { error: auditLogError } = await admin
+        .from("care_audit_events")
+        .insert({
+          care_recipient_id: careRecipientId,
+          actor_user_id: user.id,
+          action:
+            remediationKey === "confirm_access_still_needed"
+              ? "security_access_confirmed"
+              : "security_remediation_applied",
+          entity_type: "care_team_member",
+          entity_id: remediationTargetUserId,
+          summary:
+            selectedOption.label + " · " +
+            selectedOption.before + " -> " + selectedOption.after,
+        });
+      if (auditLogError) throw auditLogError;
+
+      return json({
+        ok: true,
+        memberName: remediationMemberName,
+        remediationKey,
+        before: selectedOption.before,
+        after: selectedOption.after,
       });
     }
 
