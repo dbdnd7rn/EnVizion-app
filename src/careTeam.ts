@@ -150,6 +150,111 @@ export async function reinviteCareTeamMember(
   });
 }
 
+export type AccessibleCareContext = {
+  careRecipientId: string;
+  careRecipientName: string;
+  relationship: string;
+  role: CareRole;
+  careGroupId: string | null;
+};
+
+function groupRoleToCareRole(role: string | null | undefined): CareRole | null {
+  if (role === "primary_advocate") return "owner";
+  if (role === "co_caregiver") return "caregiver";
+  if (role === "read_only") return "viewer";
+  return null;
+}
+
+function strongerCareRole(
+  directRole: CareRole | null,
+  groupRole: CareRole | null,
+): CareRole | null {
+  if (directRole === "patient") return "patient";
+
+  const rank: Record<Exclude<CareRole, "patient">, number> = {
+    owner: 3,
+    caregiver: 2,
+    viewer: 1,
+  };
+  const candidates = [directRole, groupRole].filter(
+    (role): role is Exclude<CareRole, "patient"> =>
+      Boolean(role && role !== "patient"),
+  );
+
+  return candidates.sort((a, b) => rank[b] - rank[a])[0] ?? null;
+}
+
+export async function loadAccessibleCareContexts(
+  userId: string,
+): Promise<AccessibleCareContext[]> {
+  const [recipientsResult, directMembershipResult, groupMembershipResult] =
+    await Promise.all([
+      supabase
+        .from("care_recipients")
+        .select(
+          "id, display_name, relationship, owner_id, care_group_id, created_at",
+        )
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("care_recipient_members")
+        .select("care_recipient_id, role")
+        .eq("user_id", userId)
+        .eq("status", "active"),
+      supabase
+        .from("care_group_members")
+        .select("care_group_id, role")
+        .eq("user_id", userId)
+        .eq("status", "active"),
+    ]);
+
+  const error =
+    recipientsResult.error ||
+    directMembershipResult.error ||
+    groupMembershipResult.error;
+  if (error) throw error;
+
+  const directByRecipient = new Map(
+    (directMembershipResult.data ?? []).map((row) => [
+      row.care_recipient_id,
+      row.role as CareRole,
+    ]),
+  );
+  const groupById = new Map(
+    (groupMembershipResult.data ?? []).map((row) => [
+      row.care_group_id,
+      groupRoleToCareRole(row.role),
+    ]),
+  );
+
+  return (recipientsResult.data ?? [])
+    .map((recipient) => {
+      const directRole = directByRecipient.get(recipient.id) ?? null;
+      const groupRole = recipient.care_group_id
+        ? (groupById.get(recipient.care_group_id) ?? null)
+        : null;
+      const role: CareRole | null =
+        recipient.owner_id === userId
+          ? "owner"
+          : strongerCareRole(directRole, groupRole);
+
+      if (!role) return null;
+
+      return {
+        careRecipientId: recipient.id,
+        careRecipientName: recipient.display_name,
+        relationship:
+          role === "patient"
+            ? "Myself"
+            : recipient.relationship ?? "A loved one",
+        role,
+        careGroupId: recipient.care_group_id ?? null,
+      };
+    })
+    .filter(
+      (context): context is AccessibleCareContext => Boolean(context),
+    );
+}
+
 export async function loadCareSpaces(): Promise<CareSpace[]> {
   const {
     data: { user },
@@ -158,55 +263,29 @@ export async function loadCareSpaces(): Promise<CareSpace[]> {
 
   if (userError || !user) return [];
 
-  const [{ data: memberships, error: memberError }, { data: preferences }] =
-    await Promise.all([
-      supabase
-        .from("care_recipient_members")
-        .select("care_recipient_id, role")
-        .eq("user_id", user.id)
-        .eq("status", "active"),
-      supabase
-        .from("user_preferences")
-        .select("active_care_recipient_id")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ]);
+  const [{ data: preferences }, contexts] = await Promise.all([
+    supabase
+      .from("user_preferences")
+      .select("active_care_recipient_id")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    loadAccessibleCareContexts(user.id),
+  ]);
 
-  if (memberError) throw memberError;
-
-  const rows = memberships ?? [];
-  if (!rows.length) return [];
-
-  const recipientIds = rows.map((row) => row.care_recipient_id);
-  const { data: recipients, error: recipientError } = await supabase
-    .from("care_recipients")
-    .select("id, display_name, relationship")
-    .in("id", recipientIds);
-
-  if (recipientError) throw recipientError;
-
-  const recipientMap = new Map(
-    (recipients ?? []).map((row) => [row.id, row]),
-  );
+  if (!contexts.length) return [];
 
   const preferredId = preferences?.active_care_recipient_id ?? null;
+  const activeId =
+    contexts.find((context) => context.careRecipientId === preferredId)
+      ?.careRecipientId ?? contexts[0].careRecipientId;
 
-  return rows
-    .map((row) => {
-      const recipient = recipientMap.get(row.care_recipient_id);
-      if (!recipient) return null;
-
-      return {
-        careRecipientId: row.care_recipient_id,
-        careRecipientName: recipient.display_name,
-        relationship: recipient.relationship ?? "A loved one",
-        role: row.role as CareRole,
-        active: preferredId
-          ? preferredId === row.care_recipient_id
-          : row === rows[0],
-      };
-    })
-    .filter((space): space is CareSpace => Boolean(space));
+  return contexts.map((context) => ({
+    careRecipientId: context.careRecipientId,
+    careRecipientName: context.careRecipientName,
+    relationship: context.relationship,
+    role: context.role,
+    active: context.careRecipientId === activeId,
+  }));
 }
 
 export async function setActiveCareRecipient(careRecipientId: string) {
@@ -217,16 +296,10 @@ export async function setActiveCareRecipient(careRecipientId: string) {
 
   if (userError || !user) throw new Error("Please sign in again.");
 
-  const { data: membership, error: membershipError } = await supabase
-    .from("care_recipient_members")
-    .select("care_recipient_id")
-    .eq("care_recipient_id", careRecipientId)
-    .eq("user_id", user.id)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (membershipError) throw membershipError;
-  if (!membership) throw new Error("You do not have active access to this care profile.");
+  const contexts = await loadAccessibleCareContexts(user.id);
+  if (!contexts.some((item) => item.careRecipientId === careRecipientId)) {
+    throw new Error("You do not have active access to this care profile.");
+  }
 
   const { error } = await supabase.from("user_preferences").upsert({
     user_id: user.id,
