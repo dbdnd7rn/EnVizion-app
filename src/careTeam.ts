@@ -11,6 +11,8 @@ export type CareInvitation = {
   invitedName: string;
   inviterName: string;
   invitedAt: string | null;
+  inviteExpiresAt: string | null;
+  lastRemindedAt: string | null;
 };
 
 export type CareTeamMember = {
@@ -22,6 +24,10 @@ export type CareTeamMember = {
   invitedAt: string | null;
   acceptedAt: string | null;
   revokedAt: string | null;
+  inviteExpiresAt: string | null;
+  lastRemindedAt: string | null;
+  emailRequestedAt: string | null;
+  isExpired: boolean;
   isCurrentUser: boolean;
 };
 
@@ -146,6 +152,17 @@ export async function reinviteCareTeamMember(
 ) {
   await invokeCareTeam({
     action: "reinvite",
+    careRecipientId,
+    userId,
+  });
+}
+
+export async function sendCareInvitationReminder(
+  careRecipientId: string,
+  userId: string,
+) {
+  await invokeCareTeam({
+    action: "send_reminder",
     careRecipientId,
     userId,
   });
