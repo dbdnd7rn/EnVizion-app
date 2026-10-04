@@ -120,6 +120,30 @@ export type CareTeamSecurityReview = {
   checks: string[];
 };
 
+export type CareTeamSecurityRemediationOption = {
+  key: string;
+  label: string;
+  before: string;
+  after: string;
+  impact: string;
+  destructive: boolean;
+  fingerprint: string;
+};
+
+export type CareTeamSecurityRemediationOptions = {
+  findingId: string;
+  memberName: string;
+  options: CareTeamSecurityRemediationOption[];
+};
+
+export type CareTeamSecurityRemediationResult = {
+  ok: true;
+  memberName: string;
+  remediationKey: string;
+  before: string;
+  after: string;
+};
+
 async function invokeCareTeam<T>(
   body: Record<string, unknown>,
 ): Promise<T> {
@@ -177,6 +201,33 @@ export async function loadCareTeamSecurityReview(
   return invokeCareTeam<CareTeamSecurityReview>({
     action: "security_review",
     careRecipientId,
+  });
+}
+
+export async function loadCareTeamSecurityRemediationOptions(
+  careRecipientId: string,
+  findingId: string,
+): Promise<CareTeamSecurityRemediationOptions> {
+  return invokeCareTeam<CareTeamSecurityRemediationOptions>({
+    action: "security_remediation_options",
+    careRecipientId,
+    findingId,
+  });
+}
+
+export async function applyCareTeamSecurityRemediation(input: {
+  careRecipientId: string;
+  findingId: string;
+  remediationKey: string;
+  fingerprint: string;
+}): Promise<CareTeamSecurityRemediationResult> {
+  return invokeCareTeam<CareTeamSecurityRemediationResult>({
+    action: "security_remediation_apply",
+    careRecipientId: input.careRecipientId,
+    findingId: input.findingId,
+    remediationKey: input.remediationKey,
+    fingerprint: input.fingerprint,
+    confirm: true,
   });
 }
 
