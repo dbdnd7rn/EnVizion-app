@@ -62,6 +62,7 @@ import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsSc
 import { CareTeamScreen } from "./src/screens/CareTeamScreen";
 import { CareTeamActivityScreen } from "./src/screens/CareTeamActivityScreen";
 import { CareTeamAccessReportScreen } from "./src/screens/CareTeamAccessReportScreen";
+import { CareTeamSecurityReviewScreen } from "./src/screens/CareTeamSecurityReviewScreen";
 import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
 import { AccessibilityScreen } from "./src/screens/AccessibilityScreen";
 import { LaunchValidationScreen } from "./src/screens/LaunchValidationScreen";
@@ -592,6 +593,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareTeamAccessReport"
             component={CareTeamAccessReportScreen}
             options={{ title: "Care team access report" }}
+          />
+          <Stack.Screen
+            name="CareTeamSecurityReview"
+            component={CareTeamSecurityReviewScreen}
+            options={{ title: "Care team security review" }}
           />
           <Stack.Screen
             name="Notifications"
