@@ -37,6 +37,20 @@ export type CareTeamRoster = {
   members: CareTeamMember[];
 };
 
+export type CareInvitationAttention = {
+  pending: number;
+  nearExpiry: number;
+  expired: number;
+  needsAttention: number;
+  next: {
+    userId: string;
+    displayName: string;
+    role: Exclude<CareRole, "owner">;
+    inviteExpiresAt: string | null;
+    isExpired: boolean;
+  } | null;
+};
+
 export type CareSpace = {
   careRecipientId: string;
   careRecipientName: string;
@@ -103,6 +117,15 @@ export async function loadCareTeam(
 ): Promise<CareTeamRoster> {
   return invokeCareTeam<CareTeamRoster>({
     action: "list",
+    careRecipientId,
+  });
+}
+
+export async function loadCareInvitationAttention(
+  careRecipientId: string,
+): Promise<CareInvitationAttention> {
+  return invokeCareTeam<CareInvitationAttention>({
+    action: "attention",
     careRecipientId,
   });
 }
