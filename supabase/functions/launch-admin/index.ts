@@ -724,6 +724,34 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (action === "record_access_governance_report") {
+      const generatedAt = String(payload.generatedAt ?? "").trim();
+      const reportVersion = String(payload.reportVersion ?? "1").trim().slice(0, 20);
+
+      if (
+        generatedAt &&
+        !Number.isFinite(new Date(generatedAt).getTime())
+      ) {
+        return json({ error: "Invalid report generation timestamp" }, 400);
+      }
+
+      const { error: auditError } = await admin
+        .from("pilot_admin_audit")
+        .insert({
+          actor_user_id: user.id,
+          action: "access_governance_report_generated",
+          details: {
+            generated_at: generatedAt || new Date().toISOString(),
+            report_version: reportVersion,
+            scope: "access_governance_metadata_only",
+          },
+        });
+
+      if (auditError) throw auditError;
+
+      return json({ ok: true });
+    }
+
     if (action === "dashboard") {
       const { data: waves, error: waveError } = await admin
         .from("pilot_launch_waves")
