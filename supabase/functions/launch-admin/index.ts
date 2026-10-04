@@ -438,6 +438,292 @@ Deno.serve(async (req: Request) => {
     const payload = await req.json().catch(() => ({}));
     const action = String(payload.action ?? "");
 
+    if (action === "access_governance") {
+      const now = Date.now();
+      const dayMs = 24 * 60 * 60 * 1000;
+      const completedSince = new Date(
+        now - 90 * dayMs,
+      ).toISOString();
+
+      const [
+        { data: recipients, error: recipientError },
+        { data: directMembers, error: directError },
+        { data: groupMembers, error: groupError },
+        { data: openReviews, error: openReviewError },
+        { data: completedReviews, error: completedReviewError },
+      ] = await Promise.all([
+        admin
+          .from("care_recipients")
+          .select("id, display_name, owner_id, care_group_id")
+          .limit(1000),
+        admin
+          .from("care_recipient_members")
+          .select("care_recipient_id, user_id, role, status")
+          .eq("status", "active")
+          .in("role", ["caregiver", "viewer"])
+          .limit(2000),
+        admin
+          .from("care_group_members")
+          .select("care_group_id, user_id, role, status")
+          .eq("status", "active")
+          .in("role", ["co_caregiver", "read_only"])
+          .limit(2000),
+        admin
+          .from("care_access_recertifications")
+          .select(
+            "id, care_recipient_id, subject_user_id, role_snapshot, status, due_at, decision, role_after, reviewed_by, reviewed_at, created_at, updated_at, advance_notified_at, overdue_7d_notified_at, overdue_14d_notified_at",
+          )
+          .in("status", ["scheduled", "due"])
+          .order("due_at", { ascending: true })
+          .limit(1000),
+        admin
+          .from("care_access_recertifications")
+          .select(
+            "id, care_recipient_id, subject_user_id, role_snapshot, status, due_at, decision, role_after, reviewed_by, reviewed_at, created_at, updated_at",
+          )
+          .eq("status", "completed")
+          .gte("reviewed_at", completedSince)
+          .order("reviewed_at", { ascending: false })
+          .limit(500),
+      ]);
+
+      const failed = [
+        recipientError,
+        directError,
+        groupError,
+        openReviewError,
+        completedReviewError,
+      ].find(Boolean);
+      if (failed) throw failed;
+
+      const recipientRows = recipients ?? [];
+      const recipientMap = new Map(
+        recipientRows.map((row: any) => [row.id, row]),
+      );
+      const recipientsByGroup = new Map<string, any[]>();
+      for (const row of recipientRows as any[]) {
+        if (!row.care_group_id) continue;
+        const list = recipientsByGroup.get(row.care_group_id) ?? [];
+        list.push(row);
+        recipientsByGroup.set(row.care_group_id, list);
+      }
+
+      const eligible = new Map<
+        string,
+        {
+          careRecipientId: string;
+          subjectUserId: string;
+          role: "caregiver" | "viewer";
+        }
+      >();
+
+      for (const row of directMembers ?? []) {
+        const key = row.care_recipient_id + ":" + row.user_id;
+        eligible.set(key, {
+          careRecipientId: row.care_recipient_id,
+          subjectUserId: row.user_id,
+          role: row.role,
+        });
+      }
+
+      for (const row of groupMembers ?? []) {
+        const mappedRole =
+          row.role === "co_caregiver" ? "caregiver" : "viewer";
+        for (const recipient of recipientsByGroup.get(row.care_group_id) ?? []) {
+          if (row.user_id === recipient.owner_id) continue;
+          const key = recipient.id + ":" + row.user_id;
+          if (!eligible.has(key)) {
+            eligible.set(key, {
+              careRecipientId: recipient.id,
+              subjectUserId: row.user_id,
+              role: mappedRole,
+            });
+          }
+        }
+      }
+
+      const openReviewMap = new Map(
+        (openReviews ?? []).map((row: any) => [
+          row.care_recipient_id + ":" + row.subject_user_id,
+          row,
+        ]),
+      );
+
+      const profileIds = new Set<string>();
+      for (const item of eligible.values()) profileIds.add(item.subjectUserId);
+      for (const recipient of recipientRows as any[]) {
+        if (recipient.owner_id) profileIds.add(recipient.owner_id);
+      }
+      for (const row of completedReviews ?? []) {
+        if (row.subject_user_id) profileIds.add(row.subject_user_id);
+        if (row.reviewed_by) profileIds.add(row.reviewed_by);
+      }
+
+      const { data: profiles, error: profileError } = profileIds.size
+        ? await admin
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", [...profileIds])
+        : { data: [], error: null };
+      if (profileError) throw profileError;
+
+      const profileMap = new Map(
+        (profiles ?? []).map((row: any) => [
+          row.id,
+          String(row.full_name ?? "").trim(),
+        ]),
+      );
+      const personName = (userId: string | null | undefined, fallback: string) =>
+        (userId && profileMap.get(userId)) || fallback;
+
+      const queue = (openReviews ?? []).map((row: any) => {
+        const recipient = recipientMap.get(row.care_recipient_id);
+        const dueAt = new Date(row.due_at).getTime();
+        const daysToDue = Math.ceil((dueAt - now) / dayMs);
+        const overdueDays = dueAt < now
+          ? Math.floor((now - dueAt) / dayMs)
+          : 0;
+
+        let bucket:
+          | "overdue_14"
+          | "overdue_7"
+          | "due"
+          | "upcoming_7"
+          | "scheduled" = "scheduled";
+        if (dueAt <= now - 14 * dayMs) bucket = "overdue_14";
+        else if (dueAt <= now - 7 * dayMs) bucket = "overdue_7";
+        else if (dueAt <= now) bucket = "due";
+        else if (dueAt <= now + 7 * dayMs) bucket = "upcoming_7";
+
+        return {
+          id: row.id,
+          careRecipientId: row.care_recipient_id,
+          careRecipientName:
+            recipient?.display_name ?? "Care profile",
+          primaryAdvocateName: personName(
+            recipient?.owner_id,
+            "Primary Advocate",
+          ),
+          subjectUserId: row.subject_user_id,
+          memberName: personName(
+            row.subject_user_id,
+            "Care team member",
+          ),
+          role: row.role_snapshot,
+          status: row.status,
+          bucket,
+          dueAt: row.due_at,
+          daysToDue,
+          overdueDays,
+          advanceNotifiedAt: row.advance_notified_at,
+          overdue7NotifiedAt: row.overdue_7d_notified_at,
+          overdue14NotifiedAt: row.overdue_14d_notified_at,
+        };
+      });
+
+      const coverageGaps = [...eligible.values()]
+        .filter((item) => {
+          const key = item.careRecipientId + ":" + item.subjectUserId;
+          return !openReviewMap.has(key);
+        })
+        .map((item) => {
+          const recipient = recipientMap.get(item.careRecipientId);
+          return {
+            careRecipientId: item.careRecipientId,
+            careRecipientName:
+              recipient?.display_name ?? "Care profile",
+            primaryAdvocateName: personName(
+              recipient?.owner_id,
+              "Primary Advocate",
+            ),
+            subjectUserId: item.subjectUserId,
+            memberName: personName(
+              item.subjectUserId,
+              "Care team member",
+            ),
+            role: item.role,
+          };
+        });
+
+      const recentCompleted = (completedReviews ?? []).map((row: any) => {
+        const recipient = recipientMap.get(row.care_recipient_id);
+        return {
+          id: row.id,
+          careRecipientId: row.care_recipient_id,
+          careRecipientName:
+            recipient?.display_name ?? "Care profile",
+          subjectUserId: row.subject_user_id,
+          memberName: personName(
+            row.subject_user_id,
+            "Care team member",
+          ),
+          roleBefore: row.role_snapshot,
+          decision: row.decision,
+          roleAfter: row.role_after,
+          reviewedByName: personName(
+            row.reviewed_by,
+            "Primary Advocate",
+          ),
+          reviewedAt: row.reviewed_at,
+        };
+      });
+
+      const counts = {
+        overdue14: queue.filter((item: any) => item.bucket === "overdue_14").length,
+        overdue7: queue.filter((item: any) => item.bucket === "overdue_7").length,
+        due: queue.filter((item: any) => item.bucket === "due").length,
+        upcoming7: queue.filter((item: any) => item.bucket === "upcoming_7").length,
+        scheduled: queue.filter((item: any) => item.bucket === "scheduled").length,
+      };
+
+      const status =
+        counts.overdue14 > 0 || coverageGaps.length > 0
+          ? "action_required"
+          : counts.overdue7 > 0 || counts.due > 0
+            ? "attention"
+            : counts.upcoming7 > 0
+              ? "review"
+              : "clear";
+
+      const summary = {
+        status,
+        eligibleAccess: eligible.size,
+        openReviews: queue.length,
+        coverageGaps: coverageGaps.length,
+        completed90Days: recentCompleted.length,
+        ...counts,
+      };
+
+      const { error: auditError } = await admin
+        .from("pilot_admin_audit")
+        .insert({
+          actor_user_id: user.id,
+          action: "access_governance_viewed",
+          details: {
+            eligible_access: summary.eligibleAccess,
+            open_reviews: summary.openReviews,
+            overdue_14: summary.overdue14,
+            coverage_gaps: summary.coverageGaps,
+          },
+        });
+      if (auditError) throw auditError;
+
+      return json({
+        generatedAt: new Date().toISOString(),
+        summary,
+        queue,
+        coverageGaps,
+        recentCompleted,
+        policy: {
+          cadenceDays: 90,
+          upcomingWindowDays: 7,
+          overdueEscalationDays: [7, 14],
+          scope:
+            "Access-governance metadata only. Clinical care records are not included.",
+        },
+      });
+    }
+
     if (action === "dashboard") {
       const { data: waves, error: waveError } = await admin
         .from("pilot_launch_waves")
