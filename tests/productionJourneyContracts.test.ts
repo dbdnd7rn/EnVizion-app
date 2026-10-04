@@ -272,3 +272,25 @@ test("care invitation management exposes expiry reminders and accurate email sta
   assert.match(screen, /Email requested/);
   assert.match(screen, /does not claim that the message was/);
 });
+
+
+test("automatic care invitation follow-up is scheduled and visible to Primary Advocates", () => {
+  const migration = source(
+    "supabase/migrations/20261004134800_automate_care_invitation_followups.sql",
+  );
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+  const careTeam = source("src/careTeam.ts");
+  const home = source("src/screens/MainScreens.tsx");
+
+  assert.match(migration, /dispatch_care_invitation_followups/);
+  assert.match(migration, /invite_auto_reminder_sent/);
+  assert.match(migration, /care_invite_needs_attention/);
+  assert.match(migration, /care_invite_expiring/);
+  assert.match(migration, /care_invite_expired/);
+  assert.match(migration, /13 \* \* \* \*/);
+  assert.match(admin, /action === "attention"/);
+  assert.match(admin, /needsAttention/);
+  assert.match(careTeam, /loadCareInvitationAttention/);
+  assert.match(home, /CARE TEAM NEEDS ATTENTION/);
+  assert.match(home, /expires within 48 hours/);
+});
