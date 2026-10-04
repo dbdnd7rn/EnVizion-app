@@ -6,7 +6,7 @@ import type {
 import {
   buildCareTeamActivity,
   summarizeCareTeamActivity,
-} from "./careTeamActivityHelpers";
+} from "./careTeamActivityHelpers.ts";
 
 export const careAccessReportPeriodLabels: Record<
   CareAccessReportPeriod,
