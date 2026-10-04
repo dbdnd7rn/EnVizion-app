@@ -558,6 +558,44 @@ export function PilotAdminScreen() {
         />
       </Card>
 
+      <Section title="Access governance" />
+      <Card
+        style={{
+          backgroundColor: "#FAF7FB",
+          borderColor: "#E4D9E8",
+          gap: 11,
+        }}
+      >
+        <View style={S.between}>
+          <View
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 17,
+              backgroundColor: "#F1E7F5",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="shield-checkmark-outline" size={24} color={C.purple} />
+          </View>
+          <View style={[S.pill, { backgroundColor: C.white }]}>
+            <Text style={[S.small, { color: C.purple }]}>ADMIN ONLY</Text>
+          </View>
+        </View>
+        <Text style={S.h2}>Access Governance Dashboard</Text>
+        <Txt>
+          Monitor 90-day care-team access reviews across care profiles, see
+          overdue escalation status, coverage gaps and recent Primary Advocate
+          sign-offs without exposing clinical care records.
+        </Txt>
+        <Button
+          title="Open Access Governance"
+          icon="shield-outline"
+          onPress={() => n.navigate("AccessGovernanceAdmin")}
+        />
+      </Card>
+
       <Section title="Launch validation" />
       <Card style={{ backgroundColor: C.lavender }}>
         <Icon name="flag-outline" size={28} />
