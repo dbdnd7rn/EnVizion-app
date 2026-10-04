@@ -398,3 +398,49 @@ test("security remediation requires a current preview and explicit confirmation"
   assert.match(activity, /Security remediation applied/);
   assert.match(activity, /Access need reconfirmed/);
 });
+
+
+test("periodic care access recertification requires Primary Advocate sign-off", () => {
+  const navigation = source("src/navigation.ts");
+  const app = source("App.tsx");
+  const careTeam = source("src/careTeam.ts");
+  const screen = source("src/screens/CareAccessRecertificationScreen.tsx");
+  const teamScreen = source("src/screens/CareTeamScreen.tsx");
+  const activity = source("src/careTeamActivityHelpers.ts");
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+  const scheduler = source(
+    "supabase/migrations/20261004150000_add_periodic_care_access_recertification.sql",
+  );
+  const signoff = source(
+    "supabase/migrations/20261004150500_add_atomic_care_access_recertification_signoff.sql",
+  );
+
+  assert.match(navigation, /CareAccessRecertification/);
+  assert.match(app, /name=["']CareAccessRecertification["']/);
+  assert.match(teamScreen, /Periodic Access Recertification/);
+  assert.match(screen, /90-DAY ACCESS RECERTIFICATION/);
+  assert.match(screen, /Keep access/);
+  assert.match(screen, /Change role/);
+  assert.match(screen, /Revoke access/);
+  assert.match(screen, /I reviewed this person’s access/);
+  assert.match(screen, /Confirm 90-day access decision/);
+  assert.match(screen, /Primary Advocate access required/);
+  assert.match(careTeam, /loadCareAccessRecertifications/);
+  assert.match(careTeam, /completeCareAccessRecertification/);
+  assert.match(admin, /action === "recertifications"/);
+  assert.match(admin, /action === "recertify_access"/);
+  assert.match(admin, /Explicit sign-off confirmation is required/);
+  assert.match(scheduler, /care_access_recertifications/);
+  assert.match(scheduler, /interval '90 days'/);
+  assert.match(scheduler, /envizion-care-access-recertifications/);
+  assert.match(scheduler, /29 \*\/6 \* \* \*/);
+  assert.match(scheduler, /care_access_recertification_due/);
+  assert.match(signoff, /apply_care_access_recertification/);
+  assert.match(signoff, /Only a Primary Advocate can sign off access recertification/);
+  assert.match(signoff, /role_snapshot is distinct from current_access_role/);
+  assert.match(signoff, /access_recertification_completed/);
+  assert.match(signoff, /access_recertified/);
+  assert.match(signoff, /grant execute[\s\S]*service_role/i);
+  assert.match(activity, /90-day access review completed/);
+  assert.match(activity, /Periodic access recertification signed off/);
+});
