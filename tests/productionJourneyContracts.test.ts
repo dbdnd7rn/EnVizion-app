@@ -368,3 +368,33 @@ test("care team security review detects access conflicts without changing permis
   assert.match(admin, /stale-active-access/);
   assert.doesNotMatch(admin, /action === "security_review"[\s\S]{0,22000}\.update\(/);
 });
+
+
+test("security remediation requires a current preview and explicit confirmation", () => {
+  const navigation = source("src/navigation.ts");
+  const app = source("App.tsx");
+  const careTeam = source("src/careTeam.ts");
+  const review = source("src/screens/CareTeamSecurityReviewScreen.tsx");
+  const remediation = source("src/screens/CareTeamSecurityRemediationScreen.tsx");
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+  const activity = source("src/careTeamActivityHelpers.ts");
+
+  assert.match(navigation, /CareTeamSecurityRemediation/);
+  assert.match(app, /name=["']CareTeamSecurityRemediation["']/);
+  assert.match(review, /Security Remediation Center/);
+  assert.match(careTeam, /loadCareTeamSecurityRemediationOptions/);
+  assert.match(careTeam, /applyCareTeamSecurityRemediation/);
+  assert.match(remediation, /Before & after preview/);
+  assert.match(remediation, /I reviewed this before-and-after change/);
+  assert.match(remediation, /Confirm & apply change/);
+  assert.match(admin, /security_remediation_options/);
+  assert.match(admin, /security_remediation_apply/);
+  assert.match(admin, /payload\.confirm !== true/);
+  assert.match(admin, /fingerprintValue/);
+  assert.match(admin, /Care-team access changed after the preview/);
+  assert.match(admin, /reduce_to_least_privilege/);
+  assert.match(admin, /security_remediation_applied/);
+  assert.match(admin, /security_access_confirmed/);
+  assert.match(activity, /Security remediation applied/);
+  assert.match(activity, /Access need reconfirmed/);
+});
