@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   Text,
   TextInput,
@@ -8,10 +9,13 @@ import {
 } from "react-native";
 import {
   loadAccessGovernanceDashboard,
+  recordAccessGovernanceReportGeneration,
   type AccessGovernanceDashboard,
   type AccessGovernanceQueueItem,
   type AccessReviewBucket,
 } from "../accessGovernanceAdmin";
+import { buildAccessGovernanceReportHtml } from "../accessGovernanceReportHelpers";
+import { printHtmlResource } from "../printing";
 import {
   Button,
   C,
@@ -125,6 +129,7 @@ export function AccessGovernanceAdminScreen() {
   const [filter, setFilter] = useState<QueueFilter>("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [message, setMessage] = useState("");
 
   async function refresh() {
@@ -141,6 +146,33 @@ export function AccessGovernanceAdminScreen() {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function exportGovernanceReport() {
+    if (!dashboard || exporting) return;
+
+    setExporting(true);
+    setMessage("");
+
+    try {
+      const html = buildAccessGovernanceReportHtml(dashboard);
+      await printHtmlResource("Access Governance Evidence Report", html);
+      await recordAccessGovernanceReportGeneration(dashboard.generatedAt);
+
+      setMessage(
+        Platform.OS === "web"
+          ? "The governance report opened in the print workflow. Choose Save as PDF to keep a copy."
+          : "The Access Governance Evidence Report is ready in the share workflow.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not create the governance report.",
+      );
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -596,9 +628,39 @@ export function AccessGovernanceAdminScreen() {
         <Txt style={S.small}>{dashboard.policy.scope}</Txt>
       </Card>
 
+      <Section title="Governance evidence export" />
+      <Card style={{ backgroundColor: "#FAF7FB", gap: 10 }}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <Icon name="document-text-outline" size={22} color={C.purple} />
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={S.h3}>Privacy-minimized governance report</Text>
+            <Txt style={S.small}>
+              Export the current recertification queue, coverage gaps,
+              recent Primary Advocate sign-offs and governance policy.
+              Clinical care details and email addresses are excluded.
+            </Txt>
+          </View>
+        </View>
+      </Card>
+      <Button
+        title={
+          exporting
+            ? "Creating governance report…"
+            : Platform.OS === "web"
+              ? "Open governance report & save PDF"
+              : "Create & share governance report PDF"
+        }
+        disabled={exporting || loading}
+        icon="document-text-outline"
+        onPress={() => void exportGovernanceReport()}
+      />
+      <Txt style={[S.small, { textAlign: "center" }]}>
+        Report generation is recorded in the administrator audit trail.
+      </Txt>
+
       <Button
         title={loading ? "Refreshing…" : "Refresh governance dashboard"}
-        disabled={loading}
+        disabled={loading || exporting}
         icon="refresh-outline"
         onPress={() => void refresh()}
       />
