@@ -64,6 +64,7 @@ import { CareTeamActivityScreen } from "./src/screens/CareTeamActivityScreen";
 import { CareTeamAccessReportScreen } from "./src/screens/CareTeamAccessReportScreen";
 import { CareTeamSecurityReviewScreen } from "./src/screens/CareTeamSecurityReviewScreen";
 import { CareTeamSecurityRemediationScreen } from "./src/screens/CareTeamSecurityRemediationScreen";
+import { CareAccessRecertificationScreen } from "./src/screens/CareAccessRecertificationScreen";
 import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
 import { AccessibilityScreen } from "./src/screens/AccessibilityScreen";
 import { LaunchValidationScreen } from "./src/screens/LaunchValidationScreen";
@@ -604,6 +605,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="CareTeamSecurityRemediation"
             component={CareTeamSecurityRemediationScreen}
             options={{ title: "Security remediation" }}
+          />
+          <Stack.Screen
+            name="CareAccessRecertification"
+            component={CareAccessRecertificationScreen}
+            options={{ title: "90-day access review" }}
           />
           <Stack.Screen
             name="Notifications"
