@@ -397,7 +397,7 @@ export function OnboardingScreen() {
 
         <Heading
           eyebrow="YOUR ACCESS"
-          title={\`What \${presentation.label} access means\`}
+          title={"What " + presentation.label + " access means"}
           body={presentation.summary}
         />
 
@@ -446,7 +446,7 @@ export function OnboardingScreen() {
           title={
             saving
               ? "Accepting invitation…"
-              : \`Accept as \${presentation.label}\`
+              : "Accept as " + presentation.label
           }
           disabled={saving}
           icon="checkmark-circle-outline"
