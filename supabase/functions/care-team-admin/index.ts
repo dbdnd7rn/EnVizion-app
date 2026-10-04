@@ -36,6 +36,27 @@ function roleLabel(role: CareRole) {
   return "Family Member";
 }
 
+const INVITATION_TTL_DAYS = 14;
+const REMINDER_COOLDOWN_HOURS = 24;
+
+function invitationExpiry(from = new Date()) {
+  return new Date(
+    from.getTime() + INVITATION_TTL_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
+}
+
+function invitationExpired(expiresAt: string | null | undefined) {
+  return Boolean(expiresAt && new Date(expiresAt).getTime() <= Date.now());
+}
+
+function reminderCoolingDown(lastRemindedAt: string | null | undefined) {
+  if (!lastRemindedAt) return false;
+  return (
+    Date.now() - new Date(lastRemindedAt).getTime() <
+    REMINDER_COOLDOWN_HOURS * 60 * 60 * 1000
+  );
+}
+
 async function findUserByEmail(admin: any, email: string) {
   const perPage = 1000;
   for (let page = 1; page <= 100; page += 1) {
@@ -105,7 +126,7 @@ Deno.serve(async (req: Request) => {
       const { data: pending, error } = await admin
         .from("care_recipient_members")
         .select(
-          "care_recipient_id, role, status, invited_by, invited_email, invited_name, invited_at",
+          "care_recipient_id, role, status, invited_by, invited_email, invited_name, invited_at, invite_expires_at, last_reminded_at",
         )
         .eq("user_id", user.id)
         .eq("status", "invited")
@@ -134,7 +155,9 @@ Deno.serve(async (req: Request) => {
       );
 
       return json({
-        invitations: (pending ?? []).map((row) => {
+        invitations: (pending ?? [])
+          .filter((row) => !invitationExpired(row.invite_expires_at))
+          .map((row) => {
           const recipient = recipientMap.get(row.care_recipient_id);
           const inviter = row.invited_by
             ? inviterMap.get(row.invited_by)
@@ -152,6 +175,8 @@ Deno.serve(async (req: Request) => {
             invitedName: row.invited_name ?? "",
             inviterName,
             invitedAt: row.invited_at,
+            inviteExpiresAt: row.invite_expires_at,
+            lastRemindedAt: row.last_reminded_at,
           };
         }),
       });
@@ -165,7 +190,7 @@ Deno.serve(async (req: Request) => {
 
       const { data: membership, error: memberError } = await admin
         .from("care_recipient_members")
-        .select("role, status")
+        .select("role, status, invite_expires_at")
         .eq("care_recipient_id", careRecipientId)
         .eq("user_id", user.id)
         .single();
@@ -173,6 +198,15 @@ Deno.serve(async (req: Request) => {
       if (memberError) throw memberError;
       if (membership.status !== "invited") {
         return json({ error: "This invitation is no longer pending." }, 400);
+      }
+      if (invitationExpired(membership.invite_expires_at)) {
+        return json(
+          {
+            error:
+              "This invitation has expired. Ask the Primary Advocate to send a new invitation.",
+          },
+          400,
+        );
       }
 
       const accepted = action === "accept";
@@ -303,7 +337,7 @@ Deno.serve(async (req: Request) => {
         admin
           .from("care_recipient_members")
           .select(
-            "user_id, role, status, invited_by, invited_email, invited_name, invited_at, accepted_at, revoked_at, created_at, updated_at",
+            "user_id, role, status, invited_by, invited_email, invited_name, invited_at, accepted_at, revoked_at, invite_expires_at, last_reminded_at, invite_email_requested_at, created_at, updated_at",
           )
           .eq("care_recipient_id", careRecipientId)
           .order("created_at", { ascending: true }),
@@ -346,6 +380,10 @@ Deno.serve(async (req: Request) => {
             mappedStatus === "active"
               ? existing?.accepted_at ?? row.joined_at ?? null
               : null,
+          invite_expires_at: existing?.invite_expires_at ?? null,
+          last_reminded_at: existing?.last_reminded_at ?? null,
+          invite_email_requested_at:
+            existing?.invite_email_requested_at ?? null,
           revoked_at:
             mappedStatus === "revoked"
               ? existing?.revoked_at ?? row.updated_at ?? null
@@ -381,6 +419,12 @@ Deno.serve(async (req: Request) => {
             invitedAt: row.invited_at,
             acceptedAt: row.accepted_at,
             revokedAt: row.revoked_at,
+            inviteExpiresAt: row.invite_expires_at ?? null,
+            lastRemindedAt: row.last_reminded_at ?? null,
+            emailRequestedAt: row.invite_email_requested_at ?? null,
+            isExpired:
+              row.status === "invited" &&
+              invitationExpired(row.invite_expires_at),
             isCurrentUser: row.user_id === user.id,
           };
         }),
@@ -475,6 +519,8 @@ Deno.serve(async (req: Request) => {
           ? "access_reinvited"
           : "invite_sent";
 
+      const now = new Date();
+      const nowIso = now.toISOString();
       const { error: memberError } = await admin
         .from("care_recipient_members")
         .upsert({
@@ -485,10 +531,13 @@ Deno.serve(async (req: Request) => {
           invited_by: user.id,
           invited_email: email,
           invited_name: displayName,
-          invited_at: new Date().toISOString(),
+          invited_at: nowIso,
+          invite_expires_at: invitationExpiry(now),
+          last_reminded_at: null,
+          invite_email_requested_at: invitationEmailSent ? nowIso : null,
           accepted_at: null,
           revoked_at: null,
-          updated_at: new Date().toISOString(),
+          updated_at: nowIso,
         });
 
       if (memberError) throw memberError;
@@ -533,7 +582,7 @@ Deno.serve(async (req: Request) => {
     ] = await Promise.all([
       admin
         .from("care_recipient_members")
-        .select("role, status")
+        .select("role, status, invite_expires_at, last_reminded_at")
         .eq("care_recipient_id", careRecipientId)
         .eq("user_id", targetUserId)
         .maybeSingle(),
@@ -563,6 +612,76 @@ Deno.serve(async (req: Request) => {
 
     if (!targetMember) {
       return json({ error: "Care team member was not found." }, 404);
+    }
+
+    if (action === "send_reminder") {
+      if (!directTarget || directTarget.status !== "invited") {
+        return json({ error: "Only a pending invitation can be reminded." }, 400);
+      }
+      if (invitationExpired(directTarget.invite_expires_at)) {
+        return json(
+          {
+            error:
+              "This invitation has expired. Re-open the invitation before sending a reminder.",
+          },
+          400,
+        );
+      }
+      if (reminderCoolingDown(directTarget.last_reminded_at)) {
+        return json(
+          {
+            error:
+              "A reminder was already sent in the last 24 hours.",
+          },
+          400,
+        );
+      }
+
+      const now = new Date().toISOString();
+      const { error: reminderUpdateError } = await admin
+        .from("care_recipient_members")
+        .update({
+          last_reminded_at: now,
+          updated_at: now,
+        })
+        .eq("care_recipient_id", careRecipientId)
+        .eq("user_id", targetUserId);
+
+      if (reminderUpdateError) throw reminderUpdateError;
+
+      const { data: inviterAccount } = await admin.auth.admin.getUserById(user.id);
+      const inviterName =
+        String(inviterAccount?.user?.user_metadata?.full_name ?? "").trim() ||
+        String(inviterAccount?.user?.email ?? "").trim() ||
+        "Your Primary Advocate";
+
+      const { error: reminderNotificationError } = await admin
+        .from("notifications")
+        .insert({
+          user_id: targetUserId,
+          audience: "caregiver",
+          kind: "care_invite_reminder",
+          title: "Care invitation reminder",
+          body: `${inviterName} is reminding you about your ${roleLabel(targetMember.role)} invitation to ${recipient.display_name}’s care space.`,
+          entity_type: "care_recipient",
+          entity_id: careRecipientId,
+        });
+
+      if (reminderNotificationError) throw reminderNotificationError;
+
+      const { error: reminderConsentError } = await admin
+        .from("care_consent_events")
+        .insert({
+          care_recipient_id: careRecipientId,
+          actor_user_id: user.id,
+          subject_user_id: targetUserId,
+          event_type: "invite_reminder_sent",
+          role: targetMember.role,
+        });
+
+      if (reminderConsentError) throw reminderConsentError;
+
+      return json({ ok: true, remindedAt: now });
     }
 
     if (action === "update_role") {
@@ -674,11 +793,19 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "reinvite") {
-      if (!["revoked", "declined"].includes(targetMember.status)) {
+      const expiredPending =
+        directTarget?.status === "invited" &&
+        invitationExpired(directTarget.invite_expires_at);
+
+      if (
+        !["revoked", "declined"].includes(targetMember.status) &&
+        !expiredPending
+      ) {
         return json({ error: "This member does not need a new invitation." }, 400);
       }
 
-      const now = new Date().toISOString();
+      const nowDate = new Date();
+      const now = nowDate.toISOString();
       const { error: updateError } = directTarget
         ? await admin
             .from("care_recipient_members")
@@ -686,6 +813,8 @@ Deno.serve(async (req: Request) => {
               status: "invited",
               invited_by: user.id,
               invited_at: now,
+              invite_expires_at: invitationExpiry(nowDate),
+              last_reminded_at: null,
               accepted_at: null,
               revoked_at: null,
               updated_at: now,
@@ -699,6 +828,8 @@ Deno.serve(async (req: Request) => {
             status: "invited",
             invited_by: user.id,
             invited_at: now,
+            invite_expires_at: invitationExpiry(nowDate),
+            last_reminded_at: null,
             accepted_at: null,
             revoked_at: null,
             updated_at: now,
