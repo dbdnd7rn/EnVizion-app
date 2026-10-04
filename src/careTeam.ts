@@ -172,6 +172,23 @@ export type CareAccessRecertificationOverview = {
   items: CareAccessRecertificationItem[];
 };
 
+export type CareAccessRecertificationAttention = {
+  due: number;
+  upcoming7: number;
+  overdue7: number;
+  overdue14: number;
+  needsAttention: number;
+  next: {
+    id: string;
+    userId: string;
+    displayName: string;
+    role: Extract<CareRole, "caregiver" | "viewer">;
+    dueAt: string;
+    isDue: boolean;
+    overdueDays: number;
+  } | null;
+};
+
 export type CareAccessRecertificationResult = {
   ok: true;
   subjectUserId: string;
@@ -273,6 +290,15 @@ export async function loadCareAccessRecertifications(
 ): Promise<CareAccessRecertificationOverview> {
   return invokeCareTeam<CareAccessRecertificationOverview>({
     action: "recertifications",
+    careRecipientId,
+  });
+}
+
+export async function loadCareAccessRecertificationAttention(
+  careRecipientId: string,
+): Promise<CareAccessRecertificationAttention> {
+  return invokeCareTeam<CareAccessRecertificationAttention>({
+    action: "recertification_attention",
     careRecipientId,
   });
 }
