@@ -1,7 +1,11 @@
 import { supabase } from "./supabase";
 import type { Appointment, Entry, TrackerKind } from "./domain";
 import type { Medication, MedicationRecord } from "./medications";
-import { recordCareWorkspaceOpen, type CareRole } from "./careTeam";
+import {
+  loadAccessibleCareContexts,
+  recordCareWorkspaceOpen,
+  type CareRole,
+} from "./careTeam";
 
 export type CareMode = "advocate" | "self";
 
@@ -16,48 +20,30 @@ export type SavedOnboarding = {
 };
 
 async function resolveCareContextForUser(userId: string) {
-  const [{ data: preferences }, { data: memberships, error: membershipError }] =
-    await Promise.all([
-      supabase
-        .from("user_preferences")
-        .select("active_care_recipient_id, care_mode")
-        .eq("user_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("care_recipient_members")
-        .select("care_recipient_id, role, accepted_at")
-        .eq("user_id", userId)
-        .eq("status", "active"),
-    ]);
+  const [{ data: preferences }, contexts] = await Promise.all([
+    supabase
+      .from("user_preferences")
+      .select("active_care_recipient_id, care_mode")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    loadAccessibleCareContexts(userId),
+  ]);
 
-  if (membershipError) throw membershipError;
-  const rows = memberships ?? [];
-  if (!rows.length) return null;
+  if (!contexts.length) return null;
 
   const preferredId = preferences?.active_care_recipient_id ?? null;
   const selected =
-    rows.find((row) => row.care_recipient_id === preferredId) ??
-    rows.find((row) => row.role === "owner") ??
-    rows[0];
-
-  const { data: recipient, error: recipientError } = await supabase
-    .from("care_recipients")
-    .select("id, display_name, relationship")
-    .eq("id", selected.care_recipient_id)
-    .single();
-
-  if (recipientError) throw recipientError;
+    contexts.find((context) => context.careRecipientId === preferredId) ??
+    contexts.find((context) => context.role === "owner") ??
+    contexts[0];
 
   return {
-    careRecipientId: recipient.id as string,
-    careRecipientName: recipient.display_name as string,
-    relationship:
-      selected.role === "patient"
-        ? "Myself"
-        : ((recipient.relationship || "A loved one") as string),
-    accessRole: selected.role as CareRole,
+    careRecipientId: selected.careRecipientId,
+    careRecipientName: selected.careRecipientName,
+    relationship: selected.relationship,
+    accessRole: selected.role,
     careMode: (
-      selected.role === "patient" || recipient.relationship === "Myself"
+      selected.role === "patient" || selected.relationship === "Myself"
         ? "self"
         : "advocate"
     ) as CareMode,
