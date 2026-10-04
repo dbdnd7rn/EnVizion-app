@@ -248,3 +248,27 @@ test("care invitation handoff identifies inviter and explains role access", () =
   assert.match(careTeamScreen, /Invited by \{invitation\.inviterName\}/);
   assert.match(careTeamScreen, /Access stays inactive until you/);
 });
+
+
+test("care invitation management exposes expiry reminders and accurate email state", () => {
+  const careTeam = source("src/careTeam.ts");
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+  const screen = source("src/screens/CareTeamScreen.tsx");
+  const migration = source(
+    "supabase/migrations/20261004094500_add_care_invitation_management_fields.sql",
+  );
+
+  assert.match(migration, /invite_expires_at/);
+  assert.match(migration, /last_reminded_at/);
+  assert.match(migration, /invite_email_requested_at/);
+  assert.match(admin, /INVITATION_TTL_DAYS = 14/);
+  assert.match(admin, /REMINDER_COOLDOWN_HOURS = 24/);
+  assert.match(admin, /send_reminder/);
+  assert.match(admin, /This invitation has expired/);
+  assert.match(careTeam, /sendCareInvitationReminder/);
+  assert.match(screen, /Invitation management/);
+  assert.match(screen, /Send invitation reminder/);
+  assert.match(screen, /Re-open invitation/);
+  assert.match(screen, /Email requested/);
+  assert.match(screen, /does not claim that the message was/);
+});
