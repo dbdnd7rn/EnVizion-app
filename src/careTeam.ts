@@ -144,6 +144,43 @@ export type CareTeamSecurityRemediationResult = {
   after: string;
 };
 
+export type CareAccessRecertificationDecision =
+  | "keep"
+  | "change_role"
+  | "revoke";
+
+export type CareAccessRecertificationItem = {
+  id: string;
+  userId: string;
+  displayName: string;
+  role: Extract<CareRole, "caregiver" | "viewer">;
+  status: "scheduled" | "due" | "completed";
+  dueAt: string;
+  notifiedAt: string | null;
+  decision: CareAccessRecertificationDecision | null;
+  roleAfter: Extract<CareRole, "caregiver" | "viewer"> | null;
+  reviewedAt: string | null;
+  reviewedByName: string | null;
+  createdAt: string;
+};
+
+export type CareAccessRecertificationOverview = {
+  dueCount: number;
+  upcomingCount: number;
+  completedCount: number;
+  cadenceDays: number;
+  items: CareAccessRecertificationItem[];
+};
+
+export type CareAccessRecertificationResult = {
+  ok: true;
+  subjectUserId: string;
+  decision: CareAccessRecertificationDecision;
+  before: string;
+  after: string;
+  nextDueAt: string | null;
+};
+
 async function invokeCareTeam<T>(
   body: Record<string, unknown>,
 ): Promise<T> {
@@ -227,6 +264,31 @@ export async function applyCareTeamSecurityRemediation(input: {
     findingId: input.findingId,
     remediationKey: input.remediationKey,
     fingerprint: input.fingerprint,
+    confirm: true,
+  });
+}
+
+export async function loadCareAccessRecertifications(
+  careRecipientId: string,
+): Promise<CareAccessRecertificationOverview> {
+  return invokeCareTeam<CareAccessRecertificationOverview>({
+    action: "recertifications",
+    careRecipientId,
+  });
+}
+
+export async function completeCareAccessRecertification(input: {
+  careRecipientId: string;
+  recertificationId: string;
+  decision: CareAccessRecertificationDecision;
+  roleAfter?: Extract<CareRole, "caregiver" | "viewer"> | null;
+}): Promise<CareAccessRecertificationResult> {
+  return invokeCareTeam<CareAccessRecertificationResult>({
+    action: "recertify_access",
+    careRecipientId: input.careRecipientId,
+    recertificationId: input.recertificationId,
+    decision: input.decision,
+    roleAfter: input.roleAfter ?? null,
     confirm: true,
   });
 }
