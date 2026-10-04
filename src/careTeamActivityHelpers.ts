@@ -146,6 +146,17 @@ function auditPresentation(
     };
   }
 
+  if (event.action === "access_report_generated") {
+    return {
+      title: "Care Team Access Report generated",
+      detail:
+        event.summary ??
+        `${actor} generated a Care Team Access Report.`,
+      icon: "document-text-outline",
+      tone: "purple",
+    };
+  }
+
   return {
     title: event.action.replaceAll("_", " "),
     detail:
