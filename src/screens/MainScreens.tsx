@@ -6,8 +6,10 @@ import type { RootStack } from "../navigation";
 import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
 import {
+  loadCareInvitationAttention,
   loadCareSpaces,
   setActiveCareRecipient,
+  type CareInvitationAttention,
   type CareSpace,
 } from "../careTeam";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
@@ -147,6 +149,8 @@ export function HomeScreen() {
   const n = useNav();
   const { state, refresh: refreshCare } = useCare();
   const [careSpaces, setCareSpaces] = useState<CareSpace[]>([]);
+  const [invitationAttention, setInvitationAttention] =
+    useState<CareInvitationAttention | null>(null);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [switchingCareId, setSwitchingCareId] = useState<string | null>(null);
   const { width: windowWidth } = useWindowDimensions();
@@ -183,6 +187,29 @@ export function HomeScreen() {
       active = false;
     };
   }, [state.careRecipientId]);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!state.careRecipientId || state.accessRole !== "owner") {
+      setInvitationAttention(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    loadCareInvitationAttention(state.careRecipientId)
+      .then((summary) => {
+        if (active) setInvitationAttention(summary);
+      })
+      .catch(() => {
+        if (active) setInvitationAttention(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [state.accessRole, state.careRecipientId]);
 
   const activeSpace =
     careSpaces.find((space) => space.active) ??
@@ -485,6 +512,74 @@ export function HomeScreen() {
             </View>
           </HomeReveal>
         )}
+
+        {invitationAttention &&
+          invitationAttention.needsAttention > 0 && (
+            <HomeReveal delay={50}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${invitationAttention.needsAttention} care invitation${invitationAttention.needsAttention === 1 ? "" : "s"} need attention`}
+                onPress={() => n.navigate("CareTeam")}
+                style={({ pressed }) => ({
+                  borderRadius: 22,
+                  borderWidth: 1,
+                  borderColor: invitationAttention.expired
+                    ? "#F2C7B7"
+                    : "#E3D2B8",
+                  backgroundColor: invitationAttention.expired
+                    ? "#FFF7F2"
+                    : "#FFFAF1",
+                  paddingHorizontal: 15,
+                  paddingVertical: 14,
+                  flexDirection: "row",
+                  gap: 12,
+                  alignItems: "center",
+                  opacity: pressed ? 0.78 : 1,
+                })}
+              >
+                <View
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 15,
+                    backgroundColor: invitationAttention.expired
+                      ? "#FCE5DA"
+                      : "#F8ECD9",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon
+                    name={
+                      invitationAttention.expired
+                        ? "alert-circle-outline"
+                        : "time-outline"
+                    }
+                    size={22}
+                    color={invitationAttention.expired ? "#B95734" : "#946B24"}
+                  />
+                </View>
+
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={[S.eyebrow, { color: "#8A6530" }]}>
+                    CARE TEAM NEEDS ATTENTION
+                  </Text>
+                  <Text style={[S.h3, { fontSize: 14.5 }]}>
+                    {invitationAttention.expired
+                      ? `${invitationAttention.expired} invitation${invitationAttention.expired === 1 ? "" : "s"} expired`
+                      : `${invitationAttention.nearExpiry} invitation${invitationAttention.nearExpiry === 1 ? "" : "s"} expiring soon`}
+                  </Text>
+                  <Txt style={S.small}>
+                    {invitationAttention.next
+                      ? `${invitationAttention.next.displayName} · ${invitationAttention.next.isExpired ? "re-open invitation" : "expires within 48 hours"}`
+                      : "Open Care Team to review pending invitations."}
+                  </Txt>
+                </View>
+
+                <Icon name="chevron-forward" size={20} color={C.purple} />
+              </Pressable>
+            </HomeReveal>
+          )}
 
         <HomeReveal delay={65}>
           <View
