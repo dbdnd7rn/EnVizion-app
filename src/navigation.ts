@@ -64,6 +64,7 @@ export type RootStack = {
   PilotFeedback: undefined;
   LaunchCenter: undefined;
   CareTeam: undefined;
+  CareTeamActivity: undefined;
   Notifications: undefined;
   NotificationSettings: undefined;
   StaffWorkspace: undefined;
