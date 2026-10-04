@@ -294,3 +294,28 @@ test("automatic care invitation follow-up is scheduled and visible to Primary Ad
   assert.match(home, /CARE TEAM NEEDS ATTENTION/);
   assert.match(home, /expires within 48 hours/);
 });
+
+
+test("care team activity center keeps access accountability filterable", () => {
+  const navigation = source("src/navigation.ts");
+  const app = source("App.tsx");
+  const careTeam = source("src/screens/CareTeamScreen.tsx");
+  const activity = source("src/screens/CareTeamActivityScreen.tsx");
+  const helpers = source("src/careTeamActivityHelpers.ts");
+
+  assert.match(navigation, /CareTeamActivity/);
+  assert.match(app, /name=["']CareTeamActivity["']/);
+  assert.match(careTeam, /Care Team Activity Center/);
+  assert.match(activity, /ACTIVITY & ACCOUNTABILITY/);
+  assert.match(activity, /Filter timeline/);
+  assert.match(activity, /Team member/);
+  assert.match(activity, /Accountability timeline/);
+  assert.match(helpers, /invite_sent/);
+  assert.match(helpers, /invite_accepted/);
+  assert.match(helpers, /invite_declined/);
+  assert.match(helpers, /invite_reminder_sent/);
+  assert.match(helpers, /invite_auto_reminder_sent/);
+  assert.match(helpers, /role_changed/);
+  assert.match(helpers, /access_revoked/);
+  assert.match(helpers, /access_reinvited/);
+});
