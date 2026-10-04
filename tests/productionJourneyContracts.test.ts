@@ -209,3 +209,23 @@ test("CareGroup membership can resolve and switch active care profiles", () => {
   assert.match(backend, /loadAccessibleCareContexts/);
   assert.match(backend, /contexts\.find\(\(context\) => context\.careRecipientId === preferredId\)/);
 });
+
+
+test("care team administration synchronizes invitation lifecycle into CareGroups", () => {
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+  const migration = source(
+    "supabase/migrations/20261004081000_sync_care_recipient_members_to_care_groups.sql",
+  );
+
+  assert.match(admin, /care_group_members/);
+  assert.match(admin, /primary_advocate/);
+  assert.match(admin, /co_caregiver/);
+  assert.match(admin, /read_only/);
+  assert.match(admin, /Only a Primary Advocate can manage care access/);
+  assert.match(admin, /already has active access to this CareGroup/);
+  assert.match(migration, /sync_care_group_member_from_recipient_member/);
+  assert.match(migration, /after insert or update of role, status, invited_by, accepted_at, revoked_at/i);
+  assert.match(migration, /when 'caregiver' then 'co_caregiver'/);
+  assert.match(migration, /when 'viewer' then 'read_only'/);
+  assert.match(migration, /new\.role = 'patient'/);
+});
