@@ -22,6 +22,7 @@ test("production-critical routes remain registered", () => {
     "LaunchCenter",
     "PilotFeedback",
     "PilotIntelligence",
+    "AccessGovernanceAdmin",
   ]) {
     assert.match(navigation, new RegExp(`\\b${route}\\b`));
     assert.match(app, new RegExp(`name=["']${route}["']`));
@@ -469,4 +470,34 @@ test("access recertification escalation warns without silently changing access",
   assert.match(home, /ACCESS REVIEW/);
   assert.match(home, /overdue 14\+ days/);
   assert.match(home, /due within 7 days/);
+});
+
+
+test("administrator access governance dashboard is read-only and privacy minimized", () => {
+  const navigation = source("src/navigation.ts");
+  const app = source("App.tsx");
+  const client = source("src/accessGovernanceAdmin.ts");
+  const screen = source("src/screens/AccessGovernanceAdminScreen.tsx");
+  const pilotAdmin = source("src/screens/PilotAdminScreen.tsx");
+  const launchAdmin = source("supabase/functions/launch-admin/index.ts");
+
+  assert.match(navigation, /AccessGovernanceAdmin/);
+  assert.match(app, /name=["']AccessGovernanceAdmin["']/);
+  assert.match(pilotAdmin, /Open Access Governance/);
+  assert.match(client, /action: "access_governance"/);
+  assert.match(screen, /ADMIN ACCESS GOVERNANCE/);
+  assert.match(screen, /Oversight only/);
+  assert.match(screen, /cannot keep, change or revoke/i);
+  assert.match(screen, /Coverage gaps/);
+  assert.match(screen, /Recent Primary Advocate sign-offs/);
+  assert.match(screen, /does not expose medications, diagnoses, visit notes, documents/i);
+  assert.match(launchAdmin, /action === "access_governance"/);
+  assert.match(launchAdmin, /Administrator access required/);
+  assert.match(launchAdmin, /coverageGaps/);
+  assert.match(launchAdmin, /completed90Days/);
+  assert.match(launchAdmin, /access_governance_viewed/);
+  assert.doesNotMatch(
+    screen,
+    /updateCareTeamRole|revokeCareTeamAccess|completeCareAccessRecertification/,
+  );
 });
