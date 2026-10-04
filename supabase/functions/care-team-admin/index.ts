@@ -1369,6 +1369,115 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Only a Primary Advocate can manage care access." }, 403);
     }
 
+    if (action === "recertifications") {
+      const { data: rows, error: recertificationError } = await admin
+        .from("care_access_recertifications")
+        .select(
+          "id, subject_user_id, role_snapshot, status, due_at, notified_at, decision, role_after, reviewed_by, reviewed_at, created_at",
+        )
+        .eq("care_recipient_id", careRecipientId)
+        .in("status", ["scheduled", "due", "completed"])
+        .order("due_at", { ascending: true })
+        .limit(120);
+
+      if (recertificationError) throw recertificationError;
+
+      const userIds = [
+        ...(rows ?? []).map((row) => row.subject_user_id),
+        ...(rows ?? [])
+          .map((row) => row.reviewed_by)
+          .filter((value): value is string => Boolean(value)),
+      ];
+      const accountMap = await getUsersById(admin, userIds);
+
+      const { data: directNames, error: directNamesError } = await admin
+        .from("care_recipient_members")
+        .select("user_id, invited_name")
+        .eq("care_recipient_id", careRecipientId);
+
+      if (directNamesError) throw directNamesError;
+
+      const invitedNameMap = new Map(
+        (directNames ?? []).map((row) => [
+          row.user_id,
+          String(row.invited_name ?? "").trim(),
+        ]),
+      );
+
+      const items = (rows ?? []).map((row) => {
+        const subject = accountMap.get(row.subject_user_id);
+        const reviewer = row.reviewed_by
+          ? accountMap.get(row.reviewed_by)
+          : null;
+
+        return {
+          id: row.id,
+          userId: row.subject_user_id,
+          displayName:
+            invitedNameMap.get(row.subject_user_id) ||
+            String(subject?.user_metadata?.full_name ?? "").trim() ||
+            "Care team member",
+          role: row.role_snapshot,
+          status: row.status,
+          dueAt: row.due_at,
+          notifiedAt: row.notified_at,
+          decision: row.decision,
+          roleAfter: row.role_after,
+          reviewedAt: row.reviewed_at,
+          reviewedByName:
+            row.reviewed_by
+              ? String(reviewer?.user_metadata?.full_name ?? "").trim() ||
+                (row.reviewed_by === user.id ? "You" : "Primary Advocate")
+              : null,
+          createdAt: row.created_at,
+        };
+      });
+
+      return json({
+        dueCount: items.filter((item) => item.status === "due").length,
+        upcomingCount: items.filter((item) => item.status === "scheduled").length,
+        completedCount: items.filter((item) => item.status === "completed").length,
+        cadenceDays: 90,
+        items,
+      });
+    }
+
+    if (action === "recertify_access") {
+      if (payload.confirm !== true) {
+        return json(
+          { error: "Explicit sign-off confirmation is required." },
+          400,
+        );
+      }
+
+      const recertificationId = String(payload.recertificationId ?? "");
+      const decision = String(payload.decision ?? "");
+      const roleAfter = payload.roleAfter
+        ? String(payload.roleAfter)
+        : null;
+
+      if (!recertificationId) {
+        return json({ error: "Access review is required." }, 400);
+      }
+      if (!["keep", "change_role", "revoke"].includes(decision)) {
+        return json({ error: "Choose Keep, Change Role, or Revoke." }, 400);
+      }
+
+      const { data, error } = await admin.rpc(
+        "apply_care_access_recertification",
+        {
+          target_recertification_id: recertificationId,
+          target_care_recipient_id: careRecipientId,
+          target_actor_user_id: user.id,
+          target_decision: decision,
+          target_role_after: roleAfter,
+        },
+      );
+
+      if (error) throw error;
+      return json(data ?? { ok: true });
+    }
+
     if (action === "invite") {
       const email = String(payload.email ?? "").trim().toLowerCase();
       const displayName = String(payload.displayName ?? "").trim();
