@@ -714,6 +714,44 @@ export function CareTeamScreen() {
         </>
       )}
 
+      {canManage && (
+        <>
+          <Section title="Security review" />
+          <Card
+            onPress={() => n.navigate("CareTeamSecurityReview")}
+            label="Open Care Team Security Review"
+            style={{
+              backgroundColor: "#FFF9F4",
+              borderColor: "#EAD8C6",
+              gap: 12,
+            }}
+          >
+            <View style={S.between}>
+              <View
+                style={{
+                  width: 46,
+                  height: 46,
+                  borderRadius: 17,
+                  backgroundColor: "#F8ECDD",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="shield-outline" size={23} color="#8F6529" />
+              </View>
+              <Icon name="chevron-forward" size={20} color={C.purple} />
+            </View>
+            <View style={{ gap: 5 }}>
+              <Text style={S.h2}>Care Team Security Review</Text>
+              <Txt>
+                Check for permission conflicts, inconsistent membership states,
+                unresolved invitations and access that may no longer be needed.
+              </Txt>
+            </View>
+          </Card>
+        </>
+      )}
+
       <Section title="Activity & accountability" />
       <Card
         onPress={() => n.navigate("CareTeamActivity")}
