@@ -79,6 +79,19 @@ export type CareAuditEvent = {
   createdAt: string;
 };
 
+export type CareAccessReportPeriod =
+  | "last_7_days"
+  | "last_30_days"
+  | "last_90_days"
+  | "all_recorded_history";
+
+export type CareAccessReportData = {
+  canManage: boolean;
+  currentRole: CareRole;
+  members: CareTeamMember[];
+  events: ConsentEvent[];
+};
+
 async function invokeCareTeam<T>(
   body: Record<string, unknown>,
 ): Promise<T> {
@@ -352,15 +365,26 @@ export async function setActiveCareRecipient(careRecipientId: string) {
 
 export async function loadConsentHistory(
   careRecipientId: string,
+  options?: {
+    since?: string | null;
+    limit?: number;
+  },
 ): Promise<ConsentEvent[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("care_consent_events")
     .select(
       "id, actor_user_id, subject_user_id, event_type, role, note, created_at",
     )
     .eq("care_recipient_id", careRecipientId)
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .order("created_at", { ascending: false });
+
+  if (options?.since) {
+    query = query.gte("created_at", options.since);
+  }
+
+  const { data, error } = await query.limit(
+    Math.min(Math.max(options?.limit ?? 100, 1), 500),
+  );
 
   if (error) throw error;
 
@@ -373,6 +397,46 @@ export async function loadConsentHistory(
     note: row.note,
     createdAt: row.created_at,
   }));
+}
+
+function reportPeriodSince(period: CareAccessReportPeriod) {
+  if (period === "all_recorded_history") return null;
+
+  const days =
+    period === "last_7_days" ? 7 : period === "last_30_days" ? 30 : 90;
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+}
+
+export async function loadCareAccessReportData(
+  careRecipientId: string,
+  period: CareAccessReportPeriod,
+): Promise<CareAccessReportData> {
+  const since = reportPeriodSince(period);
+  const [roster, events] = await Promise.all([
+    loadCareTeam(careRecipientId),
+    loadConsentHistory(careRecipientId, {
+      since,
+      limit: 500,
+    }),
+  ]);
+
+  return {
+    canManage: roster.canManage,
+    currentRole: roster.currentRole,
+    members: roster.members,
+    events,
+  };
+}
+
+export async function recordCareAccessReportGeneration(
+  careRecipientId: string,
+  period: CareAccessReportPeriod,
+) {
+  await invokeCareTeam({
+    action: "record_access_report",
+    careRecipientId,
+    period,
+  });
 }
 
 export async function loadCareAuditTrail(
