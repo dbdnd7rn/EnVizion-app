@@ -329,6 +329,60 @@ Deno.serve(async (req: Request) => {
 
     if (!canView) return json({ error: "Care team access required" }, 403);
 
+    if (action === "attention") {
+      if (!canManage) {
+        return json(
+          { error: "Only a Primary Advocate can review invitation attention." },
+          403,
+        );
+      }
+
+      const { data: invitationRows, error: invitationError } = await admin
+        .from("care_recipient_members")
+        .select(
+          "user_id, invited_name, invited_email, role, status, invited_at, invite_expires_at",
+        )
+        .eq("care_recipient_id", careRecipientId)
+        .eq("status", "invited")
+        .order("invite_expires_at", { ascending: true });
+
+      if (invitationError) throw invitationError;
+
+      const rows = invitationRows ?? [];
+      const now = Date.now();
+      const nearCutoff = now + 48 * 60 * 60 * 1000;
+      const expired = rows.filter(
+        (row) =>
+          row.invite_expires_at &&
+          new Date(row.invite_expires_at).getTime() <= now,
+      );
+      const nearExpiry = rows.filter((row) => {
+        if (!row.invite_expires_at) return false;
+        const at = new Date(row.invite_expires_at).getTime();
+        return at > now && at <= nearCutoff;
+      });
+      const next = [...expired, ...nearExpiry][0] ?? null;
+
+      return json({
+        pending: rows.length,
+        nearExpiry: nearExpiry.length,
+        expired: expired.length,
+        needsAttention: nearExpiry.length + expired.length,
+        next: next
+          ? {
+              userId: next.user_id,
+              displayName:
+                String(next.invited_name ?? "").trim() ||
+                String(next.invited_email ?? "").trim() ||
+                "Care team member",
+              role: next.role,
+              inviteExpiresAt: next.invite_expires_at,
+              isExpired: invitationExpired(next.invite_expires_at),
+            }
+          : null,
+      });
+    }
+
     if (action === "list") {
       const [
         { data: directMembers, error: membersError },
@@ -535,6 +589,9 @@ Deno.serve(async (req: Request) => {
           invite_expires_at: invitationExpiry(now),
           last_reminded_at: null,
           invite_email_requested_at: invitationEmailSent ? nowIso : null,
+          auto_reminded_at: null,
+          owner_attention_notified_at: null,
+          expired_notified_at: null,
           accepted_at: null,
           revoked_at: null,
           updated_at: nowIso,
@@ -815,6 +872,9 @@ Deno.serve(async (req: Request) => {
               invited_at: now,
               invite_expires_at: invitationExpiry(nowDate),
               last_reminded_at: null,
+              auto_reminded_at: null,
+              owner_attention_notified_at: null,
+              expired_notified_at: null,
               accepted_at: null,
               revoked_at: null,
               updated_at: now,
@@ -830,6 +890,9 @@ Deno.serve(async (req: Request) => {
             invited_at: now,
             invite_expires_at: invitationExpiry(nowDate),
             last_reminded_at: null,
+            auto_reminded_at: null,
+            owner_attention_notified_at: null,
+            expired_notified_at: null,
             accepted_at: null,
             revoked_at: null,
             updated_at: now,
