@@ -229,3 +229,22 @@ test("care team administration synchronizes invitation lifecycle into CareGroups
   assert.match(migration, /when 'viewer' then 'read_only'/);
   assert.match(migration, /new\.role = 'patient'/);
 });
+
+
+test("care invitation handoff identifies inviter and explains role access", () => {
+  const careTeam = source("src/careTeam.ts");
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+  const onboarding = source("src/screens/SupportScreens.tsx");
+  const careTeamScreen = source("src/screens/CareTeamScreen.tsx");
+
+  assert.match(careTeam, /inviterName: string/);
+  assert.match(admin, /inviterName/);
+  assert.match(admin, /user_metadata\?\.full_name/);
+  assert.match(onboarding, /PRIVATE INVITATION/);
+  assert.match(onboarding, /INVITED BY/);
+  assert.match(onboarding, /What .* access means/);
+  assert.match(onboarding, /Accept as/);
+  assert.match(onboarding, /Nothing is shared with you until you accept/);
+  assert.match(careTeamScreen, /Invited by \{invitation\.inviterName\}/);
+  assert.match(careTeamScreen, /Access stays inactive until you/);
+});
