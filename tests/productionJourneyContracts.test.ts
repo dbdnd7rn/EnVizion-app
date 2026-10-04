@@ -343,3 +343,28 @@ test("care team access report stays privacy-minimized and Primary Advocate contr
   assert.match(admin, /Only a Primary Advocate can generate care access reports/);
   assert.match(admin, /access_report_generated/);
 });
+
+
+test("care team security review detects access conflicts without changing permissions", () => {
+  const navigation = source("src/navigation.ts");
+  const app = source("App.tsx");
+  const careTeam = source("src/careTeam.ts");
+  const screen = source("src/screens/CareTeamSecurityReviewScreen.tsx");
+  const teamScreen = source("src/screens/CareTeamScreen.tsx");
+  const admin = source("supabase/functions/care-team-admin/index.ts");
+
+  assert.match(navigation, /CareTeamSecurityReview/);
+  assert.match(app, /name=["']CareTeamSecurityReview["']/);
+  assert.match(careTeam, /loadCareTeamSecurityReview/);
+  assert.match(teamScreen, /Care Team Security Review/);
+  assert.match(screen, /Primary Advocate access required/);
+  assert.match(screen, /Run security review again/);
+  assert.match(screen, /full forensic security audit/);
+  assert.match(admin, /action === "security_review"/);
+  assert.match(admin, /patient-write-conflict/);
+  assert.match(admin, /revoked-still-group-active/);
+  assert.match(admin, /role-mismatch/);
+  assert.match(admin, /expired-invite/);
+  assert.match(admin, /stale-active-access/);
+  assert.doesNotMatch(admin, /action === "security_review"[\s\S]{0,22000}\.update\(/);
+});
