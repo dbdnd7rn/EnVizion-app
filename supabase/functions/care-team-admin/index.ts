@@ -126,16 +126,31 @@ Deno.serve(async (req: Request) => {
       const recipientMap = new Map(
         (recipients ?? []).map((row) => [row.id, row]),
       );
+      const inviterMap = await getUsersById(
+        admin,
+        (pending ?? [])
+          .map((row) => row.invited_by)
+          .filter((value): value is string => Boolean(value)),
+      );
 
       return json({
         invitations: (pending ?? []).map((row) => {
           const recipient = recipientMap.get(row.care_recipient_id);
+          const inviter = row.invited_by
+            ? inviterMap.get(row.invited_by)
+            : null;
+          const inviterName =
+            String(inviter?.user_metadata?.full_name ?? "").trim() ||
+            String(inviter?.email ?? "").trim() ||
+            "Your Primary Advocate";
+
           return {
             careRecipientId: row.care_recipient_id,
             careRecipientName: recipient?.display_name ?? "Care recipient",
             relationship: recipient?.relationship ?? "",
             role: row.role,
             invitedName: row.invited_name ?? "",
+            inviterName,
             invitedAt: row.invited_at,
           };
         }),
