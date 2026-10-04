@@ -1199,16 +1199,8 @@ Deno.serve(async (req: Request) => {
           .eq("user_id", remediationTargetUserId);
         if (error) throw error;
       } else if (remediationKey === "confirm_access_still_needed") {
-        const { error } = await admin.from("care_audit_events").insert({
-          care_recipient_id: careRecipientId,
-          actor_user_id: user.id,
-          action: "security_access_confirmed",
-          entity_type: "care_team_member",
-          entity_id: remediationTargetUserId,
-          summary:
-            "Primary Advocate reviewed stale access and confirmed it is still needed.",
-        });
-        if (error) throw error;
+        // No permission mutation. The final accountability event below records
+        // the Primary Advocate's explicit decision to keep this access.
       }
 
       if (remediationKey !== "confirm_access_still_needed") {
