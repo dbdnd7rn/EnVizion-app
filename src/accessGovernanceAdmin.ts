@@ -87,3 +87,18 @@ export async function loadAccessGovernanceDashboard(): Promise<AccessGovernanceD
   if (data?.error) throw new Error(String(data.error));
   return data as AccessGovernanceDashboard;
 }
+
+export async function recordAccessGovernanceReportGeneration(
+  generatedAt: string,
+) {
+  const { data, error } = await supabase.functions.invoke("launch-admin", {
+    body: {
+      action: "record_access_governance_report",
+      generatedAt,
+      reportVersion: "1",
+    },
+  });
+
+  if (error) throw error;
+  if (data?.error) throw new Error(String(data.error));
+}
