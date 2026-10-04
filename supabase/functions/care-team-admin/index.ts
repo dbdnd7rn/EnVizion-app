@@ -418,19 +418,45 @@ Deno.serve(async (req: Request) => {
         return json({ error: "The care owner already has access." }, 400);
       }
 
-      const { data: existing } = await admin
-        .from("care_recipient_members")
-        .select("status")
-        .eq("care_recipient_id", careRecipientId)
-        .eq("user_id", target.id)
-        .maybeSingle();
+      const [
+        { data: existing },
+        { data: existingGroupMembership, error: existingGroupError },
+      ] = await Promise.all([
+        admin
+          .from("care_recipient_members")
+          .select("status")
+          .eq("care_recipient_id", careRecipientId)
+          .eq("user_id", target.id)
+          .maybeSingle(),
+        recipient.care_group_id
+          ? admin
+              .from("care_group_members")
+              .select("status")
+              .eq("care_group_id", recipient.care_group_id)
+              .eq("user_id", target.id)
+              .maybeSingle()
+          : Promise.resolve({ data: null, error: null }),
+      ]);
 
-      if (existing?.status === "active") {
-        return json({ error: "This person already has active care team access." }, 400);
+      if (existingGroupError) throw existingGroupError;
+
+      if (
+        existing?.status === "active" ||
+        existingGroupMembership?.status === "active"
+      ) {
+        return json(
+          {
+            error:
+              "This person already has active access to this CareGroup. Change their role from the existing care-team roster instead.",
+          },
+          400,
+        );
       }
 
       const eventType =
-        existing?.status === "revoked" || existing?.status === "declined"
+        existing?.status === "revoked" ||
+        existing?.status === "declined" ||
+        existingGroupMembership?.status === "revoked"
           ? "access_reinvited"
           : "invite_sent";
 
