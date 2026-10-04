@@ -501,3 +501,24 @@ test("administrator access governance dashboard is read-only and privacy minimiz
     /updateCareTeamRole|revokeCareTeamAccess|completeCareAccessRecertification/,
   );
 });
+
+
+test("administrator access governance evidence report is privacy minimized and audited", () => {
+  const client = source("src/accessGovernanceAdmin.ts");
+  const screen = source("src/screens/AccessGovernanceAdminScreen.tsx");
+  const helper = source("src/accessGovernanceReportHelpers.ts");
+  const launchAdmin = source("supabase/functions/launch-admin/index.ts");
+
+  assert.match(client, /recordAccessGovernanceReportGeneration/);
+  assert.match(client, /record_access_governance_report/);
+  assert.match(screen, /Governance evidence export/);
+  assert.match(screen, /Open governance report & save PDF/);
+  assert.match(screen, /Create & share governance report PDF/);
+  assert.match(helper, /Access Governance Evidence Report/);
+  assert.match(helper, /intentionally excludes medications, diagnoses, observations, visit notes, documents/i);
+  assert.match(helper, /Recent Primary Advocate sign-offs/);
+  assert.match(helper, /Recertification coverage gaps/);
+  assert.match(launchAdmin, /action === "record_access_governance_report"/);
+  assert.match(launchAdmin, /access_governance_report_generated/);
+  assert.match(launchAdmin, /scope: "access_governance_metadata_only"/);
+});
