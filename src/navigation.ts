@@ -75,6 +75,7 @@ export type RootStack = {
   StaffManagement: undefined;
   PilotAdmin: undefined;
   PilotIntelligence: undefined;
+  AccessGovernanceAdmin: undefined;
   ClinicalContent: undefined;
   ClinicalContentEditor: {
     contentId: string;
