@@ -108,6 +108,15 @@ function consentPresentation(
         icon: "remove-circle-outline",
         tone: "rose",
       };
+    case "security_remediation_applied":
+      return {
+        title: "Security remediation applied",
+        detail:
+          event.note ??
+          `${actor} applied a confirmed access remediation for ${subject}.`,
+        icon: "shield-checkmark-outline",
+        tone: "purple",
+      };
     default:
       return {
         title: event.eventType.replaceAll("_", " "),
@@ -154,6 +163,28 @@ function auditPresentation(
         `${actor} generated a Care Team Access Report.`,
       icon: "document-text-outline",
       tone: "purple",
+    };
+  }
+
+  if (event.action === "security_remediation_applied") {
+    return {
+      title: "Security remediation confirmed",
+      detail:
+        event.summary ??
+        `${actor} applied a confirmed care-team security remediation.`,
+      icon: "shield-checkmark-outline",
+      tone: "purple",
+    };
+  }
+
+  if (event.action === "security_access_confirmed") {
+    return {
+      title: "Access need reconfirmed",
+      detail:
+        event.summary ??
+        `${actor} reviewed inactive-looking access and confirmed it is still needed.`,
+      icon: "checkmark-circle-outline",
+      tone: "green",
     };
   }
 
