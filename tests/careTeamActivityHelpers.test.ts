@@ -214,3 +214,36 @@ test("care team activity explains confirmed security remediation events", () => 
   assert.equal(items[1].title, "Security remediation applied");
   assert.match(items[1].detail, /Co-Caregiver direct/);
 });
+
+
+test("care team activity explains 90-day access recertification sign-off", () => {
+  const items = buildCareTeamActivity(
+    [
+      {
+        id: "recert-consent",
+        actorUserId: "owner",
+        subjectUserId: "member",
+        eventType: "access_recertified",
+        role: "viewer",
+        note: "90-day access review · Change Role · Co-Caregiver -> Family Member",
+        createdAt: "2026-10-04T16:00:00.000Z",
+      },
+    ] as any,
+    [
+      {
+        id: "recert-audit",
+        actorUserId: "owner",
+        action: "access_recertification_completed",
+        entityType: "care_team_member",
+        entityId: "member",
+        summary: "90-day access review · Co-Caregiver -> Family Member",
+        createdAt: "2026-10-04T16:01:00.000Z",
+      },
+    ] as any,
+    names,
+  );
+
+  assert.equal(items[0].title, "Periodic access recertification signed off");
+  assert.equal(items[1].title, "90-day access review completed");
+  assert.match(items[1].detail, /Co-Caregiver -> Family Member/);
+});
