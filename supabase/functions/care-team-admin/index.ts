@@ -1369,6 +1369,95 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Only a Primary Advocate can manage care access." }, 403);
     }
 
+    if (action === "recertification_attention") {
+      if (!canManage) {
+        return json(
+          { error: "Only a Primary Advocate can review access recertification attention." },
+          403,
+        );
+      }
+
+      const { data: rows, error: attentionError } = await admin
+        .from("care_access_recertifications")
+        .select(
+          "id, subject_user_id, role_snapshot, status, due_at, notified_at",
+        )
+        .eq("care_recipient_id", careRecipientId)
+        .in("status", ["scheduled", "due"])
+        .order("due_at", { ascending: true });
+
+      if (attentionError) throw attentionError;
+
+      const now = Date.now();
+      const dayMs = 24 * 60 * 60 * 1000;
+      const currentRows = rows ?? [];
+      const dueRows = currentRows.filter((row) => row.status === "due");
+      const upcomingRows = currentRows.filter((row) => {
+        if (row.status !== "scheduled") return false;
+        const dueAt = new Date(row.due_at).getTime();
+        return dueAt > now && dueAt <= now + 7 * dayMs;
+      });
+      const overdue7Rows = dueRows.filter(
+        (row) => now - new Date(row.due_at).getTime() >= 7 * dayMs,
+      );
+      const overdue14Rows = dueRows.filter(
+        (row) => now - new Date(row.due_at).getTime() >= 14 * dayMs,
+      );
+
+      const next = [...dueRows, ...upcomingRows].sort(
+        (a, b) =>
+          new Date(a.due_at).getTime() - new Date(b.due_at).getTime(),
+      )[0] ?? null;
+
+      const names = next
+        ? await getUsersById(admin, [next.subject_user_id])
+        : new Map();
+      const directName = next
+        ? await admin
+            .from("care_recipient_members")
+            .select("invited_name")
+            .eq("care_recipient_id", careRecipientId)
+            .eq("user_id", next.subject_user_id)
+            .maybeSingle()
+        : { data: null, error: null };
+
+      if (directName.error) throw directName.error;
+
+      const nextAccount = next ? names.get(next.subject_user_id) : null;
+      const nextDisplayName = next
+        ? String(directName.data?.invited_name ?? "").trim() ||
+          String(nextAccount?.user_metadata?.full_name ?? "").trim() ||
+          "Care team member"
+        : null;
+
+      return json({
+        due: dueRows.length,
+        upcoming7: upcomingRows.length,
+        overdue7: overdue7Rows.length,
+        overdue14: overdue14Rows.length,
+        needsAttention: dueRows.length + upcomingRows.length,
+        next: next
+          ? {
+              id: next.id,
+              userId: next.subject_user_id,
+              displayName: nextDisplayName,
+              role: next.role_snapshot,
+              dueAt: next.due_at,
+              isDue: next.status === "due",
+              overdueDays:
+                next.status === "due"
+                  ? Math.max(
+                      0,
+                      Math.floor(
+                        (now - new Date(next.due_at).getTime()) / dayMs,
+                      ),
+                    )
+                  : 0,
+            }
+          : null,
+      });
+    }
+
     if (action === "recertifications") {
       const { data: rows, error: recertificationError } = await admin
         .from("care_access_recertifications")
