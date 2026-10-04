@@ -2,10 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
   inviteCareTeamMember,
-  loadCareAuditTrail,
   loadCareSpaces,
   loadCareTeam,
-  loadConsentHistory,
   loadPendingCareInvitations,
   reinviteCareTeamMember,
   respondToCareInvitation,
@@ -13,12 +11,10 @@ import {
   revokeCareTeamAccess,
   setActiveCareRecipient,
   updateCareTeamRole,
-  type CareAuditEvent,
   type CareInvitation,
   type CareRole,
   type CareSpace,
   type CareTeamMember,
-  type ConsentEvent,
 } from "../careTeam";
 import { useCare } from "../store";
 import {
@@ -138,8 +134,6 @@ export function CareTeamScreen() {
   const [spaces, setSpaces] = useState<CareSpace[]>([]);
   const [pending, setPending] = useState<CareInvitation[]>([]);
   const [members, setMembers] = useState<CareTeamMember[]>([]);
-  const [consent, setConsent] = useState<ConsentEvent[]>([]);
-  const [audit, setAudit] = useState<CareAuditEvent[]>([]);
   const [canManage, setCanManage] = useState(false);
   const [currentRole, setCurrentRole] = useState<CareRole>("viewer");
   const [loading, setLoading] = useState(true);
@@ -165,23 +159,15 @@ export function CareTeamScreen() {
 
       if (!recipientId) {
         setMembers([]);
-        setConsent([]);
-        setAudit([]);
         setCanManage(false);
         return;
       }
 
-      const [roster, consentRows, auditRows] = await Promise.all([
-        loadCareTeam(recipientId),
-        loadConsentHistory(recipientId),
-        loadCareAuditTrail(recipientId),
-      ]);
+      const roster = await loadCareTeam(recipientId);
 
       setMembers(roster.members);
       setCanManage(roster.canManage);
       setCurrentRole(roster.currentRole);
-      setConsent(consentRows);
-      setAudit(auditRows);
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -196,11 +182,6 @@ export function CareTeamScreen() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
-
-  const memberNames = useMemo(
-    () => new Map(members.map((member) => [member.userId, member.displayName])),
-    [members],
-  );
 
   const invitationSummary = useMemo(() => {
     const managed = members.filter((member) => member.role !== "owner");
@@ -733,58 +714,52 @@ export function CareTeamScreen() {
         </>
       )}
 
-      <Section title="Consent history" />
-      {!consent.length ? (
-        <Card>
-          <Txt>No sharing changes have been recorded yet.</Txt>
-        </Card>
-      ) : (
-        consent.slice(0, 12).map((event) => (
-          <Card key={event.id}>
-            <View style={S.between}>
-              <Text style={S.eyebrow}>{event.eventType.replaceAll("_", " ")}</Text>
-              <Text style={S.small}>
-                {new Date(event.createdAt).toLocaleString()}
-              </Text>
-            </View>
-            <Txt>
-              {event.role ? `${roleLabel(event.role)} access` : "Care access change"}
-              {event.note ? ` · ${event.note}` : ""}
-            </Txt>
-          </Card>
-        ))
-      )}
-
-      <Section title="Shared care activity" />
-      {!audit.length ? (
-        <Card>
-          <Txt>No shared care activity has been recorded yet.</Txt>
-        </Card>
-      ) : (
-        audit.slice(0, 20).map((event) => (
-          <Card key={event.id}>
-            <View style={S.between}>
-              <Text style={S.eyebrow}>
-                {event.action.replaceAll("_", " ")}
-              </Text>
-              <Text style={S.small}>
-                {new Date(event.createdAt).toLocaleString()}
-              </Text>
-            </View>
-            <Text style={S.h3}>
-              {event.actorUserId
-                ? memberNames.get(event.actorUserId) ?? "Care team member"
-                : "System"}
-            </Text>
-            <Txt>{event.summary ?? event.entityType.replaceAll("_", " ")}</Txt>
-          </Card>
-        ))
-      )}
-
-      <Txt style={S.small}>
-        This activity history records app workspace opens and changes made to
-        shared care records. It is not a complete network or device-access log.
-      </Txt>
+      <Section title="Activity & accountability" />
+      <Card
+        onPress={() => n.navigate("CareTeamActivity")}
+        label="Open care team activity and accountability"
+        style={{
+          backgroundColor: "#FAF7FB",
+          borderColor: "#E4D9E8",
+          gap: 12,
+        }}
+      >
+        <View style={S.between}>
+          <View
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: 17,
+              backgroundColor: "#F1E7F5",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="shield-checkmark-outline" size={23} color={C.purple} />
+          </View>
+          <Icon name="chevron-forward" size={20} color={C.purple} />
+        </View>
+        <View style={{ gap: 5 }}>
+          <Text style={S.h2}>Care Team Activity Center</Text>
+          <Txt>
+            See who invited whom, acceptance or decline, reminders, role
+            changes, revocations, re-invitations and recorded shared-care
+            activity in one filtered timeline.
+          </Txt>
+        </View>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {["Access history", "Team-member filters", "Workspace activity"].map(
+            (label) => (
+              <View
+                key={label}
+                style={[S.pill, { backgroundColor: C.white }]}
+              >
+                <Text style={[S.small, { color: C.purple }]}>{label}</Text>
+              </View>
+            ),
+          )}
+        </View>
+      </Card>
     </Page>
   );
 }
