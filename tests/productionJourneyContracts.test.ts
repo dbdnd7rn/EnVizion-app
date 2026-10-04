@@ -190,3 +190,22 @@ test("Emergency QR uses the temporary secure share link", () => {
   assert.match(emergency, /value=\{createdShare\.shareUrl\}/);
   assert.match(emergency, /Scan at ER or triage/);
 });
+
+
+test("CareGroup membership can resolve and switch active care profiles", () => {
+  const careTeam = source("src/careTeam.ts");
+  const backend = source("src/backend.ts");
+
+  assert.match(careTeam, /care_group_members/);
+  assert.match(careTeam, /primary_advocate/);
+  assert.match(careTeam, /co_caregiver/);
+  assert.match(careTeam, /read_only/);
+  assert.match(careTeam, /loadAccessibleCareContexts/);
+  assert.match(careTeam, /setActiveCareRecipient/);
+  assert.match(
+    careTeam,
+    /contexts\.some\(\(item\) => item\.careRecipientId === careRecipientId\)/,
+  );
+  assert.match(backend, /loadAccessibleCareContexts/);
+  assert.match(backend, /contexts\.find\(\(context\) => context\.careRecipientId === preferredId\)/);
+});
