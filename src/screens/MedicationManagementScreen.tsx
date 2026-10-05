@@ -253,76 +253,118 @@ function MedicationEmptyGraphic() {
   );
 }
 
-function SummaryCard({
-  label,
-  value,
-  sub,
-  icon,
+function MedicationSummaryPanel({
+  activeCount,
+  refillCount,
+  latestReview,
 }: {
-  label: string;
-  value: string;
-  sub: string;
-  icon: string;
+  activeCount: number;
+  refillCount: number;
+  latestReview: MedicationReconciliation | null;
 }) {
+  const columns = [
+    {
+      value: String(activeCount),
+      label: "Active",
+      detail: "",
+    },
+    {
+      value: String(refillCount),
+      label: "Refills due",
+      detail: "Includes overdue",
+    },
+    {
+      value: latestReview ? "Reviewed" : "Not reviewed",
+      label: "List review",
+      detail: latestReview ? medicationReconciliationLabel(latestReview) : "",
+    },
+  ];
+
   return (
     <View
       style={{
-        flex: 1,
-        minWidth: 0,
-        minHeight: 146,
-        borderRadius: 23,
-        padding: 14,
-        backgroundColor: "#FFFFFFB9",
+        minHeight: 112,
+        borderRadius: 27,
         borderWidth: 1,
-        borderColor: "#FFFFFFDD",
+        borderColor: "#E6D7F2",
+        backgroundColor: "#F6EEFC",
+        flexDirection: "row",
+        alignItems: "stretch",
         shadowColor: "#56366A",
-        shadowOpacity: 0.045,
-        shadowRadius: 15,
+        shadowOpacity: 0.055,
+        shadowRadius: 16,
         shadowOffset: { width: 0, height: 8 },
         elevation: 2,
+        overflow: "hidden",
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 6 }}>
-        <Text style={[S.eyebrow, { color: "#77329A", letterSpacing: 1.8, fontSize: 9.5, lineHeight: 13 }]}>
-          {label}
-        </Text>
-        <View
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 22,
-            backgroundColor: "#F4E9FC",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Icon name={icon} size={22} color="#783AA4" />
-        </View>
-      </View>
-      <Text
-        numberOfLines={1}
-        style={{
-          marginTop: 5,
-          fontFamily: "DMSans_700Bold",
-          fontSize: value.length > 8 ? 20 : 28,
-          lineHeight: value.length > 8 ? 25 : 32,
-          color: C.ink,
-        }}
-      >
-        {value}
-      </Text>
-      <Text
-        numberOfLines={2}
-        style={{
-          marginTop: 3,
-          fontFamily: "DMSans_400Regular",
-          fontSize: 12.5,
-          lineHeight: 17,
-          color: "#77738C",
-        }}
-      >
-        {sub}
-      </Text>
+      {columns.map((column, index) => (
+        <React.Fragment key={column.label}>
+          {index > 0 && (
+            <View
+              style={{
+                width: 1,
+                marginVertical: 22,
+                backgroundColor: "#DDD0E8",
+              }}
+            />
+          )}
+          <View
+            style={{
+              flex: 1,
+              minWidth: 0,
+              paddingHorizontal: 8,
+              paddingVertical: 18,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.72}
+              style={{
+                fontFamily: "Lora_500Medium",
+                fontSize: column.value.length > 7 ? 20 : 33,
+                lineHeight: column.value.length > 7 ? 27 : 39,
+                color: "#14113C",
+                textAlign: "center",
+              }}
+            >
+              {column.value}
+            </Text>
+            <Text
+              style={{
+                marginTop: 4,
+                fontFamily: "DMSans_500Medium",
+                fontSize: 13,
+                lineHeight: 18,
+                color: "#77718A",
+                textAlign: "center",
+              }}
+            >
+              {column.label}
+            </Text>
+            {Boolean(column.detail) && (
+              <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.78}
+                style={{
+                  marginTop: 2,
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 9.5,
+                  lineHeight: 13,
+                  color: "#8C8297",
+                  textAlign: "center",
+                }}
+              >
+                {column.detail}
+              </Text>
+            )}
+          </View>
+        </React.Fragment>
+      ))}
     </View>
   );
 }
@@ -429,10 +471,10 @@ function SafetyAccordion({
           }}
         >
           <Text style={[S.body, { color: "#7E6670" }]}>
-            EnVizion records caregiver-entered medication information. It does not prescribe, change, or recommend medicines or doses.
+            EnVizion records caregiver information; it does not prescribe, calculate doses, or tell you to start, stop, hold, or change a medication.
           </Text>
           <Text style={[S.body, { color: "#7E6670" }]}>
-            Follow the pharmacy label and the healthcare team’s plan. Confirm medication changes with the appropriate clinician or pharmacist.
+            Follow the pharmacy label and the healthcare team’s instructions. Confirm medication changes with the appropriate clinician or pharmacist.
           </Text>
           <Text style={[S.body, { color: "#7E6670" }]}>
             For a possible medical emergency or serious medication reaction, use the appropriate local emergency service rather than waiting on the app.
@@ -463,7 +505,6 @@ export function MedicationManagementScreen() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [safetyExpanded, setSafetyExpanded] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const reducedMotion = useReducedMotionPreference();
 
   const refresh = useCallback(async () => {
@@ -566,8 +607,8 @@ export function MedicationManagementScreen() {
         id: "reconciliation-" + reconciliation.id,
         type: "reconciliation" as const,
         at: reconciliation.createdAt,
-        title: "Medication review",
-        subtitle: reconciliation.medicationCount + " medication" + (reconciliation.medicationCount === 1 ? "" : "s") + " confirmed",
+        title: "List review",
+        subtitle: reconciliation.medicationCount + " medication" + (reconciliation.medicationCount === 1 ? "" : "s") + " recorded in review",
         reconciliation,
       })),
     ].sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
@@ -687,7 +728,7 @@ export function MedicationManagementScreen() {
       setReconciliationNote("");
       await refresh();
       setMessage(
-        "Medication list reconciled. A point-in-time snapshot was saved for the care team and future handoffs.",
+        "List review saved. A point-in-time record was created for future handoffs.",
       );
     } catch (error) {
       setMessage(
@@ -719,177 +760,91 @@ export function MedicationManagementScreen() {
           marginTop: -18,
           paddingTop: 18,
           paddingHorizontal: 20,
-          paddingBottom: 18,
-          gap: 20,
+          paddingBottom: 8,
+          gap: 18,
           overflow: "hidden",
         }}
       >
         <Svg
           width="100%"
           height="100%"
-          viewBox="0 0 480 570"
+          viewBox="0 0 480 520"
           preserveAspectRatio="none"
           style={{ position: "absolute", inset: 0 }}
           accessibilityElementsHidden
         >
           <Defs>
             <LinearGradient id="medPageTop" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor="#FAF5FF" />
-              <Stop offset="0.48" stopColor="#F7EDFE" />
-              <Stop offset="1" stopColor="#EEDDFB" />
+              <Stop offset="0" stopColor="#FFFDFC" />
+              <Stop offset="0.62" stopColor="#FFFDFC" />
+              <Stop offset="1" stopColor="#F8F0FD" />
             </LinearGradient>
           </Defs>
-          <Rect x="0" y="0" width="480" height="570" fill="url(#medPageTop)" />
-          <Circle cx="430" cy="45" r="120" fill="#F8F2FF" opacity={0.75} />
-          <Circle cx="390" cy="270" r="160" fill="#E6CDF8" opacity={0.35} />
+          <Rect x="0" y="0" width="480" height="520" fill="url(#medPageTop)" />
+          <Circle cx="454" cy="22" r="112" fill="#F3E7FD" opacity={0.48} />
+          <Circle cx="414" cy="180" r="118" fill="#EEDAFB" opacity={0.24} />
         </Svg>
 
         <MotionBlock reducedMotion={reducedMotion}>
-          <View style={{ minHeight: 58, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ minHeight: 58, flexDirection: "row", alignItems: "center", gap: 12 }}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Go back"
               onPress={() => n.goBack()}
               style={({ pressed }) => ({
-                width: 52,
-                height: 52,
-                borderRadius: 26,
+                width: 48,
+                height: 48,
+                borderRadius: 24,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "#FFFFFFA8",
-                borderWidth: 1,
-                borderColor: "#FFFFFFDD",
-                opacity: pressed ? 0.68 : 1,
+                opacity: pressed ? 0.64 : 1,
+                transform: [{ scale: pressed ? 0.96 : 1 }],
               })}
             >
-              <Icon name="arrow-back-outline" size={25} color="#6F2E99" />
+              <Icon name="arrow-back-outline" size={29} color="#6F2E99" />
             </Pressable>
 
-            <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold", fontSize: 19, color: C.ink }}>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 20,
+                color: C.ink,
+              }}
+            >
               Medications
             </Text>
-
-            <View style={{ position: "relative" }}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Medication page options"
-                onPress={() => setMenuOpen((value) => !value)}
-                style={({ pressed }) => ({
-                  width: 52,
-                  height: 52,
-                  borderRadius: 26,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#FFFFFFA8",
-                  borderWidth: 1,
-                  borderColor: "#FFFFFFDD",
-                  opacity: pressed ? 0.68 : 1,
-                })}
-              >
-                <Icon name="ellipsis-horizontal" size={25} color="#6F2E99" />
-              </Pressable>
-
-              {menuOpen && (
-                <View
-                  style={{
-                    position: "absolute",
-                    top: 58,
-                    right: 0,
-                    width: 190,
-                    borderRadius: 18,
-                    padding: 8,
-                    gap: 4,
-                    backgroundColor: "#FFFFFFF5",
-                    borderWidth: 1,
-                    borderColor: "#E9DFF0",
-                    shadowColor: "#3E2948",
-                    shadowOpacity: 0.12,
-                    shadowRadius: 16,
-                    shadowOffset: { width: 0, height: 8 },
-                    elevation: 8,
-                    zIndex: 30,
-                  }}
-                >
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => {
-                      setMenuOpen(false);
-                      n.navigate("CarePlan");
-                    }}
-                    style={({ pressed }) => ({
-                      minHeight: 44,
-                      borderRadius: 13,
-                      paddingHorizontal: 12,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 9,
-                      backgroundColor: pressed ? "#F4ECFA" : "transparent",
-                    })}
-                  >
-                    <Icon name="list-outline" size={18} color="#73379C" />
-                    <Text style={[S.h3, { fontSize: 12.5 }]}>Open daily care plan</Text>
-                  </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => {
-                      setMenuOpen(false);
-                      void refresh();
-                    }}
-                    style={({ pressed }) => ({
-                      minHeight: 44,
-                      borderRadius: 13,
-                      paddingHorizontal: 12,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 9,
-                      backgroundColor: pressed ? "#F4ECFA" : "transparent",
-                    })}
-                  >
-                    <Icon name="refresh-outline" size={18} color="#73379C" />
-                    <Text style={[S.h3, { fontSize: 12.5 }]}>Refresh medications</Text>
-                  </Pressable>
-                </View>
-              )}
-            </View>
           </View>
         </MotionBlock>
 
         <MotionBlock reducedMotion={reducedMotion} delay={60}>
-          <View style={{ minHeight: 175, position: "relative", justifyContent: "center" }}>
-            <View style={{ maxWidth: 250, gap: 8, zIndex: 2 }}>
+          <View style={{ minHeight: 205, position: "relative", justifyContent: "center" }}>
+            <View style={{ maxWidth: 315, zIndex: 2 }}>
               <Text
                 style={{
-                  fontFamily: "DMSans_700Bold",
-                  fontSize: 39,
-                  lineHeight: 44,
-                  letterSpacing: -1,
-                  color: "#12103B",
+                  fontFamily: "Lora_500Medium",
+                  fontSize: 40,
+                  lineHeight: 47,
+                  letterSpacing: -1.15,
+                  color: "#11103B",
                 }}
               >
-                Your medications
-              </Text>
-              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 19, lineHeight: 25, color: "#79758F" }}>
-                Organised. Up to date.
+                {"Your medications,\nbeautifully organised."}
               </Text>
             </View>
 
-            <View style={{ position: "absolute", right: -12, top: -3 }}>
+            <View style={{ position: "absolute", right: -20, top: -22, opacity: 0.95 }}>
               <FloatingMedicationHero reducedMotion={reducedMotion} />
             </View>
           </View>
         </MotionBlock>
 
         <MotionBlock reducedMotion={reducedMotion} delay={120}>
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <SummaryCard label="ACTIVE" value={String(active.length)} sub="medications" icon="medical-outline" />
-            <SummaryCard label="REFILLS" value={String(refillAttention.length)} sub="due / overdue" icon="sync-outline" />
-            <SummaryCard
-              label="REVIEW"
-              value={latestReconciliation ? "Reviewed" : "Pending"}
-              sub={latestReconciliation ? medicationReconciliationLabel(latestReconciliation) : "not reviewed yet"}
-              icon="document-text-outline"
-            />
-          </View>
+          <MedicationSummaryPanel
+            activeCount={active.length}
+            refillCount={refillAttention.length}
+            latestReview={latestReconciliation}
+          />
         </MotionBlock>
       </View>
 
@@ -945,6 +900,21 @@ export function MedicationManagementScreen() {
         </Card>
       )}
 
+      <MotionBlock reducedMotion={reducedMotion} delay={185}>
+        <Text
+          accessibilityRole="header"
+          style={{
+            fontFamily: "Lora_500Medium",
+            fontSize: 32,
+            lineHeight: 39,
+            letterSpacing: -0.7,
+            color: "#15113D",
+          }}
+        >
+          Medication list
+        </Text>
+      </MotionBlock>
+
       <MotionBlock reducedMotion={reducedMotion} delay={190}>
         {loading ? (
           <View
@@ -963,7 +933,7 @@ export function MedicationManagementScreen() {
         ) : !active.length ? (
           <View
             style={{
-              minHeight: 290,
+              minHeight: 220,
               borderRadius: 28,
               borderWidth: 1,
               borderColor: "#FFFFFFD8",
@@ -979,14 +949,14 @@ export function MedicationManagementScreen() {
               elevation: 2,
             }}
           >
-            <View style={{ width: 190, height: 130 }}>
+            <View style={{ width: 122, height: 84 }}>
               <MedicationEmptyGraphic />
             </View>
             <Text style={{ marginTop: 4, fontFamily: "DMSans_700Bold", fontSize: 20, color: C.ink }}>
               No medications yet
             </Text>
             <Text style={{ marginTop: 7, fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 20, color: "#7C788D", textAlign: "center" }}>
-              Add your first medication to get started.
+              Add your first medication to begin.
             </Text>
           </View>
         ) : (
@@ -1025,6 +995,9 @@ export function MedicationManagementScreen() {
                   </View>
 
                   {Boolean(medication.instructions) && <Txt>{medication.instructions}</Txt>}
+                  {Boolean(medication.purpose) && <Txt style={S.small}>Purpose: {medication.purpose}</Txt>}
+                  {Boolean(medication.prescriber) && <Txt style={S.small}>Prescriber: {medication.prescriber}</Txt>}
+                  {Boolean(medication.pharmacy) && <Txt style={S.small}>Pharmacy: {medication.pharmacy}</Txt>}
 
                   {Boolean(medication.refillDueOn) && (
                     <Text
@@ -1035,7 +1008,12 @@ export function MedicationManagementScreen() {
                           : null,
                       ]}
                     >
-                      Refill: {medication.refillDueOn}
+                      {refillState === "overdue"
+                        ? "Refill overdue: "
+                        : refillState === "soon"
+                          ? "Refill due soon: "
+                          : "Refill: "}
+                      {medication.refillDueOn}
                     </Text>
                   )}
 
@@ -1180,24 +1158,28 @@ export function MedicationManagementScreen() {
       )}
 
       <MotionBlock reducedMotion={reducedMotion} delay={230}>
-        <View
-          style={{
-            borderRadius: 28,
-            borderWidth: 1,
-            borderColor: "#FFFFFFDB",
-            backgroundColor: "#FFFFFFC4",
-            padding: 18,
-            gap: 15,
-            shadowColor: "#5B3967",
-            shadowOpacity: 0.045,
-            shadowRadius: 15,
-            shadowOffset: { width: 0, height: 8 },
-            elevation: 2,
-          }}
-        >
+        <SafetyAccordion
+          expanded={safetyExpanded}
+          onToggle={() => setSafetyExpanded((value) => !value)}
+          reducedMotion={reducedMotion}
+        />
+      </MotionBlock>
+
+      <MotionBlock reducedMotion={reducedMotion} delay={270}>
+        <View style={{ gap: 12 }}>
           <View style={S.between}>
-            <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 24, color: C.ink }}>
-              Medication review
+            <Text
+              accessibilityRole="header"
+              style={{
+                flex: 1,
+                fontFamily: "Lora_500Medium",
+                fontSize: 32,
+                lineHeight: 39,
+                letterSpacing: -0.7,
+                color: "#15113D",
+              }}
+            >
+              Review your list
             </Text>
             <View
               style={{
@@ -1206,7 +1188,7 @@ export function MedicationManagementScreen() {
                 paddingHorizontal: 16,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "#F2E4FB",
+                backgroundColor: "#F1E6FB",
               }}
             >
               <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 12.5, color: "#75349B" }}>
@@ -1215,86 +1197,95 @@ export function MedicationManagementScreen() {
             </View>
           </View>
 
-          <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 20, color: "#77738A" }}>
-            Confirm your list against pharmacy or care team records.
-          </Text>
-
-          <View style={{ gap: 8 }}>
-            <Text style={[S.h3, { fontSize: 13.5 }]}>Add a note (optional)</Text>
-            <TextInput
-              accessibilityLabel="Medication review note"
-              multiline
-              placeholder="Write here..."
-              placeholderTextColor="#A5A0B0"
-              value={reconciliationNote}
-              onChangeText={setReconciliationNote}
-              style={{
-                minHeight: 106,
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: "#DED6E6",
-                backgroundColor: "#FFFFFF",
-                paddingHorizontal: 15,
-                paddingTop: 15,
-                fontFamily: "DMSans_400Regular",
-                fontSize: 14,
-                lineHeight: 20,
-                color: C.ink,
-                textAlignVertical: "top",
-              }}
-            />
-          </View>
-
-          <Pressable
-            accessibilityRole="button"
-            disabled={readOnly || busyId !== null}
-            onPress={() => void reconcile()}
-            style={({ pressed }) => ({
-              minHeight: 58,
-              borderRadius: 29,
-              overflow: "hidden",
-              alignItems: "center",
-              justifyContent: "center",
-              opacity: readOnly || busyId !== null ? 0.48 : pressed ? 0.82 : 1,
-              transform: [{ scale: pressed && !readOnly ? 0.988 : 1 }],
-            })}
+          <View
+            style={{
+              borderRadius: 27,
+              borderWidth: 1,
+              borderColor: "#E6DEE9",
+              backgroundColor: "#FFFFFFD2",
+              padding: 17,
+              gap: 15,
+              shadowColor: "#5B3967",
+              shadowOpacity: 0.045,
+              shadowRadius: 15,
+              shadowOffset: { width: 0, height: 8 },
+              elevation: 2,
+            }}
           >
-            <Svg
-              width="100%"
-              height="100%"
-              viewBox="0 0 420 58"
-              preserveAspectRatio="none"
-              style={{ position: "absolute", inset: 0 }}
-              accessibilityElementsHidden
-            >
-              <Defs>
-                <LinearGradient id="reviewGradient" x1="0" y1="0" x2="1" y2="0">
-                  <Stop offset="0" stopColor="#8841B6" />
-                  <Stop offset="0.52" stopColor="#9844C7" />
-                  <Stop offset="1" stopColor="#7332A4" />
-                </LinearGradient>
-              </Defs>
-              <Rect x="0" y="0" width="420" height="58" rx="29" fill="url(#reviewGradient)" />
-            </Svg>
-            <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 15.5, color: C.white }}>
-              {busyId === "reconcile" ? "Saving review…" : "Review & confirm"}
+            <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 21, color: "#77738A" }}>
+              Check against pharmacy labels or care team records.
             </Text>
-          </Pressable>
-        </View>
-      </MotionBlock>
 
-      <MotionBlock reducedMotion={reducedMotion} delay={270}>
-        <SafetyAccordion
-          expanded={safetyExpanded}
-          onToggle={() => setSafetyExpanded((value) => !value)}
-          reducedMotion={reducedMotion}
-        />
+            <View style={{ gap: 8 }}>
+              <Text style={[S.h3, { fontSize: 14 }]}>Note (optional)</Text>
+              <TextInput
+                accessibilityLabel="Medication review note"
+                multiline
+                placeholder="Add a note..."
+                placeholderTextColor="#A5A0B0"
+                value={reconciliationNote}
+                onChangeText={setReconciliationNote}
+                style={{
+                  minHeight: 104,
+                  borderRadius: 19,
+                  borderWidth: 1,
+                  borderColor: "#DDD4E2",
+                  backgroundColor: "#FFFFFF",
+                  paddingHorizontal: 15,
+                  paddingTop: 14,
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 14,
+                  lineHeight: 20,
+                  color: C.ink,
+                  textAlignVertical: "top",
+                }}
+              />
+            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Confirm list review"
+              disabled={readOnly || busyId !== null}
+              onPress={() => void reconcile()}
+              style={({ pressed }) => ({
+                minHeight: 58,
+                borderRadius: 29,
+                overflow: "hidden",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: readOnly || busyId !== null ? 0.48 : pressed ? 0.82 : 1,
+                transform: [{ scale: pressed && !readOnly ? 0.988 : 1 }],
+              })}
+            >
+              <Svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 420 58"
+                preserveAspectRatio="none"
+                style={{ position: "absolute", inset: 0 }}
+                accessibilityElementsHidden
+              >
+                <Defs>
+                  <LinearGradient id="reviewGradient" x1="0" y1="0" x2="1" y2="0">
+                    <Stop offset="0" stopColor="#8841B6" />
+                    <Stop offset="0.52" stopColor="#9844C7" />
+                    <Stop offset="1" stopColor="#7332A4" />
+                  </LinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="420" height="58" rx="29" fill="url(#reviewGradient)" />
+              </Svg>
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 15.5, color: C.white }}>
+                {busyId === "reconcile" ? "Saving review…" : "Confirm list review"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
       </MotionBlock>
 
       <MotionBlock reducedMotion={reducedMotion} delay={310}>
         <View style={{ gap: 12 }}>
           <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 25, lineHeight: 31, color: C.ink }}>
-            Recent activity
+            Recent medication activity
           </Text>
 
           {!activity.length ? (
@@ -1325,7 +1316,7 @@ export function MedicationManagementScreen() {
               </View>
               <View style={{ flex: 1, gap: 4 }}>
                 <Text style={[S.h3, { fontSize: 15.5 }]}>No activity yet</Text>
-                <Txt style={S.small}>Medication activity will appear here.</Txt>
+                <Txt style={S.small}>Your medication activity will appear here.</Txt>
               </View>
             </View>
           ) : (
@@ -1393,6 +1384,28 @@ export function MedicationManagementScreen() {
           )}
         </View>
       </MotionBlock>
+
+      <View
+        style={{
+          marginTop: 4,
+          paddingTop: 15,
+          borderTopWidth: 1,
+          borderTopColor: "#E8E1EB",
+          alignItems: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: "DMSans_400Regular",
+            fontSize: 12.5,
+            lineHeight: 18,
+            color: "#77738A",
+            textAlign: "center",
+          }}
+        >
+          Follow your healthcare team’s instructions.
+        </Text>
+      </View>
     </Page>
   );
 }
