@@ -95,15 +95,19 @@ export function numericSeries(
   return entries
     .filter((entry) => entry.kind === kind)
     .map((entry) => {
-      const value = Number(entry.values[key]);
+      const raw = entry.values[key];
+      if (typeof raw !== "string" || !raw.trim()) return null;
+      const value = Number(raw);
       return {
         recordedAt: entry.recordedAt,
         value,
       };
     })
     .filter(
-      (point) =>
-        Number.isFinite(point.value) && Boolean(validDate(point.recordedAt)),
+      (point): point is NumericPoint =>
+        point !== null &&
+        Number.isFinite(point.value) &&
+        Boolean(validDate(point.recordedAt)),
     )
     .sort(
       (a, b) =>

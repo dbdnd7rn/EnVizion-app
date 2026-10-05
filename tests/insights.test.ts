@@ -70,12 +70,59 @@ test("daily activity excludes corrected medication entries", () => {
   assert.equal(activity[1].medicationRecords, 1);
 });
 
+test("seven-day activity returns consecutive local calendar dates including today", () => {
+  const activity = buildDailyActivity([], [], 7, new Date(2026, 9, 6, 12, 0, 0));
+  assert.deepEqual(
+    activity.map((day) => day.dateKey),
+    [
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04",
+      "2026-10-05",
+      "2026-10-06",
+    ],
+  );
+  assert.equal(activity.every((day) => day.total === 0), true);
+});
+
 test("numeric series returns chronological numeric tracker values", () => {
   const series = numericSeries(entries, "Vitals", "systolic");
   assert.deepEqual(
     series.map((point) => point.value),
     [120, 124],
   );
+});
+
+test("numeric series ignores missing or blank readings instead of treating them as zero", () => {
+  const withMissing: Entry[] = [
+    ...entries,
+    {
+      id: "v-empty",
+      kind: "Vitals",
+      values: { systolic: "   ", diastolic: "81" },
+      recordedAt: "2026-09-22T08:00:00Z",
+    },
+  ];
+  const series = numericSeries(withMissing, "Vitals", "systolic");
+  assert.deepEqual(series.map((point) => point.value), [120, 124]);
+});
+
+test("empty appointment preparation remains genuinely empty", () => {
+  const result = appointmentPreparation(
+    {
+      title: "Next appointment",
+      date: "",
+      time: "",
+      location: "",
+      notes: "",
+    },
+    [],
+  );
+
+  assert.equal(result.ready, 0);
+  assert.equal(result.total, 5);
 });
 
 test("appointment preparation counts organization items only", () => {

@@ -1,6 +1,27 @@
-import React, { useMemo } from "react";
-import { Pressable, Text, View } from "react-native";
-import Svg, { Circle, Line, Polyline } from "react-native-svg";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  AccessibilityInfo,
+  ActivityIndicator,
+  Animated,
+  Easing,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  UIManager,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import Svg, {
+  Circle,
+  Defs,
+  LinearGradient,
+  Path,
+  Polyline,
+  Rect,
+  Stop,
+} from "react-native-svg";
 import { transitionSteps } from "../content";
 import {
   appointmentPreparation,
@@ -11,66 +32,383 @@ import {
   type NumericPoint,
 } from "../insights";
 import { useCare } from "../store";
-import {
-  C,
-  Card,
-  Heading,
-  Icon,
-  Page,
-  S,
-  Section,
-  Txt,
-} from "../ui";
+import { Icon, S } from "../ui";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { CareInsightsRibbonArt } from "../components/CareInsightsRibbonArt";
 import { useNav } from "./MainScreens";
 
-function formatDate(value: string) {
-  const date = new Date(value);
-  if (!Number.isFinite(date.getTime())) return value;
-  return date.toLocaleString();
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-function ProgressBar({
-  value,
-  total,
-}: {
-  value: number;
-  total: number;
-}) {
-  const percentage = total > 0 ? Math.min(100, (value / total) * 100) : 0;
+const INK = "#10123F";
+const MUTED = "#6F6E8E";
+const PURPLE = "#7C29B4";
+const SOFT_LAVENDER = "#F5EEFD";
+const BORDER = "#E7E2EB";
+
+function InsightsPage({ children }: { children: React.ReactNode }) {
   return (
-    <View
-      accessibilityRole="progressbar"
-      accessibilityValue={{ min: 0, max: total, now: value }}
-      style={{ height: 7, borderRadius: 7, backgroundColor: "#E9E0ED" }}
-    >
-      <View
-        style={{
-          height: 7,
-          borderRadius: 7,
-          width: `${percentage}%`,
-          backgroundColor: C.purple,
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }} edges={["top"]}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 6,
+          paddingBottom: 42,
         }}
-      />
-    </View>
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View
+          style={{
+            width: "100%",
+            maxWidth: 440,
+            alignSelf: "center",
+            gap: 20,
+          }}
+        >
+          {children}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-function Stat({
+function useReducedMotionPreference() {
+  const [reduced, setReduced] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
+      if (mounted) setReduced(value);
+    });
+    const subscription = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      setReduced,
+    );
+    return () => {
+      mounted = false;
+      subscription.remove();
+    };
+  }, []);
+
+  return reduced;
+}
+
+function Entrance({
+  children,
+  delay = 0,
+  reducedMotion,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  reducedMotion: boolean;
+}) {
+  const progress = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (reducedMotion) {
+      progress.setValue(1);
+      return;
+    }
+
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 390,
+      delay,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: Platform.OS !== "web",
+    }).start();
+  }, [delay, progress, reducedMotion]);
+
+  return (
+    <Animated.View
+      style={{
+        opacity: progress,
+        transform: [
+          {
+            translateY: progress.interpolate({
+              inputRange: [0, 1],
+              outputRange: [12, 0],
+            }),
+          },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+
+function MetricNumber({
   value,
-  label,
+  reducedMotion,
+  style,
 }: {
   value: string | number;
-  label: string;
+  reducedMotion: boolean;
+  style?: any;
 }) {
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (reducedMotion) {
+      opacity.setValue(1);
+      return;
+    }
+    opacity.setValue(0.45);
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: Platform.OS !== "web",
+    }).start();
+  }, [opacity, reducedMotion, value]);
+
+  return <Animated.Text style={[style, { opacity }]}>{value}</Animated.Text>;
+}
+
+function CareInsightsTopBar({
+  onBack,
+  onInfo,
+  infoOpen,
+}: {
+  onBack: () => void;
+  onInfo: () => void;
+  infoOpen: boolean;
+}) {
+  const buttonStyle = ({ pressed }: { pressed: boolean }) => ({
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    opacity: pressed ? 0.58 : 1,
+    transform: [{ scale: pressed ? 0.96 : 1 }],
+  });
+
   return (
-    <View style={{ flex: 1, minWidth: 92, gap: 4 }}>
-      <Text style={[S.title, { fontSize: 27, color: C.deep }]}>{value}</Text>
-      <Text style={S.small}>{label}</Text>
+    <View
+      style={{
+        minHeight: 52,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        onPress={onBack}
+        style={buttonStyle}
+      >
+        <Icon name="chevron-back-outline" size={28} color={INK} />
+      </Pressable>
+
+      <Text
+        accessibilityRole="header"
+        style={{
+          fontFamily: "Lora_500Medium",
+          fontSize: 24,
+          lineHeight: 31,
+          color: INK,
+          letterSpacing: -0.5,
+        }}
+      >
+        Care insights
+      </Text>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={infoOpen ? "Hide insight information" : "About care insights"}
+        accessibilityState={{ expanded: infoOpen }}
+        onPress={onInfo}
+        style={buttonStyle}
+      >
+        <Icon name="information-circle-outline" size={29} color={INK} />
+      </Pressable>
     </View>
   );
 }
 
-function LineChart({
+function FloatingRibbon({ reducedMotion }: { reducedMotion: boolean }) {
+  const float = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (reducedMotion) {
+      float.setValue(0);
+      return;
+    }
+
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(float, {
+          toValue: 1,
+          duration: 2300,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+        Animated.timing(float, {
+          toValue: 0,
+          duration: 2300,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [float, reducedMotion]);
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        width: 252,
+        height: 205,
+        transform: [
+          {
+            translateY: float.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -7],
+            }),
+          },
+          {
+            rotate: float.interpolate({
+              inputRange: [0, 1],
+              outputRange: ["0deg", "1.2deg"],
+            }),
+          },
+        ],
+      }}
+    >
+      <CareInsightsRibbonArt />
+    </Animated.View>
+  );
+}
+
+function ProfileCardBackground() {
+  return (
+    <Svg
+      width="100%"
+      height="100%"
+      viewBox="0 0 420 154"
+      preserveAspectRatio="none"
+      pointerEvents="none"
+    >
+      <Defs>
+        <LinearGradient id="profileBg" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#8C4FC3" />
+          <Stop offset="0.52" stopColor="#6A2B94" />
+          <Stop offset="1" stopColor="#9557C8" />
+        </LinearGradient>
+        <LinearGradient id="profileGlass" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.5} />
+          <Stop offset="1" stopColor="#E0C9F8" stopOpacity={0.14} />
+        </LinearGradient>
+      </Defs>
+      <Rect x="0" y="0" width="420" height="154" rx="28" fill="url(#profileBg)" />
+      <Path
+        d="M-12 49C72-8 166-2 258 36C329 65 374 55 435 10"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth="1.2"
+        opacity={0.36}
+      />
+      <Path
+        d="M194 157C238 92 305 69 432 73V157H194Z"
+        fill="url(#profileGlass)"
+        opacity={0.35}
+      />
+      <Circle cx="47" cy="18" r="59" fill="#FFFFFF" opacity={0.045} />
+      <Circle cx="385" cy="144" r="72" fill="#FFFFFF" opacity={0.04} />
+    </Svg>
+  );
+}
+
+function dayNumber(dateKey: string) {
+  const parts = dateKey.split("-").map(Number);
+  if (parts.length !== 3 || parts.some((part) => !Number.isFinite(part))) return "";
+  return String(parts[2]);
+}
+
+function formatRecordedAt(value: string) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return value;
+  return date.toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <Text
+      accessibilityRole="header"
+      style={{
+        fontFamily: "Lora_500Medium",
+        fontSize: 25,
+        lineHeight: 32,
+        letterSpacing: -0.55,
+        color: INK,
+      }}
+    >
+      {children}
+    </Text>
+  );
+}
+
+function GlassCard({
+  children,
+  style,
+  onPress,
+  label,
+}: {
+  children: React.ReactNode;
+  style?: any;
+  onPress?: () => void;
+  label?: string;
+}) {
+  const base = {
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: BORDER,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    shadowColor: "#4D2A66",
+    shadowOpacity: 0.055,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 7 },
+    elevation: 2,
+  } as const;
+
+  if (!onPress) {
+    return <View style={[base, style]}>{children}</View>;
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      style={({ pressed }) => [
+        base,
+        style,
+        pressed && { opacity: 0.78, transform: [{ scale: 0.992 }] },
+      ]}
+    >
+      {children}
+    </Pressable>
+  );
+}
+
+function MiniLineChart({
   primary,
   secondary,
   primaryLabel,
@@ -81,200 +419,404 @@ function LineChart({
   primaryLabel: string;
   secondaryLabel?: string;
 }) {
-  const width = 320;
-  const height = 145;
-  const paddingX = 22;
-  const paddingY = 20;
+  const width = 260;
+  const height = 88;
+  const padX = 10;
+  const padY = 12;
   const combined = [...primary, ...(secondary ?? [])];
 
-  if (!combined.length) {
-    return (
-      <View
-        style={{
-          minHeight: 120,
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-        }}
-      >
-        <Icon name="analytics-outline" color={C.muted} />
-        <Txt style={{ textAlign: "center" }}>
-          Record a few values to see a trend line here.
-        </Txt>
-      </View>
-    );
-  }
+  if (!combined.length) return null;
 
   const values = combined.map((point) => point.value);
   const rawMin = Math.min(...values);
   const rawMax = Math.max(...values);
   const spread = rawMax - rawMin || Math.max(Math.abs(rawMax) * 0.08, 1);
-  const min = rawMin - spread * 0.12;
-  const max = rawMax + spread * 0.12;
+  const min = rawMin - spread * 0.14;
+  const max = rawMax + spread * 0.14;
+  const times = combined.map((point) => new Date(point.recordedAt).getTime());
+  const minTime = Math.min(...times);
+  const maxTime = Math.max(...times);
 
   const points = (series: NumericPoint[]) =>
-    series
-      .map((point, index) => {
-        const x =
-          series.length === 1
-            ? width / 2
-            : paddingX +
-              (index / (series.length - 1)) * (width - paddingX * 2);
-        const y =
-          height -
-          paddingY -
-          ((point.value - min) / (max - min)) * (height - paddingY * 2);
-        return { x, y };
-      });
+    series.map((point) => {
+      const time = new Date(point.recordedAt).getTime();
+      const x =
+        maxTime === minTime
+          ? width / 2
+          : padX + ((time - minTime) / (maxTime - minTime)) * (width - padX * 2);
+      const y =
+        height -
+        padY -
+        ((point.value - min) / (max - min)) * (height - padY * 2);
+      return { x, y };
+    });
 
   const primaryPoints = points(primary);
   const secondaryPoints = points(secondary ?? []);
-
   const polyline = (items: { x: number; y: number }[]) =>
     items.map((point) => `${point.x},${point.y}`).join(" ");
 
   return (
-    <View style={{ gap: 10 }}>
-      <View
-        accessible
-        accessibilityLabel={`${primaryLabel} trend chart with ${primary.length} recorded values`}
-        style={{
-          borderRadius: 16,
-          overflow: "hidden",
-          backgroundColor: "#F8F4F9",
-        }}
-      >
-        <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
-          {[0.25, 0.5, 0.75].map((ratio) => (
-            <Line
-              key={ratio}
-              x1={paddingX}
-              x2={width - paddingX}
-              y1={paddingY + (height - paddingY * 2) * ratio}
-              y2={paddingY + (height - paddingY * 2) * ratio}
-              stroke="#E3D8E7"
-              strokeWidth="1"
-            />
-          ))}
-          {primaryPoints.length > 1 && (
-            <Polyline
-              points={polyline(primaryPoints)}
-              fill="none"
-              stroke={C.purple}
-              strokeWidth="3"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          )}
-          {primaryPoints.map((point, index) => (
-            <Circle
-              key={`primary-${index}`}
-              cx={point.x}
-              cy={point.y}
-              r="4"
-              fill={C.purple}
-            />
-          ))}
-          {secondaryPoints.length > 1 && (
-            <Polyline
-              points={polyline(secondaryPoints)}
-              fill="none"
-              stroke={C.green}
-              strokeWidth="3"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          )}
-          {secondaryPoints.map((point, index) => (
-            <Circle
-              key={`secondary-${index}`}
-              cx={point.x}
-              cy={point.y}
-              r="4"
-              fill={C.green}
-            />
-          ))}
-        </Svg>
-      </View>
-
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <View
-            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: C.purple }}
+    <View
+      accessible
+      accessibilityLabel={`${primaryLabel} chart with ${primary.length} recorded values${secondaryLabel ? ` and ${secondary?.length ?? 0} ${secondaryLabel.toLowerCase()} values` : ""}`}
+      style={{ marginTop: 8 }}
+    >
+      <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
+        {[0.33, 0.66].map((ratio) => (
+          <Path
+            key={ratio}
+            d={`M ${padX} ${padY + (height - padY * 2) * ratio} H ${width - padX}`}
+            stroke="#E9E2EF"
+            strokeWidth="1"
           />
-          <Text style={S.small}>
-            {primaryLabel}
-            {primary.length
-              ? ` · latest ${primary[primary.length - 1].value}`
-              : ""}
-          </Text>
-        </View>
-        {secondaryLabel && (
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-            <View
-              style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: C.green }}
-            />
-            <Text style={S.small}>
-              {secondaryLabel}
-              {secondary?.length
-                ? ` · latest ${secondary[secondary.length - 1].value}`
-                : ""}
-            </Text>
-          </View>
+        ))}
+        {primaryPoints.length > 1 && (
+          <Polyline
+            points={polyline(primaryPoints)}
+            fill="none"
+            stroke={PURPLE}
+            strokeWidth="2.6"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
         )}
-      </View>
+        {primaryPoints.map((point, index) => (
+          <Circle
+            key={`p-${index}`}
+            cx={point.x}
+            cy={point.y}
+            r="3.2"
+            fill={PURPLE}
+          />
+        ))}
+        {secondaryPoints.length > 1 && (
+          <Polyline
+            points={polyline(secondaryPoints)}
+            fill="none"
+            stroke="#B49ACB"
+            strokeWidth="2.4"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        )}
+        {secondaryPoints.map((point, index) => (
+          <Circle
+            key={`s-${index}`}
+            cx={point.x}
+            cy={point.y}
+            r="3"
+            fill="#B49ACB"
+          />
+        ))}
+      </Svg>
     </View>
   );
 }
 
-function ActivityBars({
-  activity,
+function LatestReading({
+  primary,
+  secondary,
+  unit,
 }: {
-  activity: ReturnType<typeof buildDailyActivity>;
+  primary: NumericPoint[];
+  secondary?: NumericPoint[];
+  unit: string;
 }) {
-  const max = Math.max(1, ...activity.map((day) => day.total));
+  const latestPrimary = primary[primary.length - 1];
+  const latestSecondary = secondary?.[secondary.length - 1];
+  const candidates = [latestPrimary, latestSecondary].filter(Boolean) as NumericPoint[];
+  if (!candidates.length) return null;
+
+  const latest = candidates.reduce((best, point) =>
+    new Date(point.recordedAt).getTime() > new Date(best.recordedAt).getTime()
+      ? point
+      : best,
+  );
+
+  const displayValue =
+    latestPrimary && latestSecondary
+      ? `${latestPrimary.value}/${latestSecondary.value}`
+      : String(latestPrimary?.value ?? latestSecondary?.value ?? "");
 
   return (
-    <View style={{ flexDirection: "row", gap: 9, alignItems: "flex-end" }}>
-      {activity.map((day) => (
-        <View key={day.dateKey} style={{ flex: 1, alignItems: "center", gap: 6 }}>
-          <View
-            accessibilityLabel={`${day.label}: ${day.observations} observations and ${day.medicationRecords} medication records`}
+    <View style={{ gap: 2, marginTop: 5 }}>
+      <Text
+        style={{
+          fontFamily: "DMSans_600SemiBold",
+          fontSize: 12,
+          lineHeight: 17,
+          color: INK,
+        }}
+      >
+        {displayValue} {unit}
+      </Text>
+      <Text
+        style={{
+          fontFamily: "DMSans_400Regular",
+          fontSize: 10.5,
+          lineHeight: 15,
+          color: MUTED,
+        }}
+      >
+        Latest · {formatRecordedAt(latest.recordedAt)}
+      </Text>
+    </View>
+  );
+}
+
+function RecordedValueCard({
+  title,
+  icon,
+  primary,
+  secondary,
+  unit,
+  onPress,
+}: {
+  title: string;
+  icon: string;
+  primary: NumericPoint[];
+  secondary?: NumericPoint[];
+  unit: string;
+  onPress: () => void;
+}) {
+  const hasReadings = primary.length > 0 || Boolean(secondary?.length);
+
+  return (
+    <GlassCard
+      label={`Open ${title.toLowerCase()} records`}
+      onPress={onPress}
+      style={{ flex: 1, minWidth: 0, padding: 14, gap: 3 }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View
+          style={{
+            width: 46,
+            height: 46,
+            borderRadius: 18,
+            backgroundColor: SOFT_LAVENDER,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon name={icon} size={25} color={PURPLE} />
+        </View>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text
+            numberOfLines={2}
             style={{
-              width: "100%",
-              maxWidth: 34,
-              height: 96,
-              borderRadius: 12,
-              backgroundColor: "#EFE8F2",
-              justifyContent: "flex-end",
-              overflow: "hidden",
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 14,
+              lineHeight: 19,
+              color: INK,
             }}
           >
-            <View
+            {title}
+          </Text>
+          {!hasReadings && (
+            <Text
               style={{
-                height: `${(day.medicationRecords / max) * 100}%`,
-                minHeight: day.medicationRecords ? 5 : 0,
-                backgroundColor: C.green,
+                fontFamily: "DMSans_400Regular",
+                fontSize: 12,
+                lineHeight: 18,
+                color: MUTED,
               }}
-            />
-            <View
-              style={{
-                height: `${(day.observations / max) * 100}%`,
-                minHeight: day.observations ? 5 : 0,
-                backgroundColor: C.purple,
-              }}
-            />
-          </View>
-          <Text style={[S.small, { fontSize: 10 }]}>{day.label}</Text>
+            >
+              No readings yet
+            </Text>
+          )}
         </View>
-      ))}
+        <Icon name="arrow-forward-outline" size={20} color={INK} />
+      </View>
+
+      {hasReadings && (
+        <>
+          <MiniLineChart
+            primary={primary}
+            secondary={secondary}
+            primaryLabel={title === "Blood pressure" ? "Systolic" : title}
+            secondaryLabel={secondary ? "Diastolic" : undefined}
+          />
+          <LatestReading primary={primary} secondary={secondary} unit={unit} />
+        </>
+      )}
+    </GlassCard>
+  );
+}
+
+function ProgressRing({ value, total }: { value: number; total: number }) {
+  const size = 58;
+  const stroke = 6;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const ratio = total > 0 ? Math.max(0, Math.min(1, value / total)) : 0;
+
+  return (
+    <View
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: total || 1, now: total ? value : 0 }}
+      style={{ width: size, height: size }}
+    >
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#E7E7EE"
+          strokeWidth={stroke}
+        />
+        {ratio > 0 && (
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={PURPLE}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={circumference * (1 - ratio)}
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          />
+        )}
+      </Svg>
+    </View>
+  );
+}
+
+function PreparationRow({
+  title,
+  subtitle,
+  icon,
+  value,
+  total,
+  onPress,
+}: {
+  title: string;
+  subtitle: string;
+  icon: string;
+  value: number;
+  total: number;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${value} of ${total} preparation items completed`}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        minHeight: 86,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingVertical: 12,
+        opacity: pressed ? 0.72 : 1,
+        transform: [{ scale: pressed ? 0.995 : 1 }],
+      })}
+    >
+      <View
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 22,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: SOFT_LAVENDER,
+        }}
+      >
+        <Icon name={icon} size={25} color="#4E398E" />
+      </View>
+      <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+        <Text
+          style={{
+            fontFamily: "DMSans_600SemiBold",
+            fontSize: 14,
+            lineHeight: 19,
+            color: INK,
+          }}
+        >
+          {title}
+        </Text>
+        <Text
+          style={{
+            fontFamily: "DMSans_400Regular",
+            fontSize: 12,
+            lineHeight: 18,
+            color: MUTED,
+          }}
+        >
+          {subtitle}
+        </Text>
+      </View>
+      <ProgressRing value={value} total={total} />
+      <Text
+        style={{
+          minWidth: 34,
+          textAlign: "center",
+          fontFamily: "DMSans_600SemiBold",
+          fontSize: 13,
+          color: INK,
+        }}
+      >
+        {value}/{total}
+      </Text>
+      <Icon name="arrow-forward-outline" size={20} color="#5D5870" />
+    </Pressable>
+  );
+}
+
+function InfoPanel() {
+  return (
+    <View
+      style={{
+        marginTop: 10,
+        borderRadius: 18,
+        padding: 15,
+        backgroundColor: "#F8F4FB",
+        borderWidth: 1,
+        borderColor: "#EBE2F1",
+        gap: 8,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: "DMSans_600SemiBold",
+          fontSize: 13,
+          color: INK,
+        }}
+      >
+        About these insights
+      </Text>
+      <Text style={[S.small, { color: MUTED, lineHeight: 18 }]}>
+        These views organise recorded care information only. They do not diagnose,
+        score medical risk, identify deterioration, or recommend treatment changes.
+      </Text>
+      <Text style={[S.small, { color: MUTED, lineHeight: 18 }]}>
+        Medication counts are caregiver-entered records and do not verify adherence.
+        Corrected or withdrawn medication entries remain in history but are excluded
+        from current dose-entry totals.
+      </Text>
+      <Text style={[S.small, { color: MUTED, lineHeight: 18 }]}>
+        Preparation progress counts completed information or checklist items. It is
+        not a measure of clinical readiness. Discuss symptoms, readings, medicines,
+        and care decisions with the healthcare team.
+      </Text>
     </View>
   );
 }
 
 export function CareInsightsScreen() {
   const n = useNav();
-  const { state } = useCare();
+  const { width } = useWindowDimensions();
+  const { state, loading, syncError, refresh } = useCare();
+  const reducedMotion = useReducedMotionPreference();
+  const [headerInfoOpen, setHeaderInfoOpen] = useState(false);
+  const [footerInfoOpen, setFooterInfoOpen] = useState(false);
+
+  useLayoutEffect(() => {
+    n.setOptions({ headerShown: false });
+  }, [n]);
 
   const dailyActivity = useMemo(
     () => buildDailyActivity(state.entries, state.medicationRecords, 7),
@@ -306,231 +848,621 @@ export function CareInsightsScreen() {
   );
 
   const activeDays = dailyActivity.filter((day) => day.total > 0).length;
-  const sevenDayRecords = dailyActivity.reduce(
-    (sum, day) => sum + day.total,
-    0,
-  );
+  const sevenDayEvents = dailyActivity.reduce((sum, day) => sum + day.total, 0);
+  const profileName = state.careRecipientName.trim() || "Care profile";
+  const profileInitial = profileName.charAt(0).toLocaleUpperCase() || "C";
+  const stackRecordedCards = width < 390;
+  const appointmentSubtitle =
+    state.appointment.title.trim() && state.appointment.title.trim() !== "Next appointment"
+      ? state.appointment.title.trim()
+      : "Prepare for visit";
+
+  function toggleInfo(setter: React.Dispatch<React.SetStateAction<boolean>>) {
+    if (!reducedMotion) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    }
+    setter((current) => !current);
+  }
+
+  if (loading && !state.hydrated) {
+    return (
+      <InsightsPage>
+        <CareInsightsTopBar
+          onBack={() => n.goBack()}
+          onInfo={() => toggleInfo(setHeaderInfoOpen)}
+          infoOpen={headerInfoOpen}
+        />
+        <View
+          style={{
+            minHeight: 300,
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+          }}
+        >
+          <ActivityIndicator color={PURPLE} />
+          <Text style={[S.body, { color: MUTED }]}>Loading care insights…</Text>
+        </View>
+      </InsightsPage>
+    );
+  }
 
   return (
-    <Page>
-      <Heading
-        eyebrow="CARE TIMELINE & INSIGHTS"
-        title="See the care record take shape."
-        body="Visual summaries of what your care team has recorded. These charts organize information; they do not diagnose, score risk, or interpret whether a value is medically normal."
+    <InsightsPage>
+      <CareInsightsTopBar
+        onBack={() => n.goBack()}
+        onInfo={() => toggleInfo(setHeaderInfoOpen)}
+        infoOpen={headerInfoOpen}
       />
 
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E5C8ED" }]}>ACTIVE CARE PROFILE</Text>
-        <Text style={[S.h2, { color: C.white }]}>
-          {state.careRecipientName || "Care profile"}
-        </Text>
-        <Txt style={{ color: "#E9DDED" }}>
-          {activeDays} active days in the last 7 · {sevenDayRecords} recorded
-          care events
-        </Txt>
-      </Card>
+      {syncError ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Retry loading care insights"
+          onPress={() => void refresh()}
+          style={({ pressed }) => ({
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: "#E9D8EF",
+            backgroundColor: "#FBF6FD",
+            paddingHorizontal: 14,
+            paddingVertical: 11,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 9,
+            opacity: pressed ? 0.72 : 1,
+          })}
+        >
+          <Icon name="cloud-offline-outline" size={18} color={PURPLE} />
+          <Text style={[S.small, { flex: 1, color: "#6C5677" }]}>
+            {state.hydrated
+              ? "Couldn’t refresh. Showing the latest loaded care record."
+              : "Care data couldn’t load."}
+          </Text>
+          <Text
+            style={{
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 11,
+              color: PURPLE,
+            }}
+          >
+            Retry
+          </Text>
+        </Pressable>
+      ) : null}
 
-      <Section title="Last 7 days" />
-      <Card>
-        <View style={{ flexDirection: "row", gap: 16, flexWrap: "wrap" }}>
-          <Stat value={state.entries.length} label="observations in record" />
-          <Stat value={state.medications.length} label="medications listed" />
-          <Stat
-            value={medications.recordedCount}
-            label="dose entries currently recorded"
-          />
-        </View>
-        <ActivityBars activity={dailyActivity} />
-        <View style={{ flexDirection: "row", gap: 16, flexWrap: "wrap" }}>
-          <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
-            <View
-              style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: C.purple }}
-            />
-            <Text style={S.small}>Care observations</Text>
+      {headerInfoOpen ? <InfoPanel /> : null}
+
+      <Entrance reducedMotion={reducedMotion}>
+        <View
+          style={{
+            minHeight: 205,
+            position: "relative",
+            overflow: "hidden",
+            marginHorizontal: -1,
+          }}
+        >
+          <View
+            style={{
+              maxWidth: 245,
+              zIndex: 2,
+              paddingTop: 22,
+              gap: 10,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "DMSans_600SemiBold",
+                fontSize: 10,
+                letterSpacing: 4.1,
+                color: PURPLE,
+              }}
+            >
+              YOUR CARE STORY
+            </Text>
+            <Text
+              accessibilityRole="header"
+              style={{
+                fontFamily: "Lora_500Medium",
+                fontSize: 39,
+                lineHeight: 44,
+                letterSpacing: -1.25,
+                color: INK,
+              }}
+            >
+              Every detail.{"\n"}One clear view.
+            </Text>
           </View>
-          <View style={{ flexDirection: "row", gap: 6, alignItems: "center" }}>
-            <View
-              style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: C.green }}
-            />
-            <Text style={S.small}>Medication records</Text>
+          <View style={{ position: "absolute", right: -72, top: -7 }}>
+            <FloatingRibbon reducedMotion={reducedMotion} />
           </View>
         </View>
-      </Card>
+      </Entrance>
 
-      <Section title="Recorded vital trends" />
-      <Card>
-        <Text style={S.h3}>Blood pressure entries</Text>
-        <Txt style={S.small}>
-          Shows the last {Math.max(systolic.length, diastolic.length)} recorded
-          values only. EnVizion does not apply clinical thresholds here.
-        </Txt>
-        <LineChart
-          primary={systolic}
-          secondary={diastolic}
-          primaryLabel="Systolic"
-          secondaryLabel="Diastolic"
-        />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
-          style={{ minHeight: 44, justifyContent: "center" }}
+      <Entrance delay={45} reducedMotion={reducedMotion}>
+        <View
+          style={{
+            minHeight: 154,
+            borderRadius: 28,
+            overflow: "hidden",
+            position: "relative",
+            shadowColor: "#5E237E",
+            shadowOpacity: 0.16,
+            shadowRadius: 20,
+            shadowOffset: { width: 0, height: 10 },
+            elevation: 5,
+          }}
         >
-          <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-            Open vital records →
-          </Text>
-        </Pressable>
-      </Card>
-
-      <Card>
-        <Text style={S.h3}>Blood glucose entries</Text>
-        <Txt style={S.small}>
-          Recorded values are displayed without target ranges or treatment
-          recommendations.
-        </Txt>
-        <LineChart primary={glucose} primaryLabel="Blood glucose" />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => n.navigate("Tracker", { kind: "Blood sugar" })}
-          style={{ minHeight: 44, justifyContent: "center" }}
-        >
-          <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-            Open blood sugar records →
-          </Text>
-        </Pressable>
-      </Card>
-
-      <Section title="Medication record" />
-      <Card>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
-          <Stat value={state.medications.length} label="active list entries" />
-          <Stat value={medications.recordedCount} label="dose records" />
-          <Stat value={medications.correctedCount} label="corrected entries" />
-        </View>
-        <Txt style={S.small}>
-          These counts describe caregiver-entered records. They are not an
-          adherence percentage and do not confirm that medication was taken as
-          prescribed.
-        </Txt>
-        {medications.latestRecordedAt && (
-          <Txt>
-            Latest dose record: {formatDate(medications.latestRecordedAt)}
-          </Txt>
-        )}
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => n.navigate("Medications")}
-          style={{ minHeight: 44, justifyContent: "center" }}
-        >
-          <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-            Review medication history →
-          </Text>
-        </Pressable>
-      </Card>
-
-      <Section title="Preparation progress" />
-      <Card>
-        <View style={S.between}>
-          <View style={{ flex: 1 }}>
-            <Text style={S.h3}>Next appointment</Text>
-            <Txt>{state.appointment.title}</Txt>
+          <View
+            pointerEvents="none"
+            style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
+          >
+            <ProfileCardBackground />
           </View>
-          <Text style={[S.h3, { color: C.purple }]}>
-            {appointment.ready}/{appointment.total}
-          </Text>
-        </View>
-        <ProgressBar value={appointment.ready} total={appointment.total} />
-        <Txt style={S.small}>
-          Counts whether date, time, location, questions and preparation notes
-          have been entered.
-        </Txt>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => n.navigate("Appointments")}
-          style={{ minHeight: 44, justifyContent: "center" }}
-        >
-          <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-            Prepare for the visit →
-          </Text>
-        </Pressable>
-      </Card>
 
-      <Card>
-        <View style={S.between}>
-          <View style={{ flex: 1 }}>
-            <Text style={S.h3}>Hospital-to-home checklist</Text>
-            <Txt>Transition preparation</Txt>
-          </View>
-          <Text style={[S.h3, { color: C.purple }]}>
-            {state.transition.length}/{transitionSteps.length}
-          </Text>
-        </View>
-        <ProgressBar
-          value={state.transition.length}
-          total={transitionSteps.length}
-        />
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => n.navigate("Transition")}
-          style={{ minHeight: 44, justifyContent: "center" }}
-        >
-          <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-            Open transition checklist →
-          </Text>
-        </Pressable>
-      </Card>
-
-      <Section title="Recent care timeline" />
-      {!timeline.length ? (
-        <Card>
-          <Icon name="time-outline" />
-          <Text style={S.h3}>The timeline starts with your first record.</Text>
-          <Txt>
-            Observations and medication history will appear here in time order.
-          </Txt>
-        </Card>
-      ) : (
-        timeline.map((item) => (
-          <Card key={item.id}>
-            <View style={{ flexDirection: "row", gap: 13 }}>
+          <View style={{ paddingHorizontal: 21, paddingVertical: 18, gap: 14 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
               <View
                 style={{
-                  width: 42,
-                  height: 42,
-                  borderRadius: 13,
-                  backgroundColor: item.corrected ? C.redBg : C.lavender,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: "rgba(255,255,255,0.19)",
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.48)",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon
-                  name={
-                    item.kind === "medication"
-                      ? "medical-outline"
-                      : "pulse-outline"
-                  }
-                  color={item.corrected ? C.rose : C.purple}
-                  size={20}
-                />
+                <Text
+                  style={{
+                    fontFamily: "Lora_500Medium",
+                    fontSize: 30,
+                    color: "#FFFFFF",
+                  }}
+                >
+                  {profileInitial}
+                </Text>
               </View>
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={S.h3}>{item.title}</Text>
-                <Txt>{item.subtitle}</Txt>
-                <Text style={S.small}>{formatDate(item.recordedAt)}</Text>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    fontFamily: "DMSans_600SemiBold",
+                    fontSize: 19,
+                    lineHeight: 25,
+                    color: "#FFFFFF",
+                  }}
+                >
+                  {profileName}
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 2,
+                    fontFamily: "DMSans_400Regular",
+                    fontSize: 12,
+                    color: "#E9DFF2",
+                  }}
+                >
+                  Active care profile
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end", gap: 4 }}>
+                {loading ? <ActivityIndicator size="small" color="#FFFFFF" /> : null}
+                <Text
+                  style={{
+                    fontFamily: "DMSans_400Regular",
+                    fontSize: 11.5,
+                    color: "#E8D8F0",
+                  }}
+                >
+                  Past 7 days
+                </Text>
               </View>
             </View>
-          </Card>
-        ))
-      )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
-        <Text style={S.h3}>How to use these insights</Text>
-        <Txt>
-          Use the graphs and timeline to notice what has been recorded and to
-          prepare questions for the healthcare team. EnVizion Life does not
-          automatically identify deterioration, diagnose a condition, or tell
-          you to change treatment.
-        </Txt>
-      </Card>
-    </Page>
+            <View
+              style={{
+                height: 1,
+                backgroundColor: "rgba(255,255,255,0.42)",
+              }}
+            />
+
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={{ flex: 1, alignItems: "center", gap: 2 }}>
+                <MetricNumber
+                  value={activeDays}
+                  reducedMotion={reducedMotion}
+                  style={{
+                    fontFamily: "Lora_500Medium",
+                    fontSize: 28,
+                    lineHeight: 32,
+                    color: "#FFFFFF",
+                  }}
+                />
+                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: "#F0E7F5" }}>
+                  Active days
+                </Text>
+              </View>
+              <View style={{ width: 1, height: 41, backgroundColor: "rgba(255,255,255,0.4)" }} />
+              <View style={{ flex: 1, alignItems: "center", gap: 2 }}>
+                <MetricNumber
+                  value={sevenDayEvents}
+                  reducedMotion={reducedMotion}
+                  style={{
+                    fontFamily: "Lora_500Medium",
+                    fontSize: 28,
+                    lineHeight: 32,
+                    color: "#FFFFFF",
+                  }}
+                />
+                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: "#F0E7F5" }}>
+                  Care events
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Entrance>
+
+      <Entrance delay={80} reducedMotion={reducedMotion}>
+        <View style={{ gap: 8 }}>
+          <Text
+            style={{
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 9.5,
+              letterSpacing: 2.2,
+              color: "#8B82A0",
+              textTransform: "uppercase",
+            }}
+          >
+            Current record totals
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            {[
+              [state.entries.length, "Observations"],
+              [state.medications.length, "Medications"],
+              [medications.recordedCount, "Dose entries"],
+            ].map(([value, label], index) => (
+              <React.Fragment key={String(label)}>
+                {index > 0 ? <View style={{ width: 1, height: 43, backgroundColor: "#E3DEE8" }} /> : null}
+                <View style={{ flex: 1, alignItems: "center", gap: 3 }}>
+                  <MetricNumber
+                    value={value}
+                    reducedMotion={reducedMotion}
+                    style={{
+                      fontFamily: "Lora_500Medium",
+                      fontSize: 25,
+                      lineHeight: 31,
+                      color: INK,
+                    }}
+                  />
+                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: MUTED }}>
+                    {label}
+                  </Text>
+                </View>
+              </React.Fragment>
+            ))}
+          </View>
+        </View>
+      </Entrance>
+
+      <Entrance delay={105} reducedMotion={reducedMotion}>
+        <View style={{ gap: 10 }}>
+          <SectionTitle>Last 7 days</SectionTitle>
+          <View style={{ flexDirection: "row", gap: 7 }}>
+            {dailyActivity.map((day, index) => {
+              const selected = index === dailyActivity.length - 1;
+              const hasActivity = day.total > 0;
+              return (
+                <View
+                  key={day.dateKey}
+                  accessible
+                  accessibilityLabel={`${day.label} ${dayNumber(day.dateKey)}: ${day.observations} observations and ${day.medicationRecords} medication records`}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    minHeight: 59,
+                    borderRadius: 10,
+                    borderWidth: selected ? 1.6 : 1,
+                    borderColor: selected ? PURPLE : "#DDD9E3",
+                    backgroundColor: selected ? "#FBF7FF" : "rgba(255,255,255,0.72)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 2,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "DMSans_400Regular",
+                      fontSize: 9.5,
+                      color: selected ? PURPLE : "#676584",
+                    }}
+                  >
+                    {day.label}
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: "Lora_500Medium",
+                      fontSize: 17,
+                      lineHeight: 20,
+                      color: selected ? PURPLE : INK,
+                    }}
+                  >
+                    {dayNumber(day.dateKey)}
+                  </Text>
+                  {hasActivity ? (
+                    <View
+                      style={{
+                        minWidth: 15,
+                        height: 15,
+                        borderRadius: 8,
+                        paddingHorizontal: 3,
+                        backgroundColor: "#EEE0F7",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 8, color: PURPLE }}>
+                        {day.total}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
+          <Text
+            style={{
+              textAlign: "center",
+              fontFamily: "DMSans_400Regular",
+              fontSize: 11.5,
+              color: MUTED,
+            }}
+          >
+            {sevenDayEvents === 0
+              ? "No activity recorded yet"
+              : `${sevenDayEvents} care event${sevenDayEvents === 1 ? "" : "s"} recorded in this period`}
+          </Text>
+        </View>
+      </Entrance>
+
+      <Entrance delay={130} reducedMotion={reducedMotion}>
+        <View style={{ gap: 10 }}>
+          <SectionTitle>Recorded values</SectionTitle>
+          <View style={{ flexDirection: stackRecordedCards ? "column" : "row", gap: 10 }}>
+            <RecordedValueCard
+              title="Blood pressure"
+              icon="heart-outline"
+              primary={systolic}
+              secondary={diastolic}
+              unit="mmHg"
+              onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
+            />
+            <RecordedValueCard
+              title="Blood glucose"
+              icon="water-outline"
+              primary={glucose}
+              unit="mg/dL"
+              onPress={() => n.navigate("Tracker", { kind: "Blood sugar" })}
+            />
+          </View>
+        </View>
+      </Entrance>
+
+      <Entrance delay={155} reducedMotion={reducedMotion}>
+        <View style={{ gap: 10 }}>
+          <SectionTitle>Medication record</SectionTitle>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingHorizontal: 5,
+              gap: 4,
+            }}
+          >
+            {[
+              [state.medications.length, "Active"],
+              [medications.recordedCount, "Doses"],
+              [medications.correctedCount, "Corrected"],
+            ].map(([value, label], index) => (
+              <React.Fragment key={String(label)}>
+                {index > 0 ? <View style={{ width: 1, height: 35, backgroundColor: "#DDD9E3" }} /> : null}
+                <View style={{ flex: 1, flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 7 }}>
+                  <MetricNumber
+                    value={value}
+                    reducedMotion={reducedMotion}
+                    style={{
+                      fontFamily: "Lora_500Medium",
+                      fontSize: 24,
+                      lineHeight: 30,
+                      color: INK,
+                    }}
+                  />
+                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10.5, color: MUTED }}>
+                    {label}
+                  </Text>
+                </View>
+              </React.Fragment>
+            ))}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="View medication history"
+              onPress={() => n.navigate("Medications")}
+              style={({ pressed }) => ({
+                minHeight: 44,
+                paddingHorizontal: 8,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+                opacity: pressed ? 0.62 : 1,
+              })}
+            >
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 11.5, color: PURPLE }}>
+                View history
+              </Text>
+              <Icon name="arrow-forward-outline" size={17} color={PURPLE} />
+            </Pressable>
+          </View>
+        </View>
+      </Entrance>
+
+      <Entrance delay={180} reducedMotion={reducedMotion}>
+        <View style={{ gap: 10 }}>
+          <SectionTitle>Getting ready</SectionTitle>
+          <GlassCard style={{ paddingHorizontal: 14, paddingVertical: 0, overflow: "hidden" }}>
+            <PreparationRow
+              title="Next appointment"
+              subtitle={appointmentSubtitle}
+              icon="calendar-clear-outline"
+              value={appointment.ready}
+              total={appointment.total}
+              onPress={() => n.navigate("Appointments")}
+            />
+            <View style={{ height: 1, backgroundColor: "#E5E1E9" }} />
+            <PreparationRow
+              title="Hospital to home"
+              subtitle="Open checklist"
+              icon="home-outline"
+              value={state.transition.length}
+              total={transitionSteps.length}
+              onPress={() => n.navigate("Transition")}
+            />
+          </GlassCard>
+        </View>
+      </Entrance>
+
+      <Entrance delay={205} reducedMotion={reducedMotion}>
+        <View style={{ gap: 10 }}>
+          <SectionTitle>Care timeline</SectionTitle>
+          {!timeline.length ? (
+            <View style={{ flexDirection: "row", gap: 14, paddingHorizontal: 6, paddingVertical: 4 }}>
+              <View style={{ width: 58, alignItems: "center" }}>
+                <View
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: 6,
+                    borderWidth: 1.5,
+                    borderColor: "#D8D8E3",
+                    backgroundColor: "#FFFFFF",
+                  }}
+                />
+                <View style={{ width: 1.5, height: 43, backgroundColor: "#DEDDE6", marginTop: 5 }} />
+              </View>
+              <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <View
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 24,
+                    backgroundColor: "#F3EFF7",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="book-outline" size={23} color="#535078" />
+                </View>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13.5, color: INK }}>
+                    Your story starts here
+                  </Text>
+                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, lineHeight: 17, color: MUTED }}>
+                    Saved care events appear here in time order.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View style={{ gap: 0 }}>
+              {timeline.map((item, index) => (
+                <View key={item.id} style={{ flexDirection: "row", gap: 12 }}>
+                  <View style={{ width: 34, alignItems: "center" }}>
+                    <View
+                      style={{
+                        width: 10,
+                        height: 10,
+                        borderRadius: 5,
+                        backgroundColor: item.corrected ? "#C76579" : PURPLE,
+                        marginTop: 17,
+                      }}
+                    />
+                    {index < timeline.length - 1 ? (
+                      <View style={{ flex: 1, width: 1.3, minHeight: 54, backgroundColor: "#E2DFE7", marginTop: 4 }} />
+                    ) : null}
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      minHeight: 70,
+                      paddingVertical: 10,
+                      paddingBottom: 16,
+                      borderBottomWidth: index < timeline.length - 1 ? 1 : 0,
+                      borderBottomColor: "#EEEAF0",
+                      flexDirection: "row",
+                      gap: 11,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 18,
+                        backgroundColor: item.corrected ? "#FFF0F3" : SOFT_LAVENDER,
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Icon
+                        name={item.kind === "medication" ? "medical-outline" : "pulse-outline"}
+                        size={20}
+                        color={item.corrected ? "#B24C65" : PURPLE}
+                      />
+                    </View>
+                    <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                      <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13, color: INK }}>
+                        {item.title}
+                      </Text>
+                      <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11, lineHeight: 16, color: MUTED }}>
+                        {item.subtitle}
+                      </Text>
+                      <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10, lineHeight: 15, color: "#918CA0" }}>
+                        {formatRecordedAt(item.recordedAt)}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      </Entrance>
+
+      <Entrance delay={230} reducedMotion={reducedMotion}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="About these insights"
+          accessibilityState={{ expanded: footerInfoOpen }}
+          onPress={() => toggleInfo(setFooterInfoOpen)}
+          style={({ pressed }) => ({
+            minHeight: 54,
+            borderTopWidth: 1,
+            borderTopColor: "#E2DFE7",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 10,
+            opacity: pressed ? 0.65 : 1,
+          })}
+        >
+          <Icon name="information-circle-outline" size={21} color="#4E4A72" />
+          <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: MUTED }}>
+            Records, not clinical interpretation.
+          </Text>
+          <Icon name={footerInfoOpen ? "chevron-up-outline" : "chevron-forward-outline"} size={16} color={PURPLE} />
+        </Pressable>
+        {footerInfoOpen ? <InfoPanel /> : null}
+      </Entrance>
+    </InsightsPage>
   );
 }
