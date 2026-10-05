@@ -354,7 +354,7 @@ function ProgressBar({
       >
         <View
           style={{
-            width: Math.round(ratio * 100) + "%",
+            width: (Math.round(ratio * 100) + "%") as any,
             minWidth: ratio > 0 ? 4 : 0,
             height: 10,
             borderRadius: 999,
