@@ -32,6 +32,7 @@ type NotificationsContextValue = {
   items: NotificationRecord[];
   unreadCount: number;
   loading: boolean;
+  error: string | null;
   refresh: () => Promise<void>;
   markRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
@@ -55,6 +56,12 @@ function mapRow(row: any): NotificationRecord {
   };
 }
 
+function errorMessage(error: unknown) {
+  return error instanceof Error
+    ? error.message
+    : "We could not refresh your notifications.";
+}
+
 export function NotificationsProvider({
   children,
 }: {
@@ -62,11 +69,14 @@ export function NotificationsProvider({
 }) {
   const [items, setItems] = useState<NotificationRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    setError(null);
+
     try {
-      const { data, error } = await supabase
+      const { data, error: queryError } = await supabase
         .from("notifications")
         .select(
           "id, audience, kind, title, body, entity_type, entity_id, read_at, created_at",
@@ -74,8 +84,11 @@ export function NotificationsProvider({
         .order("created_at", { ascending: false })
         .limit(50);
 
-      if (error) throw error;
+      if (queryError) throw queryError;
       setItems((data ?? []).map(mapRow));
+    } catch (refreshError) {
+      setError(errorMessage(refreshError));
+      throw refreshError;
     } finally {
       setLoading(false);
     }
@@ -97,7 +110,11 @@ export function NotificationsProvider({
         return;
       }
 
-      await refresh();
+      try {
+        await refresh();
+      } catch {
+        // The screen keeps the last available list and exposes the refresh error.
+      }
 
       if (!active) return;
 
@@ -121,12 +138,14 @@ export function NotificationsProvider({
             filter: `user_id=eq.${user.id}`,
           },
           (payload) => {
-            const next = payload.new && Object.keys(payload.new).length
-              ? mapRow(payload.new)
-              : null;
+            const next =
+              payload.new && Object.keys(payload.new).length
+                ? mapRow(payload.new)
+                : null;
 
             if (!next) return;
 
+            setError(null);
             setItems((current) => {
               const remaining = current.filter((item) => item.id !== next.id);
               return [next, ...remaining].sort(
@@ -151,13 +170,14 @@ export function NotificationsProvider({
   }, [refresh]);
 
   const markRead = useCallback(async (id: string) => {
+    setError(null);
     const readAt = new Date().toISOString();
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from("notifications")
       .update({ read_at: readAt })
       .eq("id", id);
 
-    if (error) throw error;
+    if (updateError) throw updateError;
 
     setItems((current) =>
       current.map((item) =>
@@ -167,13 +187,14 @@ export function NotificationsProvider({
   }, []);
 
   const markAllRead = useCallback(async () => {
+    setError(null);
     const readAt = new Date().toISOString();
-    const { error } = await supabase
+    const { error: updateError } = await supabase
       .from("notifications")
       .update({ read_at: readAt })
       .is("read_at", null);
 
-    if (error) throw error;
+    if (updateError) throw updateError;
 
     setItems((current) =>
       current.map((item) =>
@@ -193,11 +214,12 @@ export function NotificationsProvider({
       items,
       unreadCount,
       loading,
+      error,
       refresh,
       markRead,
       markAllRead,
     }),
-    [items, loading, markAllRead, markRead, refresh, unreadCount],
+    [error, items, loading, markAllRead, markRead, refresh, unreadCount],
   );
 
   return (
