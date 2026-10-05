@@ -15,7 +15,6 @@ import {
 } from "../medicationManagement";
 import {
   medicationOutcomeLabel,
-  medicationReconciliationLabel,
   medicationRefillState,
 } from "../medicationManagementHelpers";
 import { supabase } from "../supabase";
@@ -29,7 +28,6 @@ import {
   Icon,
   Page,
   S,
-  Section,
   Txt,
 } from "../ui";
 import { useNav } from "./MainScreens";
