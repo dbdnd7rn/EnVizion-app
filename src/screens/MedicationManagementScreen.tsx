@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Line, Path, Rect, Stop } from "react-native-svg";
 import {
   correctManagedMedicationRecord,
@@ -70,34 +70,26 @@ function MedicationHeroGraphic() {
           <Stop offset="1" stopColor="#EEE4FB" />
         </LinearGradient>
         <LinearGradient id="medPurple" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#9D66D3" />
-          <Stop offset="1" stopColor="#6D35A0" />
+          <Stop offset="0" stopColor="#A16CD6" />
+          <Stop offset="1" stopColor="#6C359E" />
         </LinearGradient>
         <LinearGradient id="medPink" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FF9FBB" />
-          <Stop offset="1" stopColor="#F86C92" />
+          <Stop offset="0" stopColor="#FF9FBA" />
+          <Stop offset="1" stopColor="#F46D92" />
         </LinearGradient>
       </Defs>
-
       <Path d="M28 202c-6-53 15-108 63-143 49-36 116-41 168-11 45 26 61 72 49 118-11 42-48 66-100 70H75c-26 0-44-10-47-34Z" fill="url(#medHeroBg)" />
       <Ellipse cx="301" cy="180" rx="18" ry="60" fill="#8C5CC9" transform="rotate(22 301 180)" />
       <Ellipse cx="322" cy="190" rx="15" ry="53" fill="#B18BDF" transform="rotate(34 322 190)" />
       <Ellipse cx="285" cy="115" rx="15" ry="51" fill="#A779D6" transform="rotate(-8 285 115)" />
-
       <Path d="M132 83c-17-27-55-10-43 18 10 22 43 38 43 38s33-17 43-39c12-28-26-44-43-17Z" fill="url(#medPink)" />
 
       <G transform="translate(182 64) rotate(6 62 78)">
         <Rect x="0" y="0" width="122" height="156" rx="16" fill="#7441A8" />
         <Rect x="10" y="13" width="102" height="132" rx="11" fill="#FFFDFE" />
         <Rect x="42" y="-8" width="40" height="24" rx="8" fill="#8E5BC0" />
-        <Path d="M33 29h12c9 0 14 4 14 11 0 6-4 10-10 11l12 16h-11L39 52h-6v15h-9V29h9Zm0 8v8h10c5 0 7-1 7-4s-2-4-7-4H33Z" fill="#854AB2" />
-        <Path d="M34 49h21" stroke="#D2BDE8" strokeWidth="6" strokeLinecap="round" />
-        <Path d="M34 68h58" stroke="#DCCDEA" strokeWidth="6" strokeLinecap="round" />
-        <Path d="M34 87h49" stroke="#DCCDEA" strokeWidth="6" strokeLinecap="round" />
-        <Path d="M34 106h61" stroke="#DCCDEA" strokeWidth="6" strokeLinecap="round" />
-        <Path d="M34 125h38" stroke="#DCCDEA" strokeWidth="6" strokeLinecap="round" />
-        <Path d="M31 28c8-13 22-10 24 0-2 13-24 13-24 0Z" fill="#D9C0ED" opacity="0.45" />
-        <Path d="M35 37l9-22M51 37l-3-21" stroke="#7F4CB3" strokeWidth="4" strokeLinecap="round" />
+        <Path d="M30 29h13c10 0 15 4 15 11 0 6-4 10-10 11l13 16H50L39 52h-9v15h-9V29h9Zm0 8v8h11c5 0 7-1 7-4s-2-4-7-4H30Z" fill="#854AB2" />
+        <Path d="M34 68h58M34 87h49M34 106h61M34 125h38" stroke="#DCCDEA" strokeWidth="6" strokeLinecap="round" />
       </G>
 
       <G transform="translate(111 96)">
@@ -121,14 +113,12 @@ function MedicationHeroGraphic() {
         <Rect x="0" y="0" width="60" height="20" rx="10" fill="#7C40AF" />
         <Rect x="30" y="0" width="30" height="20" rx="10" fill="#6D319B" />
       </G>
-
       <G transform="translate(221 200) rotate(-38 31 10)">
         <Rect x="0" y="0" width="62" height="20" rx="10" fill="#7E49B6" />
         <Rect x="31" y="0" width="31" height="20" rx="10" fill="#FF7299" />
       </G>
       <Ellipse cx="278" cy="222" rx="18" ry="10" fill="#FFF" stroke="#E5DAED" strokeWidth="2" />
       <Line x1="34" y1="234" x2="331" y2="234" stroke="#EEE4F2" strokeWidth="2" />
-      <Path d="M222 95c0-17 13-30 30-30" stroke="#7E43AF" strokeWidth="6" fill="none" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -192,6 +182,217 @@ export function MedicationManagementScreen() {
 
   const refresh = useCallback(async () => {
     if (!careRecipientId) {
+      setMedications([]);
+      setRecords([]);
+      setReconciliations([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await loadMedicationManagement(careRecipientId);
+      setMedications(result.medications);
+      setRecords(result.records);
+      setReconciliations(result.reconciliations);
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not load medication management.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [careRecipientId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!careRecipientId) return;
+    const channel = supabase
+      .channel(`medication-management:${careRecipientId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "medications",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "medication_records",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "medication_reconciliations",
+          filter: `care_recipient_id=eq.${careRecipientId}`,
+        },
+        () => void refresh(),
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [careRecipientId, refresh]);
+
+  const active = useMemo(
+    () => medications.filter((medication) => medication.active),
+    [medications],
+  );
+  const latestReconciliation = reconciliations[0] ?? null;
+  const refillAttention = useMemo(
+    () =>
+      active.filter((medication) => {
+        const status = medicationRefillState(medication);
+        return status === "soon" || status === "overdue";
+      }),
+    [active],
+  );
+
+  function startEdit(medication?: ManagedMedication) {
+    if (!medication) {
+      setDraft(emptyDraft);
+    } else {
+      setDraft({
+        id: medication.id,
+        name: medication.name,
+        instructions: medication.instructions,
+        time: medication.time,
+        dose: medication.dose,
+        route: medication.route,
+        purpose: medication.purpose,
+        prescriber: medication.prescriber,
+        pharmacy: medication.pharmacy,
+        isPrn: medication.isPrn,
+        refillDueOn: medication.refillDueOn,
+      });
+    }
+    setEditing(true);
+    setMessage("");
+  }
+
+  async function save() {
+    if (!careRecipientId || readOnly) return;
+    setBusyId("save");
+    setMessage("");
+    try {
+      const medication = await saveManagedMedication({
+        careRecipientId,
+        ...draft,
+      });
+
+      dispatch({
+        type: draft.id ? "edit-med" : "add-med",
+        medication: {
+          id: medication.id,
+          name: medication.name,
+          instructions: medication.instructions,
+          time: medication.time,
+        },
+      });
+
+      setEditing(false);
+      setDraft(emptyDraft);
+      await refresh();
+      setMessage("Medication details saved.");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not save the medication.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function record(
+    medication: ManagedMedication,
+    status: MedicationOutcome,
+  ) {
+    if (!careRecipientId || readOnly) return;
+    setBusyId("record-" + medication.id);
+    setMessage("");
+    try {
+      const record = await recordManagedMedicationOutcome({
+        careRecipientId,
+        medicationId: medication.id,
+        status,
+        note: recordNotes[medication.id] ?? "",
+      });
+      setRecordNotes((current) => ({ ...current, [medication.id]: "" }));
+
+      if (status === "taken" || status === "prn_taken") {
+        dispatch({
+          type: "record-med",
+          record: {
+            id: record.id,
+            medication: {
+              id: medication.id,
+              name: medication.name,
+              instructions: medication.instructions,
+              time: medication.time,
+            },
+            recordedAt: record.recordedAt,
+          },
+        });
+      }
+
+      await refresh();
+      setMessage(medicationOutcomeLabel(status) + ".");
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not save this medication record.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function reconcile() {
+    if (!careRecipientId || readOnly) return;
+    setBusyId("reconcile");
+    setMessage("");
+    try {
+      await reconcileManagedMedicationList(
+        careRecipientId,
+        reconciliationNote,
+      );
+      setReconciliationNote("");
+      await refresh();
+      setMessage(
+        "Medication list reconciled. A point-in-time snapshot was saved for the care team and future handoffs.",
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "We could not reconcile this medication list.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (!careRecipientId) {
     return (
       <Page>
         <Heading
@@ -213,14 +414,7 @@ export function MedicationManagementScreen() {
           overflow: "hidden",
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            minWidth: 0,
-            gap: 9,
-            paddingTop: 3,
-          }}
-        >
+        <View style={{ flex: 1, minWidth: 0, gap: 9, paddingTop: 3 }}>
           <Text
             style={[
               S.eyebrow,
@@ -254,15 +448,7 @@ export function MedicationManagementScreen() {
             Keep track, stay organized, and be ready for care transitions.
           </Text>
         </View>
-
-        <View
-          pointerEvents="none"
-          style={{
-            width: 194,
-            height: 220,
-            marginRight: -8,
-          }}
-        >
+        <View pointerEvents="none" style={{ width: 194, height: 220, marginRight: -8 }}>
           <MedicationHeroGraphic />
         </View>
       </View>
@@ -299,13 +485,7 @@ export function MedicationManagementScreen() {
           <Icon name="shield-checkmark-outline" size={29} color="#D74361" />
         </View>
         <View style={{ flex: 1, gap: 4 }}>
-          <Text
-            style={{
-              fontFamily: "DMSans_700Bold",
-              fontSize: 16,
-              color: "#BA3A57",
-            }}
-          >
+          <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 16, color: "#BA3A57" }}>
             Medication safety
           </Text>
           <Text
@@ -316,8 +496,7 @@ export function MedicationManagementScreen() {
               color: "#8F7080",
             }}
           >
-            EnVizion records your information; it does not prescribe or change
-            medications.
+            EnVizion records your information; it does not prescribe or change medications.
           </Text>
         </View>
         <Icon name="chevron-forward" size={22} color="#C73857" />
@@ -461,13 +640,7 @@ export function MedicationManagementScreen() {
             })}
           >
             <Icon name="list-outline" size={18} color="#72369A" />
-            <Text
-              style={{
-                fontFamily: "DMSans_600SemiBold",
-                fontSize: 12.5,
-                color: "#72369A",
-              }}
-            >
+            <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 12.5, color: "#72369A" }}>
               Open daily care plan
             </Text>
             <Icon name="chevron-forward" size={16} color="#72369A" />
@@ -496,14 +669,7 @@ export function MedicationManagementScreen() {
               gap: 12,
             }}
           >
-            <View
-              style={{
-                minHeight: 110,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
+            <View style={{ minHeight: 110, flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View style={{ width: 150, height: 105 }}>
                 <MedicationEmptyGraphic />
               </View>
@@ -547,13 +713,7 @@ export function MedicationManagementScreen() {
               })}
             >
               <Icon name="add-outline" size={23} color="#FFFFFF" />
-              <Text
-                style={{
-                  fontFamily: "DMSans_600SemiBold",
-                  fontSize: 15,
-                  color: "#FFFFFF",
-                }}
-              >
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 15, color: "#FFFFFF" }}>
                 Add medication
               </Text>
             </Pressable>
@@ -566,9 +726,7 @@ export function MedicationManagementScreen() {
                 <Card key={medication.id} style={{ borderRadius: 24, gap: 12 }}>
                   <View style={S.between}>
                     <View style={{ flex: 1, gap: 3 }}>
-                      <Text style={[S.h2, { fontSize: 20 }]}>
-                        {medication.name}
-                      </Text>
+                      <Text style={[S.h2, { fontSize: 20 }]}>{medication.name}</Text>
                       <Txt style={S.small}>
                         {[medication.dose, medication.route, medication.time]
                           .filter(Boolean)
@@ -626,6 +784,14 @@ export function MedicationManagementScreen() {
                     </View>
                   </View>
 
+                  {medication.isPrn && (
+                    <Button
+                      title="PRN taken"
+                      secondary
+                      disabled={readOnly || busyId !== null}
+                      onPress={() => void record(medication, "prn_taken")}
+                    />
+                  )}
                   <Button
                     title="Edit medication"
                     secondary
@@ -640,10 +806,7 @@ export function MedicationManagementScreen() {
                     onPress={async () => {
                       setBusyId("stop-" + medication.id);
                       try {
-                        await discontinueManagedMedication(
-                          careRecipientId,
-                          medication.id,
-                        );
+                        await discontinueManagedMedication(careRecipientId, medication.id);
                         dispatch({ type: "remove-med", id: medication.id });
                         await refresh();
                         setMessage(
@@ -681,13 +844,7 @@ export function MedicationManagementScreen() {
               })}
             >
               <Icon name="add-outline" size={21} color="#72369A" />
-              <Text
-                style={{
-                  fontFamily: "DMSans_600SemiBold",
-                  fontSize: 14,
-                  color: "#72369A",
-                }}
-              >
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 14, color: "#72369A" }}>
                 Add medication
               </Text>
             </Pressable>
@@ -696,65 +853,21 @@ export function MedicationManagementScreen() {
 
         {editing && (
           <Card style={{ borderRadius: 24 }}>
-            <Text style={S.h3}>
-              {draft.id ? "Edit medication" : "Add medication"}
-            </Text>
-            <Field
-              label="Medication name"
-              value={draft.name}
-              onChange={(name) => setDraft((current) => ({ ...current, name }))}
-            />
-            <Field
-              label="Dose"
-              value={draft.dose}
-              onChange={(dose) => setDraft((current) => ({ ...current, dose }))}
-            />
-            <Field
-              label="Route"
-              value={draft.route}
-              onChange={(route) => setDraft((current) => ({ ...current, route }))}
-            />
+            <Text style={S.h3}>{draft.id ? "Edit medication" : "Add medication"}</Text>
+            <Field label="Medication name" value={draft.name} onChange={(name) => setDraft((current) => ({ ...current, name }))} />
+            <Field label="Dose" value={draft.dose} onChange={(dose) => setDraft((current) => ({ ...current, dose }))} />
+            <Field label="Route" value={draft.route} onChange={(route) => setDraft((current) => ({ ...current, route }))} />
             <Field
               label="Directions"
               value={draft.instructions}
-              onChange={(instructions) =>
-                setDraft((current) => ({ ...current, instructions }))
-              }
+              onChange={(instructions) => setDraft((current) => ({ ...current, instructions }))}
               multiline
             />
-            <Field
-              label="Scheduled time"
-              value={draft.time}
-              onChange={(time) => setDraft((current) => ({ ...current, time }))}
-            />
-            <Field
-              label="Purpose (optional)"
-              value={draft.purpose}
-              onChange={(purpose) =>
-                setDraft((current) => ({ ...current, purpose }))
-              }
-            />
-            <Field
-              label="Prescriber (optional)"
-              value={draft.prescriber}
-              onChange={(prescriber) =>
-                setDraft((current) => ({ ...current, prescriber }))
-              }
-            />
-            <Field
-              label="Pharmacy (optional)"
-              value={draft.pharmacy}
-              onChange={(pharmacy) =>
-                setDraft((current) => ({ ...current, pharmacy }))
-              }
-            />
-            <Field
-              label="Refill date (YYYY-MM-DD)"
-              value={draft.refillDueOn}
-              onChange={(refillDueOn) =>
-                setDraft((current) => ({ ...current, refillDueOn }))
-              }
-            />
+            <Field label="Scheduled time" value={draft.time} onChange={(time) => setDraft((current) => ({ ...current, time }))} />
+            <Field label="Purpose (optional)" value={draft.purpose} onChange={(purpose) => setDraft((current) => ({ ...current, purpose }))} />
+            <Field label="Prescriber (optional)" value={draft.prescriber} onChange={(prescriber) => setDraft((current) => ({ ...current, prescriber }))} />
+            <Field label="Pharmacy (optional)" value={draft.pharmacy} onChange={(pharmacy) => setDraft((current) => ({ ...current, pharmacy }))} />
+            <Field label="Refill date (YYYY-MM-DD)" value={draft.refillDueOn} onChange={(refillDueOn) => setDraft((current) => ({ ...current, refillDueOn }))} />
 
             <View style={{ flexDirection: "row", gap: 8 }}>
               {[false, true].map((value) => (
@@ -762,9 +875,7 @@ export function MedicationManagementScreen() {
                   <Button
                     title={value ? "PRN" : "Scheduled"}
                     secondary={draft.isPrn !== value}
-                    onPress={() =>
-                      setDraft((current) => ({ ...current, isPrn: value }))
-                    }
+                    onPress={() => setDraft((current) => ({ ...current, isPrn: value }))}
                   />
                 </View>
               ))}
@@ -828,13 +939,7 @@ export function MedicationManagementScreen() {
               <Icon name="git-compare-outline" size={25} color="#793BA5" />
             </View>
             <View style={{ flex: 1, gap: 3 }}>
-              <Text
-                style={{
-                  fontFamily: "DMSans_700Bold",
-                  fontSize: 16,
-                  color: "#17143D",
-                }}
-              >
+              <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 16, color: "#17143D" }}>
                 Confirm your current list
               </Text>
               <Text
@@ -850,14 +955,7 @@ export function MedicationManagementScreen() {
             </View>
           </View>
 
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 6,
-            }}
-          >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             {[
               ["document-text-outline", "Current list", "Your medications"],
               ["search-outline", "Review", "Check for changes"],
@@ -881,32 +979,17 @@ export function MedicationManagementScreen() {
                       color={index === 0 ? "#FFFFFF" : "#6E30A0"}
                     />
                   </View>
-                  <Text
-                    style={{
-                      fontFamily: "DMSans_600SemiBold",
-                      fontSize: 11.5,
-                      color: "#17143D",
-                      textAlign: "center",
-                    }}
-                  >
+                  <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 11.5, color: "#17143D", textAlign: "center" }}>
                     {step[1]}
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: "DMSans_400Regular",
-                      fontSize: 10,
-                      lineHeight: 13,
-                      color: "#7C7489",
-                      textAlign: "center",
-                    }}
-                  >
+                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10, lineHeight: 13, color: "#7C7489", textAlign: "center" }}>
                     {step[2]}
                   </Text>
                 </View>
                 {index < 2 && (
                   <View
                     style={{
-                      width: 54,
+                      width: 42,
                       height: 2,
                       backgroundColor: "#9B63BD",
                       marginTop: -22,
@@ -917,12 +1000,27 @@ export function MedicationManagementScreen() {
             ))}
           </View>
 
-          <Field
-            label=""
-            placeholder="Add a note (optional)…"
-            value={reconciliationNote}
-            onChange={setReconciliationNote}
+          <TextInput
+            accessibilityLabel="Reconciliation note"
             multiline
+            placeholder="Add a note (optional)…"
+            placeholderTextColor="#A49CAD"
+            value={reconciliationNote}
+            onChangeText={setReconciliationNote}
+            style={{
+              minHeight: 64,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: "#DDD2E5",
+              backgroundColor: "#FFFFFF",
+              paddingHorizontal: 15,
+              paddingTop: 14,
+              fontFamily: "DMSans_400Regular",
+              fontSize: 14,
+              lineHeight: 19,
+              color: C.ink,
+              textAlignVertical: "top",
+            }}
           />
 
           <Pressable
@@ -938,16 +1036,8 @@ export function MedicationManagementScreen() {
               opacity: readOnly || busyId !== null ? 0.5 : pressed ? 0.84 : 1,
             })}
           >
-            <Text
-              style={{
-                fontFamily: "DMSans_600SemiBold",
-                fontSize: 15,
-                color: "#FFFFFF",
-              }}
-            >
-              {busyId === "reconcile"
-                ? "Saving reconciliation…"
-                : "Reconcile current list"}
+            <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 15, color: "#FFFFFF" }}>
+              {busyId === "reconcile" ? "Saving reconciliation…" : "Reconcile current list"}
             </Text>
           </Pressable>
         </View>
@@ -983,32 +1073,17 @@ export function MedicationManagementScreen() {
               <MedicationActivityGraphic />
             </View>
             <View style={{ flex: 1, gap: 4 }}>
-              <Text
-                style={{
-                  fontFamily: "DMSans_700Bold",
-                  fontSize: 15,
-                  color: "#17143D",
-                }}
-              >
+              <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 15, color: "#17143D" }}>
                 No recent activity yet.
               </Text>
-              <Text
-                style={{
-                  fontFamily: "DMSans_400Regular",
-                  fontSize: 12,
-                  lineHeight: 17,
-                  color: "#7B7489",
-                }}
-              >
+              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12, lineHeight: 17, color: "#7B7489" }}>
                 Your medication updates and reconciliation history will appear here.
               </Text>
             </View>
           </View>
         ) : (
           records.slice(0, 30).map((record) => {
-            const medication = medications.find(
-              (item) => item.id === record.medicationId,
-            );
+            const medication = medications.find((item) => item.id === record.medicationId);
             return (
               <Card key={record.id} style={{ borderRadius: 22 }}>
                 <Text style={S.eyebrow}>
@@ -1032,10 +1107,7 @@ export function MedicationManagementScreen() {
                     onPress={async () => {
                       setBusyId("correct-" + record.id);
                       try {
-                        const at = await correctManagedMedicationRecord(
-                          careRecipientId,
-                          record.id,
-                        );
+                        const at = await correctManagedMedicationRecord(careRecipientId, record.id);
                         dispatch({ type: "correct-med", id: record.id, at });
                         await refresh();
                         setMessage(
