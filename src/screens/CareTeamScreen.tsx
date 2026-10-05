@@ -714,6 +714,15 @@ export function CareTeamScreen() {
         </>
       )}
 
+      {recipientId && (
+        <Card style={{ gap: 10 }}>
+          <Icon name="swap-horizontal-outline" size={26} color={C.purple} />
+          <Text style={S.h2}>Primary Advocate handover</Text>
+          <Txt>Transfer responsibility or respond to a handover request with a clear permission preview.</Txt>
+          <Button title="Review handover" secondary onPress={() => n.navigate("AdvocateHandover")} />
+        </Card>
+      )}
+
       {canManage && (
         <>
           <Section title="90-day access review" />

@@ -64,6 +64,7 @@ import { CareTeamActivityScreen } from "./src/screens/CareTeamActivityScreen";
 import { CareTeamAccessReportScreen } from "./src/screens/CareTeamAccessReportScreen";
 import { CareTeamSecurityReviewScreen } from "./src/screens/CareTeamSecurityReviewScreen";
 import { CareTeamSecurityRemediationScreen } from "./src/screens/CareTeamSecurityRemediationScreen";
+import { AdvocateHandoverScreen } from "./src/screens/AdvocateHandoverScreen";
 import { CareAccessRecertificationScreen } from "./src/screens/CareAccessRecertificationScreen";
 import { PrivacyDataScreen } from "./src/screens/PrivacyDataScreen";
 import { AccessibilityScreen } from "./src/screens/AccessibilityScreen";
@@ -607,6 +608,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             component={CareTeamSecurityRemediationScreen}
             options={{ title: "Security remediation" }}
           />
+          <Stack.Screen name="AdvocateHandover" component={AdvocateHandoverScreen} options={{ title: "Primary Advocate handover" }} />
           <Stack.Screen
             name="CareAccessRecertification"
             component={CareAccessRecertificationScreen}

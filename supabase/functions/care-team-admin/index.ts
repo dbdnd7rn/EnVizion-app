@@ -344,6 +344,42 @@ Deno.serve(async (req: Request) => {
 
     if (!canView) return json({ error: "Care team access required" }, 403);
 
+    if (action === "handover_list") {
+      const { data: handovers, error } = await admin
+        .from("care_advocate_handovers")
+        .select("id, from_user_id, to_user_id, status, created_at, expires_at, resolved_at")
+        .eq("care_recipient_id", careRecipientId)
+        .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      const accounts = await getUsersById(admin, (handovers ?? []).flatMap(row => [row.from_user_id, row.to_user_id]).filter((id): id is string => Boolean(id)));
+      const name = (id: string | null) => id ? String(accounts.get(id)?.user_metadata?.full_name ?? "").trim() || "Care team member" : "Former care team member";
+      return json({
+        canInitiate: isOwner,
+        requests: (handovers ?? []).map(row => ({
+          id: row.id, fromName: name(row.from_user_id), toName: name(row.to_user_id),
+          status: row.status === "pending" && new Date(row.expires_at).getTime() <= Date.now() ? "expired" : row.status,
+          createdAt: row.created_at, expiresAt: row.expires_at, resolvedAt: row.resolved_at,
+          canRespond: row.to_user_id === user.id, canCancel: row.from_user_id === user.id,
+        })),
+      });
+    }
+
+    if (action === "handover") {
+      const { data, error } = await admin.rpc("manage_care_advocate_handover", {
+        p_actor: user.id,
+        p_recipient: careRecipientId,
+        p_action: String(payload.decision ?? ""),
+        p_target: payload.targetUserId || null,
+        p_request: payload.requestId || null,
+        p_fingerprint: payload.fingerprint || null,
+        p_confirm: payload.confirm === true,
+      });
+      if (error) return json({ error: error.message }, 409);
+      return json(data);
+    }
+
     if (action === "attention") {
       if (!canManage) {
         return json(

@@ -117,6 +117,16 @@ function consentPresentation(
         icon: "shield-checkmark-outline",
         tone: "purple",
       };
+    case "advocate_handover_requested":
+    case "advocate_handover_accepted":
+    case "advocate_handover_declined":
+    case "advocate_handover_cancelled":
+      return {
+        title: `Primary Advocate handover ${event.eventType.replace("advocate_handover_", "")}`,
+        detail: event.note ?? `${actor} recorded a handover decision for ${subject}.`,
+        icon: "swap-horizontal-outline",
+        tone: event.eventType === "advocate_handover_accepted" ? "green" : "purple",
+      };
     case "access_recertified":
       return {
         title: "90-day access review completed",

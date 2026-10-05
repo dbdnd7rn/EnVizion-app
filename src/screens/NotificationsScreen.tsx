@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useNotifications, type NotificationRecord } from "../notifications";
 import { Button, C, Card, Heading, Icon, Page, S, Txt } from "../ui";
+import { setActiveCareRecipient } from "../careTeam";
+import { useCare } from "../store";
 import { useNav } from "./MainScreens";
 
 function iconFor(item: NotificationRecord) {
@@ -21,6 +23,7 @@ function iconFor(item: NotificationRecord) {
 
 export function NotificationsScreen() {
   const n = useNav();
+  const { refresh: refreshCare } = useCare();
   const {
     items,
     unreadCount,
@@ -52,6 +55,13 @@ export function NotificationsScreen() {
 
       if (item.entityType === "coaching_request") {
         n.navigate("Coaching");
+        return;
+      }
+
+      if (item.entityType === "care_advocate_handover" && item.entityId) {
+        await setActiveCareRecipient(item.entityId);
+        await refreshCare();
+        n.navigate("AdvocateHandover");
         return;
       }
 

@@ -205,7 +205,10 @@ async function invokeCareTeam<T>(
     body,
   });
 
-  if (error) throw error;
+  if (error) {
+    const detail = await error.context?.clone?.().json().catch(() => null);
+    throw new Error(detail?.error || error.message || "Care team request failed.");
+  }
   if (data?.error) throw new Error(String(data.error));
   return data as T;
 }
@@ -659,4 +662,33 @@ export async function recordCareWorkspaceOpen(careRecipientId: string) {
   if (error) {
     // Access logging should never block the care experience.
   }
+}
+
+
+export type AdvocateHandoverRequest = {
+  id: string;
+  fromName: string;
+  toName: string;
+  status: "pending" | "accepted" | "declined" | "cancelled" | "expired";
+  createdAt: string;
+  expiresAt: string;
+  resolvedAt: string | null;
+  canRespond: boolean;
+  canCancel: boolean;
+};
+export type AdvocateHandoverOverview = { canInitiate: boolean; requests: AdvocateHandoverRequest[] };
+export type AdvocateHandoverPreview = { fingerprint: string; fromUserId: string; toUserId: string; before: string; after: string };
+export function loadAdvocateHandovers(careRecipientId: string) {
+  return invokeCareTeam<AdvocateHandoverOverview>({ action: "handover_list", careRecipientId });
+}
+export function previewAdvocateHandover(careRecipientId: string, targetUserId: string) {
+  return invokeCareTeam<AdvocateHandoverPreview>({ action: "handover", decision: "preview", careRecipientId, targetUserId });
+}
+export function decideAdvocateHandover(input: {
+  careRecipientId: string; decision: "request" | "accept" | "decline" | "cancel";
+  targetUserId?: string; requestId?: string; fingerprint?: string;
+}) {
+  return invokeCareTeam<{ ok: boolean; status: AdvocateHandoverRequest["status"] }>({
+    ...input, action: "handover", confirm: true,
+  });
 }

@@ -69,6 +69,7 @@ export type RootStack = {
   CareTeamSecurityReview: undefined;
   CareTeamSecurityRemediation: undefined;
   CareAccessRecertification: undefined;
+  AdvocateHandover: undefined;
   Notifications: undefined;
   NotificationSettings: undefined;
   StaffWorkspace: undefined;
