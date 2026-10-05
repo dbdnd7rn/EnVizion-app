@@ -617,7 +617,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="Notifications"
             component={NotificationsScreen}
-            options={{ title: "Notifications" }}
+            options={{ title: "Notifications", headerShown: false }}
           />
           <Stack.Screen
             name="NotificationSettings"
@@ -706,7 +706,7 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
         <StaffStack.Screen
           name="Notifications"
           component={NotificationsScreen}
-          options={{ title: "Notifications" }}
+          options={{ title: "Notifications", headerShown: false }}
         />
         <StaffStack.Screen
           name="NotificationSettings"
