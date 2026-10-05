@@ -336,7 +336,7 @@ function MedicationSummaryPanel({
             <Text
               style={{
                 marginTop: 4,
-                fontFamily: "DMSans_500Medium",
+                fontFamily: "DMSans_600SemiBold",
                 fontSize: 13,
                 lineHeight: 18,
                 color: "#77718A",
