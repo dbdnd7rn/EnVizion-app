@@ -1284,7 +1284,16 @@ export function MedicationManagementScreen() {
 
       <MotionBlock reducedMotion={reducedMotion} delay={310}>
         <View style={{ gap: 12 }}>
-          <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 25, lineHeight: 31, color: C.ink }}>
+          <Text
+            accessibilityRole="header"
+            style={{
+              fontFamily: "Lora_500Medium",
+              fontSize: 32,
+              lineHeight: 39,
+              letterSpacing: -0.7,
+              color: C.ink,
+            }}
+          >
             Recent medication activity
           </Text>
 
