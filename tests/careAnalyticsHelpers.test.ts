@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   buildCaregiverAnalytics,
+  buildWeeklyCoordinationReportHtml,
   clippedMinutes,
   formatHours,
   missedCheckInShiftIds,
@@ -153,4 +154,70 @@ test("weekly summary and workload share stay arithmetic, not subjective scores",
   assert.equal(summary.actualMinutes, 450);
   assert.equal(summary.completedTasks, 4);
   assert.equal(summary.coverageGapEvents, 1);
+});
+
+
+test("week switching and zero workload denominators stay honest", () => {
+  const current = weekPeriod(0, new Date("2026-10-06T12:00:00Z"));
+  const previous = weekPeriod(-1, new Date("2026-10-06T12:00:00Z"));
+
+  assert.equal(
+    current.start.getTime() - previous.start.getTime(),
+    7 * 86_400_000,
+  );
+
+  const zeroRow = {
+    caregiverId: "u1",
+    scheduledMinutes: 0,
+    actualMinutes: 0,
+    completedTasks: 0,
+    lateCheckIns: 0,
+    lateMinutes: 0,
+    missedCheckIns: 0,
+    coverageGapEvents: 0,
+  };
+
+  assert.equal(scheduledSharePercent(zeroRow, [zeroRow]), 0);
+  assert.equal(formatHours(0), "0h");
+});
+
+test("weekly PDF helper uses the selected reporting week and caregiver data", () => {
+  const html = buildWeeklyCoordinationReportHtml({
+    careRecipientName: "Care profile",
+    periodLabel: "5 Oct 2026 – 11 Oct 2026",
+    generatedAt: "2026-10-11T20:00:00Z",
+    rows: [
+      {
+        caregiverId: "u1",
+        scheduledMinutes: 120,
+        actualMinutes: 90,
+        completedTasks: 2,
+        lateCheckIns: 1,
+        lateMinutes: 5,
+        missedCheckIns: 0,
+        coverageGapEvents: 0,
+      },
+    ],
+    caregiverName: () => "Alex Caregiver",
+    data: {
+      tasks: [],
+      shifts: [],
+      attendance: [],
+      completions: [{ id: "c1" }, { id: "c2" }] as any,
+      coverageEvents: [],
+    },
+    summary: {
+      scheduledMinutes: 120,
+      actualMinutes: 90,
+      completedTasks: 2,
+      lateCheckIns: 1,
+      missedCheckIns: 0,
+      coverageGapEvents: 0,
+    },
+  });
+
+  assert.match(html, /5 Oct 2026 – 11 Oct 2026/);
+  assert.match(html, /Alex Caregiver/);
+  assert.match(html, /2h/);
+  assert.match(html, /1h 30m/);
 });
