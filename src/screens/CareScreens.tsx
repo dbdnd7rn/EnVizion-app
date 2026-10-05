@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Linking, Pressable, Text, TextInput, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop, Text as SvgText } from "react-native-svg";
 import type { RootStack } from "../navigation";
@@ -478,6 +478,390 @@ function BloodSugarField({
         {trailing}
       </View>
     </View>
+  );
+}
+
+function useTrackerReducedMotion() {
+  const [reduced, setReduced] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    AccessibilityInfo.isReduceMotionEnabled().then((value) => {
+      if (active) setReduced(value);
+    });
+    const subscription = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      setReduced,
+    );
+    return () => {
+      active = false;
+      subscription.remove();
+    };
+  }, []);
+
+  return reduced;
+}
+
+function CHFReveal({
+  children,
+  reducedMotion,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  reducedMotion: boolean;
+  delay?: number;
+}) {
+  const opacity = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
+  const offset = useRef(new Animated.Value(reducedMotion ? 0 : 14)).current;
+
+  useEffect(() => {
+    if (reducedMotion) {
+      opacity.setValue(1);
+      offset.setValue(0);
+      return;
+    }
+
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 430,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: Platform.OS !== "web",
+      }),
+      Animated.timing(offset, {
+        toValue: 0,
+        duration: 430,
+        delay,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: Platform.OS !== "web",
+      }),
+    ]).start();
+  }, [delay, offset, opacity, reducedMotion]);
+
+  return (
+    <Animated.View style={{ opacity, transform: [{ translateY: offset }] }}>
+      {children}
+    </Animated.View>
+  );
+}
+
+function CHFGlassHeartGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 230 190" accessibilityElementsHidden>
+      <Defs>
+        <LinearGradient id="chfHeartGlass" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.95} />
+          <Stop offset="0.18" stopColor="#F4E7FF" stopOpacity={0.96} />
+          <Stop offset="0.58" stopColor="#CDA8F8" stopOpacity={0.98} />
+          <Stop offset="1" stopColor="#8C55D8" stopOpacity={0.96} />
+        </LinearGradient>
+        <LinearGradient id="chfHeartGlow" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.92} />
+          <Stop offset="1" stopColor="#E5D2FF" stopOpacity={0.35} />
+        </LinearGradient>
+        <LinearGradient id="chfOrb" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" />
+          <Stop offset="1" stopColor="#C49AF1" />
+        </LinearGradient>
+      </Defs>
+
+      <Circle cx="135" cy="92" r="82" fill="#F1E7FF" opacity={0.72} />
+      <Ellipse cx="135" cy="164" rx="69" ry="11" fill="#8154BA" opacity={0.10} />
+
+      <Path
+        d="M116 159C94 140 62 112 62 78C62 55 79 40 99 40C115 40 127 49 135 62C143 49 155 40 172 40C193 40 209 55 209 78C209 113 177 140 135 169C128 165 122 162 116 159Z"
+        fill="#7345B3"
+        opacity={0.15}
+      />
+      <Path
+        d="M111 151C90 133 69 110 69 82C69 61 84 47 103 47C119 47 129 56 136 69C144 56 154 47 170 47C190 47 205 61 205 82C205 111 181 135 136 164C126 158 118 154 111 151Z"
+        fill="url(#chfHeartGlass)"
+      />
+      <Path
+        d="M93 63C108 50 121 51 130 61"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth="10"
+        strokeLinecap="round"
+        opacity={0.58}
+      />
+      <Path
+        d="M102 53C116 48 125 51 132 58"
+        fill="none"
+        stroke="#FFFFFF"
+        strokeWidth="4"
+        strokeLinecap="round"
+        opacity={0.72}
+      />
+
+      <Ellipse
+        cx="135"
+        cy="102"
+        rx="94"
+        ry="29"
+        fill="none"
+        stroke="url(#chfHeartGlow)"
+        strokeWidth="5"
+        transform="rotate(11 135 102)"
+      />
+      <Ellipse
+        cx="135"
+        cy="102"
+        rx="94"
+        ry="29"
+        fill="none"
+        stroke="#B997E9"
+        strokeWidth="1.5"
+        opacity={0.55}
+        transform="rotate(11 135 102)"
+      />
+
+      <Circle cx="190" cy="24" r="14" fill="url(#chfOrb)" opacity={0.88} />
+      <Circle cx="197" cy="20" r="5" fill="#FFFFFF" opacity={0.72} />
+      <Circle cx="218" cy="87" r="10" fill="url(#chfOrb)" opacity={0.88} />
+      <Circle cx="216" cy="84" r="3.5" fill="#FFFFFF" opacity={0.75} />
+      <Circle cx="54" cy="122" r="12" fill="url(#chfOrb)" opacity={0.82} />
+      <Circle cx="50" cy="117" r="4" fill="#FFFFFF" opacity={0.75} />
+    </Svg>
+  );
+}
+
+function FloatingCHFHeart({ reducedMotion }: { reducedMotion: boolean }) {
+  const float = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (reducedMotion) {
+      float.setValue(0);
+      return;
+    }
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(float, {
+          toValue: 1,
+          duration: 2200,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+        Animated.timing(float, {
+          toValue: 0,
+          duration: 2200,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: Platform.OS !== "web",
+        }),
+      ]),
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [float, reducedMotion]);
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        width: 205,
+        height: 178,
+        transform: [
+          {
+            translateY: float.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -7],
+            }),
+          },
+          {
+            rotate: float.interpolate({
+              inputRange: [0, 1],
+              outputRange: ["0deg", "1.2deg"],
+            }),
+          },
+        ],
+      }}
+    >
+      <CHFGlassHeartGraphic />
+    </Animated.View>
+  );
+}
+
+function CHFFieldIcon({
+  type,
+  color = "#6F319F",
+}: {
+  type: "weight" | "breathing" | "swelling" | "notes";
+  color?: string;
+}) {
+  if (type === "weight") {
+    return (
+      <Svg width={30} height={30} viewBox="0 0 30 30" accessibilityElementsHidden>
+        <Rect x="4" y="5" width="22" height="21" rx="5" fill="none" stroke={color} strokeWidth="2.2" />
+        <Circle cx="15" cy="10.5" r="2.2" fill="none" stroke={color} strokeWidth="2" />
+        <Path d="M15 10.5l3-2.5" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  if (type === "breathing") {
+    return (
+      <Svg width={32} height={32} viewBox="0 0 32 32" accessibilityElementsHidden>
+        <Path d="M15.5 8v8.5" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+        <Path d="M16.5 8v8.5" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
+        <Path
+          d="M14.5 14C11.3 10.6 8 10.8 6.9 14.8L4.7 22.3C3.9 25.3 5.9 28 8.8 28c3.7 0 5.7-3.2 5.7-7.2V14Z"
+          fill="none"
+          stroke={color}
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+        />
+        <Path
+          d="M17.5 14c3.2-3.4 6.5-3.2 7.6.8l2.2 7.5c.8 3-1.2 5.7-4.1 5.7-3.7 0-5.7-3.2-5.7-7.2V14Z"
+          fill="none"
+          stroke={color}
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+        />
+        <Path d="M11.3 7.2c0 3.2 1.1 5.3 3.2 6.8M20.7 7.2c0 3.2-1.1 5.3-3.2 6.8" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  if (type === "swelling") {
+    return (
+      <Svg width={32} height={32} viewBox="0 0 32 32" accessibilityElementsHidden>
+        <Path d="M3 9c4-4 8-4 12 0s8 4 14 0" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" />
+        <Path d="M3 16c4-4 8-4 12 0s8 4 14 0" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" />
+        <Path d="M3 23c4-4 8-4 12 0s8 4 14 0" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" />
+      </Svg>
+    );
+  }
+
+  return (
+    <Svg width={30} height={30} viewBox="0 0 30 30" accessibilityElementsHidden>
+      <Path d="M6 4h14l4 4v18H6Z" fill="none" stroke={color} strokeWidth="2.2" strokeLinejoin="round" />
+      <Path d="M20 4v5h5M10 13h10M10 17h10M10 21h7" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <Path d="M20 22l4 4" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function CHFObservationField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  type,
+  editable,
+  numeric = false,
+  multiline = false,
+  required = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type: "weight" | "breathing" | "swelling" | "notes";
+  editable: boolean;
+  numeric?: boolean;
+  multiline?: boolean;
+  required?: boolean;
+}) {
+  const focus = useRef(new Animated.Value(0)).current;
+
+  const setFocused = (focused: boolean) => {
+    Animated.timing(focus, {
+      toValue: focused ? 1 : 0,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  };
+
+  return (
+    <View style={{ gap: 9 }}>
+      <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 14, lineHeight: 20, color: C.ink }}>
+        {label}
+        {required ? <Text style={{ color: "#8238B8" }}> *</Text> : null}
+      </Text>
+
+      <Animated.View
+        style={{
+          minHeight: multiline ? 110 : 58,
+          borderRadius: 19,
+          borderWidth: focus.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, 1.6],
+          }),
+          borderColor: focus.interpolate({
+            inputRange: [0, 1],
+            outputRange: ["#DDD3E6", "#9E58CF"],
+          }),
+          backgroundColor: focus.interpolate({
+            inputRange: [0, 1],
+            outputRange: ["#FFFFFFF2", "#FFFDFEFF"],
+          }),
+          flexDirection: "row",
+          alignItems: multiline ? "flex-start" : "center",
+          overflow: "hidden",
+          opacity: editable ? 1 : 0.7,
+        }}
+      >
+        <Animated.View
+          style={{
+            width: 58,
+            alignSelf: "stretch",
+            alignItems: "center",
+            justifyContent: multiline ? "flex-start" : "center",
+            paddingTop: multiline ? 17 : 0,
+            backgroundColor: focus.interpolate({
+              inputRange: [0, 1],
+              outputRange: ["#F8F3FC", "#F0E4FB"],
+            }),
+          }}
+        >
+          <CHFFieldIcon type={type} />
+        </Animated.View>
+
+        <TextInput
+          accessibilityLabel={label}
+          editable={editable}
+          value={value}
+          onChangeText={onChange}
+          placeholder={placeholder}
+          placeholderTextColor="#9994AC"
+          keyboardType={numeric ? "decimal-pad" : "default"}
+          multiline={multiline}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          returnKeyType={multiline ? "default" : "next"}
+          style={{
+            flex: 1,
+            minHeight: multiline ? 108 : 56,
+            paddingHorizontal: 15,
+            paddingTop: multiline ? 15 : 0,
+            paddingBottom: multiline ? 15 : 0,
+            fontFamily: "DMSans_400Regular",
+            fontSize: 14.5,
+            lineHeight: 21,
+            color: C.ink,
+            textAlignVertical: multiline ? "top" : "center",
+          }}
+        />
+      </Animated.View>
+    </View>
+  );
+}
+
+function CHFEmptyStateGraphic() {
+  return (
+    <Svg width="100%" height="100%" viewBox="0 0 74 74" accessibilityElementsHidden>
+      <Defs>
+        <LinearGradient id="chfEmptyOrb" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#F8F2FF" />
+          <Stop offset="1" stopColor="#E9D8FB" />
+        </LinearGradient>
+      </Defs>
+      <Circle cx="37" cy="37" r="31" fill="url(#chfEmptyOrb)" />
+      <Rect x="24" y="21" width="26" height="31" rx="4" fill="#FFFFFF" stroke="#7440AD" strokeWidth="2.3" />
+      <Path d="M36 21v31" stroke="#7440AD" strokeWidth="2" opacity={0.62} />
+    </Svg>
   );
 }
 
@@ -1047,6 +1431,565 @@ export function TrackerScreen({
             </Card>
           ))
         )}
+      </Page>
+    );
+  }
+
+
+  if (kind === "CHF symptoms") {
+    const reducedMotion = useTrackerReducedMotion();
+    const setChfValue = (key: string, value: string) => {
+      setValues((old) => ({ ...old, [key]: value }));
+      setSuccess(false);
+      if (error) setError("");
+    };
+
+    return (
+      <Page>
+        <View
+          style={{
+            marginHorizontal: -20,
+            marginTop: -18,
+            paddingHorizontal: 20,
+            paddingTop: 18,
+            paddingBottom: 12,
+            overflow: "hidden",
+          }}
+        >
+          <Svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 480 355"
+            preserveAspectRatio="none"
+            style={{ position: "absolute", inset: 0 }}
+            accessibilityElementsHidden
+          >
+            <Defs>
+              <LinearGradient id="chfPageHeroBg" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor="#FBF8FF" />
+                <Stop offset="0.48" stopColor="#F6EDFF" />
+                <Stop offset="1" stopColor="#EEE2FC" />
+              </LinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="480" height="355" fill="url(#chfPageHeroBg)" />
+            <Path d="M0 92C73 85 115 128 175 130C261 132 308 76 480 86V0H0Z" fill="#FFFFFF" opacity={0.35} />
+            <Path d="M0 318C88 267 161 282 242 313C314 340 382 322 480 288V355H0Z" fill="#FFFFFF" opacity={0.48} />
+            <Circle cx="435" cy="44" r="92" fill="#FFFFFF" opacity={0.35} />
+          </Svg>
+
+          <CHFReveal reducedMotion={reducedMotion}>
+            <View
+              style={{
+                minHeight: 58,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+                onPress={() => n.goBack()}
+                style={({ pressed }) => ({
+                  width: 50,
+                  height: 50,
+                  borderRadius: 25,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#FFFFFFA8",
+                  borderWidth: 1,
+                  borderColor: "#FFFFFFDD",
+                  opacity: pressed ? 0.68 : 1,
+                  transform: [{ scale: pressed ? 0.97 : 1 }],
+                })}
+              >
+                <Icon name="chevron-back-outline" size={27} color="#24164B" />
+              </Pressable>
+
+              <Text
+                accessibilityRole="header"
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 19,
+                  lineHeight: 24,
+                  color: C.ink,
+                }}
+              >
+                Daily care
+              </Text>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Daily care help"
+                onPress={() => n.navigate("Resources")}
+                style={({ pressed }) => ({
+                  width: 50,
+                  height: 50,
+                  borderRadius: 25,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#FFFFFFA8",
+                  borderWidth: 1,
+                  borderColor: "#FFFFFFDD",
+                  opacity: pressed ? 0.68 : 1,
+                  transform: [{ scale: pressed ? 0.97 : 1 }],
+                })}
+              >
+                <Icon name="help-circle-outline" size={26} color="#5143BC" />
+              </Pressable>
+            </View>
+          </CHFReveal>
+
+          <CHFReveal reducedMotion={reducedMotion} delay={70}>
+            <View style={{ minHeight: 225, position: "relative", justifyContent: "center" }}>
+              <View style={{ maxWidth: 250, gap: 8, zIndex: 2 }}>
+                <Text
+                  style={[
+                    S.eyebrow,
+                    {
+                      color: "#8A3EB5",
+                      fontSize: 10.5,
+                      letterSpacing: 2.5,
+                    },
+                  ]}
+                >
+                  DAILY CARE JOURNAL
+                </Text>
+
+                <Text
+                  style={{
+                    fontFamily: "DMSans_700Bold",
+                    fontSize: 40,
+                    lineHeight: 44,
+                    letterSpacing: -1.05,
+                    color: "#10103B",
+                  }}
+                >
+                  CHF symptoms
+                </Text>
+
+                <Text
+                  style={{
+                    fontFamily: "DMSans_400Regular",
+                    fontSize: 18,
+                    lineHeight: 24,
+                    color: "#747087",
+                  }}
+                >
+                  Notice. Record. Share.
+                </Text>
+              </View>
+
+              <View style={{ position: "absolute", right: -13, top: 7 }}>
+                <FloatingCHFHeart reducedMotion={reducedMotion} />
+              </View>
+            </View>
+          </CHFReveal>
+        </View>
+
+        <CHFReveal reducedMotion={reducedMotion} delay={120}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Emergency and warning signs"
+            onPress={() => n.navigate("Emergency")}
+            style={({ pressed }) => ({
+              minHeight: 92,
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: "#F0BFCB",
+              backgroundColor: "#FFF2F4",
+              paddingHorizontal: 18,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 14,
+              opacity: pressed ? 0.76 : 1,
+              transform: [{ scale: pressed ? 0.992 : 1 }],
+              shadowColor: "#7D344E",
+              shadowOpacity: 0.035,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+              elevation: 1,
+            })}
+          >
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                borderWidth: 2,
+                borderColor: "#D83D60",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#FFF9FA",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 24,
+                  color: "#D3365B",
+                  marginTop: -1,
+                }}
+              >
+                !
+              </Text>
+            </View>
+
+            <View style={{ flex: 1, gap: 3 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 16,
+                  lineHeight: 21,
+                  color: "#C72D51",
+                }}
+              >
+                Emergency & warning signs
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 13.5,
+                  lineHeight: 19,
+                  color: "#A45D6D",
+                }}
+              >
+                Know when to get help
+              </Text>
+            </View>
+
+            <Icon name="chevron-forward-outline" size={24} color="#C72D51" />
+          </Pressable>
+        </CHFReveal>
+
+        {readOnly && <ReadOnlyCareNotice />}
+
+        <CHFReveal reducedMotion={reducedMotion} delay={170}>
+          <View
+            style={{
+              borderRadius: 28,
+              borderWidth: 1,
+              borderColor: "#FFFFFFD9",
+              backgroundColor: "#FFFFFFCF",
+              padding: 18,
+              gap: 17,
+              shadowColor: "#563864",
+              shadowOpacity: 0.055,
+              shadowRadius: 18,
+              shadowOffset: { width: 0, height: 10 },
+              elevation: 2,
+            }}
+          >
+            <Text
+              style={[
+                S.eyebrow,
+                {
+                  color: "#7C35A4",
+                  fontSize: 10.5,
+                  letterSpacing: 2.35,
+                },
+              ]}
+            >
+              NEW OBSERVATION
+            </Text>
+
+            <CHFObservationField
+              label="Weight (lb)"
+              value={values.weight || ""}
+              onChange={(value) => setChfValue("weight", value)}
+              placeholder="Enter weight"
+              type="weight"
+              numeric
+              editable={!readOnly && !saving}
+            />
+
+            <CHFObservationField
+              label="Breathing compared with usual"
+              value={values.breathing || ""}
+              onChange={(value) => setChfValue("breathing", value)}
+              placeholder="Describe any changes"
+              type="breathing"
+              required
+              editable={!readOnly && !saving}
+            />
+
+            <CHFObservationField
+              label="Swelling or other changes"
+              value={values.swelling || ""}
+              onChange={(value) => setChfValue("swelling", value)}
+              placeholder="What have you noticed?"
+              type="swelling"
+              editable={!readOnly && !saving}
+            />
+
+            <CHFObservationField
+              label="Additional notes (optional)"
+              value={values.notes || ""}
+              onChange={(value) => setChfValue("notes", value)}
+              placeholder="Add a note..."
+              type="notes"
+              multiline
+              editable={!readOnly && !saving}
+            />
+
+            {Boolean(error) && (
+              <Text
+                accessibilityRole="alert"
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 12.5,
+                  lineHeight: 18,
+                  color: C.rose,
+                }}
+              >
+                {error}
+              </Text>
+            )}
+
+            {success && (
+              <Text
+                accessibilityRole="alert"
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 13,
+                  color: C.green,
+                }}
+              >
+                Observation saved securely.
+              </Text>
+            )}
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Save observation"
+              accessibilityState={{ disabled: saving || readOnly }}
+              disabled={saving || readOnly}
+              onPress={() => void save()}
+              style={({ pressed }) => ({
+                minHeight: 58,
+                borderRadius: 29,
+                overflow: "hidden",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                opacity: readOnly || saving ? 0.52 : pressed ? 0.82 : 1,
+                transform: [{ scale: pressed && !readOnly && !saving ? 0.99 : 1 }],
+                shadowColor: "#6C2A98",
+                shadowOpacity: 0.14,
+                shadowRadius: 13,
+                shadowOffset: { width: 0, height: 7 },
+                elevation: 3,
+              })}
+            >
+              <Svg
+                width="100%"
+                height="100%"
+                viewBox="0 0 430 58"
+                preserveAspectRatio="none"
+                style={{ position: "absolute", inset: 0 }}
+                accessibilityElementsHidden
+              >
+                <Defs>
+                  <LinearGradient id="chfSaveGradient" x1="0" y1="0" x2="1" y2="0">
+                    <Stop offset="0" stopColor="#6F2C9C" />
+                    <Stop offset="0.5" stopColor="#8D3DBC" />
+                    <Stop offset="1" stopColor="#A54AD0" />
+                  </LinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="430" height="58" rx="29" fill="url(#chfSaveGradient)" />
+              </Svg>
+              <Icon
+                name={saving ? "hourglass-outline" : "checkmark-outline"}
+                size={24}
+                color={C.white}
+              />
+              <Text
+                style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 15.5,
+                  color: C.white,
+                }}
+              >
+                {saving ? "Saving observation…" : "Save observation"}
+              </Text>
+            </Pressable>
+
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 12,
+                lineHeight: 18,
+                color: "#77738B",
+              }}
+            >
+              * Required
+            </Text>
+          </View>
+        </CHFReveal>
+
+        <CHFReveal reducedMotion={reducedMotion} delay={220}>
+          <View style={{ gap: 12 }}>
+            <Text
+              style={{
+                fontFamily: "DMSans_700Bold",
+                fontSize: 25,
+                lineHeight: 31,
+                letterSpacing: -0.45,
+                color: C.ink,
+              }}
+            >
+              Recent observations
+            </Text>
+
+            {!history.length ? (
+              <View
+                style={{
+                  minHeight: 162,
+                  borderRadius: 28,
+                  borderWidth: 1,
+                  borderColor: "#FFFFFFD9",
+                  backgroundColor: "#FFFFFFC9",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 20,
+                  shadowColor: "#563864",
+                  shadowOpacity: 0.045,
+                  shadowRadius: 16,
+                  shadowOffset: { width: 0, height: 8 },
+                  elevation: 2,
+                }}
+              >
+                <View style={{ width: 72, height: 72 }}>
+                  <CHFEmptyStateGraphic />
+                </View>
+                <Text
+                  style={{
+                    marginTop: 4,
+                    fontFamily: "DMSans_700Bold",
+                    fontSize: 17,
+                    lineHeight: 22,
+                    color: C.ink,
+                  }}
+                >
+                  No observations yet
+                </Text>
+                <Text
+                  style={{
+                    marginTop: 4,
+                    fontFamily: "DMSans_400Regular",
+                    fontSize: 13,
+                    lineHeight: 18,
+                    color: C.muted,
+                    textAlign: "center",
+                  }}
+                >
+                  Your saved entries will appear here.
+                </Text>
+              </View>
+            ) : (
+              history.map((entry) => (
+                <View
+                  key={entry.id}
+                  style={{
+                    borderRadius: 24,
+                    borderWidth: 1,
+                    borderColor: "#EAE2F0",
+                    backgroundColor: "#FFFFFFCC",
+                    padding: 16,
+                    gap: 11,
+                  }}
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <Text style={[S.eyebrow, { color: "#79399F" }]}>
+                      {new Date(entry.recordedAt).toLocaleString()}
+                    </Text>
+                    <Icon name="heart-outline" size={19} color="#8A42B3" />
+                  </View>
+
+                  {trackerFields[kind]
+                    .filter((field) => entry.values[field.key])
+                    .map((field) => (
+                      <View
+                        key={field.key}
+                        style={{
+                          borderRadius: 16,
+                          padding: 12,
+                          backgroundColor: "#F8F3FC",
+                        }}
+                      >
+                        <Text style={S.small}>{field.label}</Text>
+                        <Text style={[S.h3, { marginTop: 3 }]}>{entry.values[field.key]}</Text>
+                      </View>
+                    ))}
+
+                  {Boolean(entry.values.notes) && (
+                    <View
+                      style={{
+                        borderRadius: 16,
+                        padding: 12,
+                        backgroundColor: "#FBF8FD",
+                      }}
+                    >
+                      <Text style={S.small}>Additional notes</Text>
+                      <Txt style={{ marginTop: 3 }}>{entry.values.notes}</Txt>
+                    </View>
+                  )}
+                </View>
+              ))
+            )}
+          </View>
+        </CHFReveal>
+
+        <CHFReveal reducedMotion={reducedMotion} delay={270}>
+          <View
+            style={{
+              minHeight: 72,
+              borderRadius: 24,
+              paddingHorizontal: 16,
+              paddingVertical: 13,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              backgroundColor: "#FBF8FF",
+            }}
+          >
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#F0E5FB",
+              }}
+            >
+              <Icon name="shield-checkmark-outline" size={25} color="#6F2EA0" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  fontFamily: "DMSans_700Bold",
+                  fontSize: 12.5,
+                  lineHeight: 18,
+                  color: C.ink,
+                }}
+              >
+                For recording, not diagnosis.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 12,
+                  lineHeight: 17,
+                  color: C.muted,
+                }}
+              >
+                Follow your healthcare team’s care plan.
+              </Text>
+            </View>
+          </View>
+        </CHFReveal>
       </Page>
     );
   }
