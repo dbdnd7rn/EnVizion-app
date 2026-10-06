@@ -10,9 +10,10 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test --test-isolation=none tests/*.test.ts",
-    "build:web": "(npm audit --omit=dev --audit-level=high || true) && npm run typecheck && npm test && expo export --platform web",
+    "build:web": "(npm run security:audit || true) && npm run typecheck && npm test && expo export --platform web",
     "smoke:dist": "node scripts/verify-web-export.mjs",
-    "smoke:live": "node scripts/live-smoke.mjs"
+    "smoke:live": "node scripts/live-smoke.mjs",
+    "security:audit": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
     "@expo-google-fonts/dm-sans": "^0.4.0",
