@@ -158,6 +158,48 @@ export async function createCarePlanItem(input: {
   return mapItem(data);
 }
 
+
+export async function updateCarePlanItem(input: {
+  careRecipientId: string;
+  itemId: string;
+  title: string;
+  category: CarePlanCategory;
+  details: string;
+  localTime: string;
+  timezone: string;
+  daysOfWeek: number[];
+  priority: CarePlanPriority;
+}) {
+  const title = input.title.trim();
+  if (!title) throw new Error("Add a routine title first.");
+  if (!input.daysOfWeek.length) {
+    throw new Error("Choose at least one day for this routine.");
+  }
+
+  const { data, error } = await supabase
+    .from("care_plan_items")
+    .update({
+      title: title.slice(0, 160),
+      category: input.category,
+      details: input.details.trim().slice(0, 2000) || null,
+      local_time: input.localTime.trim() || null,
+      timezone: input.timezone || "UTC",
+      days_of_week: [...new Set(input.daysOfWeek)].sort((a, b) => a - b),
+      priority: input.priority,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("care_recipient_id", input.careRecipientId)
+    .eq("id", input.itemId)
+    .eq("active", true)
+    .select(
+      "id, care_recipient_id, created_by, title, category, details, local_time, timezone, days_of_week, priority, assigned_to, active, created_at, updated_at",
+    )
+    .single();
+
+  if (error) throw error;
+  return mapItem(data);
+}
+
 export async function archiveCarePlanItem(
   careRecipientId: string,
   itemId: string,
