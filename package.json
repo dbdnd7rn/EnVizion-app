@@ -10,9 +10,10 @@
     "ios": "expo start --ios",
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test --test-isolation=none tests/*.test.ts",
-    "build:web": "(npm audit --omit=dev --audit-level=high || true) && npm run typecheck && npm test && expo export --platform web",
+    "build:web": "(npm audit --omit=dev --audit-level=high || true) && npm run audit:lock && npm run typecheck && npm test && expo export --platform web",
     "smoke:dist": "node scripts/verify-web-export.mjs",
-    "smoke:live": "node scripts/live-smoke.mjs"
+    "smoke:live": "node scripts/live-smoke.mjs",
+    "audit:lock": "node -e \"const p=require('./package-lock.json').packages; console.log('LOCK_SHELL_QUOTE='+JSON.stringify(p['node_modules/shell-quote'])); console.log('LOCK_SOURCE_MAP_JS='+JSON.stringify(p['node_modules/source-map-js']))\""
   },
   "dependencies": {
     "@expo-google-fonts/dm-sans": "^0.4.0",
