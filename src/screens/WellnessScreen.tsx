@@ -267,6 +267,7 @@ export function WellnessScreen() {
 
   const [timerState, setTimerState] = useState<TimerState>("idle");
   const [elapsedMs, setElapsedMs] = useState(0);
+  // Privacy boundary: reflection text intentionally remains component state only.
   const [reflection, setReflection] = useState("");
   const [keptForVisit, setKeptForVisit] = useState(false);
 
