@@ -7,7 +7,7 @@ const screen = fs.readFileSync("src/screens/WellnessScreen.tsx", "utf8");
 test("spiritual reflection remains screen-local and non-persistent", () => {
   assert.match(
     screen,
-    /const \[reflection, setReflection\] = useState\("")/,
+    /const \[reflection, setReflection\] = useState\(""\)/,
   );
   assert.match(
     screen,
@@ -34,5 +34,5 @@ test("quiet moment timer guards duplicates and cleans up when the screen loses f
   assert.match(screen, /clearInterval\(intervalRef\.current\)/);
   assert.match(screen, /useFocusEffect/);
   assert.match(screen, /clearTimerResources\(\)/);
-  assert.match(screen, /setReflection\("")/);
+  assert.match(screen, /setReflection\(""\)/);
 });
