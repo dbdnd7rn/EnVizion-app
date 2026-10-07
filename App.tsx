@@ -101,10 +101,10 @@ import {
   SpecialistsScreen,
   SpecialistScreen,
   CoachingScreen,
-  WellnessScreen,
   ResourcesScreen,
   ProfileScreen,
 } from "./src/screens/SupportScreens";
+import { WellnessScreen } from "./src/screens/WellnessScreen";
 
 const Stack = createNativeStackNavigator<RootStack>();
 const StaffStack = createNativeStackNavigator<RootStack>();
@@ -546,7 +546,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="Wellness"
             component={WellnessScreen}
-            options={{ title: "Spiritual Wellness" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Resources"
