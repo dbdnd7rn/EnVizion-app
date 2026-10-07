@@ -582,7 +582,7 @@ function SummaryPanel({
       >
         <View
           style={{
-            width: Math.round(progress * 100) + "%",
+            width: `${Math.round(progress * 100)}%` as `${number}%`,
             height: "100%",
             borderRadius: 999,
             backgroundColor: PURPLE,
