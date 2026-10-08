@@ -21,19 +21,8 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-export const C = {
-  ink: "#18163C",
-  muted: "#77758B",
-  purple: "#74328F",
-  deep: "#542267",
-  lavender: "#F3ECF9",
-  paper: "#FFFDFC",
-  line: "#EEE8F0",
-  rose: "#C34A67",
-  redBg: "#FFF0F1",
-  green: "#24986E",
-  white: "#FFFFFF",
-};
+import { design, glassSurface, pageSurface } from "./design";
+export const C = design.color;
 export const S = StyleSheet.create({
   page: { paddingHorizontal: 22, paddingTop: 18, paddingBottom: 38, gap: 20 },
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -44,14 +33,14 @@ export const S = StyleSheet.create({
     gap: 10,
   },
   title: {
-    fontFamily: "DMSans_700Bold",
+    fontFamily: design.font.display,
     fontSize: 32,
     lineHeight: 39,
     letterSpacing: -0.8,
     color: C.ink,
   },
   h2: {
-    fontFamily: "DMSans_700Bold",
+    fontFamily: design.font.display,
     fontSize: 22,
     lineHeight: 29,
     letterSpacing: -0.35,
@@ -83,24 +72,17 @@ export const S = StyleSheet.create({
     textTransform: "uppercase",
   },
   card: {
-    backgroundColor: C.white,
-    borderRadius: 24,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: C.line,
+    ...glassSurface,
+    borderRadius: design.radius.card,
+    padding: design.space.card,
     gap: 12,
-    shadowColor: "#35223F",
-    shadowOpacity: 0.045,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 2,
   },
   input: {
     borderWidth: 1,
     borderColor: "#E6DCE9",
-    borderRadius: 20,
+    borderRadius: design.radius.control,
     padding: 15,
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: "DMSans_400Regular",
     color: C.ink,
     backgroundColor: C.white,
@@ -162,8 +144,14 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => ({
         minHeight: 54,
-        backgroundColor: secondary ? "#F3ECF9" : C.purple,
-        borderRadius: 27,
+        backgroundColor: secondary ? "#F3ECF9" : pressed ? C.deep : C.purple,
+        borderWidth: 1,
+        borderColor: secondary ? "#E4D6EF" : "#82449F",
+        ...(Platform.OS === "web" && !secondary ? {
+          backgroundImage: "linear-gradient(135deg, rgba(255,255,255,.12), transparent)",
+          boxShadow: "0 5px 15px rgba(112,51,143,.13), inset 0 1px 0 rgba(255,255,255,.18)",
+        } : {}),
+        borderRadius: design.radius.control,
         paddingHorizontal: 20,
         paddingVertical: 14,
         flexDirection: "row",
@@ -179,7 +167,7 @@ export function Button({
       <Text
         style={[
           S.h3,
-          { fontSize: 14, color: secondary ? C.purple : C.white },
+          { fontSize: 14, flexShrink: 1, textAlign: "center", color: secondary ? C.purple : C.white },
         ]}
       >
         {title}
@@ -203,23 +191,24 @@ export function Card({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={label ? `Open ${label}` : undefined}
+      {...(Platform.OS === "web" ? { dataSet: { designCard: "interactive" } } : {})}
       onPress={onPress}
       style={({ pressed }) => [
         S.card,
         style,
-        pressed && { opacity: 0.78, transform: [{ scale: 0.99 }] },
+        pressed && { opacity: 0.86, borderColor: "#CBB3DF" },
       ]}
     >
       {children}
     </Pressable>
   ) : (
-    <View style={[S.card, style]}>{children}</View>
+    <View {...(Platform.OS === "web" ? { dataSet: { designCard: "static" } } : {})} style={[S.card, style]}>{children}</View>
   );
 }
 export function Page({ children }: { children: React.ReactNode }) {
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: C.paper }}
+      style={[{ flex: 1 }, pageSurface]}
       contentContainerStyle={{
         paddingHorizontal: 20,
         paddingTop: 18,
@@ -232,9 +221,10 @@ export function Page({ children }: { children: React.ReactNode }) {
       horizontal={false}
     >
       <View
+        {...(Platform.OS === "web" ? { dataSet: { designPage: "true" } } : {})}
         style={{
           width: "100%",
-          maxWidth: 440,
+          maxWidth: 680,
           alignSelf: "center",
           gap: 20,
         }}
@@ -274,7 +264,7 @@ export function Section({
 }) {
   return (
     <View style={S.between}>
-      <Text accessibilityRole="header" style={S.h2}>
+      <Text accessibilityRole="header" style={[S.h2, { flexShrink: 1 }]}>
         {title}
       </Text>
       {action && (
@@ -284,7 +274,7 @@ export function Section({
           accessibilityLabel={`${action}: ${title}`}
           style={{ minHeight: 44, justifyContent: "center" }}
         >
-          <Text style={[S.h3, { fontSize: 12, color: C.purple }]}>
+          <Text style={[S.h3, { fontSize: 12, color: C.purple, textAlign: "right" }]}>
             {action} →
           </Text>
         </Pressable>
@@ -350,13 +340,17 @@ export function Field({
   numeric?: boolean;
   multiline?: boolean;
 }) {
+  const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: 8 }}>
       <Text style={[S.h3, { fontSize: 13 }]}>{label}</Text>
       <TextInput
         accessibilityLabel={label}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         style={[
           S.input,
+          focused && { borderColor: C.purple, backgroundColor: "#FFFEFF" },
           multiline && { minHeight: 96, textAlignVertical: "top" },
         ]}
         value={value}
@@ -504,12 +498,12 @@ export function Fade({ children }: { children: React.ReactNode }) {
       Animated.parallel([
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 320,
+          duration: design.motion.reveal,
           useNativeDriver: Platform.OS !== "web",
         }),
         Animated.timing(translateY, {
           toValue: 0,
-          duration: 320,
+          duration: design.motion.reveal,
           useNativeDriver: Platform.OS !== "web",
         }),
       ]).start();

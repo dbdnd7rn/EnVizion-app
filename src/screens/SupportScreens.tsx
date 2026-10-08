@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -1167,7 +1168,7 @@ export function SpecialistScreen({
           <Text
             accessibilityRole="header"
             style={{
-              fontFamily: "DMSans_700Bold",
+              fontFamily: design.font.display,
               fontSize: 36,
               lineHeight: 41,
               letterSpacing: -0.85,
@@ -1266,7 +1267,7 @@ export function SpecialistScreen({
         <View style={{ flex: 1, gap: 7 }}>
           <Text
             style={{
-              fontFamily: "DMSans_700Bold",
+              fontFamily: design.font.display,
               fontSize: 22,
               lineHeight: 27,
               color: "#17143D",
@@ -1292,7 +1293,7 @@ export function SpecialistScreen({
       <View style={{ gap: 14 }}>
         <Text
           style={{
-            fontFamily: "DMSans_700Bold",
+            fontFamily: design.font.display,
             fontSize: 27,
             lineHeight: 33,
             letterSpacing: -0.5,

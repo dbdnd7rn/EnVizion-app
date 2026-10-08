@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -842,7 +843,7 @@ export function HomeScreen() {
               <View style={{ flex: 1, gap: 8 }}>
                 <Text
                   style={{
-                    fontFamily: "DMSans_700Bold",
+                    fontFamily: design.font.display,
                     fontSize: 31,
                     lineHeight: 37,
                     letterSpacing: -0.65,
@@ -1123,7 +1124,7 @@ export function HomeScreen() {
               </View>
               <Text
                 style={{
-                  fontFamily: "DMSans_700Bold",
+                  fontFamily: design.font.display,
                   fontSize: 21,
                   lineHeight: 27,
                   color: "#18163C",
@@ -2268,7 +2269,7 @@ export function ToolkitScreen() {
             <Text
               accessibilityRole="header"
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 39,
                 lineHeight: 44,
                 letterSpacing: -1.05,
@@ -2454,7 +2455,7 @@ export function ToolkitScreen() {
             <View style={{ gap: 4, marginTop: 5 }}>
               <Text
                 style={{
-                  fontFamily: "DMSans_700Bold",
+                  fontFamily: design.font.display,
                   fontSize: 23,
                   color: "#15153D",
                 }}
@@ -2505,7 +2506,7 @@ export function ToolkitScreen() {
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <Text
                       style={{
-                        fontFamily: "DMSans_700Bold",
+                        fontFamily: design.font.display,
                         fontSize: 24,
                         lineHeight: 30,
                         color: "#14153D",
@@ -2577,7 +2578,7 @@ export function ToolkitScreen() {
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Text
                   style={{
-                    fontFamily: "DMSans_700Bold",
+                    fontFamily: design.font.display,
                     fontSize: 27,
                     lineHeight: 33,
                     color: "#14153D",
@@ -2876,7 +2877,7 @@ export function LibraryScreen() {
             <Text
               accessibilityRole="header"
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 40,
                 lineHeight: 45,
                 letterSpacing: -1.05,
@@ -3016,7 +3017,7 @@ export function LibraryScreen() {
               </Text>
               <Text
                 style={{
-                  fontFamily: "DMSans_700Bold",
+                  fontFamily: design.font.display,
                   fontSize: 28,
                   lineHeight: 33,
                   letterSpacing: -0.55,
@@ -3083,7 +3084,7 @@ export function LibraryScreen() {
           <View style={S.between}>
             <Text
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 21,
                 lineHeight: 27,
                 color: C.ink,
@@ -3221,7 +3222,7 @@ export function LibraryScreen() {
             <View style={S.between}>
               <Text
                 style={{
-                  fontFamily: "DMSans_700Bold",
+                  fontFamily: design.font.display,
                   fontSize: 21,
                   lineHeight: 27,
                   color: C.ink,

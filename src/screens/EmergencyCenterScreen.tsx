@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "react-native-qrcode-svg";
 import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
@@ -675,7 +676,7 @@ export function EmergencyCenterScreen() {
 
           <Text
             style={{
-              fontFamily: "DMSans_700Bold",
+              fontFamily: design.font.display,
               fontSize: 39,
               lineHeight: 43,
               letterSpacing: -1.15,
@@ -970,7 +971,7 @@ export function EmergencyCenterScreen() {
             <Text
               accessibilityRole="header"
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 25,
                 lineHeight: 31,
                 color: C.ink,
@@ -1028,7 +1029,7 @@ export function EmergencyCenterScreen() {
             <Text
               accessibilityRole="header"
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 25,
                 lineHeight: 31,
                 color: C.ink,
@@ -1080,7 +1081,7 @@ export function EmergencyCenterScreen() {
               <Text
                 accessibilityRole="header"
                 style={{
-                  fontFamily: "DMSans_700Bold",
+                  fontFamily: design.font.display,
                   fontSize: 25,
                   lineHeight: 31,
                   color: C.ink,

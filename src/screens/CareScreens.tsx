@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -933,7 +934,7 @@ export function TrackerScreen({
             <Text
               accessibilityRole="header"
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 40,
                 lineHeight: 45,
                 letterSpacing: -0.9,
@@ -1317,7 +1318,7 @@ export function TrackerScreen({
         <View style={S.between}>
           <Text
             style={{
-              fontFamily: "DMSans_700Bold",
+              fontFamily: design.font.display,
               fontSize: 25,
               lineHeight: 31,
               letterSpacing: -0.45,
@@ -1558,7 +1559,7 @@ export function TrackerScreen({
 
                 <Text
                   style={{
-                    fontFamily: "DMSans_700Bold",
+                    fontFamily: design.font.display,
                     fontSize: 40,
                     lineHeight: 44,
                     letterSpacing: -1.05,
@@ -1832,7 +1833,7 @@ export function TrackerScreen({
           <View style={{ gap: 12 }}>
             <Text
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 25,
                 lineHeight: 31,
                 letterSpacing: -0.45,
@@ -2066,7 +2067,7 @@ export function TrackerScreen({
             <Text
               accessibilityRole="header"
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 41,
                 lineHeight: 45,
                 letterSpacing: -1.05,
@@ -2370,7 +2371,7 @@ export function TrackerScreen({
         <View style={S.between}>
           <Text
             style={{
-              fontFamily: "DMSans_700Bold",
+              fontFamily: design.font.display,
               fontSize: 25,
               lineHeight: 31,
               letterSpacing: -0.45,
