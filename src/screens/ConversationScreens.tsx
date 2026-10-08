@@ -1,3 +1,4 @@
+import { design, glassSurface, pageSurface } from "../design";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -107,6 +108,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.white,
   },
   composer: {
+    ...glassSurface,
     padding: 16,
     paddingBottom: 14,
     gap: 8,
@@ -117,6 +119,7 @@ const styles = StyleSheet.create({
   inputRow: { flexDirection: "row", alignItems: "flex-end", gap: 10 },
 
   assistantTopbar: {
+    ...glassSurface,
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 14,
@@ -134,7 +137,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F5FB",
   },
   assistantTopTitle: {
-    fontFamily: "DMSans_700Bold",
+    fontFamily: design.font.display,
     fontSize: 22,
     lineHeight: 28,
     color: "#12143D",
@@ -198,7 +201,7 @@ const styles = StyleSheet.create({
   },
   assistantHeroTitle: {
     width: "60%",
-    fontFamily: "DMSans_700Bold",
+    fontFamily: design.font.display,
     fontSize: 31,
     lineHeight: 37,
     letterSpacing: -0.5,
@@ -307,7 +310,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   assistantSectionTitle: {
-    fontFamily: "DMSans_700Bold",
+    fontFamily: design.font.display,
     fontSize: 21,
     color: "#14163F",
   },
@@ -1013,7 +1016,7 @@ export function AssistantScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      style={[{ flex: 1 }, pageSurface]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={0}
     >
@@ -1448,7 +1451,7 @@ export function TeamConversationScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: C.paper }}
+      style={[{ flex: 1 }, pageSurface]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={90}
     >

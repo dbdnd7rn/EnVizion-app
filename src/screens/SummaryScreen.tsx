@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, {
   useCallback,
   useEffect,
@@ -446,7 +447,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
     <Text
       accessibilityRole="header"
       style={{
-        fontFamily: "DMSans_700Bold",
+        fontFamily: design.font.display,
         fontSize: 24,
         lineHeight: 30,
         letterSpacing: -0.4,
@@ -923,7 +924,7 @@ export function SummaryScreen() {
                 <View style={{ maxWidth: 250, zIndex: 2, gap: 8 }}>
                   <Text
                     style={{
-                      fontFamily: "DMSans_700Bold",
+                      fontFamily: design.font.display,
                       fontSize: 41,
                       lineHeight: 44,
                       letterSpacing: -1.25,

@@ -56,6 +56,8 @@ import {
 } from "./src/screens/ConversationScreens";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
+import { glassSurface, pageSurface } from "./src/design";
+import { DesignEnhancements } from "./src/components/DesignEnhancements";
 import { NotificationsProvider } from "./src/notifications";
 import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsScreen";
@@ -119,7 +121,8 @@ function MainTabs() {
         tabBarInactiveTintColor: "#8A8494",
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
+          ...glassSurface,
+          borderWidth: 0,
           borderTopWidth: 1,
           borderTopColor: "#F0E9F1",
           height: 78,
@@ -346,7 +349,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
         <Stack.Navigator
           initialRouteName="Onboarding"
           screenOptions={{
-            headerStyle: { backgroundColor: C.paper },
+            headerStyle: { backgroundColor: "#FCF9FE" },
             headerShadowVisible: false,
             headerTintColor: C.purple,
             headerTitleStyle: {
@@ -651,7 +654,7 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
       <StaffStack.Navigator
         initialRouteName="StaffWorkspace"
         screenOptions={{
-          headerStyle: { backgroundColor: C.paper },
+          headerStyle: { backgroundColor: "#FCF9FE" },
           headerShadowVisible: false,
           headerTintColor: C.purple,
           headerTitleStyle: {
@@ -832,13 +835,14 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar style="dark" />
+      <DesignEnhancements />
       <View
-        style={{ flex: 1, backgroundColor: "#EDE5EF", alignItems: "center" }}
+        style={[pageSurface, { flex: 1, alignItems: "center" }]}
       >
         <View
           style={{
             width: "100%",
-            maxWidth: 480,
+            maxWidth: 760,
             flex: 1,
             backgroundColor: C.paper,
             ...(Platform.OS === "web"

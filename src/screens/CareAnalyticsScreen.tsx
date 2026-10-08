@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, {
   useCallback,
   useEffect,
@@ -847,7 +848,7 @@ export function CareAnalyticsScreen() {
             <Text
               accessibilityRole="header"
               style={{
-                fontFamily: "DMSans_700Bold",
+                fontFamily: design.font.display,
                 fontSize: 34,
                 lineHeight: 39,
                 letterSpacing: -0.8,
@@ -1143,7 +1144,7 @@ export function CareAnalyticsScreen() {
               <Text
                 accessibilityRole="header"
                 style={{
-                  fontFamily: "DMSans_700Bold",
+                  fontFamily: design.font.display,
                   fontSize: 25,
                   lineHeight: 31,
                   color: "#17143D",

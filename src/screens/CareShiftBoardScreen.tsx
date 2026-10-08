@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
@@ -1232,7 +1233,7 @@ export function CareShiftBoardScreen() {
 
               <Text
                 style={{
-                  fontFamily: "DMSans_700Bold",
+                  fontFamily: design.font.display,
                   fontSize: 38,
                   lineHeight: 42,
                   letterSpacing: -0.9,

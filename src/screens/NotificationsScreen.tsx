@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, {
   useEffect,
   useMemo,
@@ -663,7 +664,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     color: "#10133B",
-    fontFamily: "DMSans_700Bold",
+    fontFamily: design.font.display,
     fontSize: 39,
     lineHeight: 45,
     letterSpacing: -1.5,

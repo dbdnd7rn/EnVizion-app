@@ -1,3 +1,4 @@
+import { design } from "../design";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -549,7 +550,7 @@ export function CareContactsScreen() {
           <Text
             accessibilityRole="header"
             style={{
-              fontFamily: "DMSans_700Bold",
+              fontFamily: design.font.display,
               fontSize: 34,
               lineHeight: 40,
               letterSpacing: -0.9,
