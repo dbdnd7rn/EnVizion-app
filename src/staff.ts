@@ -46,19 +46,23 @@ async function requireStaff(): Promise<StaffMembership> {
   return membership;
 }
 
-export async function getStaffMembership(): Promise<StaffMembership | null> {
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError) throw userError;
-  if (!user) return null;
+export async function getStaffMembership(
+  authenticatedUserId?: string,
+): Promise<StaffMembership | null> {
+  // The startup gate has already verified the session. Reuse its user ID
+  // instead of making another sequential auth.getUser() network request.
+  let userId = authenticatedUserId;
+  if (!userId) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+    if (!user) return null;
+    userId = user.id;
+  }
 
   const { data, error } = await supabase
     .from("staff_members")
     .select("user_id, display_name, role, active")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) throw error;
