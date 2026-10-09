@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import Svg, { Defs, LinearGradient, Stop, Rect, Circle, Path } from "react-native-svg";
 import {
   completeCareAccessRecertification,
   loadCareAccessRecertifications,
@@ -9,17 +10,118 @@ import {
 } from "../careTeam";
 import { useCare } from "../store";
 import {
-  Button,
   C,
-  Card,
-  Heading,
   Icon,
-  Page,
   S,
-  Section,
   Txt,
 } from "../ui";
 import { useNav } from "./MainScreens";
+
+
+const PURPLE = "#7139A9";
+const INK = "#19163E";
+const MUTED = "#7C7795";
+function Page({ children }: { children: React.ReactNode }) {
+  return <ScrollView style={{ flex: 1, backgroundColor: "#FCFAFF" }}
+    contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 18, paddingBottom: 54 }}
+    keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <View style={{ width: "100%", maxWidth: 480, alignSelf: "center", gap: 18 }}>
+      {children}
+    </View>
+  </ScrollView>;
+}
+function Card({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+  return <View style={[{ padding: 16, borderRadius: 25, borderWidth: 1,
+    borderColor: "#E7DDF2", backgroundColor: "#FFFDFFED", gap: 12,
+    shadowColor: "#603982", shadowOpacity: 0.07,
+    shadowOffset: { width: 0, height: 7 }, shadowRadius: 16,
+    elevation: 2, overflow: "hidden" }, style]}>
+    <View pointerEvents="none" style={{ position: "absolute",
+      right: -65, top: -90, width: 175, height: 175, borderRadius: 90,
+      backgroundColor: "#EFE4FE", opacity: 0.45 }} />
+    {children}
+  </View>;
+}
+function Heading({ eyebrow, title, body }: {
+  eyebrow: string; title: string; body?: string;
+}) {
+  return <View style={{ gap: 9 }}>
+    <Text style={{ color: PURPLE, fontFamily: "DMSans_700Bold",
+      letterSpacing: 1.9, fontSize: 10.5 }}>{eyebrow}</Text>
+    <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold",
+      color: INK, fontSize: 29, lineHeight: 36,
+      letterSpacing: -0.65 }}>{title}</Text>
+    {body && <Text style={{ fontFamily: "DMSans_400Regular", color: MUTED,
+      fontSize: 13.5, lineHeight: 21 }}>{body}</Text>}
+  </View>;
+}
+function Section({ title }: { title: string }) {
+  return <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold",
+    color: INK, fontSize: 21, letterSpacing: -0.4, lineHeight: 27 }}>{title}</Text>;
+}
+function Button({ title, onPress, secondary = false, icon, disabled = false }: {
+  title: string; onPress: () => void; secondary?: boolean; icon?: string; disabled?: boolean;
+}) {
+  return <Pressable accessibilityRole="button" accessibilityLabel={title}
+    accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
+    style={({ pressed }) => ({ borderRadius: 30, minHeight: 53,
+      borderColor: secondary ? "#E2CDF7" : "#9D65D4", borderWidth: 1,
+      backgroundColor: secondary ? "#F0E8FB" : PURPLE,
+      alignItems: "center", justifyContent: "center",
+      flexDirection: "row", gap: 9, overflow: "hidden",
+      opacity: disabled ? 0.44 : pressed ? 0.75 : 1 })}>
+    {!secondary && <Svg width="100%" height="100%" pointerEvents="none"
+      style={{ position: "absolute", top: 0, left: 0 }}
+      viewBox="0 0 320 53" preserveAspectRatio="none">
+      <Defs><LinearGradient id="reviewAction" x1="0" y1="0" x2="1" y2="0">
+        <Stop offset="0" stopColor="#9A5BD4"/>
+        <Stop offset="0.55" stopColor="#7541B4"/>
+        <Stop offset="1" stopColor="#8648C8"/>
+      </LinearGradient></Defs>
+      <Rect width="320" height="53" fill="url(#reviewAction)"/>
+    </Svg>}
+    {icon && <Icon name={icon} color={secondary ? PURPLE : "#FFFFFF"} size={20}/>}
+    <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 14,
+      color: secondary ? PURPLE : "#FFFFFF" }}>{title}</Text>
+  </Pressable>;
+}
+function IconTile({ icon, green = false }: { icon: string; green?: boolean }) {
+  return <View style={{ width: 50, height: 50, borderRadius: 20,
+    backgroundColor: green ? "#E8F6EE" : "#F0E7FC",
+    justifyContent: "center", alignItems: "center" }}>
+    <Icon name={icon} color={green ? "#229870" : PURPLE} size={25}/>
+  </View>;
+}
+function GlassCalendar() {
+  return <Svg width={115} height={122} viewBox="0 0 130 140">
+    <Defs>
+      <LinearGradient id="calendarFace" x1="0" y1="0" x2="1" y2="1">
+        <Stop offset="0" stopColor="#E7DFFF"/><Stop offset="1" stopColor="#9B7FE5"/>
+      </LinearGradient>
+      <LinearGradient id="calendarShield" x1="0" y1="0" x2="1" y2="1">
+        <Stop offset="0" stopColor="#BA9CF4"/><Stop offset="1" stopColor="#7840CF"/>
+      </LinearGradient>
+    </Defs>
+    <Rect x="10" y="24" width="92" height="99" rx="18"
+      fill="url(#calendarFace)" stroke="#FFF" strokeWidth="2"
+      transform="rotate(-9 56 72)"/>
+    <Path d="M15 52 L104 38 L102 60 L18 75 Z" fill="#8D6BE0"/>
+    <Rect x="29" y="13" width="10" height="27" rx="5"
+      fill="#B6A1F7" stroke="#FFF" strokeWidth="2"/>
+    <Rect x="77" y="7" width="10" height="29" rx="5"
+      fill="#B6A1F7" stroke="#FFF" strokeWidth="2"/>
+    {[0,1,2].map((row) => [0,1,2].map((col) =>
+      <Rect key={row+"-"+col} x={25+col*20} y={73+row*18}
+        width="12" height="12" rx="4" fill="#F9F5FF" opacity={0.77}/>))}
+    <Circle cx="99" cy="100" r="29" fill="#FFF" opacity={0.6}/>
+    <Circle cx="99" cy="100" r="25" fill="url(#calendarShield)"
+      stroke="#FFF" strokeWidth="2"/>
+    <Path d="M99 83 L114 89 L113 104 Q110 115 99 119 Q85 111 85 100 L85 89 Z"
+      fill="#F6F1FF" stroke="#E6DEFF" strokeWidth="1.7"/>
+    <Path d="M91 100 L97 106 L108 93" fill="none"
+      stroke="#7A4CCA" strokeWidth="3.6" strokeLinecap="round"/>
+  </Svg>;
+}
 
 function roleLabel(role: CareAccessRecertificationItem["role"]) {
   return role === "caregiver" ? "Co-Caregiver" : "Family Member";
