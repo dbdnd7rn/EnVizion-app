@@ -121,7 +121,7 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
         setPath(nextPath);
         setUrl(nextUrl);
         setLoadedUserId(userId);
-        if (isOwnProfilePhoto(previousPath, userId)) {
+        if (previousPath && isOwnProfilePhoto(previousPath, userId)) {
           void supabase.storage.from(BUCKET).remove([previousPath]);
         }
       } catch (failure) {
@@ -149,7 +149,7 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
       setPath(null);
       setUrl(null);
       setLoadedUserId(userId);
-      if (isOwnProfilePhoto(previousPath, userId)) {
+      if (previousPath && isOwnProfilePhoto(previousPath, userId)) {
         void supabase.storage.from(BUCKET).remove([previousPath]);
       }
       return true;
