@@ -190,17 +190,6 @@ export function ProfileDashboardScreen() {
     }
   }, [dispatch, faithBusy, state.faith, state.name, state.relationship]);
 
-  const navigationItems = [
-    { title: "Care team & sharing", subtitle: "Invite family, manage access and sharing.", icon: "people-outline", route: "CareTeam", tint: "#F2E7FA" },
-    { title: "Care contacts & providers", subtitle: "Doctors, specialists, pharmacy, insurance and services.", icon: "call-outline", route: "CareContacts", tint: "#EDF0FF" },
-    { title: "Care notes & communication log", subtitle: "Shared calls, outcomes, decisions and follow-ups.", icon: "chatbubbles-outline", route: "CareCommunicationLog", tint: "#FCECF5" },
-    { title: "Today & caregiver shift board", subtitle: "Coverage, overdue responsibilities and handoffs.", icon: "checkbox-outline", route: "CareShiftBoard", tint: "#FFF0EA" },
-    { title: "Caregiver availability & schedule", subtitle: "Availability, shifts, attendance, swaps and gaps.", icon: "calendar-outline", route: "CareSchedule", tint: "#F5EDFF" },
-    { title: "Care coordination analytics", subtitle: "Workload, attendance, completed tasks and gaps.", icon: "bar-chart-outline", route: "CareAnalytics", tint: "#EEF1FF" },
-    { title: "Needs coordination", subtitle: "Uncovered tasks, overlaps and planning conflicts.", icon: "warning-outline", route: "CareCoordinationInbox", tint: "#FFF1F2" },
-    { title: "Care tasks & shared care plan", subtitle: "Responsibilities, assignments and completion history.", icon: "list-outline", route: "CareTasks", tint: "#FCEEF4" },
-  ] as const;
-
   const settings = [
     { title: "Account, privacy & data", subtitle: "Password, exports, consent and deletion.", icon: "shield-checkmark-outline", route: "PrivacyData" },
     { title: "Accessibility & display", subtitle: "Text scaling, motion and screen readers.", icon: "accessibility-outline", route: "Accessibility" },
@@ -357,16 +346,12 @@ export function ProfileDashboardScreen() {
       </View>
 
       <View style={{ gap: 9 }}>
-        {navigationItems.map((item, index) => (
-          <HeroReveal delay={Math.min(index * 24, 190)} key={item.title}>
-            <ProfileEntry
-              title={item.title} subtitle={item.subtitle} icon={item.icon} tint={item.tint}
-              onPress={() => n.navigate(item.route)}
-            />
-          </HeroReveal>
-        ))}
-      </View>
-
+        <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold", fontSize: 19, color: INK, marginBottom: 2 }}>
+          Account & preferences
+        </Text>
+        <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12.5, lineHeight: 18, color: MUTED, marginBottom: 4 }}>
+          Your personal settings stay here. Care tasks and team coordination live in the Care tab.
+        </Text>
       <View style={{ gap: 9 }}>
         <View style={{ flexDirection: "row", gap: 9 }}>
           {settings.slice(0, 2).map((item) => (
