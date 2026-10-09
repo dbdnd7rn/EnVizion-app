@@ -605,7 +605,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
           <Txt>Loading caregiver coverage requests…</Txt>
         </Card>
       ) : !ordered.length ? (
-        <Card style={{ backgroundColor: "#EAF4EF" }}>
+        <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
           <Icon name="checkmark-circle-outline" color={C.green} size={30} />
           <Text style={S.h3}>No coverage requests have been published.</Text>
           <Txt>
@@ -750,7 +750,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                     )}
                   </Card>
 
-                  <Card style={{ backgroundColor: "#FBF9FC" }}>
+                  <Card style={{ backgroundColor: themeBackground("#FBF9FC") }}>
                     <View style={S.between}>
                       <View style={{ flex: 1, gap: 3 }}>
                         <Text style={S.eyebrow}>BACKUP CAREGIVER MATCHING</Text>
@@ -838,7 +838,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
               )}
 
               {request.status === "reserved" && (
-                <Card style={{ backgroundColor: "#F0E8F3" }}>
+                <Card style={{ backgroundColor: themeBackground("#F0E8F3") }}>
                   <View style={S.row}>
                     <Icon name="checkmark-done-outline" color={C.purple} />
                     <View style={{ flex: 1, gap: 3 }}>
@@ -860,7 +860,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
               )}
 
               {request.status === "filled" && (
-                <Card style={{ backgroundColor: "#EAF4EF" }}>
+                <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
                   <View style={S.row}>
                     <Icon name="checkmark-circle-outline" color={C.green} />
                     <View style={{ flex: 1, gap: 3 }}>

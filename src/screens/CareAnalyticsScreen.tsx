@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeBorder, themeTint } from "../themeColors";
 import { themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -138,17 +139,17 @@ function WeekCardBackground() {
     >
       <Defs>
         <LinearGradient id="weekBg" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#9B5DCA" />
-          <Stop offset="0.55" stopColor="#7D3CAF" />
-          <Stop offset="1" stopColor="#A06BCD" />
+          <Stop offset="0" stopColor={themeTint("#9B5DCA")} />
+          <Stop offset="0.55" stopColor={themeTint("#7D3CAF")} />
+          <Stop offset="1" stopColor={themeTint("#A06BCD")} />
         </LinearGradient>
       </Defs>
       <Rect x="0" y="0" width="420" height="122" rx="28" fill="url(#weekBg)" />
-      <Circle cx="74" cy="29" r="66" fill="#FFFFFF" opacity="0.075" />
-      <Circle cx="351" cy="100" r="86" fill="#FFFFFF" opacity="0.05" />
+      <Circle cx="74" cy="29" r="66" fill={themeTint("#FFFFFF")} opacity="0.075" />
+      <Circle cx="351" cy="100" r="86" fill={themeTint("#FFFFFF")} opacity="0.05" />
       <Path
         d="M220 122C251 73 310 51 420 54V122H220Z"
-        fill="#FFFFFF"
+        fill={themeTint("#FFFFFF")}
         opacity="0.045"
       />
     </Svg>
@@ -197,21 +198,21 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
       <Svg width="100%" height="100%" viewBox="0 0 220 205">
         <Defs>
           <LinearGradient id="calBody" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#A46EE4" />
-            <Stop offset="0.55" stopColor="#B885ED" />
-            <Stop offset="1" stopColor="#D2B0F4" />
+            <Stop offset="0" stopColor={themeTint("#A46EE4")} />
+            <Stop offset="0.55" stopColor={themeTint("#B885ED")} />
+            <Stop offset="1" stopColor={themeTint("#D2B0F4")} />
           </LinearGradient>
           <LinearGradient id="calGlass" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.78" />
-            <Stop offset="1" stopColor="#F4E9FF" stopOpacity="0.52" />
+            <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity="0.78" />
+            <Stop offset="1" stopColor={themeTint("#F4E9FF")} stopOpacity="0.52" />
           </LinearGradient>
           <LinearGradient id="calHeart" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#F4C6FF" />
-            <Stop offset="1" stopColor="#A75DE2" />
+            <Stop offset="0" stopColor={themeTint("#F4C6FF")} />
+            <Stop offset="1" stopColor={themeTint("#A75DE2")} />
           </LinearGradient>
         </Defs>
 
-        <Ellipse cx="111" cy="183" rx="74" ry="14" fill="#8A4ABB" opacity="0.14" />
+        <Ellipse cx="111" cy="183" rx="74" ry="14" fill={themeTint("#8A4ABB")} opacity="0.14" />
 
         <G transform="translate(30 27)">
           <Rect
@@ -220,7 +221,7 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
             width="153"
             height="138"
             rx="30"
-            fill="#8E4BC4"
+            fill={themeTint("#8E4BC4")}
             opacity="0.18"
           />
           <Rect
@@ -230,7 +231,7 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
             height="142"
             rx="29"
             fill="url(#calBody)"
-            stroke="#E5CDF8"
+            stroke={themeTint("#E5CDF8")}
             strokeWidth="3"
           />
           <Rect
@@ -243,10 +244,10 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
           />
 
           <G>
-            <Ellipse cx="43" cy="13" rx="13" ry="21" fill="#8C4CC0" />
-            <Ellipse cx="43" cy="13" rx="7" ry="14" fill="#D6B8F2" />
-            <Ellipse cx="119" cy="13" rx="13" ry="21" fill="#8C4CC0" />
-            <Ellipse cx="119" cy="13" rx="7" ry="14" fill="#D6B8F2" />
+            <Ellipse cx="43" cy="13" rx="13" ry="21" fill={themeTint("#8C4CC0")} />
+            <Ellipse cx="43" cy="13" rx="7" ry="14" fill={themeTint("#D6B8F2")} />
+            <Ellipse cx="119" cy="13" rx="13" ry="21" fill={themeTint("#8C4CC0")} />
+            <Ellipse cx="119" cy="13" rx="7" ry="14" fill={themeTint("#D6B8F2")} />
           </G>
 
           {[0, 1, 2, 3].map((column) =>
@@ -267,7 +268,7 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
           <Path
             d="M87 85c-8-12-25-5-20 8 5 10 20 18 20 18s16-8 21-18c5-13-12-20-21-8Z"
             fill="url(#calHeart)"
-            stroke="#FFFFFF"
+            stroke={themeTint("#FFFFFF")}
             strokeWidth="2"
           />
         </G>
@@ -325,12 +326,12 @@ function ProgressBar({
   return (
     <View style={{ gap: 6 }}>
       <View style={S.between}>
-        <Text style={[S.small, { color: "#706A86" }]}>{label}</Text>
+        <Text style={[S.small, { color: themeForeground("#706A86") }]}>{label}</Text>
         <Text
           style={[
             S.small,
             {
-              color: "#17143D",
+              color: themeForeground("#17143D"),
               fontFamily: "DMSans_600SemiBold",
             },
           ]}
@@ -349,7 +350,7 @@ function ProgressBar({
         style={{
           height: 10,
           borderRadius: 999,
-          backgroundColor: "#EAE0F2",
+          backgroundColor: themeBackground("#EAE0F2"),
           overflow: "hidden",
         }}
       >
@@ -359,7 +360,7 @@ function ProgressBar({
             minWidth: ratio > 0 ? 4 : 0,
             height: 10,
             borderRadius: 999,
-            backgroundColor: "#8A4AB6",
+            backgroundColor: themeBackground("#8A4AB6"),
           }}
         />
       </View>
@@ -451,14 +452,14 @@ function AccordionHeader({
         minHeight: 68,
         borderRadius: 23,
         borderWidth: 1,
-        borderColor: "#E7DDEE",
+        borderColor: themeBorder("#E7DDEE"),
         backgroundColor: "rgba(255,255,255,0.84)",
         paddingHorizontal: 16,
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
         opacity: pressed ? 0.78 : 1,
-        shadowColor: "#57306A",
+        shadowColor: themeShadow("#57306A"),
         shadowOpacity: 0.035,
         shadowRadius: 12,
         shadowOffset: { width: 0, height: 5 },
@@ -470,12 +471,12 @@ function AccordionHeader({
           width: 44,
           height: 44,
           borderRadius: 22,
-          backgroundColor: "#F1E7FA",
+          backgroundColor: themeBackground("#F1E7FA"),
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={22} color="#6E2D9A" />
+        <Icon name={icon} size={22} color={themeForeground("#6E2D9A")} />
       </View>
       <Text
         style={{
@@ -483,7 +484,7 @@ function AccordionHeader({
           fontFamily: "DMSans_600SemiBold",
           fontSize: 14,
           lineHeight: 19,
-          color: "#4F1E72",
+          color: themeForeground("#4F1E72"),
         }}
       >
         {title}
@@ -495,7 +496,7 @@ function AccordionHeader({
             minHeight: 36,
             borderRadius: 18,
             paddingHorizontal: 12,
-            backgroundColor: "#F0E3FA",
+            backgroundColor: themeBackground("#F0E3FA"),
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -504,7 +505,7 @@ function AccordionHeader({
             style={{
               fontFamily: "DMSans_600SemiBold",
               fontSize: 13,
-              color: "#6D2E98",
+              color: themeForeground("#6D2E98"),
             }}
           >
             {count}
@@ -523,7 +524,7 @@ function AccordionHeader({
           ],
         }}
       >
-        <Icon name="chevron-down" size={20} color="#5F2187" />
+        <Icon name="chevron-down" size={20} color={themeForeground("#5F2187")} />
       </Animated.View>
     </Pressable>
   );
@@ -815,7 +816,7 @@ export function CareAnalyticsScreen() {
               width: 310,
               height: 310,
               borderRadius: 155,
-              backgroundColor: "#F0E3FB",
+              backgroundColor: themeBackground("#F0E3FB"),
               right: -145,
               top: -145,
               opacity: 0.62,
@@ -828,7 +829,7 @@ export function CareAnalyticsScreen() {
               width: 220,
               height: 150,
               borderRadius: 110,
-              backgroundColor: "#F9ECFA",
+              backgroundColor: themeBackground("#F9ECFA"),
               right: -20,
               top: 75,
               transform: [{ rotate: "-18deg" }],
@@ -852,7 +853,7 @@ export function CareAnalyticsScreen() {
                 fontSize: 34,
                 lineHeight: 39,
                 letterSpacing: -0.8,
-                color: "#16143D",
+                color: themeForeground("#16143D"),
               }}
             >
               Your week in care
@@ -862,7 +863,7 @@ export function CareAnalyticsScreen() {
                 fontFamily: "DMSans_500Medium",
                 fontSize: 17,
                 lineHeight: 24,
-                color: "#76728D",
+                color: themeForeground("#76728D"),
               }}
             >
               A clearer view, together.
@@ -882,7 +883,7 @@ export function CareAnalyticsScreen() {
             borderRadius: 28,
             overflow: "hidden",
             position: "relative",
-            shadowColor: "#6D2A96",
+            shadowColor: themeShadow("#6D2A96"),
             shadowOpacity: 0.2,
             shadowRadius: 20,
             shadowOffset: { width: 0, height: 10 },
@@ -923,7 +924,7 @@ export function CareAnalyticsScreen() {
                 opacity: loading ? 0.45 : pressed ? 0.72 : 1,
               })}
             >
-              <Icon name="chevron-back" size={24} color="#FFFFFF" />
+              <Icon name="chevron-back" size={24} color={themeForeground("#FFFFFF")} />
             </Pressable>
 
             <View style={{ flex: 1, gap: 3 }}>
@@ -932,7 +933,7 @@ export function CareAnalyticsScreen() {
                   fontFamily: "DMSans_700Bold",
                   fontSize: 20,
                   lineHeight: 25,
-                  color: "#FFFFFF",
+                  color: themeForeground("#FFFFFF"),
                 }}
               >
                 {periodLabel}
@@ -942,7 +943,7 @@ export function CareAnalyticsScreen() {
                   fontFamily: "DMSans_400Regular",
                   fontSize: 12.5,
                   lineHeight: 18,
-                  color: "#EADCF1",
+                  color: themeForeground("#EADCF1"),
                 }}
               >
                 {state.careRecipientName || "Care profile"} ·{" "}
@@ -975,12 +976,12 @@ export function CareAnalyticsScreen() {
                 opacity: loading ? 0.45 : pressed ? 0.72 : 1,
               })}
             >
-              <Icon name="calendar-outline" size={19} color="#FFFFFF" />
+              <Icon name="calendar-outline" size={19} color={themeForeground("#FFFFFF")} />
               <Text
                 style={{
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 12.5,
-                  color: "#FFFFFF",
+                  color: themeForeground("#FFFFFF"),
                 }}
               >
                 This week
@@ -996,17 +997,17 @@ export function CareAnalyticsScreen() {
             style={{
               minHeight: 66,
               borderRadius: 22,
-              backgroundColor: "#F4ECFA",
+              backgroundColor: themeBackground("#F4ECFA"),
               borderWidth: 1,
-              borderColor: "#E6DAEE",
+              borderColor: themeBorder("#E6DAEE"),
               paddingHorizontal: 15,
               flexDirection: "row",
               alignItems: "center",
               gap: 11,
             }}
           >
-            <Icon name="eye-outline" size={21} color="#73359A" />
-            <Text style={[S.small, { flex: 1, color: "#6E6780" }]}>
+            <Icon name="eye-outline" size={21} color={themeForeground("#73359A")} />
+            <Text style={[S.small, { flex: 1, color: themeForeground("#6E6780") }]}>
               View-only access. PDF export is available to Owner and Caregiver roles.
             </Text>
           </View>
@@ -1019,12 +1020,12 @@ export function CareAnalyticsScreen() {
             style={{
               minHeight: 58,
               borderRadius: 20,
-              backgroundColor: "#F4ECFA",
+              backgroundColor: themeBackground("#F4ECFA"),
               paddingHorizontal: 15,
               justifyContent: "center",
             }}
           >
-            <Text accessibilityRole="alert" style={[S.small, { color: "#5F3B70" }]}>
+            <Text accessibilityRole="alert" style={[S.small, { color: themeForeground("#5F3B70") }]}>
               {message}
             </Text>
           </View>
@@ -1037,15 +1038,15 @@ export function CareAnalyticsScreen() {
             style={{
               minHeight: 180,
               borderRadius: 26,
-              backgroundColor: "#FFFFFF",
+              backgroundColor: themeBackground("#FFFFFF"),
               borderWidth: 1,
-              borderColor: "#EAE3ED",
+              borderColor: themeBorder("#EAE3ED"),
               alignItems: "center",
               justifyContent: "center",
               gap: 12,
             }}
           >
-            <ActivityIndicator color="#7A3AA1" />
+            <ActivityIndicator color={themeForeground("#7A3AA1")} />
             <Text style={S.small}>Loading this care week…</Text>
           </View>
         </Entrance>
@@ -1055,14 +1056,14 @@ export function CareAnalyticsScreen() {
             style={{
               minHeight: 154,
               borderRadius: 26,
-              backgroundColor: "#FFF5F5",
+              backgroundColor: themeBackground("#FFF5F5"),
               borderWidth: 1,
-              borderColor: "#F2D5DB",
+              borderColor: themeBorder("#F2D5DB"),
               padding: 18,
               gap: 12,
             }}
           >
-            <Icon name="alert-circle-outline" size={25} color="#B9425D" />
+            <Icon name="alert-circle-outline" size={25} color={themeForeground("#B9425D")} />
             <Text style={S.h3}>This week could not be loaded.</Text>
             <Text accessibilityRole="alert" style={S.small}>
               {loadError}
@@ -1091,7 +1092,7 @@ export function CareAnalyticsScreen() {
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 12,
-                    shadowColor: "#5C316A",
+                    shadowColor: themeShadow("#5C316A"),
                     shadowOpacity: 0.035,
                     shadowRadius: 14,
                     shadowOffset: { width: 0, height: 6 },
@@ -1103,14 +1104,14 @@ export function CareAnalyticsScreen() {
                       width: 46,
                       height: 46,
                       borderRadius: 23,
-                      backgroundColor: "#F3E8FB",
+                      backgroundColor: themeBackground("#F3E8FB"),
                       borderWidth: 1,
-                      borderColor: "#FFFFFF",
+                      borderColor: themeBorder("#FFFFFF"),
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <Icon name={metric.icon} size={23} color="#742BA0" />
+                    <Icon name={metric.icon} size={23} color={themeForeground("#742BA0")} />
                   </View>
                   <View style={{ flex: 1, gap: 2 }}>
                     <Text
@@ -1118,7 +1119,7 @@ export function CareAnalyticsScreen() {
                         fontFamily: "DMSans_700Bold",
                         fontSize: 22,
                         lineHeight: 27,
-                        color: "#17143D",
+                        color: themeForeground("#17143D"),
                       }}
                     >
                       {metric.value}
@@ -1128,7 +1129,7 @@ export function CareAnalyticsScreen() {
                         fontFamily: "DMSans_400Regular",
                         fontSize: 11.5,
                         lineHeight: 16,
-                        color: "#77728A",
+                        color: themeForeground("#77728A"),
                       }}
                     >
                       {metric.label}
@@ -1147,7 +1148,7 @@ export function CareAnalyticsScreen() {
                   fontFamily: "DMSans_700Bold",
                   fontSize: 25,
                   lineHeight: 31,
-                  color: "#17143D",
+                  color: themeForeground("#17143D"),
                 }}
               >
                 Caregiver workload
@@ -1171,11 +1172,11 @@ export function CareAnalyticsScreen() {
                       style={{
                         borderRadius: 26,
                         borderWidth: 1,
-                        borderColor: "#E7DDEE",
+                        borderColor: themeBorder("#E7DDEE"),
                         backgroundColor: "rgba(255,255,255,0.9)",
                         padding: 18,
                         gap: 15,
-                        shadowColor: "#5A2E69",
+                        shadowColor: themeShadow("#5A2E69"),
                         shadowOpacity: 0.045,
                         shadowRadius: 16,
                         shadowOffset: { width: 0, height: 7 },
@@ -1196,10 +1197,10 @@ export function CareAnalyticsScreen() {
                               width: 52,
                               height: 52,
                               borderRadius: 26,
-                              backgroundColor: "#8743B6",
+                              backgroundColor: themeBackground("#8743B6"),
                               alignItems: "center",
                               justifyContent: "center",
-                              shadowColor: "#7B3EAA",
+                              shadowColor: themeShadow("#7B3EAA"),
                               shadowOpacity: 0.18,
                               shadowRadius: 9,
                               shadowOffset: { width: 0, height: 5 },
@@ -1210,7 +1211,7 @@ export function CareAnalyticsScreen() {
                               style={{
                                 fontFamily: "DMSans_600SemiBold",
                                 fontSize: 21,
-                                color: "#FFFFFF",
+                                color: themeForeground("#FFFFFF"),
                               }}
                             >
                               {initial}
@@ -1223,7 +1224,7 @@ export function CareAnalyticsScreen() {
                                 fontFamily: "DMSans_700Bold",
                                 fontSize: 18,
                                 lineHeight: 22,
-                                color: "#17143D",
+                                color: themeForeground("#17143D"),
                               }}
                             >
                               {name}
@@ -1240,7 +1241,7 @@ export function CareAnalyticsScreen() {
                             minHeight: 38,
                             borderRadius: 19,
                             paddingHorizontal: 13,
-                            backgroundColor: "#F2E8FA",
+                            backgroundColor: themeBackground("#F2E8FA"),
                             alignItems: "center",
                             justifyContent: "center",
                           }}
@@ -1249,7 +1250,7 @@ export function CareAnalyticsScreen() {
                             style={{
                               fontFamily: "DMSans_600SemiBold",
                               fontSize: 12,
-                              color: "#6A2A91",
+                              color: themeForeground("#6A2A91"),
                             }}
                           >
                             {row.completedTasks} task
@@ -1281,21 +1282,21 @@ export function CareAnalyticsScreen() {
                           count={row.lateCheckIns}
                           label="late"
                           background="#F3E7FB"
-                          color="#6E2D98"
+                          color={themeForeground("#6E2D98")}
                         />
                         <CountPill
                           icon="warning-outline"
                           count={row.missedCheckIns}
                           label="missed"
                           background="#FCEAF2"
-                          color="#7B2E77"
+                          color={themeForeground("#7B2E77")}
                         />
                         <CountPill
                           icon="shield-outline"
                           count={row.coverageGapEvents}
                           label="gaps"
                           background="#EEF0FF"
-                          color="#464BB0"
+                          color={themeForeground("#464BB0")}
                         />
                       </View>
 
@@ -1312,16 +1313,16 @@ export function CareAnalyticsScreen() {
                   style={{
                     minHeight: 112,
                     borderRadius: 24,
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: themeBackground("#FFFFFF"),
                     borderWidth: 1,
-                    borderColor: "#E8E2EC",
+                    borderColor: themeBorder("#E8E2EC"),
                     alignItems: "center",
                     justifyContent: "center",
                     padding: 18,
                     gap: 8,
                   }}
                 >
-                  <Icon name="people-outline" size={25} color="#7A3A9E" />
+                  <Icon name="people-outline" size={25} color={themeForeground("#7A3A9E")} />
                   <Text style={[S.small, { textAlign: "center" }]}>
                     No caregiver workload activity is recorded for this week.
                   </Text>
@@ -1351,9 +1352,9 @@ export function CareAnalyticsScreen() {
                         key={shift.id}
                         style={{
                           borderRadius: 22,
-                          backgroundColor: "#FFF8FA",
+                          backgroundColor: themeBackground("#FFF8FA"),
                           borderWidth: 1,
-                          borderColor: "#EECFD7",
+                          borderColor: themeBorder("#EECFD7"),
                           padding: 15,
                           gap: 5,
                         }}
@@ -1373,14 +1374,14 @@ export function CareAnalyticsScreen() {
                     <View
                       style={{
                         borderRadius: 22,
-                        backgroundColor: "#F2F8F5",
+                        backgroundColor: themeBackground("#F2F8F5"),
                         padding: 15,
                         flexDirection: "row",
                         alignItems: "center",
                         gap: 10,
                       }}
                     >
-                      <Icon name="checkmark-circle-outline" color="#2D8B69" />
+                      <Icon name="checkmark-circle-outline" color={themeForeground("#2D8B69")} />
                       <Text style={[S.small, { flex: 1 }]}>
                         No missed check-ins detected for this week.
                       </Text>
@@ -1408,9 +1409,9 @@ export function CareAnalyticsScreen() {
                         key={event.id}
                         style={{
                           borderRadius: 22,
-                          backgroundColor: "#FBF8FE",
+                          backgroundColor: themeBackground("#FBF8FE"),
                           borderWidth: 1,
-                          borderColor: "#E5DBEC",
+                          borderColor: themeBorder("#E5DBEC"),
                           padding: 15,
                           gap: 5,
                         }}
@@ -1433,7 +1434,7 @@ export function CareAnalyticsScreen() {
                     <View
                       style={{
                         borderRadius: 22,
-                        backgroundColor: "#F6F4FA",
+                        backgroundColor: themeBackground("#F6F4FA"),
                         padding: 15,
                       }}
                     >
@@ -1453,7 +1454,7 @@ export function CareAnalyticsScreen() {
                 minHeight: 164,
                 borderRadius: 27,
                 borderWidth: 1,
-                borderColor: "#E2D8E9",
+                borderColor: themeBorder("#E2D8E9"),
                 backgroundColor: "rgba(255,255,255,0.88)",
                 padding: 17,
                 gap: 14,
@@ -1474,7 +1475,7 @@ export function CareAnalyticsScreen() {
                   width: 126,
                   height: 126,
                   borderRadius: 34,
-                  backgroundColor: "#F1E8FA",
+                  backgroundColor: themeBackground("#F1E8FA"),
                   transform: [{ rotate: "13deg" }],
                   opacity: 0.82,
                 }}
@@ -1486,21 +1487,21 @@ export function CareAnalyticsScreen() {
                     width: 52,
                     height: 52,
                     borderRadius: 26,
-                    backgroundColor: "#F2E7FA",
+                    backgroundColor: themeBackground("#F2E7FA"),
                     alignItems: "center",
                     justifyContent: "center",
                     borderWidth: 1,
-                    borderColor: "#FFFFFF",
+                    borderColor: themeBorder("#FFFFFF"),
                   }}
                 >
-                  <Icon name="document-text-outline" size={26} color="#6E2C98" />
+                  <Icon name="document-text-outline" size={26} color={themeForeground("#6E2C98")} />
                 </View>
                 <View style={{ flex: 1, gap: 3 }}>
                   <Text
                     style={{
                       fontFamily: "DMSans_700Bold",
                       fontSize: 17,
-                      color: "#17143D",
+                      color: themeForeground("#17143D"),
                     }}
                   >
                     Weekly family report
@@ -1518,7 +1519,7 @@ export function CareAnalyticsScreen() {
                 style={({ pressed }) => ({
                   minHeight: 54,
                   borderRadius: 27,
-                  backgroundColor: "#7D37A2",
+                  backgroundColor: themeBackground("#7D37A2"),
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
@@ -1526,12 +1527,12 @@ export function CareAnalyticsScreen() {
                   opacity: viewer || exporting ? 0.45 : pressed ? 0.8 : 1,
                 })}
               >
-                <Icon name="share-outline" size={20} color="#FFFFFF" />
+                <Icon name="share-outline" size={20} color={themeForeground("#FFFFFF")} />
                 <Text
                   style={{
                     fontFamily: "DMSans_600SemiBold",
                     fontSize: 14,
-                    color: "#FFFFFF",
+                    color: themeForeground("#FFFFFF"),
                   }}
                 >
                   {exporting ? "Creating PDF…" : "Create PDF report"}
@@ -1549,7 +1550,7 @@ export function CareAnalyticsScreen() {
                 minHeight: 62,
                 borderRadius: 31,
                 borderWidth: 1.2,
-                borderColor: "#8B54B0",
+                borderColor: themeBorder("#8B54B0"),
                 backgroundColor: "rgba(255,255,255,0.88)",
                 paddingHorizontal: 18,
                 flexDirection: "row",
@@ -1559,19 +1560,19 @@ export function CareAnalyticsScreen() {
                 opacity: pressed ? 0.78 : 1,
               })}
             >
-              <Icon name="people-outline" size={20} color="#61218B" />
+              <Icon name="people-outline" size={20} color={themeForeground("#61218B")} />
               <Text
                 style={{
                   flex: 1,
                   textAlign: "center",
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 14,
-                  color: "#61218B",
+                  color: themeForeground("#61218B"),
                 }}
               >
                 Today’s shift board
               </Text>
-              <Icon name="chevron-forward" size={18} color="#61218B" />
+              <Icon name="chevron-forward" size={18} color={themeForeground("#61218B")} />
             </Pressable>
           </Entrance>
 
@@ -1591,9 +1592,9 @@ export function CareAnalyticsScreen() {
                 <View
                   style={{
                     borderRadius: 22,
-                    backgroundColor: "#F8F4FB",
+                    backgroundColor: themeBackground("#F8F4FB"),
                     borderWidth: 1,
-                    borderColor: "#E7DDEE",
+                    borderColor: themeBorder("#E7DDEE"),
                     padding: 16,
                     gap: 9,
                   }}

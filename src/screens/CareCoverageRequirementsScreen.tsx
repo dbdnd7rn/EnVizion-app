@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -327,11 +328,11 @@ export function CareCoverageRequirementsScreen() {
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Icon name="time-outline" color="#E5C8ED" size={28} />
+        <Icon name="time-outline" color={themeForeground("#E5C8ED")} size={28} />
         <Text style={[S.h2, { color: C.white }]}>
           Care demand is separate from caregiver availability.
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           A required-care window says when this care profile needs coverage.
           Caregiver availability says who may be able to provide it. EnVizion
           only matches the two after the schedule is considered.

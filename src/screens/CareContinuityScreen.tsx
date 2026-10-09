@@ -1,3 +1,4 @@
+import { themeBorder } from "../themeColors";
 import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -558,7 +559,7 @@ export function CareContinuityScreen() {
         )}
 
         {coverageBridge.pendingHandoff && (
-          <Card style={{ backgroundColor: "#FFF9F0" }}>
+          <Card style={{ backgroundColor: themeBackground("#FFF9F0") }}>
             <Text style={S.eyebrow}>PENDING HANDOFF</Text>
             <Text style={S.h3}>
               {coverageBridge.pendingHandoff.shiftLabel}
@@ -639,7 +640,7 @@ export function CareContinuityScreen() {
                     Started {new Date(session.startedAt).toLocaleString()}
                   </Txt>
                 </View>
-                <View style={[S.pill, { backgroundColor: "#E3F3EA" }]}>
+                <View style={[S.pill, { backgroundColor: themeBackground("#E3F3EA") }]}>
                   <Text style={[S.small, { color: C.green }]}>On shift</Text>
                 </View>
               </View>
@@ -652,7 +653,7 @@ export function CareContinuityScreen() {
         <>
           <Section title="Awaiting takeover" />
           {pendingTakeovers.slice(0, 10).map((handoff) => (
-            <Card key={handoff.id} style={{ borderColor: "#E7CFAB" }}>
+            <Card key={handoff.id} style={{ borderColor: themeBorder("#E7CFAB") }}>
               <Text style={S.h3}>{handoff.shiftLabel}</Text>
               <Txt style={S.small}>
                 From {memberName(handoff.createdBy)}
