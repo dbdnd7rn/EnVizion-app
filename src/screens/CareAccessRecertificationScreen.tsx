@@ -16,6 +16,7 @@ import {
   Txt,
 } from "../ui";
 import { useNav } from "./MainScreens";
+import { themeBackground, themeBorder, themeForeground } from "../themeColors";
 
 
 const PURPLE = "#7139A9";
@@ -23,7 +24,7 @@ const INK = "#19163E";
 const MUTED = "#7C7795";
 function Page({ children }: { children: React.ReactNode }) {
   const n = useNav();
-  return <ScrollView style={{ flex: 1, backgroundColor: "#FCFAFF" }}
+  return <ScrollView style={{ flex: 1, backgroundColor: themeBackground("#FCFAFF") }}
     contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 18, paddingBottom: 54 }}
     keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View style={{ width: "100%", maxWidth: 480, alignSelf: "center", gap: 18 }}>
@@ -33,7 +34,7 @@ function Page({ children }: { children: React.ReactNode }) {
           style={({pressed})=>({width:45,height:45,borderRadius:24,justifyContent:"center",
             alignItems:"center",backgroundColor:"#F1EAFB",borderWidth:1,
             borderColor:"#FFFFFF",opacity:pressed?0.75:1})}>
-          <Icon name="arrow-back-outline" color={PURPLE} size={22}/>
+          <Icon name="arrow-back-outline" color={themeForeground(PURPLE)} size={22}/>
         </Pressable>
         <Text accessibilityRole="header" style={{flex:1,color:INK,fontSize:18,
           fontFamily:"DMSans_700Bold"}}>90-day access review</Text>
@@ -44,13 +45,13 @@ function Page({ children }: { children: React.ReactNode }) {
 }
 function Card({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[{ padding: 16, borderRadius: 25, borderWidth: 1,
-    borderColor: "#E7DDF2", backgroundColor: "#FFFDFFED", gap: 12,
+    borderColor: themeBorder("#E7DDF2"), backgroundColor: themeBackground("#FFFDFFED"), gap: 12,
     shadowColor: "#603982", shadowOpacity: 0.07,
     shadowOffset: { width: 0, height: 7 }, shadowRadius: 16,
     elevation: 2, overflow: "hidden" }, style]}>
     <View pointerEvents="none" style={{ position: "absolute",
       right: -65, top: -90, width: 175, height: 175, borderRadius: 90,
-      backgroundColor: "#EFE4FE", opacity: 0.45 }} />
+      backgroundColor: themeBackground("#EFE4FE"), opacity: 0.45 }} />
     {children}
   </View>;
 }
@@ -58,18 +59,18 @@ function Heading({ eyebrow, title, body }: {
   eyebrow: string; title: string; body?: string;
 }) {
   return <View style={{ gap: 9 }}>
-    <Text style={{ color: PURPLE, fontFamily: "DMSans_700Bold",
+    <Text style={{ color: themeForeground(PURPLE), fontFamily: "DMSans_700Bold",
       letterSpacing: 1.9, fontSize: 10.5 }}>{eyebrow}</Text>
     <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold",
-      color: INK, fontSize: 29, lineHeight: 36,
+      color: themeForeground(INK), fontSize: 29, lineHeight: 36,
       letterSpacing: -0.65 }}>{title}</Text>
-    {body && <Text style={{ fontFamily: "DMSans_400Regular", color: MUTED,
+    {body && <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
       fontSize: 13.5, lineHeight: 21 }}>{body}</Text>}
   </View>;
 }
 function Section({ title }: { title: string }) {
   return <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold",
-    color: INK, fontSize: 21, letterSpacing: -0.4, lineHeight: 27 }}>{title}</Text>;
+    color: themeForeground(INK), fontSize: 21, letterSpacing: -0.4, lineHeight: 27 }}>{title}</Text>;
 }
 function Button({ title, onPress, secondary = false, icon, disabled = false }: {
   title: string; onPress: () => void; secondary?: boolean; icon?: string; disabled?: boolean;
@@ -78,7 +79,7 @@ function Button({ title, onPress, secondary = false, icon, disabled = false }: {
     accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
     style={({ pressed }) => ({ borderRadius: 30, minHeight: 53,
       borderColor: secondary ? "#E2CDF7" : "#9D65D4", borderWidth: 1,
-      backgroundColor: secondary ? "#F0E8FB" : PURPLE,
+      backgroundColor: secondary ? themeBackground("#F0E8FB") : PURPLE,
       alignItems: "center", justifyContent: "center",
       flexDirection: "row", gap: 9, overflow: "hidden",
       opacity: disabled ? 0.44 : pressed ? 0.75 : 1 })}>
@@ -99,7 +100,7 @@ function Button({ title, onPress, secondary = false, icon, disabled = false }: {
 }
 function IconTile({ icon, green = false }: { icon: string; green?: boolean }) {
   return <View style={{ width: 50, height: 50, borderRadius: 20,
-    backgroundColor: green ? "#E8F6EE" : "#F0E7FC",
+    backgroundColor: themeBackground(green ? "#E8F6EE" : "#F0E7FC"),
     justifyContent: "center", alignItems: "center" }}>
     <Icon name={icon} color={green ? "#229870" : PURPLE} size={25}/>
   </View>;
@@ -360,7 +361,7 @@ export function CareAccessRecertificationScreen() {
         <Card style={{ borderColor: "#EECEDA", backgroundColor: "#FFF8FA" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
             <IconTile icon="alert-circle-outline" />
-            <Text accessibilityRole="alert" style={{ flex: 1, color: INK,
+            <Text accessibilityRole="alert" style={{ flex: 1, color: themeForeground(INK),
               fontFamily: "DMSans_400Regular", fontSize: 13, lineHeight: 20 }}>
               {loadError || "Access reviews are unavailable. Please refresh."}
             </Text>
@@ -383,18 +384,18 @@ export function CareAccessRecertificationScreen() {
       />
 
       {overview && (
-        <Card style={{ backgroundColor: "#F3EBFCEA", borderColor: "#DBC8F4" }}>
+        <Card style={{ backgroundColor: themeBackground("#F3EBFCEA"), borderColor: themeBorder("#DBC8F4") }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
             <View style={{ width: 115, alignItems: "center" }}><GlassCalendar/></View>
             <View style={{ flex: 1, gap: 8 }}>
-              <Text style={{ color: PURPLE, fontFamily: "DMSans_700Bold",
+              <Text style={{ color: themeForeground(PURPLE), fontFamily: "DMSans_700Bold",
                 letterSpacing: 1.2, fontSize: 10 }}>PERIODIC ACCESS GOVERNANCE</Text>
               <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 23,
-                lineHeight: 29, color: INK }}>
+                lineHeight: 29, color: themeForeground(INK) }}>
                 {overview.dueCount} review{overview.dueCount === 1 ? "" : "s"} due
               </Text>
               <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5,
-                lineHeight: 18, color: MUTED }}>
+                lineHeight: 18, color: themeForeground(MUTED) }}>
                 EnVizion reviews access every {overview.cadenceDays} days.
                 Primary Advocate ownership and Care Recipient access are
                 not part of caregiver/family recertification.
@@ -414,7 +415,7 @@ export function CareAccessRecertificationScreen() {
 
       <Section title="Due now" />
       {!due.length ? (
-        <Card style={{backgroundColor:"#F9FCFA",borderColor:"#D9EDE3"}}>
+        <Card style={{backgroundColor:themeBackground("#F9FCFA"),borderColor:themeBorder("#D9EDE3")}}>
           <View style={{flexDirection:"row",alignItems:"center",gap:13}}>
             <IconTile icon="shield-checkmark-outline" green/>
             <View style={{flex:1,gap:4}}>
@@ -681,7 +682,7 @@ export function CareAccessRecertificationScreen() {
         ))
       )}
 
-      <Card style={{ backgroundColor: "#F8F2FCEB", gap: 8 }}>
+      <Card style={{ backgroundColor: themeBackground("#F8F2FCEB"), gap: 8 }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <IconTile icon="information-circle-outline"/>
           <View style={{ flex: 1, gap: 4 }}>
