@@ -1,6 +1,6 @@
 import { supabase } from "../supabase";
 import { detectedTimezone } from "../reminders";
-import { validateAssistantDraft, type AssistantDraft } from "./validateAssistantDraft";
+import { validateAssistantDraft, type AssistantHistory, type CareAIAnswer } from "./validateAssistantDraft";
 export { validateAssistantDraft } from "./validateAssistantDraft";
 export type { ReminderDraft, NoteDraft, AssistantDraft, AssistantHistory, CareAIAnswer } from "./validateAssistantDraft";
 
