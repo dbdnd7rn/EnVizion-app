@@ -1,3 +1,4 @@
+import { themeForeground, themeTint } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -428,7 +429,7 @@ function WelcomeHeroArtwork({
           <Ellipse cx="34" cy="302" rx="8" ry="41" fill="#70508A" transform="rotate(-28 34 302)" />
           <Ellipse cx="62" cy="317" rx="7" ry="35" fill="#9676A9" transform="rotate(22 62 317)" />
           <Ellipse cx="93" cy="327" rx="6" ry="30" fill="#B096C0" transform="rotate(-18 93 327)" />
-          <Ellipse cx="401" cy="303" rx="7" ry="37" fill="#795791" transform="rotate(24 401 303)" />
+          <Ellipse cx="401" cy="303" rx="7" ry="37" fill={themeTint("#795791")} transform="rotate(24 401 303)" />
           <Ellipse cx="372" cy="320" rx="6" ry="30" fill="#A184B4" transform="rotate(-18 372 320)" />
         </G>
 
@@ -813,7 +814,7 @@ export function OnboardingWelcomeStep({
                     fontFamily: "DMSans_700Bold",
                     fontSize: 15.5,
                     lineHeight: 21,
-                    color: "#151541",
+                    color: themeForeground("#151541"),
                   }}
                 >
                   {feature.title}
@@ -823,7 +824,7 @@ export function OnboardingWelcomeStep({
                     fontFamily: "DMSans_400Regular",
                     fontSize: 13.5,
                     lineHeight: 20,
-                    color: "#777387",
+                    color: themeForeground("#777387"),
                   }}
                 >
                   {feature.body}

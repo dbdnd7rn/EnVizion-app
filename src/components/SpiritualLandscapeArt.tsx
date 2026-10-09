@@ -1,3 +1,4 @@
+import { themeTint } from "../themeColors";
 import React from "react";
 import { View } from "react-native";
 import Svg, {
@@ -90,7 +91,7 @@ export function SpiritualLandscapeArt({ height = 300 }: { height?: number }) {
         />
 
         <G opacity="0.94">
-          <Path d="M18 300C20 250 20 212 24 182" stroke="#694781" strokeWidth="3" fill="none" />
+          <Path d="M18 300C20 250 20 212 24 182" stroke={themeTint("#694781")} strokeWidth="3" fill="none" />
           <Path d="M24 222C12 211 8 200 10 190C22 194 29 205 24 222Z" fill="#75538F" />
           <Path d="M24 239C36 226 42 214 42 202C28 207 20 222 24 239Z" fill="#6E4B88" />
           <Path d="M24 263C9 251 3 238 4 226C18 232 28 246 24 263Z" fill="#80619A" />
@@ -101,7 +102,7 @@ export function SpiritualLandscapeArt({ height = 300 }: { height?: number }) {
           <Path d="M54 265C41 257 34 245 34 234C48 238 58 250 54 265Z" fill="#9470AB" />
 
           <Path d="M78 300C79 266 82 241 87 218" stroke="#6D4A86" strokeWidth="2.5" fill="none" />
-          <Ellipse cx="79" cy="233" rx="9" ry="16" fill="#795690" transform="rotate(-28 79 233)" />
+          <Ellipse cx="79" cy="233" rx="9" ry="16" fill={themeTint("#795690")} transform="rotate(-28 79 233)" />
           <Ellipse cx="94" cy="247" rx="9" ry="15" fill="#9470A8" transform="rotate(30 94 247)" />
           <Ellipse cx="75" cy="265" rx="8" ry="13" fill="#A17CB4" transform="rotate(-34 75 265)" />
         </G>

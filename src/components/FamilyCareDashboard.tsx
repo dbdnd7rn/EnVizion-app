@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import React, { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -361,7 +362,7 @@ export function FamilyCareDashboard({
           borderRadius: 15,
           borderWidth: 1,
           borderColor: C.line,
-          backgroundColor: C.white,
+          backgroundColor: themeBackground(C.white),
           paddingHorizontal: 16,
           flexDirection: "row",
           alignItems: "center",
