@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Switch, Text, View } from "react-native";
@@ -504,11 +505,11 @@ export function CarePacketScreen() {
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E7CFEF" }]}>ACTIVE CARE PROFILE</Text>
+        <Text style={[S.eyebrow, { color: themeForeground("#E7CFEF") }]}>ACTIVE CARE PROFILE</Text>
         <Text style={[S.h2, { color: C.white }]}>
           {state.careRecipientName || "Care profile"}
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           {state.accessRole === "owner"
             ? "Owner"
             : state.accessRole === "caregiver"

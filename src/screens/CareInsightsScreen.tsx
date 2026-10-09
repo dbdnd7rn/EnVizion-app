@@ -1,3 +1,4 @@
+import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
@@ -53,9 +54,9 @@ const BORDER = "#E7E2EB";
 
 function InsightsPage({ children }: { children: React.ReactNode }) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }} edges={["top"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: themeBackground("#FFFFFF") }} edges={["top"]}>
       <ScrollView
-        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        style={{ flex: 1, backgroundColor: themeBackground("#FFFFFF") }}
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: 6,
@@ -303,20 +304,20 @@ function ProfileCardBackground() {
     >
       <Defs>
         <LinearGradient id="profileBg" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#8C4FC3" />
-          <Stop offset="0.52" stopColor="#6A2B94" />
-          <Stop offset="1" stopColor="#9557C8" />
+          <Stop offset="0" stopColor={themeTint("#8C4FC3")} />
+          <Stop offset="0.52" stopColor={themeTint("#6A2B94")} />
+          <Stop offset="1" stopColor={themeTint("#9557C8")} />
         </LinearGradient>
         <LinearGradient id="profileGlass" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.5} />
-          <Stop offset="1" stopColor="#E0C9F8" stopOpacity={0.14} />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity={0.5} />
+          <Stop offset="1" stopColor={themeTint("#E0C9F8")} stopOpacity={0.14} />
         </LinearGradient>
       </Defs>
       <Rect x="0" y="0" width="420" height="154" rx="28" fill="url(#profileBg)" />
       <Path
         d="M-12 49C72-8 166-2 258 36C329 65 374 55 435 10"
         fill="none"
-        stroke="#FFFFFF"
+        stroke={themeTint("#FFFFFF")}
         strokeWidth="1.2"
         opacity={0.36}
       />
@@ -325,8 +326,8 @@ function ProfileCardBackground() {
         fill="url(#profileGlass)"
         opacity={0.35}
       />
-      <Circle cx="47" cy="18" r="59" fill="#FFFFFF" opacity={0.045} />
-      <Circle cx="385" cy="144" r="72" fill="#FFFFFF" opacity={0.04} />
+      <Circle cx="47" cy="18" r="59" fill={themeTint("#FFFFFF")} opacity={0.045} />
+      <Circle cx="385" cy="144" r="72" fill={themeTint("#FFFFFF")} opacity={0.04} />
     </Svg>
   );
 }
@@ -382,7 +383,7 @@ function GlassCard({
     borderWidth: 1,
     borderColor: BORDER,
     backgroundColor: "rgba(255,255,255,0.9)",
-    shadowColor: "#4D2A66",
+    shadowColor: themeShadow("#4D2A66"),
     shadowOpacity: 0.055,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 7 },
@@ -468,7 +469,7 @@ function MiniLineChart({
           <Path
             key={ratio}
             d={`M ${padX} ${padY + (height - padY * 2) * ratio} H ${width - padX}`}
-            stroke="#E9E2EF"
+            stroke={themeTint("#E9E2EF")}
             strokeWidth="1"
           />
         ))}
@@ -495,7 +496,7 @@ function MiniLineChart({
           <Polyline
             points={polyline(secondaryPoints)}
             fill="none"
-            stroke="#B49ACB"
+            stroke={themeTint("#B49ACB")}
             strokeWidth="2.4"
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -507,7 +508,7 @@ function MiniLineChart({
             cx={point.x}
             cy={point.y}
             r="3"
-            fill="#B49ACB"
+            fill={themeTint("#B49ACB")}
           />
         ))}
       </Svg>
@@ -664,7 +665,7 @@ function ProgressRing({ value, total }: { value: number; total: number }) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#E7E7EE"
+          stroke={themeTint("#E7E7EE")}
           strokeWidth={stroke}
         />
         {ratio > 0 && (
@@ -726,7 +727,7 @@ function PreparationRow({
           backgroundColor: SOFT_LAVENDER,
         }}
       >
-        <Icon name={icon} size={25} color="#4E398E" />
+        <Icon name={icon} size={25} color={themeForeground("#4E398E")} />
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text
@@ -762,7 +763,7 @@ function PreparationRow({
       >
         {value}/{total}
       </Text>
-      <Icon name="arrow-forward-outline" size={20} color="#5D5870" />
+      <Icon name="arrow-forward-outline" size={20} color={themeForeground("#5D5870")} />
     </Pressable>
   );
 }
@@ -774,9 +775,9 @@ function InfoPanel() {
         marginTop: 10,
         borderRadius: 18,
         padding: 15,
-        backgroundColor: "#F8F4FB",
+        backgroundColor: themeBackground("#F8F4FB"),
         borderWidth: 1,
-        borderColor: "#EBE2F1",
+        borderColor: themeBorder("#EBE2F1"),
         gap: 8,
       }}
     >
@@ -904,8 +905,8 @@ export function CareInsightsScreen() {
           style={({ pressed }) => ({
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: "#E9D8EF",
-            backgroundColor: "#FBF6FD",
+            borderColor: themeBorder("#E9D8EF"),
+            backgroundColor: themeBackground("#FBF6FD"),
             paddingHorizontal: 14,
             paddingVertical: 11,
             flexDirection: "row",
@@ -915,7 +916,7 @@ export function CareInsightsScreen() {
           })}
         >
           <Icon name="cloud-offline-outline" size={18} color={themeForeground(PURPLE)} />
-          <Text style={[S.small, { flex: 1, color: "#6C5677" }]}>
+          <Text style={[S.small, { flex: 1, color: themeForeground("#6C5677") }]}>
             {state.hydrated
               ? "Couldn’t refresh. Showing the latest loaded care record."
               : "Care data couldn’t load."}
@@ -987,7 +988,7 @@ export function CareInsightsScreen() {
             borderRadius: 28,
             overflow: "hidden",
             position: "relative",
-            shadowColor: "#5E237E",
+            shadowColor: themeShadow("#5E237E"),
             shadowOpacity: 0.16,
             shadowRadius: 20,
             shadowOffset: { width: 0, height: 10 },
@@ -1019,7 +1020,7 @@ export function CareInsightsScreen() {
                   style={{
                     fontFamily: "Lora_500Medium",
                     fontSize: 30,
-                    color: "#FFFFFF",
+                    color: themeForeground("#FFFFFF"),
                   }}
                 >
                   {profileInitial}
@@ -1032,7 +1033,7 @@ export function CareInsightsScreen() {
                     fontFamily: "DMSans_600SemiBold",
                     fontSize: 19,
                     lineHeight: 25,
-                    color: "#FFFFFF",
+                    color: themeForeground("#FFFFFF"),
                   }}
                 >
                   {profileName}
@@ -1042,19 +1043,19 @@ export function CareInsightsScreen() {
                     marginTop: 2,
                     fontFamily: "DMSans_400Regular",
                     fontSize: 12,
-                    color: "#E9DFF2",
+                    color: themeForeground("#E9DFF2"),
                   }}
                 >
                   Active care profile
                 </Text>
               </View>
               <View style={{ alignItems: "flex-end", gap: 4 }}>
-                {loading ? <ActivityIndicator size="small" color="#FFFFFF" /> : null}
+                {loading ? <ActivityIndicator size="small" color={themeForeground("#FFFFFF")} /> : null}
                 <Text
                   style={{
                     fontFamily: "DMSans_400Regular",
                     fontSize: 11.5,
-                    color: "#E8D8F0",
+                    color: themeForeground("#E8D8F0"),
                   }}
                 >
                   Past 7 days
@@ -1078,10 +1079,10 @@ export function CareInsightsScreen() {
                     fontFamily: "Lora_500Medium",
                     fontSize: 28,
                     lineHeight: 32,
-                    color: "#FFFFFF",
+                    color: themeForeground("#FFFFFF"),
                   }}
                 />
-                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: "#F0E7F5" }}>
+                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: themeForeground("#F0E7F5") }}>
                   Active days
                 </Text>
               </View>
@@ -1094,10 +1095,10 @@ export function CareInsightsScreen() {
                     fontFamily: "Lora_500Medium",
                     fontSize: 28,
                     lineHeight: 32,
-                    color: "#FFFFFF",
+                    color: themeForeground("#FFFFFF"),
                   }}
                 />
-                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: "#F0E7F5" }}>
+                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: themeForeground("#F0E7F5") }}>
                   Care events
                 </Text>
               </View>
@@ -1113,7 +1114,7 @@ export function CareInsightsScreen() {
               fontFamily: "DMSans_600SemiBold",
               fontSize: 9.5,
               letterSpacing: 2.2,
-              color: "#8B82A0",
+              color: themeForeground("#8B82A0"),
               textTransform: "uppercase",
             }}
           >
@@ -1126,7 +1127,7 @@ export function CareInsightsScreen() {
               [medications.recordedCount, "Dose entries"],
             ].map(([value, label], index) => (
               <React.Fragment key={String(label)}>
-                {index > 0 ? <View style={{ width: 1, height: 43, backgroundColor: "#E3DEE8" }} /> : null}
+                {index > 0 ? <View style={{ width: 1, height: 43, backgroundColor: themeBackground("#E3DEE8") }} /> : null}
                 <View style={{ flex: 1, alignItems: "center", gap: 3 }}>
                   <MetricNumber
                     value={value}
@@ -1199,7 +1200,7 @@ export function CareInsightsScreen() {
                         height: 15,
                         borderRadius: 8,
                         paddingHorizontal: 3,
-                        backgroundColor: "#EEE0F7",
+                        backgroundColor: themeBackground("#EEE0F7"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
@@ -1268,7 +1269,7 @@ export function CareInsightsScreen() {
               [medications.correctedCount, "Corrected"],
             ].map(([value, label], index) => (
               <React.Fragment key={String(label)}>
-                {index > 0 ? <View style={{ width: 1, height: 35, backgroundColor: "#DDD9E3" }} /> : null}
+                {index > 0 ? <View style={{ width: 1, height: 35, backgroundColor: themeBackground("#DDD9E3") }} /> : null}
                 <View style={{ flex: 1, flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 7 }}>
                   <MetricNumber
                     value={value}
@@ -1320,7 +1321,7 @@ export function CareInsightsScreen() {
               total={appointment.total}
               onPress={() => n.navigate("Appointments")}
             />
-            <View style={{ height: 1, backgroundColor: "#E5E1E9" }} />
+            <View style={{ height: 1, backgroundColor: themeBackground("#E5E1E9") }} />
             <PreparationRow
               title="Hospital to home"
               subtitle="Open checklist"
@@ -1345,11 +1346,11 @@ export function CareInsightsScreen() {
                     height: 12,
                     borderRadius: 6,
                     borderWidth: 1.5,
-                    borderColor: "#D8D8E3",
-                    backgroundColor: "#FFFFFF",
+                    borderColor: themeBorder("#D8D8E3"),
+                    backgroundColor: themeBackground("#FFFFFF"),
                   }}
                 />
-                <View style={{ width: 1.5, height: 43, backgroundColor: "#DEDDE6", marginTop: 5 }} />
+                <View style={{ width: 1.5, height: 43, backgroundColor: themeBackground("#DEDDE6"), marginTop: 5 }} />
               </View>
               <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 12 }}>
                 <View
@@ -1357,7 +1358,7 @@ export function CareInsightsScreen() {
                     width: 48,
                     height: 48,
                     borderRadius: 24,
-                    backgroundColor: "#F3EFF7",
+                    backgroundColor: themeBackground("#F3EFF7"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -1389,7 +1390,7 @@ export function CareInsightsScreen() {
                       }}
                     />
                     {index < timeline.length - 1 ? (
-                      <View style={{ flex: 1, width: 1.3, minHeight: 54, backgroundColor: "#E2DFE7", marginTop: 4 }} />
+                      <View style={{ flex: 1, width: 1.3, minHeight: 54, backgroundColor: themeBackground("#E2DFE7"), marginTop: 4 }} />
                     ) : null}
                   </View>
                   <View
@@ -1399,7 +1400,7 @@ export function CareInsightsScreen() {
                       paddingVertical: 10,
                       paddingBottom: 16,
                       borderBottomWidth: index < timeline.length - 1 ? 1 : 0,
-                      borderBottomColor: "#EEEAF0",
+                      borderBottomColor: themeBorder("#EEEAF0"),
                       flexDirection: "row",
                       gap: 11,
                     }}
@@ -1427,7 +1428,7 @@ export function CareInsightsScreen() {
                       <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11, lineHeight: 16, color: themeForeground(MUTED) }}>
                         {item.subtitle}
                       </Text>
-                      <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10, lineHeight: 15, color: "#918CA0" }}>
+                      <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10, lineHeight: 15, color: themeForeground("#918CA0") }}>
                         {formatRecordedAt(item.recordedAt)}
                       </Text>
                     </View>
@@ -1448,7 +1449,7 @@ export function CareInsightsScreen() {
           style={({ pressed }) => ({
             minHeight: 54,
             borderTopWidth: 1,
-            borderTopColor: "#E2DFE7",
+            borderTopColor: themeBorder("#E2DFE7"),
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
@@ -1456,7 +1457,7 @@ export function CareInsightsScreen() {
             opacity: pressed ? 0.65 : 1,
           })}
         >
-          <Icon name="information-circle-outline" size={21} color="#4E4A72" />
+          <Icon name="information-circle-outline" size={21} color={themeForeground("#4E4A72")} />
           <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: themeForeground(MUTED) }}>
             Records, not clinical interpretation.
           </Text>

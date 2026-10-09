@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import { themeBackground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -388,7 +389,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
       </View>
 
       {resolutionHistory.length > 0 && (
-        <Card style={{ backgroundColor: "#F8F4F9" }}>
+        <Card style={{ backgroundColor: themeBackground("#F8F4F9") }}>
           <Text style={S.h3}>Recent forecast outcomes</Text>
           {resolutionHistory.slice(0, 6).map((entry) => (
             <View
@@ -427,12 +428,12 @@ export function CoverageForecastScreen({ navigation }: Props) {
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <View style={S.row}>
-          <Icon name="telescope-outline" color="#E5C8ED" size={27} />
+          <Icon name="telescope-outline" color={themeForeground("#E5C8ED")} size={27} />
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={[S.h2, { color: C.white }]}>
               Forecasting is a planning signal, not an automatic decision.
             </Text>
-            <Txt style={{ color: "#E9DDED" }}>
+            <Txt style={{ color: themeForeground("#E9DDED") }}>
               Nothing is assigned automatically. Owners review the exact care
               window and decide whether to update availability, build the
               weekly plan, or confirm coverage.
@@ -492,8 +493,8 @@ export function CoverageForecastScreen({ navigation }: Props) {
           <Txt>Calculating future coverage pressure…</Txt>
         </Card>
       ) : !forecast.length ? (
-        <Card style={{ backgroundColor: "#EAF4EF" }}>
-          <Icon name="shield-checkmark-outline" color="#2D7656" />
+        <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
+          <Icon name="shield-checkmark-outline" color={themeForeground("#2D7656")} />
           <Text style={S.h3}>No uncovered recurring-care segments forecast.</Text>
           <Txt>
             Current shifts and Open Coverage reservations account for the
@@ -549,7 +550,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
             </View>
 
             {item.recommendedCaregiverName && (
-              <Card style={{ backgroundColor: "#EAF4EF" }}>
+              <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
                 <Txt style={S.small}>CURRENT STRONGEST RECORDED OPTION</Txt>
                 <Text style={S.h3}>{item.recommendedCaregiverName}</Text>
                 <Txt style={S.small}>

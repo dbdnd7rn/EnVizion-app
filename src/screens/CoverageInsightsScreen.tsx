@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -257,12 +258,12 @@ export function CoverageInsightsScreen({ navigation }: Props) {
                   </View>
 
                   <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-                    <View style={[S.pill, { backgroundColor: "#EAF4EF" }]}>
+                    <View style={[S.pill, { backgroundColor: themeBackground("#EAF4EF") }]}>
                       <Txt style={S.small}>
                         {item.acceptedRequests} accepted
                       </Txt>
                     </View>
-                    <View style={[S.pill, { backgroundColor: "#F1EDEF" }]}>
+                    <View style={[S.pill, { backgroundColor: themeBackground("#F1EDEF") }]}>
                       <Txt style={S.small}>
                         {item.declinedRequests} declined
                       </Txt>
