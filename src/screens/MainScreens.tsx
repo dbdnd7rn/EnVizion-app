@@ -2431,6 +2431,7 @@ export function ToolkitScreen() {
         )}
 
         {!hasActiveResults && (
+          <>
         <HomeReveal delay={70}>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <QuickCard
@@ -2524,6 +2525,7 @@ export function ToolkitScreen() {
             </View>
           </Pressable>
         </HomeReveal>
+          </>
         )}
 
         {hasActiveResults ? (
