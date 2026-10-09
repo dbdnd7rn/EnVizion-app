@@ -2,7 +2,8 @@ import { themeForeground, themeBorder, themeShadow, themeTint } from "../themeCo
 import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "react-native-qrcode-svg";
-import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Modal, Pressable, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import {
   loadEmergencyCenterData,
@@ -298,6 +299,33 @@ function ProfileTile({
   );
 }
 
+
+type EmergencyDetailSection =
+  | "hospital" | "allergies" | "conditions" | "directive"
+  | "bloodType" | "codeStatus" | "poa" | "language";
+
+const emergencyDetailLabels: Record<EmergencyDetailSection, string> = {
+  hospital: "Hospital",
+  allergies: "Allergies",
+  conditions: "Conditions",
+  directive: "Advance directive",
+  bloodType: "Blood type",
+  codeStatus: "Code status",
+  poa: "Healthcare POA",
+  language: "Primary language",
+};
+
+const emergencyDetailIcons: Record<EmergencyDetailSection, string> = {
+  hospital: "business-outline",
+  allergies: "medical-outline",
+  conditions: "heart-outline",
+  directive: "document-text-outline",
+  bloodType: "water-outline",
+  codeStatus: "shield-checkmark-outline",
+  poa: "person-circle-outline",
+  language: "language-outline",
+};
+
 export function EmergencyCenterScreen() {
   const n = useNav();
   const { state } = useCare();
@@ -308,6 +336,9 @@ export function EmergencyCenterScreen() {
   const [data, setData] = useState<EmergencyCenterData>(emptyData);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [activeDetail, setActiveDetail] = useState<EmergencyDetailSection | null>(null);
+  const [detailDirty, setDetailDirty] = useState(false);
+  const [confirmDiscardDetail, setConfirmDiscardDetail] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [offlineSummary, setOfflineSummary] =
@@ -528,6 +559,9 @@ export function EmergencyCenterScreen() {
         markReviewed,
       });
       setEditing(false);
+      setActiveDetail(null);
+      setDetailDirty(false);
+      setConfirmDiscardDetail(false);
       await refresh();
       setMessage(
         markReviewed
@@ -545,6 +579,99 @@ export function EmergencyCenterScreen() {
     }
   }
 
+
+  function openProfileDetail(section: EmergencyDetailSection) {
+    if (busy) return;
+    setDetailDirty(false);
+    setConfirmDiscardDetail(false);
+    setActiveDetail(section);
+  }
+
+  function discardDetail() {
+    // Only drafts are cleared. Saving is the only operation that writes records.
+    applyProfile(data);
+    setActiveDetail(null);
+    setDetailDirty(false);
+    setConfirmDiscardDetail(false);
+  }
+
+  function closeProfileDetail() {
+    if (busy) return;
+    if (detailDirty) {
+      setConfirmDiscardDetail(true);
+      return;
+    }
+    discardDetail();
+  }
+
+  function detailField(
+    label: string,
+    value: string,
+    onChange: (value: string) => void,
+    multiline = false,
+  ) {
+    if (readOnly) {
+      return (
+        <View style={{ gap: 7, borderRadius: 18,
+          padding: 15, backgroundColor: themeBackground("#F5EFFB") }}>
+          <Text style={[S.h3, { fontSize: 13 }]}>{label}</Text>
+          <Text selectable style={[S.body, { fontSize: 14 }]}>
+            {value.trim() || "Not set"}
+          </Text>
+        </View>
+      );
+    }
+    return (
+      <Field label={label} value={value} multiline={multiline}
+        onChange={(next) => {
+          setDetailDirty(true);
+          setConfirmDiscardDetail(false);
+          onChange(next);
+        }}/>
+    );
+  }
+
+  function detailChoices<T extends string>(
+    label: string,
+    choices: readonly (readonly [T, string])[],
+    selected: T,
+    onSelect: (value: T) => void,
+  ) {
+    return (
+      <View style={{ gap: 10 }}>
+        <Text style={[S.h3, { fontSize: 14 }]}>{label}</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {choices.map(([value, text]) => (
+            <Pressable key={value} accessibilityRole="radio"
+              accessibilityState={{ selected: selected === value, disabled: readOnly }}
+              disabled={readOnly}
+              onPress={() => {
+                setDetailDirty(true);
+                setConfirmDiscardDetail(false);
+                onSelect(value);
+              }}
+              style={({ pressed }) => ({
+                borderRadius: 19, minHeight: 42,
+                paddingVertical: 10, paddingHorizontal: 14,
+                backgroundColor: selected === value
+                  ? themeAction(C.purple) : themeBackground("#F2EAF9"),
+                borderWidth: 1,
+                borderColor: selected === value
+                  ? themeBorder("#8C4FAE") : themeBorder("#E8DBEF"),
+                opacity: pressed ? 0.74 : 1,
+                justifyContent: "center", alignItems: "center",
+              })}>
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13,
+                color: selected === value ? C.white : C.deep }}>
+                {text}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+    );
+  }
+
   if (!careRecipientId) {
     return (
       <Page>
@@ -558,6 +685,122 @@ export function EmergencyCenterScreen() {
 
   return (
     <Page>
+
+      <Modal visible={activeDetail !== null} animationType="slide"
+        presentationStyle="fullScreen" onRequestClose={closeProfileDetail}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: themeBackground(C.paper) }}>
+          <Page>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Back to Emergency profile"
+                disabled={busy} onPress={closeProfileDetail}
+                style={({ pressed }) => ({
+                  width: 46, height: 46, borderRadius: 23,
+                  backgroundColor: themeBackground("#F2EAFB"),
+                  alignItems: "center", justifyContent: "center",
+                  opacity: busy ? 0.45 : pressed ? 0.75 : 1,
+                })}>
+                <Icon name="arrow-back-outline" color={C.purple} size={23}/>
+              </Pressable>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={[S.h3, { fontSize: 18 }]} numberOfLines={1}>
+                  {activeDetail ? emergencyDetailLabels[activeDetail] : "Emergency profile"}
+                </Text>
+                <Text style={S.small}>Emergency profile</Text>
+              </View>
+            </View>
+
+            {activeDetail && (
+              <>
+                <Card style={{ borderRadius: 27, gap: 16,
+                  backgroundColor: themeBackground("#FCF9FF") }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <View style={{ width: 48, height: 48, borderRadius: 17,
+                      backgroundColor: themeBackground("#F0E5FA"),
+                      alignItems: "center", justifyContent: "center" }}>
+                      <Icon name={emergencyDetailIcons[activeDetail]}
+                        size={24} color={C.purple}/>
+                    </View>
+                    <View style={{ flex: 1, gap: 5 }}>
+                      <Text style={[S.h2, { fontSize: 20 }]}>
+                        {emergencyDetailLabels[activeDetail]}
+                      </Text>
+                      <Text style={S.small}>
+                        {readOnly ? "View saved care information." :
+                          "Update this detail without editing the whole profile."}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {activeDetail === "hospital" && (
+                    <>
+                      {detailField("Preferred hospital / facility", preferredHospital, setPreferredHospital)}
+                      {detailField("Local emergency number", localEmergencyNumber, setLocalEmergencyNumber)}
+                    </>
+                  )}
+                  {activeDetail === "allergies" &&
+                    detailField("Known allergies", allergies, setAllergies, true)}
+                  {activeDetail === "conditions" && (
+                    <>
+                      {detailField("Important conditions", importantConditions, setImportantConditions, true)}
+                      {detailField("Medical devices / equipment", medicalDevices, setMedicalDevices, true)}
+                    </>
+                  )}
+                  {activeDetail === "directive" &&
+                    detailField("Advance directive / document location",
+                      advanceDirectiveLocation, setAdvanceDirectiveLocation, true)}
+                  {activeDetail === "bloodType" &&
+                    detailField("Blood type", bloodType, setBloodType)}
+                  {activeDetail === "codeStatus" && (
+                    <>
+                      {detailChoices("Code status / resuscitation directive",
+                        codeStatusChoices, codeStatus, setCodeStatus)}
+                      {detailField("DNR / directive document location",
+                        dnrLocation, setDnrLocation, true)}
+                    </>
+                  )}
+                  {activeDetail === "poa" && (
+                    <>
+                      {detailChoices("Healthcare power of attorney",
+                        poaStatusChoices, poaStatus, setPoaStatus)}
+                      {detailField("POA name", poaName, setPoaName)}
+                      {detailField("POA phone", poaPhone, setPoaPhone)}
+                    </>
+                  )}
+                  {activeDetail === "language" &&
+                    detailField("Primary language", primaryLanguage, setPrimaryLanguage)}
+                </Card>
+
+                {confirmDiscardDetail && (
+                  <Card style={{ gap: 12, borderColor: themeBorder("#E3BBD8"),
+                    backgroundColor: themeBackground("#FFF5FA") }}>
+                    <Text accessibilityRole="alert" style={S.h3}>
+                      Discard unsaved changes?
+                    </Text>
+                    <Txt>Changes to this detail will not be saved.</Txt>
+                    <Button title="Keep editing" secondary
+                      onPress={() => setConfirmDiscardDetail(false)}/>
+                    <Button title="Discard changes and go back" secondary
+                      onPress={discardDetail}/>
+                  </Card>
+                )}
+
+                {Boolean(message) && (
+                  <Text accessibilityRole="alert" style={S.body}>{message}</Text>
+                )}
+
+                {!readOnly && (
+                  <Button title={busy ? "Saving…" : "Save " + emergencyDetailLabels[activeDetail]}
+                    icon="checkmark-outline" disabled={busy}
+                    onPress={() => void save(false)}/>
+                )}
+                <Button title="Back to Emergency profile" secondary
+                  disabled={busy} icon="arrow-back-outline"
+                  onPress={closeProfileDetail}/>
+              </>
+            )}
+          </Page>
+        </SafeAreaView>
+      </Modal>
       <View
         style={{
           minHeight: 58,
@@ -1122,7 +1365,7 @@ export function EmergencyCenterScreen() {
                   icon="business-outline"
                   accent="#2C8FD6"
                   background="#EEF7FF"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("hospital")}
                 />
                 <ProfileTile
                   title="Allergies"
@@ -1130,7 +1373,7 @@ export function EmergencyCenterScreen() {
                   icon="medical-outline"
                   accent="#E34168"
                   background="#FFF0F4"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("allergies")}
                 />
                 <ProfileTile
                   title="Conditions"
@@ -1138,7 +1381,7 @@ export function EmergencyCenterScreen() {
                   icon="heart-outline"
                   accent="#1E9D79"
                   background="#EEF9F5"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("conditions")}
                 />
                 <ProfileTile
                   title="Advance directive"
@@ -1146,7 +1389,7 @@ export function EmergencyCenterScreen() {
                   icon="document-text-outline"
                   accent="#A05A4E"
                   background="#FFF5F0"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("directive")}
                 />
                 <ProfileTile
                   title="Blood type"
@@ -1154,7 +1397,7 @@ export function EmergencyCenterScreen() {
                   icon="water-outline"
                   accent="#C43C57"
                   background="#FFF0F3"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("bloodType")}
                 />
                 <ProfileTile
                   title="Code status"
@@ -1164,7 +1407,7 @@ export function EmergencyCenterScreen() {
                   icon="shield-checkmark-outline"
                   accent="#6B4BBE"
                   background="#F3EFFF"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("codeStatus")}
                 />
                 <ProfileTile
                   title="Healthcare POA"
@@ -1174,7 +1417,7 @@ export function EmergencyCenterScreen() {
                   icon="person-circle-outline"
                   accent="#21806B"
                   background="#EDF8F4"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("poa")}
                 />
                 <ProfileTile
                   title="Primary language"
@@ -1182,7 +1425,7 @@ export function EmergencyCenterScreen() {
                   icon="language-outline"
                   accent="#2C79B8"
                   background="#EEF7FF"
-                  onPress={() => !readOnly && setEditing(true)}
+                  onPress={() => openProfileDetail("language")}
                 />
               </View>
             ) : (
