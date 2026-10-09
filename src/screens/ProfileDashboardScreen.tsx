@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeBorder, themeShadow } from "../themeColors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo, ActivityIndicator, Animated, Easing,
@@ -25,10 +26,10 @@ function Glass({
 }) {
   return (
     <View style={[{
-      borderRadius: 23, borderWidth: 1, borderColor: "#E8DDF0",
-      backgroundColor: "#FFFFFFE9",
+      borderRadius: 23, borderWidth: 1, borderColor: themeBorder("#E8DDF0"),
+      backgroundColor: themeBackground("#FFFFFFE9"),
       overflow: "hidden",
-      shadowColor: "#643D72", shadowOpacity: 0.065,
+      shadowColor: themeShadow("#643D72"), shadowOpacity: 0.065,
       shadowRadius: 13, shadowOffset: { width: 0, height: 6 }, elevation: 2,
     }, style]}>
       <View pointerEvents="none" style={{ position: "absolute", right: -1, bottom: -1, opacity: 0.9 }}>
@@ -48,7 +49,7 @@ function IconTile({ name, tint = "#F1E6FB" }: { name: string; tint?: string }) {
       width: 47, height: 47, borderRadius: 17,
       backgroundColor: tint, alignItems: "center", justifyContent: "center",
     }}>
-      <Icon name={name} size={23} color={PURPLE} />
+      <Icon name={name} size={23} color={themeForeground(PURPLE)} />
     </View>
   );
 }
@@ -74,11 +75,11 @@ function ProfileEntry({
           <View style={{ flex: 1, gap: 3 }}>
             <Text style={{
               fontFamily: "DMSans_700Bold", fontSize: 14.2, lineHeight: 19,
-              color: INK,
+              color: themeForeground(INK),
             }}>{title}</Text>
             <Text style={{
               fontFamily: "DMSans_400Regular", fontSize: 11.5, lineHeight: 16,
-              color: MUTED,
+              color: themeForeground(MUTED),
             }}>{subtitle}</Text>
           </View>
           <Icon name="chevron-forward-outline" size={20} color="#6B5082" />
@@ -100,12 +101,12 @@ function MiniEntry({
       <Glass>
         <View style={{ minHeight: 117, padding: 12, gap: 8 }}>
           <IconTile name={icon} />
-          <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, lineHeight: 16.5, color: INK }}>
+          <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, lineHeight: 16.5, color: themeForeground(INK) }}>
             {title}
           </Text>
           <Text style={{
             fontFamily: "DMSans_400Regular", fontSize: 11, lineHeight: 15,
-            color: MUTED,
+            color: themeForeground(MUTED),
           }}>{subtitle}</Text>
         </View>
       </Glass>
@@ -201,7 +202,7 @@ export function ProfileDashboardScreen() {
     <Page>
       <HeroReveal>
         <Glass tint="#F0DFFB">
-          <View style={{ padding: 18, gap: 12, backgroundColor: "#F9F3FCCD" }}>
+          <View style={{ padding: 18, gap: 12, backgroundColor: themeBackground("#F9F3FCCD") }}>
             <View pointerEvents="none" style={{ position: "absolute", right: -20, top: -20 }}>
               <Svg width="170" height="140" viewBox="0 0 170 140">
                 <Circle cx="118" cy="35" r="76" fill="#F0DDFB" opacity={0.54}/>
@@ -209,16 +210,16 @@ export function ProfileDashboardScreen() {
               </Svg>
             </View>
             <Text style={{
-              color: PURPLE, letterSpacing: 2.4, fontFamily: "DMSans_700Bold", fontSize: 10.5,
+              color: themeForeground(PURPLE), letterSpacing: 2.4, fontFamily: "DMSans_700Bold", fontSize: 10.5,
             }}>YOUR CARE DASHBOARD</Text>
             <View style={{ flexDirection: "row", gap: 8, alignItems: "center", minHeight: 130 }}>
               <View style={{ flex: 1, gap: 8 }}>
                 <Text accessibilityRole="header" numberOfLines={2}
                   adjustsFontSizeToFit style={{
                     fontFamily: "Lora_500Medium", fontSize: compact ? 31 : 36,
-                    lineHeight: compact ? 38 : 43, letterSpacing: -1.1, color: INK,
+                    lineHeight: compact ? 38 : 43, letterSpacing: -1.1, color: themeForeground(INK),
                   }}>Hello, {firstName}.</Text>
-                <Text style={{ color: "#686380", fontFamily: "DMSans_400Regular", fontSize: 12.5, lineHeight: 19 }}>
+                <Text style={{ color: themeForeground("#686380"), fontFamily: "DMSans_400Regular", fontSize: 12.5, lineHeight: 19 }}>
                   {state.careMode === "self"
                     ? "Your care information, preferences and support settings live here."
                     : "Your care information and support settings, together."}
@@ -231,20 +232,20 @@ export function ProfileDashboardScreen() {
                   style={({ pressed }) => ({
                     minHeight: 42, paddingHorizontal: 10, flexDirection: "row",
                     gap: 5, alignItems: "center", borderRadius: 18,
-                    backgroundColor: "#F8F1FC", borderWidth: 1, borderColor: "#E8D6F3",
+                    backgroundColor: themeBackground("#F8F1FC"), borderWidth: 1, borderColor: themeBorder("#E8D6F3"),
                     opacity: pressed ? 0.7 : 1,
                   })}>
-                  <Icon name="camera-outline" size={17} color={PURPLE}/>
-                  <Text style={{ fontFamily: "DMSans_600SemiBold", color: PURPLE, fontSize: 11 }}>Edit profile</Text>
+                  <Icon name="camera-outline" size={17} color={themeForeground(PURPLE)}/>
+                  <Text style={{ fontFamily: "DMSans_600SemiBold", color: themeForeground(PURPLE), fontSize: 11 }}>Edit profile</Text>
                 </Pressable>
               </View>
             </View>
 
             {editOpen && (
-              <View style={{ gap: 8, padding: 12, backgroundColor: "#FFFFFFDA",
-                borderWidth: 1, borderColor: "#E5D6EF", borderRadius: 18 }}>
-                <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 13, color: INK }}>Your profile picture</Text>
-                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: MUTED, lineHeight: 17 }}>
+              <View style={{ gap: 8, padding: 12, backgroundColor: themeBackground("#FFFFFFDA"),
+                borderWidth: 1, borderColor: themeBorder("#E5D6EF"), borderRadius: 18 }}>
+                <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 13, color: themeForeground(INK) }}>Your profile picture</Text>
+                <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: themeForeground(MUTED), lineHeight: 17 }}>
                   Choose a JPEG, PNG or WebP image (up to 5 MB). Only you can access the stored photo.
                 </Text>
                 <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -253,10 +254,10 @@ export function ProfileDashboardScreen() {
                       if (success) { setMessage("Profile photo updated."); setEditOpen(false); }
                     })}
                     style={({ pressed }) => ({
-                      backgroundColor: PURPLE, minHeight: 45, paddingHorizontal: 16, borderRadius: 19,
+                      backgroundColor: themeBackground(PURPLE), minHeight: 45, paddingHorizontal: 16, borderRadius: 19,
                       alignItems: "center", justifyContent: "center", opacity: photoBusy ? 0.5 : pressed ? 0.75 : 1,
                     })}>
-                    <Text style={{ color: "#FFFFFF", fontFamily: "DMSans_700Bold", fontSize: 12.5 }}>
+                    <Text style={{ color: themeForeground("#FFFFFF"), fontFamily: "DMSans_700Bold", fontSize: 12.5 }}>
                       {photoBusy ? "Saving photo…" : "Choose photo"}
                     </Text>
                   </Pressable>
@@ -266,13 +267,13 @@ export function ProfileDashboardScreen() {
                         if (success) { setMessage("Profile photo removed."); setEditOpen(false); }
                       })}
                       style={{ minHeight: 45, paddingHorizontal: 12, justifyContent: "center" }}>
-                      <Text style={{ color: "#9B3B6C", fontFamily: "DMSans_600SemiBold", fontSize: 12.5 }}>Remove photo</Text>
+                      <Text style={{ color: themeForeground("#9B3B6C"), fontFamily: "DMSans_600SemiBold", fontSize: 12.5 }}>Remove photo</Text>
                     </Pressable>
                   )}
                 </View>
-                {photoBusy && <ActivityIndicator color={PURPLE}/>}
+                {photoBusy && <ActivityIndicator color={themeForeground(PURPLE)}/>}
                 {Boolean(photoError) && (
-                  <Text accessibilityRole="alert" style={{ color: "#B82C56", fontSize: 12.5 }}>{photoError}</Text>
+                  <Text accessibilityRole="alert" style={{ color: themeForeground("#B82C56"), fontSize: 12.5 }}>{photoError}</Text>
                 )}
               </View>
             )}
@@ -293,19 +294,19 @@ export function ProfileDashboardScreen() {
             ].map((item, index) => (
               <React.Fragment key={item.title}>
                 {index > 0 && (
-                  <View style={{ width: 1, marginVertical: 6, backgroundColor: "#E4D7ED" }} />
+                  <View style={{ width: 1, marginVertical: 6, backgroundColor: themeBackground("#E4D7ED") }} />
                 )}
                 <View style={{
                   flex: 1, minWidth: 0, paddingHorizontal: 6,
                   alignItems: "center", gap: 5, justifyContent: "center",
                 }}>
-                  <Icon name={item.icon} size={22} color={PURPLE} />
+                  <Icon name={item.icon} size={22} color={themeForeground(PURPLE)} />
                   <Text numberOfLines={2} style={{
-                    fontFamily: "DMSans_700Bold", color: INK,
+                    fontFamily: "DMSans_700Bold", color: themeForeground(INK),
                     fontSize: compact ? 10 : 11, textAlign: "center", lineHeight: 14,
                   }}>{item.title}</Text>
                   <Text numberOfLines={1} style={{
-                    fontFamily: "DMSans_400Regular", color: MUTED,
+                    fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
                     fontSize: 10, textAlign: "center",
                   }}>{item.value}</Text>
                 </View>
@@ -317,39 +318,39 @@ export function ProfileDashboardScreen() {
 
       <View style={{ gap: 10 }}>
         <Text accessibilityRole="header" style={{
-          fontFamily: "Lora_500Medium", color: INK, fontSize: 23, lineHeight: 31,
+          fontFamily: "Lora_500Medium", color: themeForeground(INK), fontSize: 23, lineHeight: 31,
         }}>Account overview</Text>
         <Glass>
           <View style={{ flexDirection: "row", alignItems: "stretch", paddingVertical: 14, paddingHorizontal: 10 }}>
             <View style={{ flex: 1.55, gap: 8, alignItems: "center", justifyContent: "center" }}>
-              <Icon name="mail-outline" size={22} color={PURPLE}/>
-              <Text style={{ fontFamily: "DMSans_700Bold", color: INK, fontSize: 12 }}>Your account</Text>
+              <Icon name="mail-outline" size={22} color={themeForeground(PURPLE)}/>
+              <Text style={{ fontFamily: "DMSans_700Bold", color: themeForeground(INK), fontSize: 12 }}>Your account</Text>
               <Text numberOfLines={2} style={{
-                fontFamily: "DMSans_400Regular", color: MUTED,
+                fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
                 textAlign: "center", fontSize: 10.5, lineHeight: 14,
               }}>{user?.email || "Signed in"}</Text>
             </View>
-            <View style={{ width: 1, backgroundColor: "#E9DFEF", marginHorizontal: 6 }}/>
+            <View style={{ width: 1, backgroundColor: themeBackground("#E9DFEF"), marginHorizontal: 6 }}/>
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 4 }}>
-              <Icon name="analytics-outline" size={23} color={PURPLE}/>
-              <Text style={{ fontFamily: "Lora_500Medium", color: INK, fontSize: 23 }}>{state.entries.length}</Text>
-              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10.5, color: MUTED, textAlign: "center" }}>Care observations</Text>
+              <Icon name="analytics-outline" size={23} color={themeForeground(PURPLE)}/>
+              <Text style={{ fontFamily: "Lora_500Medium", color: themeForeground(INK), fontSize: 23 }}>{state.entries.length}</Text>
+              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10.5, color: themeForeground(MUTED), textAlign: "center" }}>Care observations</Text>
             </View>
-            <View style={{ width: 1, backgroundColor: "#E9DFEF", marginHorizontal: 6 }}/>
+            <View style={{ width: 1, backgroundColor: themeBackground("#E9DFEF"), marginHorizontal: 6 }}/>
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 4 }}>
-              <Icon name="bookmark-outline" size={23} color={PURPLE}/>
-              <Text style={{ fontFamily: "Lora_500Medium", color: INK, fontSize: 23 }}>{state.saved.length}</Text>
-              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10.5, color: MUTED, textAlign: "center" }}>Saved resources</Text>
+              <Icon name="bookmark-outline" size={23} color={themeForeground(PURPLE)}/>
+              <Text style={{ fontFamily: "Lora_500Medium", color: themeForeground(INK), fontSize: 23 }}>{state.saved.length}</Text>
+              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10.5, color: themeForeground(MUTED), textAlign: "center" }}>Saved resources</Text>
             </View>
           </View>
         </Glass>
       </View>
 
       <View style={{ gap: 9 }}>
-        <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold", fontSize: 19, color: INK, marginBottom: 2 }}>
+        <Text accessibilityRole="header" style={{ fontFamily: "DMSans_700Bold", fontSize: 19, color: themeForeground(INK), marginBottom: 2 }}>
           Account & preferences
         </Text>
-        <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12.5, lineHeight: 18, color: MUTED, marginBottom: 4 }}>
+        <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12.5, lineHeight: 18, color: themeForeground(MUTED), marginBottom: 4 }}>
           Your personal settings stay here. Care tasks and team coordination live in the Care tab.
         </Text>
         <View style={{ flexDirection: "row", gap: 9 }}>
@@ -376,10 +377,10 @@ export function ProfileDashboardScreen() {
           }}>
             <IconTile name="heart-outline"/>
             <View style={{ flex: 1, gap: 4 }}>
-              <Text style={{ color: INK, fontFamily: "DMSans_700Bold", fontSize: 13, lineHeight: 18 }}>
+              <Text style={{ color: themeForeground(INK), fontFamily: "DMSans_700Bold", fontSize: 13, lineHeight: 18 }}>
                 Spiritual encouragement on home
               </Text>
-              <Text style={{ color: MUTED, fontFamily: "DMSans_400Regular", fontSize: 11.5 }}>
+              <Text style={{ color: themeForeground(MUTED), fontFamily: "DMSans_400Regular", fontSize: 11.5 }}>
                 Receive uplifting messages and prayers.
               </Text>
             </View>
@@ -392,22 +393,22 @@ export function ProfileDashboardScreen() {
 
       {Boolean(message) && (
         <Text accessibilityRole="alert" style={{
-          color: "#75338F", fontFamily: "DMSans_600SemiBold", fontSize: 12.5,
+          color: themeForeground("#75338F"), fontFamily: "DMSans_600SemiBold", fontSize: 12.5,
         }}>{message}</Text>
       )}
       <Pressable accessibilityRole="button" accessibilityLabel="Sign out"
         onPress={() => void signOut()}
         style={({ pressed }) => ({
-          minHeight: 55, borderRadius: 27, backgroundColor: "#F4E9FC",
+          minHeight: 55, borderRadius: 27, backgroundColor: themeBackground("#F4E9FC"),
           alignItems: "center", justifyContent: "center",
           flexDirection: "row", gap: 7, opacity: pressed ? 0.7 : 1,
-          borderColor: "#E6D4F0", borderWidth: 1,
+          borderColor: themeBorder("#E6D4F0"), borderWidth: 1,
         })}>
-        <Icon name="log-out-outline" size={21} color={PURPLE}/>
-        <Text style={{ color: PURPLE, fontFamily: "DMSans_700Bold", fontSize: 15 }}>Sign out</Text>
+        <Icon name="log-out-outline" size={21} color={themeForeground(PURPLE)}/>
+        <Text style={{ color: themeForeground(PURPLE), fontFamily: "DMSans_700Bold", fontSize: 15 }}>Sign out</Text>
       </Pressable>
       <Text style={{
-        color: "#82798F", fontFamily: "DMSans_400Regular",
+        color: themeForeground("#82798F"), fontFamily: "DMSans_400Regular",
         fontSize: 10.5, lineHeight: 16, textAlign: "center",
       }}>
         EnVizion Life Caregiver Toolkit & Patient Advocate Support Program.

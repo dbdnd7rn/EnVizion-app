@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeBorder, themeShadow, themedStyles } from "../themeColors";
 import React, {
   useEffect,
   useMemo,
@@ -590,10 +591,10 @@ export function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#FCFAFF",
+    backgroundColor: themeBackground("#FCFAFF"),
     overflow: "hidden",
   },
   scroll: {
@@ -622,7 +623,7 @@ const styles = StyleSheet.create({
     left: 72,
     right: 72,
     textAlign: "center",
-    color: "#11143A",
+    color: themeForeground("#11143A"),
     fontFamily: "DMSans_700Bold",
     fontSize: 20,
     letterSpacing: -0.3,
@@ -636,7 +637,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.68)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#613486",
+    shadowColor: themeShadow("#613486"),
     shadowOpacity: 0.08,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 9 },
@@ -656,13 +657,13 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   eyebrow: {
-    color: "#6C2794",
+    color: themeForeground("#6C2794"),
     fontFamily: "DMSans_700Bold",
     fontSize: 11,
     letterSpacing: 3.6,
   },
   heroTitle: {
-    color: "#10133B",
+    color: themeForeground("#10133B"),
     fontFamily: "DMSans_700Bold",
     fontSize: 39,
     lineHeight: 45,
@@ -673,7 +674,7 @@ const styles = StyleSheet.create({
     lineHeight: 40,
   },
   heroSubtitle: {
-    color: "#58566F",
+    color: themeForeground("#58566F"),
     fontFamily: "DMSans_400Regular",
     fontSize: 19,
     lineHeight: 27,
@@ -702,7 +703,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.95)",
     backgroundColor: "rgba(255,255,255,0.62)",
-    shadowColor: "#6D3E8A",
+    shadowColor: themeShadow("#6D3E8A"),
     shadowOpacity: 0.07,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
@@ -719,8 +720,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   segmentSelected: {
-    backgroundColor: "#8739C0",
-    shadowColor: "#7F39B6",
+    backgroundColor: themeBackground("#8739C0"),
+    shadowColor: themeShadow("#7F39B6"),
     shadowOpacity: 0.22,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -731,12 +732,12 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.985 }],
   },
   segmentText: {
-    color: "#65268E",
+    color: themeForeground("#65268E"),
     fontFamily: "DMSans_700Bold",
     fontSize: 16,
   },
   segmentTextSelected: {
-    color: "#FFFFFF",
+    color: themeForeground("#FFFFFF"),
   },
   badge: {
     minWidth: 28,
@@ -745,10 +746,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#C73969",
+    backgroundColor: themeBackground("#C73969"),
   },
   badgeText: {
-    color: "#FFFFFF",
+    color: themeForeground("#FFFFFF"),
     fontFamily: "DMSans_700Bold",
     fontSize: 13,
   },
@@ -761,7 +762,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.68)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#613486",
+    shadowColor: themeShadow("#613486"),
     shadowOpacity: 0.08,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
@@ -787,7 +788,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(248,237,255,0.74)",
   },
   markButtonText: {
-    color: "#6C2A98",
+    color: themeForeground("#6C2A98"),
     fontFamily: "DMSans_700Bold",
     fontSize: 14,
   },
@@ -803,12 +804,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 9,
     borderWidth: 1,
-    borderColor: "#F2D6E0",
+    borderColor: themeBorder("#F2D6E0"),
     backgroundColor: "rgba(255,244,248,0.88)",
   },
   errorText: {
     flex: 1,
-    color: "#933D59",
+    color: themeForeground("#933D59"),
     fontFamily: "DMSans_400Regular",
     fontSize: 13,
     lineHeight: 19,
@@ -816,7 +817,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginLeft: 4,
     marginBottom: 14,
-    color: "#66647A",
+    color: themeForeground("#66647A"),
     fontFamily: "DMSans_600SemiBold",
     fontSize: 17,
   },
@@ -834,7 +835,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    shadowColor: "#583779",
+    shadowColor: themeShadow("#583779"),
     shadowOpacity: 0.07,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 10 },
@@ -860,19 +861,19 @@ const styles = StyleSheet.create({
     paddingRight: 24,
   },
   cardTitle: {
-    color: "#11143A",
+    color: themeForeground("#11143A"),
     fontFamily: "DMSans_700Bold",
     fontSize: 16,
     lineHeight: 22,
   },
   cardMessage: {
-    color: "#343455",
+    color: themeForeground("#343455"),
     fontFamily: "DMSans_400Regular",
     fontSize: 14,
     lineHeight: 20,
   },
   timestamp: {
-    color: "#7A7890",
+    color: themeForeground("#7A7890"),
     fontFamily: "DMSans_400Regular",
     fontSize: 12,
     lineHeight: 18,
@@ -884,7 +885,7 @@ const styles = StyleSheet.create({
     width: 11,
     height: 11,
     borderRadius: 6,
-    backgroundColor: "#C84A6A",
+    backgroundColor: themeBackground("#C84A6A"),
   },
   chevron: {
     position: "absolute",
@@ -901,7 +902,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
     gap: 8,
-    shadowColor: "#583779",
+    shadowColor: themeShadow("#583779"),
     shadowOpacity: 0.06,
     shadowRadius: 20,
     shadowOffset: { width: 0, height: 10 },
@@ -917,12 +918,12 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   stateTitle: {
-    color: "#11143A",
+    color: themeForeground("#11143A"),
     fontFamily: "DMSans_700Bold",
     fontSize: 16,
   },
   stateText: {
-    color: "#77758B",
+    color: themeForeground("#77758B"),
     fontFamily: "DMSans_400Regular",
     fontSize: 13,
     lineHeight: 19,
@@ -938,7 +939,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   footerText: {
-    color: "#858298",
+    color: themeForeground("#858298"),
     fontFamily: "DMSans_400Regular",
     fontSize: 12,
     lineHeight: 18,
@@ -977,4 +978,4 @@ const styles = StyleSheet.create({
     borderRadius: 260,
     backgroundColor: "rgba(226, 211, 255, 0.30)",
   },
-});
+}));

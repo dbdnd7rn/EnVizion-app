@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeBorder, themeShadow } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -289,7 +290,7 @@ export function HomeScreen() {
                   width: 48,
                   height: 48,
                   borderRadius: 24,
-                  backgroundColor: "#F1E8F8",
+                  backgroundColor: themeBackground("#F1E8F8"),
                   alignItems: "center",
                   justifyContent: "center",
                   opacity: pressed ? 0.72 : 1,
@@ -309,7 +310,7 @@ export function HomeScreen() {
                 style={[
                   S.eyebrow,
                   {
-                    color: "#8C8290",
+                    color: themeForeground("#8C8290"),
                     fontSize: 10,
                     letterSpacing: 2.2,
                     marginLeft: 2,
@@ -371,7 +372,7 @@ export function HomeScreen() {
                     style={{
                       fontFamily: "DMSans_700Bold",
                       fontSize: 17,
-                      color: "#211B2C",
+                      color: themeForeground("#211B2C"),
                     }}
                   >
                     {state.careRecipientName || "Care profile"}
@@ -381,7 +382,7 @@ export function HomeScreen() {
                     style={{
                       fontFamily: "DMSans_400Regular",
                       fontSize: 12.5,
-                      color: "#817789",
+                      color: themeForeground("#817789"),
                     }}
                   >
                     {state.careMode === "self"
@@ -395,7 +396,7 @@ export function HomeScreen() {
                     width: 34,
                     height: 34,
                     borderRadius: 13,
-                    backgroundColor: "#F4EDF7",
+                    backgroundColor: themeBackground("#F4EDF7"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -415,7 +416,7 @@ export function HomeScreen() {
               </Pressable>
 
               {switcherOpen && careSpaces.length > 1 && (
-                <Card style={{ gap: 7, padding: 9, backgroundColor: "#FFFEFF" }}>
+                <Card style={{ gap: 7, padding: 9, backgroundColor: themeBackground("#FFFEFF") }}>
                   {careSpaces.map((space) => {
                     const selected =
                       space.active ||
@@ -667,7 +668,7 @@ export function HomeScreen() {
                 </View>
 
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={[S.eyebrow, { color: "#8A6530" }]}>
+                  <Text style={[S.eyebrow, { color: themeForeground("#8A6530") }]}>
                     CARE TEAM NEEDS ATTENTION
                   </Text>
                   <Text style={[S.h3, { fontSize: 14.5 }]}>
@@ -694,7 +695,7 @@ export function HomeScreen() {
               minHeight: 224,
               borderRadius: 30,
               overflow: "hidden",
-              backgroundColor: "#FFFDFC",
+              backgroundColor: themeBackground("#FFFDFC"),
               marginHorizontal: -2,
             }}
           >
@@ -724,7 +725,7 @@ export function HomeScreen() {
               <Text
                 style={[
                   S.eyebrow,
-                  { color: "#7A3F96", fontSize: 11, letterSpacing: 2.8 },
+                  { color: themeForeground("#7A3F96"), fontSize: 11, letterSpacing: 2.8 },
                 ]}
               >
                 {state.careMode === "self" ? "YOUR CARE DASHBOARD" : "YOUR CARE COMPANION"}
@@ -736,7 +737,7 @@ export function HomeScreen() {
                   fontSize: compact ? 36 : 40,
                   lineHeight: compact ? 42 : 47,
                   letterSpacing: -1.15,
-                  color: "#17153A",
+                  color: themeForeground("#17153A"),
                 }}
               >
                 {greeting},{"\n"}{displayName}.
@@ -746,7 +747,7 @@ export function HomeScreen() {
                   fontFamily: "DMSans_400Regular",
                   fontSize: 18,
                   lineHeight: 25,
-                  color: "#77758B",
+                  color: themeForeground("#77758B"),
                   maxWidth: heroTextWidth,
                 }}
               >
@@ -767,13 +768,13 @@ export function HomeScreen() {
               position: "relative",
               overflow: "hidden",
               borderRadius: 28,
-              backgroundColor: "#63307D",
+              backgroundColor: themeBackground("#63307D"),
               paddingHorizontal: 23,
               paddingVertical: 22,
               minHeight: 205,
               opacity: pressed ? 0.9 : 1,
               transform: [{ scale: pressed ? 0.988 : 1 }],
-              shadowColor: "#5A246C",
+              shadowColor: themeShadow("#5A246C"),
               shadowOpacity: 0.2,
               shadowRadius: 20,
               shadowOffset: { width: 0, height: 10 },
@@ -789,7 +790,7 @@ export function HomeScreen() {
                 borderRadius: 120,
                 right: -104,
                 top: -124,
-                backgroundColor: "#FFFFFF0C",
+                backgroundColor: themeBackground("#FFFFFF0C"),
               }}
             />
             <View
@@ -801,7 +802,7 @@ export function HomeScreen() {
                 borderRadius: 77,
                 right: 52,
                 bottom: -105,
-                backgroundColor: "#FFFFFF0A",
+                backgroundColor: themeBackground("#FFFFFF0A"),
               }}
             />
             <View
@@ -813,7 +814,7 @@ export function HomeScreen() {
                 borderRadius: 39,
                 left: -22,
                 bottom: -28,
-                backgroundColor: "#B277CA17",
+                backgroundColor: themeBackground("#B277CA17"),
               }}
             />
 
@@ -821,7 +822,7 @@ export function HomeScreen() {
               style={[
                 S.eyebrow,
                 {
-                  color: "#F1DAF7",
+                  color: themeForeground("#F1DAF7"),
                   fontSize: 11,
                   letterSpacing: 2.8,
                   marginBottom: 14,
@@ -850,7 +851,7 @@ export function HomeScreen() {
                     fontFamily: "DMSans_400Regular",
                     fontSize: 15,
                     lineHeight: 22,
-                    color: "#EEE2F2",
+                    color: themeForeground("#EEE2F2"),
                     maxWidth: 258,
                   }}
                 >
@@ -865,7 +866,7 @@ export function HomeScreen() {
                       width: 72,
                       height: 72,
                       borderRadius: 23,
-                      backgroundColor: "#F7EDFB",
+                      backgroundColor: themeBackground("#F7EDFB"),
                       alignItems: "center",
                       justifyContent: "center",
                       transform: [{ rotate: "4deg" }],
@@ -879,10 +880,10 @@ export function HomeScreen() {
                     width: 53,
                     height: 53,
                     borderRadius: 27,
-                    backgroundColor: C.white,
+                    backgroundColor: themeBackground(C.white),
                     alignItems: "center",
                     justifyContent: "center",
-                    shadowColor: "#2A1831",
+                    shadowColor: themeShadow("#2A1831"),
                     shadowOpacity: 0.08,
                     shadowRadius: 10,
                     shadowOffset: { width: 0, height: 4 },
@@ -902,20 +903,20 @@ export function HomeScreen() {
               borderRadius: 25,
               padding: 15,
               gap: 13,
-              backgroundColor: "#FBF8FD",
-              borderColor: "#EDE4F1",
+              backgroundColor: themeBackground("#FBF8FD"),
+              borderColor: themeBorder("#EDE4F1"),
             }}
           >
             <View style={S.between}>
               <Text
                 style={[
                   S.eyebrow,
-                  { color: "#72408F", fontSize: 10.5, letterSpacing: 2.4 },
+                  { color: themeForeground("#72408F"), fontSize: 10.5, letterSpacing: 2.4 },
                 ]}
               >
                 TODAY AT A GLANCE
               </Text>
-              <Text style={[S.small, { color: "#80758B" }]}>
+              <Text style={[S.small, { color: themeForeground("#80758B") }]}>
                 From your care records
               </Text>
             </View>
@@ -1005,8 +1006,8 @@ export function HomeScreen() {
               minHeight: 146,
               borderRadius: 25,
               padding: 20,
-              backgroundColor: "#FFFDFD",
-              borderColor: "#F0E9ED",
+              backgroundColor: themeBackground("#FFFDFD"),
+              borderColor: themeBorder("#F0E9ED"),
             }}
           >
             <View
@@ -1029,7 +1030,7 @@ export function HomeScreen() {
                 <Text
                   style={[
                     S.eyebrow,
-                    { color: "#824A9D", fontSize: 10, letterSpacing: 2.1 },
+                    { color: themeForeground("#824A9D"), fontSize: 10, letterSpacing: 2.1 },
                   ]}
                 >
                   YOU’RE MAKING A DIFFERENCE
@@ -1040,7 +1041,7 @@ export function HomeScreen() {
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 21,
                   lineHeight: 28,
-                  color: "#18163C",
+                  color: themeForeground("#18163C"),
                 }}
               >
                 “Small steps today{"\n"}create brighter tomorrows.”
@@ -1074,10 +1075,10 @@ function HomeStat({
         borderRadius: 19,
         paddingHorizontal: 9,
         paddingVertical: 12,
-        backgroundColor: C.white,
+        backgroundColor: themeBackground(C.white),
         gap: 7,
         borderWidth: 1,
-        borderColor: "#F1EBF3",
+        borderColor: themeBorder("#F1EBF3"),
       }}
     >
       <View
@@ -1097,7 +1098,7 @@ function HomeStat({
           fontFamily: "DMSans_700Bold",
           fontSize: 21,
           lineHeight: 25,
-          color: "#18163C",
+          color: themeForeground("#18163C"),
         }}
       >
         {value}
@@ -1108,7 +1109,7 @@ function HomeStat({
           fontFamily: "DMSans_400Regular",
           fontSize: 10.5,
           lineHeight: 14,
-          color: "#77758B",
+          color: themeForeground("#77758B"),
         }}
       >
         {label}
@@ -1149,7 +1150,7 @@ function HomeActionCard({
         paddingVertical: 11,
         gap: 8,
         borderWidth: 1,
-        borderColor: "#EEE7F0",
+        borderColor: themeBorder("#EEE7F0"),
         opacity: pressed ? 0.76 : 1,
         transform: [{ scale: pressed ? 0.965 : 1 }],
       })}
@@ -1174,7 +1175,7 @@ function HomeActionCard({
             fontFamily: "DMSans_600SemiBold",
             fontSize: 12.5,
             lineHeight: 17,
-            color: "#18163C",
+            color: themeForeground("#18163C"),
           }}
         >
           {title}
@@ -1185,7 +1186,7 @@ function HomeActionCard({
             fontFamily: "DMSans_400Regular",
             fontSize: 10,
             lineHeight: 13,
-            color: "#77758B",
+            color: themeForeground("#77758B"),
           }}
         >
           {subtitle}
@@ -1235,7 +1236,7 @@ function ToolkitHeroGraphic() {
           borderRadius: 48,
           right: 2,
           top: 0,
-          backgroundColor: "#EEE4FB",
+          backgroundColor: themeBackground("#EEE4FB"),
         }}
       />
       <View
@@ -1246,7 +1247,7 @@ function ToolkitHeroGraphic() {
           borderRadius: 37,
           left: 9,
           bottom: 8,
-          backgroundColor: "#FBECEE",
+          backgroundColor: themeBackground("#FBECEE"),
         }}
       />
       <View
@@ -1259,7 +1260,7 @@ function ToolkitHeroGraphic() {
           top: 28,
           borderWidth: 2,
           borderStyle: "dotted",
-          borderColor: "#B998F2",
+          borderColor: themeBorder("#B998F2"),
           opacity: 0.9,
         }}
       />
@@ -1273,13 +1274,13 @@ function ToolkitHeroGraphic() {
             width: 94,
             height: 94,
             borderRadius: 26,
-            backgroundColor: "#F7F1FF",
+            backgroundColor: themeBackground("#F7F1FF"),
             borderWidth: 1,
-            borderColor: "#ECE2F6",
+            borderColor: themeBorder("#ECE2F6"),
             alignItems: "center",
             justifyContent: "center",
             transform: [{ rotate: "-10deg" }],
-            shadowColor: "#6F4D8A",
+            shadowColor: themeShadow("#6F4D8A"),
             shadowOpacity: 0.08,
             shadowRadius: 12,
             shadowOffset: { width: 0, height: 6 },
@@ -1295,7 +1296,7 @@ function ToolkitHeroGraphic() {
               width: 4,
               height: 14,
               borderRadius: 2,
-              backgroundColor: "#A75BCE",
+              backgroundColor: themeBackground("#A75BCE"),
               transform: [{ rotate: "18deg" }],
             }}
           />
@@ -1307,7 +1308,7 @@ function ToolkitHeroGraphic() {
               width: 13,
               height: 4,
               borderRadius: 2,
-              backgroundColor: "#A75BCE",
+              backgroundColor: themeBackground("#A75BCE"),
               transform: [{ rotate: "20deg" }],
             }}
           />
@@ -1323,9 +1324,9 @@ function ToolkitHeroGraphic() {
             width: 57,
             height: 57,
             borderRadius: 17,
-            backgroundColor: "#F4EEFF",
+            backgroundColor: themeBackground("#F4EEFF"),
             borderWidth: 1,
-            borderColor: "#E9DFF3",
+            borderColor: themeBorder("#E9DFF3"),
             alignItems: "center",
             justifyContent: "center",
             transform: [{ rotate: "8deg" }],
@@ -1344,9 +1345,9 @@ function ToolkitHeroGraphic() {
             width: 58,
             height: 58,
             borderRadius: 17,
-            backgroundColor: "#FFF2F1",
+            backgroundColor: themeBackground("#FFF2F1"),
             borderWidth: 1,
-            borderColor: "#F4DFE2",
+            borderColor: themeBorder("#F4DFE2"),
             alignItems: "center",
             justifyContent: "center",
             transform: [{ rotate: "10deg" }],
@@ -1381,10 +1382,10 @@ function QuickCard({
         borderRadius: 24,
         overflow: "hidden",
         padding: 16,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: themeBackground("#FFFFFF"),
         borderWidth: 1,
-        borderColor: "#EDE6F1",
-        shadowColor: "#43324E",
+        borderColor: themeBorder("#EDE6F1"),
+        shadowColor: themeShadow("#43324E"),
         shadowOpacity: 0.035,
         shadowRadius: 14,
         shadowOffset: { width: 0, height: 7 },
@@ -1399,7 +1400,7 @@ function QuickCard({
           width: 52,
           height: 52,
           borderRadius: 18,
-          backgroundColor: "#F4ECFB",
+          backgroundColor: themeBackground("#F4ECFB"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -1412,7 +1413,7 @@ function QuickCard({
           style={{
             fontFamily: "DMSans_700Bold",
             fontSize: 17,
-            color: "#15153D",
+            color: themeForeground("#15153D"),
           }}
         >
           {title}
@@ -1422,7 +1423,7 @@ function QuickCard({
             fontFamily: "DMSans_400Regular",
             fontSize: 13,
             lineHeight: 18,
-            color: "#817B91",
+            color: themeForeground("#817B91"),
           }}
         >
           {subtitle}
@@ -1437,7 +1438,7 @@ function QuickCard({
           width: 34,
           height: 34,
           borderRadius: 17,
-          backgroundColor: "#F3EBFA",
+          backgroundColor: themeBackground("#F3EBFA"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -1473,12 +1474,12 @@ function ToolItemRow({
         minHeight: 104,
         borderRadius: 24,
         overflow: "hidden",
-        backgroundColor: "#FFFFFF",
+        backgroundColor: themeBackground("#FFFFFF"),
         borderWidth: 1,
-        borderColor: "#ECE6F0",
+        borderColor: themeBorder("#ECE6F0"),
         flexDirection: "row",
         alignItems: "stretch",
-        shadowColor: "#44334E",
+        shadowColor: themeShadow("#44334E"),
         shadowOpacity: 0.035,
         shadowRadius: 14,
         shadowOffset: { width: 0, height: 7 },
@@ -1505,7 +1506,7 @@ function ToolItemRow({
             width: 54,
             height: 54,
             borderRadius: 18,
-            backgroundColor: "#F3EAFB",
+            backgroundColor: themeBackground("#F3EAFB"),
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -1519,7 +1520,7 @@ function ToolItemRow({
               fontFamily: "DMSans_700Bold",
               fontSize: 15.5,
               lineHeight: 20,
-              color: "#15153D",
+              color: themeForeground("#15153D"),
             }}
           >
             {item.title}
@@ -1529,7 +1530,7 @@ function ToolItemRow({
               fontFamily: "DMSans_400Regular",
               fontSize: 12.5,
               lineHeight: 18,
-              color: "#7E788F",
+              color: themeForeground("#7E788F"),
             }}
           >
             {item.subtitle}
@@ -1541,7 +1542,7 @@ function ToolItemRow({
             width: 34,
             height: 34,
             borderRadius: 17,
-            backgroundColor: "#F4ECFB",
+            backgroundColor: themeBackground("#F4ECFB"),
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -1558,7 +1559,7 @@ function ToolItemRow({
         style={({ pressed }) => ({
           width: 55,
           borderLeftWidth: 1,
-          borderLeftColor: "#EEE8F1",
+          borderLeftColor: themeBorder("#EEE8F1"),
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: pinned ? "#FBF7FD" : "transparent",
@@ -1618,14 +1619,14 @@ function ToolGroup({
           minHeight: 116,
           borderRadius: 25,
           overflow: "hidden",
-          backgroundColor: "#FFFFFF",
+          backgroundColor: themeBackground("#FFFFFF"),
           borderWidth: 1,
-          borderColor: "#ECE6F0",
+          borderColor: themeBorder("#ECE6F0"),
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: 15,
           gap: 15,
-          shadowColor: "#44334E",
+          shadowColor: themeShadow("#44334E"),
           shadowOpacity: 0.035,
           shadowRadius: 14,
           shadowOffset: { width: 0, height: 7 },
@@ -1640,7 +1641,7 @@ function ToolGroup({
             width: 58,
             height: 58,
             borderRadius: 19,
-            backgroundColor: "#F3EAFB",
+            backgroundColor: themeBackground("#F3EAFB"),
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -1654,7 +1655,7 @@ function ToolGroup({
               fontFamily: "DMSans_700Bold",
               fontSize: 18,
               lineHeight: 22,
-              color: "#15153D",
+              color: themeForeground("#15153D"),
             }}
           >
             {title}
@@ -1664,7 +1665,7 @@ function ToolGroup({
               fontFamily: "DMSans_400Regular",
               fontSize: 13,
               lineHeight: 19,
-              color: "#7D788F",
+              color: themeForeground("#7D788F"),
             }}
           >
             {subtitle}
@@ -1676,7 +1677,7 @@ function ToolGroup({
             width: 40,
             height: 40,
             borderRadius: 20,
-            backgroundColor: "#F3EBFA",
+            backgroundColor: themeBackground("#F3EBFA"),
             alignItems: "center",
             justifyContent: "center",
             transform: [
@@ -2029,7 +2030,7 @@ export function ToolkitScreen() {
               style={[
                 S.eyebrow,
                 {
-                  color: "#7A2F9E",
+                  color: themeForeground("#7A2F9E"),
                   fontSize: 10.5,
                   letterSpacing: 2.6,
                 },
@@ -2044,7 +2045,7 @@ export function ToolkitScreen() {
                 fontSize: 39,
                 lineHeight: 44,
                 letterSpacing: -1.05,
-                color: "#12133D",
+                color: themeForeground("#12133D"),
               }}
             >
               Care tools, without the clutter
@@ -2056,7 +2057,7 @@ export function ToolkitScreen() {
                 fontFamily: "DMSans_400Regular",
                 fontSize: 15.5,
                 lineHeight: 23,
-                color: "#777489",
+                color: themeForeground("#777489"),
               }}
             >
               Search by what you want to do, open a category, or pin the tools
@@ -2081,12 +2082,12 @@ export function ToolkitScreen() {
             minHeight: 60,
             borderRadius: 24,
             borderWidth: 1,
-            borderColor: "#E7DDEE",
-            backgroundColor: "#FFFFFF",
+            borderColor: themeBorder("#E7DDEE"),
+            backgroundColor: themeBackground("#FFFFFF"),
             flexDirection: "row",
             alignItems: "center",
             paddingLeft: 17,
-            shadowColor: "#5B3C6B",
+            shadowColor: themeShadow("#5B3C6B"),
             shadowOpacity: 0.03,
             shadowRadius: 12,
             shadowOffset: { width: 0, height: 5 },
@@ -2141,7 +2142,7 @@ export function ToolkitScreen() {
               width: 56,
               minHeight: 58,
               borderLeftWidth: 1,
-              borderLeftColor: "#EEE6F2",
+              borderLeftColor: themeBorder("#EEE6F2"),
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: filtersOpen || scope !== "all" || sort !== "relevance"
@@ -2161,7 +2162,7 @@ export function ToolkitScreen() {
                   width: 7,
                   height: 7,
                   borderRadius: 4,
-                  backgroundColor: "#70338F",
+                  backgroundColor: themeBackground("#70338F"),
                 }}
               />
             )}
@@ -2202,9 +2203,9 @@ export function ToolkitScreen() {
               flexDirection: "row",
               alignItems: "center",
               gap: 14,
-              backgroundColor: "#FFF0F1",
+              backgroundColor: themeBackground("#FFF0F1"),
               borderWidth: 1,
-              borderColor: "#F5CFD5",
+              borderColor: themeBorder("#F5CFD5"),
               opacity: pressed ? 0.78 : 1,
             })}
           >
@@ -2214,7 +2215,7 @@ export function ToolkitScreen() {
                 width: 52,
                 height: 52,
                 borderRadius: 26,
-                backgroundColor: "#FFE0E6",
+                backgroundColor: themeBackground("#FFE0E6"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -2226,7 +2227,7 @@ export function ToolkitScreen() {
                 style={{
                   fontFamily: "DMSans_700Bold",
                   fontSize: 15.5,
-                  color: "#A92F47",
+                  color: themeForeground("#A92F47"),
                 }}
               >
                 Emergency & warning signs
@@ -2235,7 +2236,7 @@ export function ToolkitScreen() {
                 style={{
                   fontFamily: "DMSans_400Regular",
                   fontSize: 13,
-                  color: "#A95865",
+                  color: themeForeground("#A95865"),
                 }}
               >
                 Know when to get help
@@ -2246,7 +2247,7 @@ export function ToolkitScreen() {
                 width: 36,
                 height: 36,
                 borderRadius: 18,
-                backgroundColor: "#FFDDE4",
+                backgroundColor: themeBackground("#FFDDE4"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -2265,7 +2266,7 @@ export function ToolkitScreen() {
                 style={{
                   fontFamily: "DMSans_700Bold",
                   fontSize: 23,
-                  color: "#15153D",
+                  color: themeForeground("#15153D"),
                 }}
               >
                 {normalizedQuery ? "Search results" : "Filtered care tools"}
@@ -2293,9 +2294,9 @@ export function ToolkitScreen() {
                 style={{
                   borderRadius: 24,
                   padding: 20,
-                  backgroundColor: "#F7F2FA",
+                  backgroundColor: themeBackground("#F7F2FA"),
                   borderWidth: 1,
-                  borderColor: "#ECE4F1",
+                  borderColor: themeBorder("#ECE4F1"),
                   gap: 10,
                 }}
               >
@@ -2328,13 +2329,13 @@ export function ToolkitScreen() {
                     minHeight: 44,
                     paddingHorizontal: 17,
                     borderRadius: 18,
-                    backgroundColor: "#70338F",
+                    backgroundColor: themeBackground("#70338F"),
                     alignItems: "center",
                     justifyContent: "center",
                     opacity: pressed ? 0.8 : 1,
                   })}
                 >
-                  <Text style={{ fontFamily: "DMSans_600SemiBold", color: "#FFFFFF", fontSize: 13 }}>
+                  <Text style={{ fontFamily: "DMSans_600SemiBold", color: themeForeground("#FFFFFF"), fontSize: 13 }}>
                     Show all tools
                   </Text>
                 </Pressable>
@@ -2350,7 +2351,7 @@ export function ToolkitScreen() {
                     fontFamily: "DMSans_700Bold",
                     fontSize: 27,
                     lineHeight: 33,
-                    color: "#14153D",
+                    color: themeForeground("#14153D"),
                   }}
                 >
                   All care tools
@@ -2362,7 +2363,7 @@ export function ToolkitScreen() {
                         width: 5,
                         height: 16,
                         borderRadius: 3,
-                        backgroundColor: "#C486ED",
+                        backgroundColor: themeBackground("#C486ED"),
                         transform: [{ rotate: "32deg" }],
                       }}
                     />
@@ -2372,7 +2373,7 @@ export function ToolkitScreen() {
                         width: 13,
                         height: 5,
                         borderRadius: 3,
-                        backgroundColor: "#D2A0F3",
+                        backgroundColor: themeBackground("#D2A0F3"),
                         transform: [{ rotate: "12deg" }],
                       }}
                     />
@@ -2384,7 +2385,7 @@ export function ToolkitScreen() {
                   fontFamily: "DMSans_400Regular",
                   fontSize: 14,
                   lineHeight: 20,
-                  color: "#777489",
+                  color: themeForeground("#777489"),
                 }}
               >
                 Open a category to choose a task, or use search and the pinned filter above for your favorites.
@@ -2618,10 +2619,10 @@ export function LibraryScreen() {
   const popular = filtered.slice(0, 2);
 
   const topicItems = [
-    { title: "Medications", icon: "medical-outline", query: "medication", bg: "#F1E5FA", color: "#8B46A8" },
-    { title: "Symptoms", icon: "pulse-outline", query: "symptom", bg: "#F2E7FA", color: "#9850B1" },
-    { title: "Home care", icon: "home-outline", query: "home", bg: "#F8EAF3", color: "#8A4AA2" },
-    { title: "Appointments", icon: "calendar-outline", query: "appointment", bg: "#E9EEFF", color: "#6275C8" },
+    { title: "Medications", icon: "medical-outline", query: "medication", bg: "#F1E5FA", color: themeForeground("#8B46A8") },
+    { title: "Symptoms", icon: "pulse-outline", query: "symptom", bg: "#F2E7FA", color: themeForeground("#9850B1") },
+    { title: "Home care", icon: "home-outline", query: "home", bg: "#F8EAF3", color: themeForeground("#8A4AA2") },
+    { title: "Appointments", icon: "calendar-outline", query: "appointment", bg: "#E9EEFF", color: themeForeground("#6275C8") },
   ];
 
   return (
@@ -2638,7 +2639,7 @@ export function LibraryScreen() {
             <Text
               style={[
                 S.eyebrow,
-                { color: "#74328F", fontSize: 10.5, letterSpacing: 2.5 },
+                { color: themeForeground("#74328F"), fontSize: 10.5, letterSpacing: 2.5 },
               ]}
             >
               KNOWLEDGE BRINGS CLARITY
@@ -2650,7 +2651,7 @@ export function LibraryScreen() {
                 fontSize: 40,
                 lineHeight: 45,
                 letterSpacing: -1.05,
-                color: "#141238",
+                color: themeForeground("#141238"),
               }}
             >
               Learn simply.
@@ -2660,7 +2661,7 @@ export function LibraryScreen() {
                 fontFamily: "DMSans_400Regular",
                 fontSize: 16,
                 lineHeight: 24,
-                color: "#7A748A",
+                color: themeForeground("#7A748A"),
                 maxWidth: 245,
               }}
             >
@@ -2769,7 +2770,7 @@ export function LibraryScreen() {
               minHeight: 252,
               borderRadius: 30,
               overflow: "hidden",
-              backgroundColor: "#F4ECFA",
+              backgroundColor: themeBackground("#F4ECFA"),
               padding: 22,
               opacity: pressed ? 0.9 : 1,
               transform: [{ scale: pressed ? 0.995 : 1 }],
@@ -2779,7 +2780,7 @@ export function LibraryScreen() {
               <Text
                 style={[
                   S.eyebrow,
-                  { color: "#74328F", fontSize: 10.5, letterSpacing: 2.3 },
+                  { color: themeForeground("#74328F"), fontSize: 10.5, letterSpacing: 2.3 },
                 ]}
               >
                 FEATURED GUIDE
@@ -2790,7 +2791,7 @@ export function LibraryScreen() {
                   fontSize: 28,
                   lineHeight: 33,
                   letterSpacing: -0.55,
-                  color: "#17153A",
+                  color: themeForeground("#17153A"),
                 }}
               >
                 Trusted guides,{"\n"}real answers.
@@ -2800,7 +2801,7 @@ export function LibraryScreen() {
                   fontFamily: "DMSans_400Regular",
                   fontSize: 14,
                   lineHeight: 20,
-                  color: "#77718A",
+                  color: themeForeground("#77718A"),
                   maxWidth: 210,
                 }}
               >
@@ -2878,9 +2879,9 @@ export function LibraryScreen() {
                   minWidth: 0,
                   minHeight: 116,
                   borderRadius: 21,
-                  backgroundColor: C.white,
+                  backgroundColor: themeBackground(C.white),
                   borderWidth: 1,
-                  borderColor: "#EEE8F0",
+                  borderColor: themeBorder("#EEE8F0"),
                   alignItems: "center",
                   justifyContent: "center",
                   paddingHorizontal: 7,
@@ -2963,7 +2964,7 @@ export function LibraryScreen() {
                 style={{
                   borderRadius: 24,
                   padding: 18,
-                  backgroundColor: "#F7F2FA",
+                  backgroundColor: themeBackground("#F7F2FA"),
                 }}
               >
                 <Icon name="book-outline" size={26} />
@@ -3001,9 +3002,9 @@ export function LibraryScreen() {
                         flex: 1,
                         minWidth: 0,
                         borderRadius: 22,
-                        backgroundColor: C.white,
+                        backgroundColor: themeBackground(C.white),
                         borderWidth: 1,
-                        borderColor: "#EEE8F0",
+                        borderColor: themeBorder("#EEE8F0"),
                         padding: 10,
                         gap: 9,
                         opacity: pressed ? 0.75 : 1,
@@ -3014,7 +3015,7 @@ export function LibraryScreen() {
                         height: 108,
                         borderRadius: 16,
                         overflow: "hidden",
-                        backgroundColor: "#F4ECFB",
+                        backgroundColor: themeBackground("#F4ECFB"),
                       }}>
                         <LearnGuideGraphic kind={index === 0 ? "medication" : "symptoms"} />
                       </View>
@@ -3046,8 +3047,8 @@ export function LibraryScreen() {
                   borderRadius: 24,
                   padding: 16,
                   minHeight: 88,
-                  backgroundColor: "#FAF6FC",
-                  borderColor: "#EDE4F2",
+                  backgroundColor: themeBackground("#FAF6FC"),
+                  borderColor: themeBorder("#EDE4F2"),
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 14,
@@ -3058,7 +3059,7 @@ export function LibraryScreen() {
                     width: 54,
                     height: 54,
                     borderRadius: 18,
-                    backgroundColor: "#EFE4F8",
+                    backgroundColor: themeBackground("#EFE4F8"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -3108,7 +3109,7 @@ export function SupportScreen() {
         <Text style={[S.h2, { color: C.white }]}>
           An advocate. A listening ear.{"\n"}A clearer next step.
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           Explore one-on-one and group support with EnVizion Life.
         </Txt>
         <Button
