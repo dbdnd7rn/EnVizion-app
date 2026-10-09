@@ -442,14 +442,17 @@ export function EmergencyCenterScreen() {
           table: "care_emergency_profiles",
           filter: `care_recipient_id=eq.${careRecipientId}`,
         },
-        () => void refresh(),
+        () => {
+          // Never overwrite an in-progress emergency profile draft.
+          if (!editing && activeDetail === null) void refresh();
+        },
       )
       .subscribe();
 
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [careRecipientId, refresh]);
+  }, [careRecipientId, refresh, editing, activeDetail]);
 
   const completeness = useMemo(
     () => emergencyProfileCompleteness(data),
@@ -582,6 +585,7 @@ export function EmergencyCenterScreen() {
 
   function openProfileDetail(section: EmergencyDetailSection) {
     if (busy) return;
+    setMessage("");
     setDetailDirty(false);
     setConfirmDiscardDetail(false);
     setActiveDetail(section);
@@ -790,7 +794,7 @@ export function EmergencyCenterScreen() {
 
                 {!readOnly && (
                   <Button title={busy ? "Saving…" : "Save " + emergencyDetailLabels[activeDetail]}
-                    icon="checkmark-outline" disabled={busy}
+                    icon="checkmark-outline" disabled={busy || !detailDirty}
                     onPress={() => void save(false)}/>
                 )}
                 <Button title="Back to Emergency profile" secondary
