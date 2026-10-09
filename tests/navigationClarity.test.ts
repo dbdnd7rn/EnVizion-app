@@ -46,10 +46,10 @@ test("Care tab does not repeat category links in suggested or quick lists", () =
 });
 
 test("educational navigation has a single home under Learn", () => {
-  assert.doesNotMatch(care, /n\\.navigate\\("Specialists"\\)/);
-  assert.match(learn, /n\\.navigate\\("Specialists"\\)/);
+  assert.doesNotMatch(care, /n\.navigate\("Specialists"\)/);
+  assert.match(learn, /n\.navigate\("Specialists"\)/);
   assert.doesNotMatch(learn, /Medication basics/);
-  assert.match(learn, /popular\\.map\\(\\(guide/);
+  assert.match(learn, /popular\.map\(\(guide/);
 });
 
 test("Support no longer duplicates clinical care tools", () => {
