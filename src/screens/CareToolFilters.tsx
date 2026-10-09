@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { Icon } from "../ui";
@@ -113,10 +114,10 @@ export function CareToolFilters({
             justifyContent: "center",
           }}
         >
-          <Icon name="options-outline" size={20} color={PURPLE} />
+          <Icon name="options-outline" size={20} color={themeForeground(PURPLE)} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: "DMSans_700Bold", color: INK, fontSize: 16 }}>
+          <Text style={{ fontFamily: "DMSans_700Bold", color: themeForeground(INK), fontSize: 16 }}>
             Refine care tools
           </Text>
           <Text style={{ fontFamily: "DMSans_400Regular", color: "#7A728C", fontSize: 12 }}>
@@ -136,12 +137,12 @@ export function CareToolFilters({
             opacity: pressed ? 0.6 : 1,
           })}
         >
-          <Icon name="close-outline" size={23} color={PURPLE} />
+          <Icon name="close-outline" size={23} color={themeForeground(PURPLE)} />
         </Pressable>
       </View>
 
       <View style={{ gap: 9 }}>
-        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, color: INK }}>
+        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, color: themeForeground(INK) }}>
           Show
         </Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -157,7 +158,7 @@ export function CareToolFilters({
       </View>
 
       <View style={{ gap: 9 }}>
-        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, color: INK }}>
+        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, color: themeForeground(INK) }}>
           By category
         </Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -173,7 +174,7 @@ export function CareToolFilters({
       </View>
 
       <View style={{ gap: 9 }}>
-        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, color: INK }}>
+        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, color: themeForeground(INK) }}>
           Sort by
         </Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -210,7 +211,7 @@ export function CareToolFilters({
           })}
           disabled={!active}
         >
-          <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13, color: PURPLE }}>
+          <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13, color: themeForeground(PURPLE) }}>
             Reset filters
           </Text>
         </Pressable>
@@ -222,7 +223,7 @@ export function CareToolFilters({
             minHeight: 44,
             paddingHorizontal: 19,
             borderRadius: 18,
-            backgroundColor: PURPLE,
+            backgroundColor: themeBackground(PURPLE),
             justifyContent: "center",
             opacity: pressed ? 0.8 : 1,
           })}

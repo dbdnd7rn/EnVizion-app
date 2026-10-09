@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -1151,7 +1152,7 @@ export function WeeklyCoveragePlanScreen() {
                         return (
                           <Card
                             key={candidate.userId}
-                            style={{ backgroundColor: C.white }}
+                            style={{ backgroundColor: themeBackground(C.white) }}
                           >
                             <View style={S.between}>
                               <View style={{ flex: 1, gap: 2 }}>
@@ -1359,21 +1360,21 @@ export function WeeklyCoveragePlanScreen() {
                     </View>
 
                     <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-                      <View style={[S.pill, { backgroundColor: C.white }]}>
+                      <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
                         <Txt style={S.small}>
                           {commandParticipants.filter(
                             (item) => item.firstNotifiedAt,
                           ).length} notified
                         </Txt>
                       </View>
-                      <View style={[S.pill, { backgroundColor: C.white }]}>
+                      <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
                         <Txt style={S.small}>
                           {commandParticipants.filter(
                             (item) => item.response === "declined",
                           ).length} declined
                         </Txt>
                       </View>
-                      <View style={[S.pill, { backgroundColor: C.white }]}>
+                      <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
                         <Txt style={S.small}>
                           {commandParticipants.filter(
                             (item) => item.isClaimed,
@@ -1392,7 +1393,7 @@ export function WeeklyCoveragePlanScreen() {
                       commandParticipants.map((participant) => (
                         <Card
                           key={participant.userId}
-                          style={{ backgroundColor: C.white }}
+                          style={{ backgroundColor: themeBackground(C.white) }}
                         >
                           <View style={S.between}>
                             <View style={{ flex: 1, gap: 2 }}>

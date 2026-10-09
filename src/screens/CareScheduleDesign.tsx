@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo, Animated, Easing, Pressable, Text, View,
@@ -70,17 +71,17 @@ export function ScheduleHero() {
         <CircleDecoration/>
       </View>
       <Text style={{
-        fontFamily: "DMSans_700Bold", color: PURPLE, letterSpacing: 1.9,
+        fontFamily: "DMSans_700Bold", color: themeForeground(PURPLE), letterSpacing: 1.9,
         fontSize: 10.5, maxWidth: "78%", marginBottom: 12,
       }}>AVAILABILITY & SHIFT SCHEDULING</Text>
       <View style={{ flexDirection: "row", gap: 0, alignItems: "center" }}>
         <View style={{ flex: 1, paddingRight: 0, zIndex: 1, gap: 9 }}>
           <Text accessibilityRole="header" style={{
-            fontFamily: "Lora_500Medium", color: INK, fontSize: 26,
+            fontFamily: "Lora_500Medium", color: themeForeground(INK), fontSize: 26,
             lineHeight: 33, letterSpacing: -0.6,
           }}>Plan caregiver coverage with clarity.</Text>
           <Text style={{
-            fontFamily: "DMSans_400Regular", color: MUTED,
+            fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
             fontSize: 12, lineHeight: 18,
           }}>
             Shifts, availability and coverage in one calm place.
@@ -125,22 +126,22 @@ export function CurrentCoverageCard({
         width: 52, height: 52, borderRadius: 26, backgroundColor: "#F2E8FA",
         justifyContent: "center", alignItems: "center",
       }}>
-        <Icon name="calendar-outline" size={25} color={PURPLE}/>
+        <Icon name="calendar-outline" size={25} color={themeForeground(PURPLE)}/>
       </View>
       <View style={{ flex: 1, gap: 5 }}>
         <Text style={{
           fontFamily: "DMSans_700Bold", fontSize: 10.5,
-          letterSpacing: 1.5, color: PURPLE,
+          letterSpacing: 1.5, color: themeForeground(PURPLE),
         }}>CURRENT COVERAGE</Text>
         <Text style={{
-          fontFamily: "DMSans_700Bold", fontSize: 15, lineHeight: 21, color: INK,
+          fontFamily: "DMSans_700Bold", fontSize: 15, lineHeight: 21, color: themeForeground(INK),
         }}>{title}</Text>
         <Text style={{
           fontFamily: "DMSans_400Regular", fontSize: 12.5,
-          lineHeight: 17, color: MUTED,
+          lineHeight: 17, color: themeForeground(MUTED),
         }}>{detail}</Text>
       </View>
-      <Icon name="chevron-forward-outline" size={21} color={PURPLE}/>
+      <Icon name="chevron-forward-outline" size={21} color={themeForeground(PURPLE)}/>
     </Pressable>
   );
 }
@@ -169,14 +170,14 @@ export function ScheduleQuickAction({
         backgroundColor: "#FFFFFFBC",
         alignItems: "center", justifyContent: "center",
       }}>
-        <Icon name={icon} size={22} color={PURPLE} />
+        <Icon name={icon} size={22} color={themeForeground(PURPLE)} />
       </View>
       <View style={{ flexDirection: "row", gap: 4, alignItems: "flex-end" }}>
         <Text style={{
           flex: 1, fontFamily: "DMSans_600SemiBold",
-          fontSize: 13, lineHeight: 18, color: INK,
+          fontSize: 13, lineHeight: 18, color: themeForeground(INK),
         }}>{title}</Text>
-        <Icon name="chevron-forward-outline" size={18} color={PURPLE}/>
+        <Icon name="chevron-forward-outline" size={18} color={themeForeground(PURPLE)}/>
       </View>
     </Pressable>
   );
@@ -211,10 +212,10 @@ export function ScheduleOverviewTile({
         <Icon name={icon} size={22} color={tint === "#EAF7F1" ? "#228269" : PURPLE}/>
       </View>
       <View style={{ flex: 1, gap: 6 }}>
-        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 13.3, color: INK, lineHeight: 18 }}>{title}</Text>
-        <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12.2, lineHeight: 18, color: MUTED }}>{detail}</Text>
+        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 13.3, color: themeForeground(INK), lineHeight: 18 }}>{title}</Text>
+        <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12.2, lineHeight: 18, color: themeForeground(MUTED) }}>{detail}</Text>
       </View>
-      <Icon name={expanded ? "chevron-up-outline" : "chevron-forward-outline"} size={19} color={PURPLE}/>
+      <Icon name={expanded ? "chevron-up-outline" : "chevron-forward-outline"} size={19} color={themeForeground(PURPLE)}/>
     </Pressable>
   );
 }
