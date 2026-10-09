@@ -20,7 +20,7 @@ import {
   S,
   Section,
   Txt,
-} from "../ui";
+} from "./ProfileLinkedUI";
 
 const categories: Array<{
   id: PilotFeedbackCategory;
@@ -111,8 +111,8 @@ export function PilotFeedbackScreen() {
     <Page>
       <Heading
         eyebrow="PILOT FEEDBACK"
-        title="Tell us what the real caregiver experience feels like."
-        body="Pilot feedback is kept separate from clinical care records. Bugs go to technical diagnostics; experience feedback and suggestions go to the support triage queue."
+        title="Your voice makes care better."
+        body="Share a bug, your experience or a thoughtful improvement. We're listening."
       />
 
       {consent && !eligible && (
