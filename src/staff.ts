@@ -48,6 +48,7 @@ async function requireStaff(): Promise<StaffMembership> {
 
 export async function getStaffMembership(
   authenticatedUserId?: string,
+  allowInitialAdminClaim = true,
 ): Promise<StaffMembership | null> {
   // The startup gate has already verified the session. Reuse its user ID
   // instead of making another sequential auth.getUser() network request.
@@ -68,6 +69,10 @@ export async function getStaffMembership(
   if (error) throw error;
 
   if (!data) {
+    // Normal caregiver sign-in must not invoke admin provisioning.
+    // The initial-admin claim remains available for explicit setup calls.
+    if (!allowInitialAdminClaim) return null;
+
     const { data: claim } = await supabase.functions.invoke("pilot-admin", {
       body: { action: "claim_initial_admin" },
     });
