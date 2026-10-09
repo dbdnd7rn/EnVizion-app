@@ -1,3 +1,4 @@
+import { themeBackground, themeBorder } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -122,7 +123,7 @@ export function PilotFeedbackScreen() {
       )}
 
       {consentError && (
-        <Card style={{ backgroundColor: "#FFF3F5", borderColor: "#F0D4DB" }}>
+        <Card style={{ backgroundColor: themeBackground("#FFF3F5"), borderColor: themeBorder("#F0D4DB") }}>
           <Icon name="cloud-offline-outline" color={C.rose} size={25}/>
           <Text style={S.h3}>Feedback access could not be checked.</Text>
           <Txt style={S.small}>Reopen this page when your connection returns. Your draft stays here while you are on this page.</Txt>
@@ -130,7 +131,7 @@ export function PilotFeedbackScreen() {
       )}
 
       {consent && !eligible && (
-        <Card style={{ backgroundColor: "#FFF9F2" }}>
+        <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
           <Icon name="lock-closed-outline" size={26} />
           <Text style={S.h3}>Pilot feedback is available to enrolled testers.</Text>
           <Txt style={S.small}>
@@ -139,7 +140,7 @@ export function PilotFeedbackScreen() {
         </Card>
       )}
 
-      <Card style={{ backgroundColor: "#F8F2FC", gap: 7 }}>
+      <Card style={{ backgroundColor: themeBackground("#F8F2FC"), gap: 7 }}>
         <View style={S.row}>
           <Icon name="shield-checkmark-outline" color={C.purple} size={21} />
           <Text style={[S.h3, { fontSize: 13, flex: 1 }]}>Handled separately from care records</Text>
@@ -194,7 +195,7 @@ export function PilotFeedbackScreen() {
       })}
 
       <Section title="Tell us more" />
-      <Card style={{ backgroundColor: "#FFFFFFF0", gap: 16 }}>
+      <Card style={{ backgroundColor: themeBackground("#FFFFFFF0"), gap: 16 }}>
         <Field
           label="Short summary"
           value={summary}
@@ -224,7 +225,7 @@ export function PilotFeedbackScreen() {
         </Card>
       )}
 
-      <Card style={{ backgroundColor: "#FFF2F4", borderColor: "#F1D6DF" }}>
+      <Card style={{ backgroundColor: themeBackground("#FFF2F4"), borderColor: themeBorder("#F1D6DF") }}>
         <View style={S.row}>
           <Icon name="alert-circle-outline" color={C.rose} size={23} />
           <Text style={[S.h3, { flex: 1, color: C.rose, fontSize: 14 }]}>

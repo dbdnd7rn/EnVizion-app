@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeBorder, themeShadow, themeTint } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, TextInput, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Line, Path, Rect, Stop } from "react-native-svg";
@@ -133,45 +134,45 @@ function MedicationHeroGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 260 210" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="heroCapsulePurple" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#BE8AF6" />
-          <Stop offset="0.48" stopColor="#8B4AD0" />
-          <Stop offset="1" stopColor="#6327A0" />
+          <Stop offset="0" stopColor={themeTint("#BE8AF6")} />
+          <Stop offset="0.48" stopColor={themeTint("#8B4AD0")} />
+          <Stop offset="1" stopColor={themeTint("#6327A0")} />
         </LinearGradient>
         <LinearGradient id="heroCapsuleLight" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" />
-          <Stop offset="0.52" stopColor="#F1E5FF" />
-          <Stop offset="1" stopColor="#CFB0F3" />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
+          <Stop offset="0.52" stopColor={themeTint("#F1E5FF")} />
+          <Stop offset="1" stopColor={themeTint("#CFB0F3")} />
         </LinearGradient>
         <LinearGradient id="heroCapsulePink" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#F6DEFF" />
-          <Stop offset="1" stopColor="#C99AEF" />
+          <Stop offset="0" stopColor={themeTint("#F6DEFF")} />
+          <Stop offset="1" stopColor={themeTint("#C99AEF")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="143" cy="101" r="92" fill="#F4EAFE" />
-      <Circle cx="206" cy="55" r="50" fill="#E8D6FB" opacity={0.72} />
-      <Ellipse cx="165" cy="185" rx="72" ry="12" fill="#B98BDA" opacity={0.16} />
+      <Circle cx="143" cy="101" r="92" fill={themeTint("#F4EAFE")} />
+      <Circle cx="206" cy="55" r="50" fill={themeTint("#E8D6FB")} opacity={0.72} />
+      <Ellipse cx="165" cy="185" rx="72" ry="12" fill={themeTint("#B98BDA")} opacity={0.16} />
 
       <G transform="translate(83 27) rotate(39 44 68)">
-        <Rect x="0" y="0" width="88" height="136" rx="44" fill="#6530A4" opacity={0.14} />
+        <Rect x="0" y="0" width="88" height="136" rx="44" fill={themeTint("#6530A4")} opacity={0.14} />
         <Rect x="-2" y="-3" width="88" height="136" rx="44" fill="url(#heroCapsulePurple)" />
         <Path d="M0 67H86V89C86 113 67 133 43 133C19 133 0 113 0 89V67Z" fill="url(#heroCapsuleLight)" />
-        <Path d="M17 13C31 2 49 1 61 8" stroke="#E9D2FF" strokeWidth="7" strokeLinecap="round" opacity={0.55} />
-        <Path d="M8 72H78" stroke="#D9BEF2" strokeWidth="2" opacity={0.6} />
+        <Path d="M17 13C31 2 49 1 61 8" stroke={themeTint("#E9D2FF")} strokeWidth="7" strokeLinecap="round" opacity={0.55} />
+        <Path d="M8 72H78" stroke={themeTint("#D9BEF2")} strokeWidth="2" opacity={0.6} />
       </G>
 
       <G transform="translate(132 93) rotate(101 34 58)">
-        <Rect x="0" y="0" width="68" height="116" rx="34" fill="#6A31A5" opacity={0.12} />
+        <Rect x="0" y="0" width="68" height="116" rx="34" fill={themeTint("#6A31A5")} opacity={0.12} />
         <Rect x="-2" y="-3" width="68" height="116" rx="34" fill="url(#heroCapsuleLight)" />
         <Path d="M0 57H66V80C66 100 51 116 33 116C15 116 0 100 0 80V57Z" fill="url(#heroCapsulePurple)" />
-        <Path d="M13 12C25 5 38 5 48 9" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" opacity={0.72} />
+        <Path d="M13 12C25 5 38 5 48 9" stroke={themeTint("#FFFFFF")} strokeWidth="6" strokeLinecap="round" opacity={0.72} />
       </G>
 
       <G transform="translate(74 105) rotate(-46 30 50)">
-        <Rect x="0" y="0" width="60" height="100" rx="30" fill="#7240B0" opacity={0.10} />
+        <Rect x="0" y="0" width="60" height="100" rx="30" fill={themeTint("#7240B0")} opacity={0.10} />
         <Rect x="-2" y="-3" width="60" height="100" rx="30" fill="url(#heroCapsulePink)" />
         <Path d="M0 49H58V70C58 87 45 100 29 100C13 100 0 87 0 70V49Z" fill="url(#heroCapsulePurple)" />
-        <Path d="M11 10C20 4 33 4 42 8" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" opacity={0.6} />
+        <Path d="M11 10C20 4 33 4 42 8" stroke={themeTint("#FFFFFF")} strokeWidth="5" strokeLinecap="round" opacity={0.6} />
       </G>
     </Svg>
   );
@@ -237,18 +238,18 @@ function MedicationEmptyGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 190 130" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="emptyMedOrb" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#F1DFFF" />
-          <Stop offset="1" stopColor="#F9E9FA" />
+          <Stop offset="0" stopColor={themeTint("#F1DFFF")} />
+          <Stop offset="1" stopColor={themeTint("#F9E9FA")} />
         </LinearGradient>
       </Defs>
       <Circle cx="95" cy="64" r="53" fill="url(#emptyMedOrb)" />
-      <Ellipse cx="95" cy="117" rx="42" ry="7" fill="#9A5BC6" opacity={0.10} />
+      <Ellipse cx="95" cy="117" rx="42" ry="7" fill={themeTint("#9A5BC6")} opacity={0.10} />
       <G transform="translate(58 27) rotate(-42 37 37)">
-        <Rect x="0" y="0" width="74" height="38" rx="19" fill="#FFFFFF" stroke="#8D3FBD" strokeWidth="4" />
-        <Path d="M37 1V37" stroke="#8D3FBD" strokeWidth="4" />
-        <Path d="M1 19C1 9 9 1 19 1H37V37H19C9 37 1 29 1 19Z" fill="#F2E5FF" />
+        <Rect x="0" y="0" width="74" height="38" rx="19" fill={themeTint("#FFFFFF")} stroke={themeTint("#8D3FBD")} strokeWidth="4" />
+        <Path d="M37 1V37" stroke={themeTint("#8D3FBD")} strokeWidth="4" />
+        <Path d="M1 19C1 9 9 1 19 1H37V37H19C9 37 1 29 1 19Z" fill={themeTint("#F2E5FF")} />
       </G>
-      <Path d="M29 43V57M22 50H36M153 41V59M144 50H162M42 83V93M37 88H47" stroke="#C89AEE" strokeWidth="4" strokeLinecap="round" />
+      <Path d="M29 43V57M22 50H36M153 41V59M144 50H162M42 83V93M37 88H47" stroke={themeTint("#C89AEE")} strokeWidth="4" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -286,11 +287,11 @@ function MedicationSummaryPanel({
         minHeight: 112,
         borderRadius: 27,
         borderWidth: 1,
-        borderColor: "#E6D7F2",
-        backgroundColor: "#F6EEFC",
+        borderColor: themeBorder("#E6D7F2"),
+        backgroundColor: themeBackground("#F6EEFC"),
         flexDirection: "row",
         alignItems: "stretch",
-        shadowColor: "#56366A",
+        shadowColor: themeShadow("#56366A"),
         shadowOpacity: 0.055,
         shadowRadius: 16,
         shadowOffset: { width: 0, height: 8 },
@@ -305,7 +306,7 @@ function MedicationSummaryPanel({
               style={{
                 width: 1,
                 marginVertical: 22,
-                backgroundColor: "#DDD0E8",
+                backgroundColor: themeBackground("#DDD0E8"),
               }}
             />
           )}
@@ -327,7 +328,7 @@ function MedicationSummaryPanel({
                 fontFamily: "Lora_500Medium",
                 fontSize: column.value.length > 7 ? 20 : 33,
                 lineHeight: column.value.length > 7 ? 27 : 39,
-                color: "#14113C",
+                color: themeForeground("#14113C"),
                 textAlign: "center",
               }}
             >
@@ -339,7 +340,7 @@ function MedicationSummaryPanel({
                 fontFamily: "DMSans_600SemiBold",
                 fontSize: 13,
                 lineHeight: 18,
-                color: "#77718A",
+                color: themeForeground("#77718A"),
                 textAlign: "center",
               }}
             >
@@ -355,7 +356,7 @@ function MedicationSummaryPanel({
                   fontFamily: "DMSans_400Regular",
                   fontSize: 9.5,
                   lineHeight: 13,
-                  color: "#8C8297",
+                  color: themeForeground("#8C8297"),
                   textAlign: "center",
                 }}
               >
@@ -398,8 +399,8 @@ function SafetyAccordion({
       style={{
         borderRadius: 25,
         borderWidth: 1,
-        borderColor: "#F3D6DE",
-        backgroundColor: "#FFF2F5",
+        borderColor: themeBorder("#F3D6DE"),
+        backgroundColor: themeBackground("#FFF2F5"),
         overflow: "hidden",
       }}
     >
@@ -422,16 +423,16 @@ function SafetyAccordion({
             width: 50,
             height: 50,
             borderRadius: 25,
-            backgroundColor: "#FFF9FA",
+            backgroundColor: themeBackground("#FFF9FA"),
             borderWidth: 2,
-            borderColor: "#E9A6B6",
+            borderColor: themeBorder("#E9A6B6"),
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Icon name="shield-checkmark-outline" size={25} color="#BB3A59" />
+          <Icon name="shield-checkmark-outline" size={25} color={themeForeground("#BB3A59")} />
         </View>
-        <Text style={{ flex: 1, fontFamily: "DMSans_700Bold", fontSize: 17, color: "#B43151" }}>
+        <Text style={{ flex: 1, fontFamily: "DMSans_700Bold", fontSize: 17, color: themeForeground("#B43151") }}>
           Medication safety
         </Text>
         <Animated.View
@@ -446,7 +447,7 @@ function SafetyAccordion({
             ],
           }}
         >
-          <Icon name="chevron-forward-outline" size={22} color="#B94A63" />
+          <Icon name="chevron-forward-outline" size={22} color={themeForeground("#B94A63")} />
         </Animated.View>
       </Pressable>
 
@@ -466,17 +467,17 @@ function SafetyAccordion({
             paddingBottom: 18,
             gap: 10,
             borderTopWidth: 1,
-            borderTopColor: "#F0D7DE",
+            borderTopColor: themeBorder("#F0D7DE"),
             paddingTop: 14,
           }}
         >
-          <Text style={[S.body, { color: "#7E6670" }]}>
+          <Text style={[S.body, { color: themeForeground("#7E6670") }]}>
             EnVizion records caregiver information; it does not prescribe, calculate doses, or tell you to start, stop, hold, or change a medication.
           </Text>
-          <Text style={[S.body, { color: "#7E6670" }]}>
+          <Text style={[S.body, { color: themeForeground("#7E6670") }]}>
             Follow the pharmacy label and the healthcare team’s instructions. Confirm medication changes with the appropriate clinician or pharmacist.
           </Text>
-          <Text style={[S.body, { color: "#7E6670" }]}>
+          <Text style={[S.body, { color: themeForeground("#7E6670") }]}>
             For a possible medical emergency or serious medication reaction, use the appropriate local emergency service rather than waiting on the app.
           </Text>
         </View>
@@ -775,14 +776,14 @@ export function MedicationManagementScreen() {
         >
           <Defs>
             <LinearGradient id="medPageTop" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor="#FFFDFC" />
-              <Stop offset="0.62" stopColor="#FFFDFC" />
-              <Stop offset="1" stopColor="#F8F0FD" />
+              <Stop offset="0" stopColor={themeTint("#FFFDFC")} />
+              <Stop offset="0.62" stopColor={themeTint("#FFFDFC")} />
+              <Stop offset="1" stopColor={themeTint("#F8F0FD")} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="480" height="520" fill="url(#medPageTop)" />
-          <Circle cx="454" cy="22" r="112" fill="#F3E7FD" opacity={0.48} />
-          <Circle cx="414" cy="180" r="118" fill="#EEDAFB" opacity={0.24} />
+          <Circle cx="454" cy="22" r="112" fill={themeTint("#F3E7FD")} opacity={0.48} />
+          <Circle cx="414" cy="180" r="118" fill={themeTint("#EEDAFB")} opacity={0.24} />
         </Svg>
 
         <MotionBlock reducedMotion={reducedMotion}>
@@ -801,7 +802,7 @@ export function MedicationManagementScreen() {
                 transform: [{ scale: pressed ? 0.96 : 1 }],
               })}
             >
-              <Icon name="arrow-back-outline" size={29} color="#6F2E99" />
+              <Icon name="arrow-back-outline" size={29} color={themeForeground("#6F2E99")} />
             </Pressable>
 
             <Text
@@ -826,7 +827,7 @@ export function MedicationManagementScreen() {
                   fontSize: 40,
                   lineHeight: 47,
                   letterSpacing: -1.15,
-                  color: "#11103B",
+                  color: themeForeground("#11103B"),
                 }}
               >
                 {"Your medications,\nbeautifully organised."}
@@ -863,7 +864,7 @@ export function MedicationManagementScreen() {
             gap: 10,
             opacity: readOnly || busyId !== null ? 0.48 : pressed ? 0.82 : 1,
             transform: [{ scale: pressed && !readOnly ? 0.988 : 1 }],
-            shadowColor: "#6B2C94",
+            shadowColor: themeShadow("#6B2C94"),
             shadowOpacity: 0.14,
             shadowRadius: 14,
             shadowOffset: { width: 0, height: 7 },
@@ -880,9 +881,9 @@ export function MedicationManagementScreen() {
           >
             <Defs>
               <LinearGradient id="addMedicationGradient" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor="#8541B5" />
-                <Stop offset="0.5" stopColor="#9743C9" />
-                <Stop offset="1" stopColor="#7132A2" />
+                <Stop offset="0" stopColor={themeTint("#8541B5")} />
+                <Stop offset="0.5" stopColor={themeTint("#9743C9")} />
+                <Stop offset="1" stopColor={themeTint("#7132A2")} />
               </LinearGradient>
             </Defs>
             <Rect x="0" y="0" width="440" height="60" rx="30" fill="url(#addMedicationGradient)" />
@@ -908,7 +909,7 @@ export function MedicationManagementScreen() {
             fontSize: 32,
             lineHeight: 39,
             letterSpacing: -0.7,
-            color: "#15113D",
+            color: themeForeground("#15113D"),
           }}
         >
           Medication list
@@ -924,8 +925,8 @@ export function MedicationManagementScreen() {
               alignItems: "center",
               justifyContent: "center",
               borderWidth: 1,
-              borderColor: "#E8DFF0",
-              backgroundColor: "#FFFFFFB8",
+              borderColor: themeBorder("#E8DFF0"),
+              backgroundColor: themeBackground("#FFFFFFB8"),
             }}
           >
             <ActivityIndicator color={C.purple} />
@@ -936,13 +937,13 @@ export function MedicationManagementScreen() {
               minHeight: 220,
               borderRadius: 28,
               borderWidth: 1,
-              borderColor: "#FFFFFFD8",
-              backgroundColor: "#FFFFFFB6",
+              borderColor: themeBorder("#FFFFFFD8"),
+              backgroundColor: themeBackground("#FFFFFFB6"),
               alignItems: "center",
               justifyContent: "center",
               paddingHorizontal: 26,
               paddingVertical: 24,
-              shadowColor: "#5E3B6A",
+              shadowColor: themeShadow("#5E3B6A"),
               shadowOpacity: 0.04,
               shadowRadius: 16,
               shadowOffset: { width: 0, height: 8 },
@@ -955,7 +956,7 @@ export function MedicationManagementScreen() {
             <Text style={{ marginTop: 4, fontFamily: "DMSans_700Bold", fontSize: 20, color: C.ink }}>
               No medications yet
             </Text>
-            <Text style={{ marginTop: 7, fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 20, color: "#7C788D", textAlign: "center" }}>
+            <Text style={{ marginTop: 7, fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 20, color: themeForeground("#7C788D"), textAlign: "center" }}>
               Add your first medication to begin.
             </Text>
           </View>
@@ -969,11 +970,11 @@ export function MedicationManagementScreen() {
                   style={{
                     borderRadius: 25,
                     borderWidth: 1,
-                    borderColor: "#E9E2EF",
-                    backgroundColor: "#FFFFFFC9",
+                    borderColor: themeBorder("#E9E2EF"),
+                    backgroundColor: themeBackground("#FFFFFFC9"),
                     padding: 17,
                     gap: 13,
-                    shadowColor: "#4C3455",
+                    shadowColor: themeShadow("#4C3455"),
                     shadowOpacity: 0.035,
                     shadowRadius: 12,
                     shadowOffset: { width: 0, height: 6 },
@@ -988,8 +989,8 @@ export function MedicationManagementScreen() {
                       </Txt>
                     </View>
                     {medication.isPrn && (
-                      <View style={[S.pill, { backgroundColor: "#F2E5FB" }]}>
-                        <Text style={[S.small, { color: "#75339A" }]}>PRN</Text>
+                      <View style={[S.pill, { backgroundColor: themeBackground("#F2E5FB") }]}>
+                        <Text style={[S.small, { color: themeForeground("#75339A") }]}>PRN</Text>
                       </View>
                     )}
                   </View>
@@ -1097,8 +1098,8 @@ export function MedicationManagementScreen() {
             style={{
               borderRadius: 26,
               borderWidth: 1,
-              borderColor: "#E8E0EE",
-              backgroundColor: "#FFFFFFD2",
+              borderColor: themeBorder("#E8E0EE"),
+              backgroundColor: themeBackground("#FFFFFFD2"),
               padding: 18,
               gap: 14,
             }}
@@ -1114,7 +1115,7 @@ export function MedicationManagementScreen() {
                   setEditing(false);
                   setDraft(emptyDraft);
                 }}
-                style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "#F5ECFA" }}
+                style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: themeBackground("#F5ECFA") }}
               >
                 <Icon name="close-outline" size={21} />
               </Pressable>
@@ -1176,7 +1177,7 @@ export function MedicationManagementScreen() {
                 fontSize: 32,
                 lineHeight: 39,
                 letterSpacing: -0.7,
-                color: "#15113D",
+                color: themeForeground("#15113D"),
               }}
             >
               Review your list
@@ -1188,10 +1189,10 @@ export function MedicationManagementScreen() {
                 paddingHorizontal: 16,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "#F1E6FB",
+                backgroundColor: themeBackground("#F1E6FB"),
               }}
             >
-              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 12.5, color: "#75349B" }}>
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 12.5, color: themeForeground("#75349B") }}>
                 {latestReconciliation ? "Reviewed" : "Not reviewed"}
               </Text>
             </View>
@@ -1201,18 +1202,18 @@ export function MedicationManagementScreen() {
             style={{
               borderRadius: 27,
               borderWidth: 1,
-              borderColor: "#E6DEE9",
-              backgroundColor: "#FFFFFFD2",
+              borderColor: themeBorder("#E6DEE9"),
+              backgroundColor: themeBackground("#FFFFFFD2"),
               padding: 17,
               gap: 15,
-              shadowColor: "#5B3967",
+              shadowColor: themeShadow("#5B3967"),
               shadowOpacity: 0.045,
               shadowRadius: 15,
               shadowOffset: { width: 0, height: 8 },
               elevation: 2,
             }}
           >
-            <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 21, color: "#77738A" }}>
+            <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 21, color: themeForeground("#77738A") }}>
               Check against pharmacy labels or care team records.
             </Text>
 
@@ -1222,15 +1223,15 @@ export function MedicationManagementScreen() {
                 accessibilityLabel="Medication review note"
                 multiline
                 placeholder="Add a note..."
-                placeholderTextColor="#A5A0B0"
+                placeholderTextColor={themeForeground("#A5A0B0")}
                 value={reconciliationNote}
                 onChangeText={setReconciliationNote}
                 style={{
                   minHeight: 104,
                   borderRadius: 19,
                   borderWidth: 1,
-                  borderColor: "#DDD4E2",
-                  backgroundColor: "#FFFFFF",
+                  borderColor: themeBorder("#DDD4E2"),
+                  backgroundColor: themeBackground("#FFFFFF"),
                   paddingHorizontal: 15,
                   paddingTop: 14,
                   fontFamily: "DMSans_400Regular",
@@ -1267,9 +1268,9 @@ export function MedicationManagementScreen() {
               >
                 <Defs>
                   <LinearGradient id="reviewGradient" x1="0" y1="0" x2="1" y2="0">
-                    <Stop offset="0" stopColor="#8841B6" />
-                    <Stop offset="0.52" stopColor="#9844C7" />
-                    <Stop offset="1" stopColor="#7332A4" />
+                    <Stop offset="0" stopColor={themeTint("#8841B6")} />
+                    <Stop offset="0.52" stopColor={themeTint("#9844C7")} />
+                    <Stop offset="1" stopColor={themeTint("#7332A4")} />
                   </LinearGradient>
                 </Defs>
                 <Rect x="0" y="0" width="420" height="58" rx="29" fill="url(#reviewGradient)" />
@@ -1303,8 +1304,8 @@ export function MedicationManagementScreen() {
                 minHeight: 112,
                 borderRadius: 25,
                 borderWidth: 1,
-                borderColor: "#E9E2EF",
-                backgroundColor: "#FFFFFFC8",
+                borderColor: themeBorder("#E9E2EF"),
+                backgroundColor: themeBackground("#FFFFFFC8"),
                 padding: 16,
                 flexDirection: "row",
                 alignItems: "center",
@@ -1316,12 +1317,12 @@ export function MedicationManagementScreen() {
                   width: 52,
                   height: 52,
                   borderRadius: 26,
-                  backgroundColor: "#F0E3FB",
+                  backgroundColor: themeBackground("#F0E3FB"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon name="time-outline" size={25} color="#7335A0" />
+                <Icon name="time-outline" size={25} color={themeForeground("#7335A0")} />
               </View>
               <View style={{ flex: 1, gap: 4 }}>
                 <Text style={[S.h3, { fontSize: 15.5 }]}>No activity yet</Text>
@@ -1335,8 +1336,8 @@ export function MedicationManagementScreen() {
                 style={{
                   borderRadius: 23,
                   borderWidth: 1,
-                  borderColor: "#E9E2EF",
-                  backgroundColor: "#FFFFFFC8",
+                  borderColor: themeBorder("#E9E2EF"),
+                  backgroundColor: themeBackground("#FFFFFFC8"),
                   padding: 15,
                   gap: 10,
                 }}
@@ -1355,7 +1356,7 @@ export function MedicationManagementScreen() {
                     <Icon
                       name={item.type === "reconciliation" ? "checkmark-done-outline" : "medical-outline"}
                       size={21}
-                      color="#7435A1"
+                      color={themeForeground("#7435A1")}
                     />
                   </View>
                   <View style={{ flex: 1, gap: 3 }}>
@@ -1399,7 +1400,7 @@ export function MedicationManagementScreen() {
           marginTop: 4,
           paddingTop: 15,
           borderTopWidth: 1,
-          borderTopColor: "#E8E1EB",
+          borderTopColor: themeBorder("#E8E1EB"),
           alignItems: "center",
         }}
       >
@@ -1408,7 +1409,7 @@ export function MedicationManagementScreen() {
             fontFamily: "DMSans_400Regular",
             fontSize: 12.5,
             lineHeight: 18,
-            color: "#77738A",
+            color: themeForeground("#77738A"),
             textAlign: "center",
           }}
         >

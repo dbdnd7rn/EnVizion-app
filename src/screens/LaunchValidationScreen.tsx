@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import Constants from "expo-constants";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -614,7 +615,7 @@ export function LaunchValidationScreen() {
           )}
 
           <Section title="Failure & recovery drills" />
-          <Card style={{ backgroundColor: "#FFF9F2" }}>
+          <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
             <Text style={S.h3}>Use safe, reversible drills only.</Text>
             <Txt style={S.small}>
               Do not create fake medical events or intentionally corrupt care
