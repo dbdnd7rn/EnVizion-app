@@ -9,7 +9,9 @@ import {
   Text,
   View,
 } from "react-native";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
+import { AppearanceProvider, themedScreen, useAppearance } from "./src/appearance";
+import { themeBackground } from "./src/themeColors";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -114,21 +116,22 @@ const StaffStack = createNativeStackNavigator<RootStack>();
 const Tab = createBottomTabNavigator<Tabs>();
 
 function MainTabs() {
+  const { dark } = useAppearance();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: C.purple,
-        tabBarInactiveTintColor: "#8A8494",
+        tabBarInactiveTintColor: dark ? "#A99DBB" : "#8A8494",
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: dark ? "#211B2E" : "#FFFFFF",
           borderTopWidth: 1,
-          borderTopColor: "#F0E9F1",
+          borderTopColor: dark ? "#453750" : "#F0E9F1",
           height: 78,
           paddingTop: 8,
           paddingBottom: 12,
-          shadowColor: "#2E2135",
+          shadowColor: dark ? "#000000" : "#2E2135",
           shadowOpacity: 0.035,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: -3 },
@@ -160,22 +163,22 @@ function MainTabs() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={themedScreen(HomeScreen)}
         options={{ tabBarLabel: "Home" }}
       />
       <Tab.Screen
         name="Toolkit"
-        component={ToolkitScreen}
+        component={themedScreen(ToolkitScreen)}
         options={{ tabBarLabel: "Care" }}
       />
       <Tab.Screen
         name="Library"
-        component={LibraryScreen}
+        component={themedScreen(LibraryScreen)}
         options={{ tabBarLabel: "Learn" }}
       />
       <Tab.Screen
         name="Support"
-        component={SupportScreen}
+        component={themedScreen(SupportScreen)}
         options={{ tabBarLabel: "Support" }}
       />
     </Tab.Navigator>
@@ -256,7 +259,7 @@ function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        backgroundColor: "#FCF9F6",
+        backgroundColor: themeBackground("#FCF9F6"),
       }}
     >
       <Animated.View
@@ -329,15 +332,16 @@ function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
+  const { dark } = useAppearance();
   return (
     <NotificationsProvider>
       <CareProvider>
         <CarePresenceProvider>
         <NavigationContainer
         theme={{
-          ...DefaultTheme,
+          ...(dark ? DarkTheme : DefaultTheme),
           colors: {
-            ...DefaultTheme.colors,
+            ...(dark ? DarkTheme.colors : DefaultTheme.colors),
             background: C.paper,
             primary: C.purple,
             card: C.paper,
@@ -363,268 +367,268 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
         >
           <Stack.Screen
             name="Onboarding"
-            component={OnboardingScreen}
+            component={themedScreen(OnboardingScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Main"
-            component={MainTabs}
+            component={themedScreen(MainTabs)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Tracker"
-            component={TrackerScreen}
+            component={themedScreen(TrackerScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Insights"
-            component={CareInsightsScreen}
+            component={themedScreen(CareInsightsScreen)}
             options={{ title: "Care timeline & insights" }}
           />
           <Stack.Screen
             name="CareCalendar"
-            component={CareCalendarScreen}
+            component={themedScreen(CareCalendarScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="CareDocuments"
-            component={CareDocumentsScreen}
+            component={themedScreen(CareDocumentsScreen)}
             options={{ title: "Care Document Vault" }}
           />
           <Stack.Screen
             name="CareContacts"
-            component={CareContactsScreen}
+            component={themedScreen(CareContactsScreen)}
             options={{ title: "Care contacts & providers" }}
           />
           <Stack.Screen
             name="CareCommunicationLog"
-            component={CareCommunicationLogScreen}
+            component={themedScreen(CareCommunicationLogScreen)}
             options={{ title: "Provider & insurance communication" }}
           />
           <Stack.Screen
             name="FamilyCommunication"
-            component={FamilyCommunicationScreen}
+            component={themedScreen(FamilyCommunicationScreen)}
             options={{ title: "Family communication" }}
           />
           <Stack.Screen
             name="CareTasks"
-            component={CareTasksScreen}
+            component={themedScreen(CareTasksScreen)}
             options={{ title: "Care tasks & shared care plan" }}
           />
           <Stack.Screen
             name="CareShiftBoard"
-            component={CareShiftBoardScreen}
+            component={themedScreen(CareShiftBoardScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="OnShiftCaregiver"
-            component={OnShiftCaregiverScreen}
+            component={themedScreen(OnShiftCaregiverScreen)}
             options={{ title: "On-shift caregiver" }}
           />
           <Stack.Screen
             name="CareSchedule"
-            component={CareScheduleScreen}
+            component={themedScreen(CareScheduleScreen)}
             options={{ title: "Caregiver availability & schedule" }}
           />
           <Stack.Screen
             name="CareAnalytics"
-            component={CareAnalyticsScreen}
+            component={themedScreen(CareAnalyticsScreen)}
             options={{ title: "Care coordination analytics" }}
           />
           <Stack.Screen
             name="CareCoordinationInbox"
-            component={CareCoordinationInboxScreen}
+            component={themedScreen(CareCoordinationInboxScreen)}
             options={{ title: "Needs coordination" }}
           />
           <Stack.Screen
             name="CareContinuity"
-            component={CareContinuityScreen}
+            component={themedScreen(CareContinuityScreen)}
             options={{ title: "Live care team & continuity" }}
           />
           <Stack.Screen
             name="CareCoverageRequirements"
-            component={CareCoverageRequirementsScreen}
+            component={themedScreen(CareCoverageRequirementsScreen)}
             options={{ title: "Recurring care coverage" }}
           />
           <Stack.Screen
             name="WeeklyCoveragePlan"
-            component={WeeklyCoveragePlanScreen}
+            component={themedScreen(WeeklyCoveragePlanScreen)}
             options={{ title: "Weekly coverage approval" }}
           />
           <Stack.Screen
             name="SmartCoveragePlanner"
-            component={SmartCoveragePlannerScreen}
+            component={themedScreen(SmartCoveragePlannerScreen)}
             options={{ title: "Smart Coverage Planner" }}
           />
           <Stack.Screen
             name="CoverageInsights"
-            component={CoverageInsightsScreen}
+            component={themedScreen(CoverageInsightsScreen)}
             options={{ title: "Caregiver coverage insights" }}
           />
           <Stack.Screen
             name="CoverageForecast"
-            component={CoverageForecastScreen}
+            component={themedScreen(CoverageForecastScreen)}
             options={{ title: "Proactive coverage forecast" }}
           />
           <Stack.Screen
             name="CareCoverageRequests"
-            component={CareCoverageRequestsScreen}
+            component={themedScreen(CareCoverageRequestsScreen)}
             options={{ title: "Open caregiver coverage" }}
           />
           <Stack.Screen
             name="CarePacket"
-            component={CarePacketScreen}
+            component={themedScreen(CarePacketScreen)}
             options={{ title: "Care packet & printable summary" }}
           />
           <Stack.Screen
             name="Assistant"
-            component={AssistantScreen}
+            component={themedScreen(AssistantScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Handoff"
-            component={HandoffScreen}
+            component={themedScreen(HandoffScreen)}
             options={{ title: "Talk to our team" }}
           />
           <Stack.Screen
             name="TeamConversation"
-            component={TeamConversationScreen}
+            component={themedScreen(TeamConversationScreen)}
             options={{ title: "Team conversation" }}
           />
           <Stack.Screen
             name="CarePlan"
-            component={CarePlanScreen}
+            component={themedScreen(CarePlanScreen)}
             options={{ title: "Daily care plan", headerShown: false }}
           />
           <Stack.Screen
             name="Medications"
-            component={MedicationManagementScreen}
+            component={themedScreen(MedicationManagementScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Summary"
-            component={SummaryScreen}
+            component={themedScreen(SummaryScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Appointments"
-            component={AppointmentScreen}
+            component={themedScreen(AppointmentScreen)}
             options={{ title: "Appointment prep" }}
           />
           <Stack.Screen
             name="DoctorVisitCompanion"
-            component={DoctorVisitCompanionScreen}
+            component={themedScreen(DoctorVisitCompanionScreen)}
             options={{ title: "Doctor Visit Companion" }}
           />
           <Stack.Screen
             name="Transition"
-            component={HospitalToHomeScreen}
+            component={themedScreen(HospitalToHomeScreen)}
             options={{ title: "Hospital to home" }}
           />
           <Stack.Screen
             name="Emergency"
-            component={EmergencyCenterScreen}
+            component={themedScreen(EmergencyCenterScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Guide"
-            component={GuideScreen}
+            component={themedScreen(GuideScreen)}
             options={{ title: "Your resource library" }}
           />
           <Stack.Screen
             name="Specialists"
-            component={SpecialistsScreen}
+            component={themedScreen(SpecialistsScreen)}
             options={{ title: "Healthcare navigation" }}
           />
           <Stack.Screen
             name="Specialist"
-            component={SpecialistScreen}
+            component={themedScreen(SpecialistScreen)}
             options={{ title: "Specialist guide" }}
           />
           <Stack.Screen
             name="Coaching"
-            component={CoachingScreen}
+            component={themedScreen(CoachingScreen)}
             options={{ title: "Advocate coaching" }}
           />
           <Stack.Screen
             name="Wellness"
-            component={WellnessScreen}
+            component={themedScreen(WellnessScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Resources"
-            component={ResourcesScreen}
+            component={themedScreen(ResourcesScreen)}
             options={{ title: "Trusted resources" }}
           />
           <Stack.Screen
             name="Profile"
-            component={ProfileDashboardScreen}
+            component={themedScreen(ProfileDashboardScreen)}
             options={{ title: "Your profile" }}
           />
           <Stack.Screen
             name="PrivacyData"
-            component={PrivacyDataScreen}
+            component={themedScreen(PrivacyDataScreen)}
             options={{ title: "Account, privacy & data" }}
           />
           <Stack.Screen
             name="Accessibility"
-            component={AccessibilityScreen}
+            component={themedScreen(AccessibilityScreen)}
             options={{ title: "Accessibility & display" }}
           />
           <Stack.Screen
             name="LaunchValidation"
-            component={LaunchValidationScreen}
+            component={themedScreen(LaunchValidationScreen)}
             options={{ title: "Pilot launch validation" }}
           />
           <Stack.Screen
             name="PilotFeedback"
-            component={PilotFeedbackScreen}
+            component={themedScreen(PilotFeedbackScreen)}
             options={{ title: "Pilot feedback" }}
           />
           <Stack.Screen
             name="LaunchCenter"
-            component={LaunchCenterScreen}
+            component={themedScreen(LaunchCenterScreen)}
             options={{ title: "Launch Center" }}
           />
           <Stack.Screen
             name="CareTeam"
-            component={CareTeamScreen}
+            component={themedScreen(CareTeamScreen)}
             options={{ title: "Care team & sharing", headerShown: false }}
           />
           <Stack.Screen
             name="CareTeamActivity"
-            component={CareTeamActivityScreen}
+            component={themedScreen(CareTeamActivityScreen)}
             options={{ title: "Care team activity" }}
           />
           <Stack.Screen
             name="CareTeamAccessReport"
-            component={CareTeamAccessReportScreen}
+            component={themedScreen(CareTeamAccessReportScreen)}
             options={{ title: "Care team access report" }}
           />
           <Stack.Screen
             name="CareTeamSecurityReview"
-            component={CareTeamSecurityReviewScreen}
+            component={themedScreen(CareTeamSecurityReviewScreen)}
             options={{ title: "Care team security review" }}
           />
           <Stack.Screen
             name="CareTeamSecurityRemediation"
-            component={CareTeamSecurityRemediationScreen}
+            component={themedScreen(CareTeamSecurityRemediationScreen)}
             options={{ title: "Security remediation" }}
           />
-          <Stack.Screen name="AdvocateHandover" component={AdvocateHandoverScreen} options={{ title: "Primary Advocate handover", headerShown: false }} />
+          <Stack.Screen name="AdvocateHandover" component={themedScreen(AdvocateHandoverScreen)} options={{ title: "Primary Advocate handover", headerShown: false }} />
           <Stack.Screen
             name="CareAccessRecertification"
-            component={CareAccessRecertificationScreen}
+            component={themedScreen(CareAccessRecertificationScreen)}
             options={{ title: "90-day access review" }}
           />
           <Stack.Screen
             name="Notifications"
-            component={NotificationsScreen}
+            component={themedScreen(NotificationsScreen)}
             options={{ title: "Notifications", headerShown: false }}
           />
           <Stack.Screen
             name="NotificationSettings"
-            component={NotificationSettingsScreen}
+            component={themedScreen(NotificationSettingsScreen)}
             options={{ title: "Notification preferences" }}
           />
         </Stack.Navigator>
@@ -636,13 +640,14 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
+  const { dark } = useAppearance();
   return (
     <NotificationsProvider>
       <NavigationContainer
       theme={{
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
+          ...(dark ? DarkTheme : DefaultTheme),
+          colors: {
+            ...(dark ? DarkTheme.colors : DefaultTheme.colors),
           background: C.paper,
           primary: C.purple,
           card: C.paper,
@@ -668,52 +673,52 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
       >
         <StaffStack.Screen
           name="StaffWorkspace"
-          component={StaffWorkspaceScreen}
+          component={themedScreen(StaffWorkspaceScreen)}
           options={{ headerShown: false }}
         />
         <StaffStack.Screen
           name="StaffManagement"
-          component={StaffManagementScreen}
+          component={themedScreen(StaffManagementScreen)}
           options={{ title: "Manage staff" }}
         />
         <StaffStack.Screen
           name="PilotAdmin"
-          component={PilotAdminScreen}
+          component={themedScreen(PilotAdminScreen)}
           options={{ title: "Pilot administration" }}
         />
         <StaffStack.Screen
           name="PilotIntelligence"
-          component={PilotIntelligenceScreen}
+          component={themedScreen(PilotIntelligenceScreen)}
           options={{ title: "Pilot intelligence" }}
         />
         <StaffStack.Screen
           name="AccessGovernanceAdmin"
-          component={AccessGovernanceAdminScreen}
+          component={themedScreen(AccessGovernanceAdminScreen)}
           options={{ title: "Access governance" }}
         />
         <StaffStack.Screen
           name="ClinicalContent"
-          component={StaffClinicalContentScreen}
+          component={themedScreen(StaffClinicalContentScreen)}
           options={{ title: "Clinical content" }}
         />
         <StaffStack.Screen
           name="ClinicalContentEditor"
-          component={ClinicalContentEditorScreen}
+          component={themedScreen(ClinicalContentEditorScreen)}
           options={{ title: "Content review" }}
         />
         <StaffStack.Screen
           name="StaffSupportThread"
-          component={StaffSupportThreadScreen}
+          component={themedScreen(StaffSupportThreadScreen)}
           options={{ title: "Support conversation" }}
         />
         <StaffStack.Screen
           name="Notifications"
-          component={NotificationsScreen}
+          component={themedScreen(NotificationsScreen)}
           options={{ title: "Notifications", headerShown: false }}
         />
         <StaffStack.Screen
           name="NotificationSettings"
-          component={NotificationSettingsScreen}
+          component={themedScreen(NotificationSettingsScreen)}
           options={{ title: "Notification preferences" }}
         />
       </StaffStack.Navigator>
@@ -888,7 +893,8 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
   );
 }
 
-export default function App() {
+function AppShell() {
+  const { dark, ready } = useAppearance();
   const reducedMotion = useReducedMotion();
   const [showLaunch, setShowLaunch] = useState(true);
   const [fontsTimedOut, setFontsTimedOut] = useState(false);
@@ -916,13 +922,13 @@ export default function App() {
     return () => clearTimeout(timer);
   }, [fontsReady, reducedMotion]);
 
-  if (!fontsReady) return <LoadingState message="Loading app resources…" />;
+  if (!fontsReady || !ready) return <LoadingState message="Loading app resources…" />;
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
+      <StatusBar style={dark ? "light" : "dark"} />
       <View
-        style={{ flex: 1, backgroundColor: "#EDE5EF", alignItems: "center" }}
+        style={{ flex: 1, backgroundColor: dark ? "#0E0D17" : "#EDE5EF", alignItems: "center" }}
       >
         <View
           style={{
@@ -931,7 +937,7 @@ export default function App() {
             flex: 1,
             backgroundColor: C.paper,
             ...(Platform.OS === "web"
-              ? { boxShadow: "0 0 80px #59306818" }
+              ? { boxShadow: dark ? "0 0 65px #00000055" : "0 0 80px #59306818" }
               : {}),
           }}
         >
@@ -948,4 +954,8 @@ export default function App() {
       </View>
     </SafeAreaProvider>
   );
+}
+
+export default function App() {
+  return <AppearanceProvider><AppShell /></AppearanceProvider>;
 }
