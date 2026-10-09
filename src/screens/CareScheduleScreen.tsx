@@ -63,7 +63,8 @@ import {
   S,
   Section,
   Txt,
-} from "../ui";
+} from "./ProfileLinkedUI";
+import { ScheduleHero, CurrentCoverageCard, ScheduleQuickAction, ScheduleOverviewTile, ScheduleReveal } from "./CareScheduleDesign";
 import { useNav } from "./MainScreens";
 
 type WindowDraft = {
@@ -275,6 +276,11 @@ export function CareScheduleScreen() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  // Form draft state lives at screen level even when a detail panel closes.
+  const [detailPanel, setDetailPanel] = useState<"shifts" | "gaps" | "attendance" | "weekly" | "windows" | "swaps" | "more" | null>(null);
+  const togglePanel = (panel: NonNullable<typeof detailPanel>) => {
+    setDetailPanel((current) => current === panel ? null : panel);
+  };
 
   const [availabilityFormOpen, setAvailabilityFormOpen] = useState(false);
   const [recurringFormOpen, setRecurringFormOpen] = useState(false);
@@ -833,25 +839,17 @@ export function CareScheduleScreen() {
 
   return (
     <Page>
-      <Heading
-        eyebrow="AVAILABILITY & SHIFT SCHEDULING"
-        title="Plan who is available before care work becomes urgent."
-        body="Coordinate caregiver availability, scheduled shifts, real check-ins, attendance history, coverage gaps, and shift swaps for this care profile."
+      <ScheduleHero />
+      <CurrentCoverageCard
+        title={loading ? "Loading coverage…" : actualCoverage.scheduledNow.length
+          ? `${actualCoverage.checkedInNow.length}/${actualCoverage.scheduledNow.length} scheduled caregiver${actualCoverage.scheduledNow.length === 1 ? "" : "s"} checked in`
+          : "No caregiver shift is scheduled right now"}
+        detail={loading ? "Checking the care team’s schedule…" : actualCoverage.missingCheckIn.length
+          ? `${actualCoverage.missingCheckIn.length} scheduled shift${actualCoverage.missingCheckIn.length === 1 ? "" : "s"} still need check-in confirmation.`
+          : `${coverageGaps.length} upcoming task${coverageGaps.length === 1 ? "" : "s"} without matching scheduled coverage.`}
+        busy={loading}
+        onPress={() => togglePanel("shifts")}
       />
-
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E7CFEF" }]}>ACTUAL COVERAGE NOW</Text>
-        <Text style={[S.h2, { color: C.white }]}>
-          {actualCoverage.scheduledNow.length
-            ? `${actualCoverage.checkedInNow.length}/${actualCoverage.scheduledNow.length} scheduled caregiver${actualCoverage.scheduledNow.length === 1 ? "" : "s"} checked in`
-            : "No caregiver shift is scheduled right now"}
-        </Text>
-        <Txt style={{ color: "#E9DDED" }}>
-          {actualCoverage.missingCheckIn.length
-            ? `${actualCoverage.missingCheckIn.length} active shift${actualCoverage.missingCheckIn.length === 1 ? "" : "s"} still need check-in confirmation.`
-            : `${coverageGaps.length} upcoming task${coverageGaps.length === 1 ? "" : "s"} without matching scheduled coverage.`}
-        </Txt>
-      </Card>
 
       {Boolean(message) && (
         <Card>
@@ -872,43 +870,66 @@ export function CareScheduleScreen() {
         </Card>
       )}
 
-      <Button
-        title="Back to today’s shift board"
-        secondary
-        icon="arrow-back-outline"
-        onPress={() => n.navigate("CareShiftBoard")}
-      />
-      <Button
-        title="Weekly care coordination analytics"
-        secondary
-        icon="bar-chart-outline"
-        onPress={() => n.navigate("CareAnalytics")}
-      />
-      <Button
-        title="Recurring care coverage requirements"
-        secondary
-        icon="time-outline"
-        onPress={() => n.navigate("CareCoverageRequirements")}
-      />
-      <Button
-        title="Weekly coverage approval"
-        secondary
-        icon="checkmark-done-outline"
-        onPress={() => n.navigate("WeeklyCoveragePlan")}
-      />
-      <Button
-        title="Smart Coverage Planner"
-        secondary
-        icon="sparkles-outline"
-        onPress={() => n.navigate("SmartCoveragePlanner")}
-      />
-      <Button
-        title="Open caregiver coverage requests"
-        secondary
-        icon="megaphone-outline"
-        onPress={() => n.navigate("CareCoverageRequests")}
-      />
+      <View style={{ gap: 9 }}>
+        <Text style={[S.h2, { fontSize: 23 }]}>Care planning</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10 }}>
+          <ScheduleQuickAction title="Schedule a shift" icon="calendar-outline" disabled={readOnly}
+            onPress={() => { setDetailPanel("shifts"); setShiftFormOpen(true); }}/>
+          <ScheduleQuickAction title="Add weekly pattern" icon="repeat-outline" tint="#F7F3FF" disabled={readOnly}
+            onPress={() => { setDetailPanel("weekly"); setRecurringFormOpen(true); }}/>
+          <ScheduleQuickAction title="Add one-time availability" icon="time-outline" tint="#F1F3FF" disabled={readOnly}
+            onPress={() => { setDetailPanel("windows"); setAvailabilityFormOpen(true); }}/>
+          <ScheduleQuickAction title="Coverage requests" icon="megaphone-outline" tint="#FCF2FB"
+            onPress={() => n.navigate("CareCoverageRequests")}/>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Additional coordination tools"
+          accessibilityState={{ expanded: detailPanel === "more" }}
+          onPress={() => togglePanel("more")}
+          style={({ pressed }) => ({
+            minHeight: 44, flexDirection: "row", alignItems: "center",
+            justifyContent: "center", gap: 8, opacity: pressed ? 0.75 : 1,
+          })}>
+          <Text style={{ fontFamily: "DMSans_600SemiBold", color: C.purple, fontSize: 12.5 }}>
+            {detailPanel === "more" ? "Hide more planning tools" : "More planning tools"}
+          </Text>
+          <Icon name={detailPanel === "more" ? "chevron-up-outline" : "chevron-down-outline"} size={17} color={C.purple}/>
+        </Pressable>
+        {detailPanel === "more" && (
+          <ScheduleReveal>
+            <Button title="Today’s shift board" secondary icon="people-outline" onPress={() => n.navigate("CareShiftBoard")}/>
+            <Button title="Weekly care coordination analytics" secondary icon="bar-chart-outline" onPress={() => n.navigate("CareAnalytics")}/>
+            <Button title="Recurring care coverage requirements" secondary icon="repeat-outline" onPress={() => n.navigate("CareCoverageRequirements")}/>
+            <Button title="Weekly coverage approval" secondary icon="checkmark-done-outline" onPress={() => n.navigate("WeeklyCoveragePlan")}/>
+            <Button title="Smart Coverage Planner" secondary icon="sparkles-outline" onPress={() => n.navigate("SmartCoveragePlanner")}/>
+            <Button title="Recent shift attendance" secondary icon="checkmark-circle-outline" onPress={() => setDetailPanel("attendance")}/>
+          </ScheduleReveal>
+        )}
+      </View>
 
+      <Section title="Next 7 days" />
+      <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
+        <View style={{ flex: 1 }}>
+          <ScheduleOverviewTile title="Coverage gaps"
+            detail={loading ? "Checking tasks…" : coverageGaps.length
+              ? `${coverageGaps.length} task${coverageGaps.length === 1 ? "" : "s"} need scheduled coverage.`
+              : "Every upcoming task has scheduled coverage."}
+            icon={!loading && coverageGaps.length ? "warning-outline" : "shield-checkmark-outline"}
+            tint={!loading && !coverageGaps.length ? "#EAF7F1" : "#FFF2F5"}
+            onPress={() => togglePanel("gaps")} expanded={detailPanel === "gaps"}/>
+        </View>
+        <View style={{ flex: 1 }}>
+          <ScheduleOverviewTile title="Upcoming shifts"
+            detail={loading ? "Checking shifts…" : upcomingShifts.length
+              ? `${upcomingShifts.length} scheduled in the next 7 days.`
+              : "No scheduled shifts in the next 7 days."}
+            icon="calendar-outline"
+            onPress={() => togglePanel("shifts")} expanded={detailPanel === "shifts"}/>
+        </View>
+      </View>
+
+      {detailPanel === "gaps" && (
+        <ScheduleReveal>
+          <Section title="Tasks needing coverage" />
       <Section title="Coverage gaps · next 7 days" />
       {!coverageGaps.length ? (
         <Card style={{ backgroundColor: "#EAF4EF" }}>
@@ -941,7 +962,11 @@ export function CareScheduleScreen() {
         ))
       )}
 
-      <Section title="Upcoming shifts · next 7 days" />
+        </ScheduleReveal>
+      )}
+      {detailPanel === "shifts" && (
+        <ScheduleReveal>
+          <Section title="Upcoming shifts · next 7 days" />
       {!readOnly && (
         <Button
           title={shiftFormOpen ? "Close shift form" : "Schedule a shift"}
@@ -1276,7 +1301,11 @@ export function CareScheduleScreen() {
         </Card>
       )}
 
-      <Section title="Recent shift attendance" />
+        </ScheduleReveal>
+      )}
+      {detailPanel === "attendance" && (
+        <ScheduleReveal>
+          <Section title="Recent shift attendance" />
       {attendance.length ? (
         attendance.slice(0, 20).map((item) => {
           const shift = shiftMap.get(item.shiftId);
@@ -1326,48 +1355,42 @@ export function CareScheduleScreen() {
         </Card>
       )}
 
-      <Section title="Availability" />
-      <Card style={{ backgroundColor: C.lavender }}>
-        <Icon name="repeat-outline" color={C.purple} />
-        <Text style={S.h3}>Weekly patterns + one-time exceptions</Text>
-        <Txt>
-          Save the caregiver’s normal weekly routine once, then use one-time
-          availability windows for temporary changes. Unavailable time always
-          takes priority when EnVizion matches backup coverage.
-        </Txt>
-      </Card>
-
-      {!readOnly && (
-        <View style={{ gap: 9 }}>
-          <Button
-            title={
-              recurringFormOpen
-                ? "Close weekly pattern form"
-                : "Add weekly availability pattern"
-            }
-            icon="repeat-outline"
-            onPress={() => {
-              setRecurringFormOpen((value) => !value);
-              setMessage("");
-            }}
-          />
-          <Button
-            title={
-              availabilityFormOpen
-                ? "Close one-time availability form"
-                : "Add one-time availability"
-            }
-            secondary
-            icon="time-outline"
-            onPress={() => {
-              setAvailabilityFormOpen((value) => !value);
-              setMessage("");
-            }}
-          />
-        </View>
+        </ScheduleReveal>
       )}
 
-      {recurringFormOpen && !readOnly && (
+      <Section title="Availability" />
+      <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
+        <View style={{ flex: 1 }}>
+          <ScheduleOverviewTile
+            title="Weekly recurring patterns" icon="repeat-outline"
+            detail={loading ? "Loading patterns…" : recurringAvailability.length
+              ? `${recurringAvailability.length} saved weekly pattern${recurringAvailability.length === 1 ? "" : "s"}.`
+              : "No weekly patterns yet. Add one to reuse for future shifts."}
+            onPress={() => togglePanel("weekly")} expanded={detailPanel === "weekly"}/>
+        </View>
+        <View style={{ flex: 1 }}>
+          <ScheduleOverviewTile
+            title="One-time availability" icon="time-outline"
+            detail={loading ? "Loading windows…" : futureAvailability.length
+              ? `${futureAvailability.length} upcoming availability window${futureAvailability.length === 1 ? "" : "s"}.`
+              : "No upcoming one-time windows added."}
+            onPress={() => togglePanel("windows")} expanded={detailPanel === "windows"}/>
+        </View>
+      </View>
+      {detailPanel === "weekly" && (
+        <ScheduleReveal>
+          <Card style={{ backgroundColor: C.lavender }}>
+            <Text style={S.h3}>Weekly patterns and exceptions</Text>
+            <Txt style={S.small}>
+              Save normal weekly routines once. Unavailable time always takes
+              priority when EnVizion matches backup coverage.
+            </Txt>
+          </Card>
+          {!readOnly && (
+            <Button title={recurringFormOpen ? "Close weekly pattern form" : "Add weekly availability pattern"}
+              icon="repeat-outline" secondary onPress={() => setRecurringFormOpen(value => !value)}/>
+          )}
+          {recurringFormOpen && !readOnly && (      {recurringFormOpen && !readOnly && (
         <Card>
           <Text style={S.eyebrow}>REPEATS WEEKLY</Text>
           <Text style={S.h2}>Weekly caregiver availability</Text>
@@ -1652,7 +1675,15 @@ export function CareScheduleScreen() {
         </Card>
       )}
 
-      <Section title="One-time availability windows" />
+        </ScheduleReveal>
+      )}
+      {detailPanel === "windows" && (
+        <ScheduleReveal>
+          {!readOnly && (
+            <Button title={availabilityFormOpen ? "Close one-time availability form" : "Add one-time availability"}
+              icon="time-outline" secondary onPress={() => setAvailabilityFormOpen(value => !value)}/>
+          )}
+          <Section title="One-time availability windows" />
 
       {availabilityFormOpen && !readOnly && (
         <Card>
@@ -1818,7 +1849,17 @@ export function CareScheduleScreen() {
         </Card>
       )}
 
+        </ScheduleReveal>
+      )}
       <Section title="Shift swap requests" />
+      <ScheduleOverviewTile title="Shift swap requests"
+        detail={loading ? "Checking requests…" : swaps.filter(item => item.status === "open").length
+          ? `${swaps.filter(item => item.status === "open").length} open swap request${swaps.filter(item => item.status === "open").length === 1 ? "" : "s"}.`
+          : swaps.length ? `${swaps.length} previous requests · none open.` : "No shift swap requests yet."}
+        icon="people-outline" onPress={() => togglePanel("swaps")}
+        expanded={detailPanel === "swaps"}/>
+      {detailPanel === "swaps" && (
+        <ScheduleReveal>
       {swaps.length ? (
         swaps.slice(0, 20).map((swap) => {
           const shift = shiftMap.get(swap.shiftId);
@@ -1888,9 +1929,11 @@ export function CareScheduleScreen() {
         </Card>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
-        <Icon name="information-circle-outline" />
-        <Text style={S.h3}>Coverage planning is coordination support.</Text>
+        </ScheduleReveal>
+      )}
+      <Card style={{ backgroundColor: "#F4EAFB", borderColor: "#E7D7F0", gap: 8 }}>
+        <Icon name="information-circle-outline" color={C.purple} size={23}/>
+        <Text style={[S.h3, { fontSize: 13.5 }]}>Coverage planning is coordination support.</Text>
         <Txt>
           Availability and shift warnings help the family organize care. They
           are not emergency monitoring and do not confirm that a caregiver is
