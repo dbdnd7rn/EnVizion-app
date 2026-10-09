@@ -20,6 +20,7 @@ import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import Svg, { Path } from "react-native-svg";
 import { supabase } from "./supabase";
+import { withStartupTimeout } from "./startupTimeout";
 import {
   MIN_PASSWORD_LENGTH,
   AUTH_REQUEST_TIMEOUT_MS,
@@ -39,6 +40,8 @@ type AuthContextValue = {
   loading: boolean;
   recoveryMode: boolean;
   authMessage: string;
+  startupError: string;
+  retryStartup: () => void;
   signIn: (email: string, password: string) => Promise<string | null>;
   signInWithGoogle: () => Promise<string | null>;
   signInWithGoogleIdToken: (idToken: string) => Promise<string | null>;
@@ -124,6 +127,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [recoveryMode, setRecoveryMode] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
+  const [startupError, setStartupError] = useState("");
+  const [startupAttempt, setStartupAttempt] = useState(0);
+  const retryStartup = useCallback(() => {
+    setStartupAttempt((attempt) => attempt + 1);
+  }, []);
 
   const applyNativeAuthUrl = useCallback(async (url: string) => {
     const callback = parseAuthCallback(url);
@@ -159,58 +167,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    let authChanged = false;
+    setLoading(true);
+    setStartupError("");
 
     async function bootstrap() {
       try {
-        const {
-          data: { session: storedSession },
-        } = await withAuthTimeout(supabase.auth.getSession(), AUTH_STARTUP_TIMEOUT_MS);
+        // Local storage / token refresh may stall on intermittent connections.
+        // A timeout must not be treated as proof that a session is invalid.
+        const { data, error: sessionError } = await withStartupTimeout(
+          supabase.auth.getSession(),
+          8000,
+          "Restoring your account is taking longer than expected.",
+        );
+        if (!active || authChanged) return;
+        if (sessionError) throw sessionError;
 
-        if (!active) return;
+        if (data.session) {
+          const { data: verified, error: verifyError } =
+            await withStartupTimeout(
+              supabase.auth.getUser(),
+              8000,
+              "Account verification is taking longer than expected.",
+            );
+          if (!active || authChanged) return;
 
-        if (storedSession) {
-          const { error } = await withAuthTimeout(
-            supabase.auth.getUser(),
-            AUTH_STARTUP_TIMEOUT_MS,
-          );
-          if (!active) return;
-
-          if (isDefinitiveSessionError(error)) {
-            try {
-              await withAuthTimeout(
-                supabase.auth.signOut({ scope: "local" }),
-                AUTH_STARTUP_TIMEOUT_MS,
-              );
-            } catch {
-              // Failed local cleanup must not trap the user on a spinner.
-            }
-            if (!active) return;
+          if (isDefinitiveSessionError(verifyError)) {
+            // Only a definite 401/403 should clear a stored login.
+            // Do not block the screen on a sign-out network request.
+            void supabase.auth.signOut({ scope: "local" }).catch(() => {});
             setSession(null);
             setAuthMessage("Your session expired. Sign in again to continue.");
-          } else if (error) {
-            setSession(null);
-            setAuthMessage("We couldn't verify your session. Check your connection and sign in again.");
+          } else if (verifyError || !verified.user) {
+            throw verifyError ?? new Error("We could not verify your account.");
           } else {
-            setSession(storedSession);
+            setSession(data.session);
           }
         } else {
           setSession(null);
         }
-      } catch {
-        if (active) {
-          setAuthMessage("We couldn't restore your session. Check your connection and try signing in.");
+
+        if (
+          Platform.OS === "web" &&
+          typeof window !== "undefined" &&
+          isPasswordRecoveryCallback(parseAuthCallback(window.location.href))
+        ) {
+          setRecoveryMode(true);
+        }
+      } catch (error) {
+        if (active && !authChanged) {
+          setStartupError(
+            error instanceof Error
+              ? error.message
+              : "We could not prepare your account. Please try again.",
+          );
         }
       } finally {
-        if (active) {
-          if (
-            Platform.OS === "web" &&
-            typeof window !== "undefined" &&
-            isPasswordRecoveryCallback(parseAuthCallback(window.location.href))
-          ) {
-            setRecoveryMode(true);
-          }
-          setLoading(false);
-        }
+        if (active) setLoading(false);
       }
     }
 
@@ -220,16 +233,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, nextSession: Session | null) => {
+        if (!active || event === "INITIAL_SESSION") return;
+        authChanged = true;
         setSession(nextSession);
+        setStartupError("");
 
         if (event === "PASSWORD_RECOVERY") {
           setRecoveryMode(true);
         }
-
         if (event === "SIGNED_OUT") {
           setRecoveryMode(false);
         }
-
         setLoading(false);
       },
     );
@@ -238,7 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       active = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [startupAttempt]);
 
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -280,6 +294,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       recoveryMode,
       authMessage,
+      startupError,
+      retryStartup,
       async signIn(email, password) {
         setAuthMessage("");
         const { error } = await withAuthTimeout(
@@ -399,7 +415,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await supabase.auth.signOut();
       },
     }),
-    [applyNativeAuthUrl, authMessage, loading, recoveryMode, session],
+    [applyNativeAuthUrl, authMessage, loading, recoveryMode, retryStartup, session, startupError],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
