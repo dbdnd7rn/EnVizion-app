@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, themeShadow } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -2744,7 +2744,7 @@ export function LibraryScreen() {
                 paddingHorizontal: 20,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: filter === item ? C.purple : "#F1EDF2",
+                backgroundColor: filter === item ? themeAction(C.purple) : "#F1EDF2",
                 opacity: pressed ? 0.76 : 1,
               })}
             >
@@ -2813,7 +2813,7 @@ export function LibraryScreen() {
                   minHeight: 46,
                   borderRadius: 23,
                   paddingHorizontal: 18,
-                  backgroundColor: C.purple,
+                  backgroundColor: themeAction(C.purple),
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 9,

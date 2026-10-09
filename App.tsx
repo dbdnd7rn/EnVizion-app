@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { AppearanceProvider, themedScreen, useAppearance } from "./src/appearance";
-import { themeBackground } from "./src/themeColors";
+import { themeBackground, themeAction } from "./src/themeColors";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -805,7 +805,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
             borderRadius: 26,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: C.purple,
+            backgroundColor: themeAction(C.purple),
             opacity: pressed ? 0.8 : 1,
           })}
         >
@@ -858,7 +858,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
           style={({ pressed }) => ({
             minHeight: 52,
             borderRadius: 26,
-            backgroundColor: C.purple,
+            backgroundColor: themeAction(C.purple),
             alignItems: "center",
             justifyContent: "center",
             opacity: pressed ? 0.8 : 1,

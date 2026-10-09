@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder } from "./themeColors";
+import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction } from "./themeColors";
 import { useAppearance } from "./appearance";
 import {
   AccessibilityInfo,
@@ -164,7 +164,7 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => ({
         minHeight: 54,
-        backgroundColor: secondary ? C.lavender : C.purple,
+        backgroundColor: secondary ? C.lavender : themeAction(C.purple),
         borderRadius: 27,
         paddingHorizontal: 20,
         paddingVertical: 14,

@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { C as BaseC, Icon, S as BaseS } from "../ui";
-import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder } from "../themeColors";
+import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction } from "../themeColors";
 import { useAppearance } from "../appearance";
 
 export { Icon };
@@ -257,7 +257,7 @@ export function Button({
   disabled?: boolean;
 }) {
   const destructive = /^(delete|deleting)\b/i.test(title);
-  const tone = destructive ? "#AA3658" : C.purple;
+  const tone = destructive ? "#AA3658" : themeAction(C.purple);
   return (
     <Pressable
       accessibilityRole="button"

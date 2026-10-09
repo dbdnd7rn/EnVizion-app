@@ -66,6 +66,8 @@ export function appearanceColor(source: string, role: ColorRole = "foreground") 
 }
 
 export const themeBackground = (value: string) => appearanceColor(value, "background");
+/** Filled primary actions stay deep enough for white labels in dark mode. */
+export const themeAction = (value: string) => activeMode === "dark" ? "#774A9F" : value;
 export const themeForeground = (value: string) => appearanceColor(value, "foreground");
 export const themeBorder = (value: string) => appearanceColor(value, "border");
 export const themeTint = (value: string) => appearanceColor(value, "tint");
