@@ -611,7 +611,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             component={CareTeamSecurityRemediationScreen}
             options={{ title: "Security remediation" }}
           />
-          <Stack.Screen name="AdvocateHandover" component={AdvocateHandoverScreen} options={{ title: "Primary Advocate handover" }} />
+          <Stack.Screen name="AdvocateHandover" component={AdvocateHandoverScreen} options={{ title: "Primary Advocate handover", headerShown: false }} />
           <Stack.Screen
             name="CareAccessRecertification"
             component={CareAccessRecertificationScreen}
