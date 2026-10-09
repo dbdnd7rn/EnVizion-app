@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeTint } from "../themeColors";
 import React, {
   useCallback,
   useEffect,
@@ -307,7 +308,7 @@ function HospitalToHomeArtwork({ reducedMotion }: { reducedMotion: boolean }) {
         />
 
         <G transform="translate(28 63)">
-          <Ellipse cx="74" cy="96" rx="66" ry="12" fill="#704490" opacity={0.12} />
+          <Ellipse cx="74" cy="96" rx="66" ry="12" fill={themeTint("#704490")} opacity={0.12} />
           <Rect x="16" y="28" width="94" height="72" rx="7" fill="url(#transitionHospital)" stroke="#CBB2DE" />
           <Rect x="0" y="48" width="28" height="52" rx="5" fill="#EFE6F5" stroke="#CFB9DE" />
           <Rect x="99" y="45" width="30" height="55" rx="5" fill="#EADCF3" stroke="#C8AEDB" />
@@ -321,7 +322,7 @@ function HospitalToHomeArtwork({ reducedMotion }: { reducedMotion: boolean }) {
         </G>
 
         <G transform="translate(307 74)">
-          <Ellipse cx="55" cy="81" rx="52" ry="10" fill="#704490" opacity={0.11} />
+          <Ellipse cx="55" cy="81" rx="52" ry="10" fill={themeTint("#704490")} opacity={0.11} />
           <Path d="M8 42L55 7L104 42V89H8Z" fill="#F8F1FF" stroke="#C7ADD9" />
           <Path d="M1 43L55 2L111 43L99 51L55 19L12 51Z" fill="url(#transitionHome)" />
           <Rect x="44" y="58" width="22" height="31" rx="3" fill="#E1C8F0" />
@@ -535,7 +536,7 @@ function SummaryPanel({
                 paddingHorizontal: index === 1 ? 12 : 7,
               }}
             >
-              <Text style={[S.eyebrow, { fontSize: 9, color: PURPLE }]}>
+              <Text style={[S.eyebrow, { fontSize: 9, color: themeForeground(PURPLE) }]}>
                 {item.eyebrow}
               </Text>
               <Text
@@ -561,7 +562,7 @@ function SummaryPanel({
                     marginTop: 2,
                     fontFamily: "DMSans_400Regular",
                     fontSize: 11.5,
-                    color: MUTED,
+                    color: themeForeground(MUTED),
                   }}
                 >
                   {item.detail}
@@ -585,7 +586,7 @@ function SummaryPanel({
             width: `${Math.round(progress * 100)}%` as `${number}%`,
             height: "100%",
             borderRadius: 999,
-            backgroundColor: PURPLE,
+            backgroundColor: themeBackground(PURPLE),
           }}
         />
       </View>
@@ -638,7 +639,7 @@ function Shortcut({
           backgroundColor: "#F1E5FA",
         }}
       >
-        <Icon name={icon} size={21} color={PURPLE} />
+        <Icon name={icon} size={21} color={themeForeground(PURPLE)} />
       </View>
       <Text
         style={{
@@ -651,7 +652,7 @@ function Shortcut({
       >
         {title}
       </Text>
-      <Icon name="chevron-forward-outline" size={18} color={PURPLE} />
+      <Icon name="chevron-forward-outline" size={18} color={themeForeground(PURPLE)} />
     </Pressable>
   );
 }
@@ -755,7 +756,7 @@ function PlanAccordion({
             style={{
               fontFamily: "DMSans_700Bold",
               fontSize: 13,
-              color: PURPLE,
+              color: themeForeground(PURPLE),
             }}
           >
             {index + 1}
@@ -770,7 +771,7 @@ function PlanAccordion({
             justifyContent: "center",
           }}
         >
-          <Icon name={meta.icon} size={22} color={PURPLE} />
+          <Icon name={meta.icon} size={22} color={themeForeground(PURPLE)} />
         </View>
 
         <View style={{ flex: 1, gap: 2 }}>
@@ -973,7 +974,7 @@ function ChecklistRow({
           backgroundColor: "#F4ECFA",
         }}
       >
-        <Icon name={checklistIcons[index]} size={19} color={PURPLE} />
+        <Icon name={checklistIcons[index]} size={19} color={themeForeground(PURPLE)} />
       </View>
       <Text
         style={{
@@ -1289,14 +1290,14 @@ export function HospitalToHomeScreen() {
               opacity: pressed ? 0.62 : 1,
             })}
           >
-            <Icon name="chevron-back-outline" size={25} color={PURPLE} />
+            <Icon name="chevron-back-outline" size={25} color={themeForeground(PURPLE)} />
           </Pressable>
           <Text
             accessibilityRole="header"
             style={{
               fontFamily: "DMSans_600SemiBold",
               fontSize: 16,
-              color: PURPLE,
+              color: themeForeground(PURPLE),
             }}
           >
             Hospital to home
@@ -1306,7 +1307,7 @@ export function HospitalToHomeScreen() {
 
       <MotionBlock reducedMotion={reducedMotion} delay={50}>
         <View style={{ gap: 8 }}>
-          <Text style={[S.eyebrow, { color: PURPLE }]}>
+          <Text style={[S.eyebrow, { color: themeForeground(PURPLE) }]}>
             YOUR TRANSITION PLAN
           </Text>
           <Text
@@ -1327,7 +1328,7 @@ export function HospitalToHomeScreen() {
               fontFamily: "DMSans_400Regular",
               fontSize: 15.5,
               lineHeight: 22,
-              color: MUTED,
+              color: themeForeground(MUTED),
             }}
           >
             Your discharge details, together.
@@ -1387,14 +1388,14 @@ export function HospitalToHomeScreen() {
               gap: 10,
             }}
           >
-            <Icon name="eye-outline" size={20} color={PURPLE} />
+            <Icon name="eye-outline" size={20} color={themeForeground(PURPLE)} />
             <Text
               style={{
                 flex: 1,
                 fontFamily: "DMSans_400Regular",
                 fontSize: 12.5,
                 lineHeight: 18,
-                color: "#655573",
+                color: themeForeground("#655573"),
               }}
             >
               Viewer access is read-only. You can review this transition but cannot change it.
@@ -1428,7 +1429,7 @@ export function HospitalToHomeScreen() {
               fontFamily: "DMSans_400Regular",
               fontSize: 13,
               lineHeight: 19,
-              color: MUTED,
+              color: themeForeground(MUTED),
             }}
           >
             Keep the care team’s instructions close.
@@ -1450,7 +1451,7 @@ export function HospitalToHomeScreen() {
               gap: 10,
             }}
           >
-            <ActivityIndicator color={PURPLE} />
+            <ActivityIndicator color={themeForeground(PURPLE)} />
             <Txt>Loading transition plan…</Txt>
           </View>
         </MotionBlock>
@@ -1686,7 +1687,7 @@ export function HospitalToHomeScreen() {
                       fontFamily: "DMSans_400Regular",
                       fontSize: 11.5,
                       lineHeight: 17,
-                      color: MUTED,
+                      color: themeForeground(MUTED),
                       textAlign: "center",
                     }}
                   >
@@ -1712,7 +1713,7 @@ export function HospitalToHomeScreen() {
       <MotionBlock reducedMotion={reducedMotion} delay={245}>
         <View style={{ gap: 5 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
-            <Icon name="calendar-outline" size={22} color={PURPLE} />
+            <Icon name="calendar-outline" size={22} color={themeForeground(PURPLE)} />
             <Text
               accessibilityRole="header"
               style={{
@@ -1844,7 +1845,7 @@ export function HospitalToHomeScreen() {
                         {followUp.provider ? " · " + followUp.provider : ""}
                       </Text>
                       {cancelled ? (
-                        <Text style={[S.small, { color: MUTED }]}>Cancelled</Text>
+                        <Text style={[S.small, { color: themeForeground(MUTED) }]}>Cancelled</Text>
                       ) : null}
                     </View>
                   </View>
@@ -1973,7 +1974,7 @@ export function HospitalToHomeScreen() {
               fontFamily: "DMSans_400Regular",
               fontSize: 11.5,
               lineHeight: 17,
-              color: MUTED,
+              color: themeForeground(MUTED),
             }}
           >
             Preparation tasks only — this checklist does not mean medical clearance or readiness for discharge.

@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -115,7 +116,7 @@ function Picker<T extends string>({
                 minHeight: 42,
                 justifyContent: "center",
                 paddingHorizontal: 14,
-                backgroundColor: selected ? C.purple : C.lavender,
+                backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                 opacity: disabled ? 0.55 : 1,
               },
             ]}
@@ -748,7 +749,7 @@ export function CareCommunicationLogScreen() {
             {
               minHeight: 40,
               justifyContent: "center",
-              backgroundColor: filter === "all" ? C.purple : C.lavender,
+              backgroundColor: filter === "all" ? themeAction(C.purple) : C.lavender,
             },
           ]}
         >
@@ -773,7 +774,7 @@ export function CareCommunicationLogScreen() {
               {
                 minHeight: 40,
                 justifyContent: "center",
-                backgroundColor: filter === type ? C.purple : C.lavender,
+                backgroundColor: filter === type ? themeAction(C.purple) : C.lavender,
               },
             ]}
           >

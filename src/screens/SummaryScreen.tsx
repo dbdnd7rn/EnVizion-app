@@ -1,3 +1,4 @@
+import { themeForeground, themeShadow } from "../themeColors";
 import React, {
   useCallback,
   useEffect,
@@ -860,7 +861,7 @@ export function SummaryScreen() {
                 borderColor: "#E7D7F0",
                 opacity: pressed ? 0.68 : 1,
                 transform: [{ scale: pressed ? 0.96 : 1 }],
-                shadowColor: "#573369",
+                shadowColor: themeShadow("#573369"),
                 shadowOpacity: 0.045,
                 shadowRadius: 12,
                 shadowOffset: { width: 0, height: 6 },
@@ -1160,7 +1161,7 @@ export function SummaryScreen() {
                         <Text
                           style={[
                             S.body,
-                            { flex: 1, color: "#302852", paddingTop: 7 },
+                            { flex: 1, color: themeForeground("#302852"), paddingTop: 7 },
                           ]}
                         >
                           {question}

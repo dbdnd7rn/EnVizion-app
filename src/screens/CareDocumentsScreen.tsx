@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -63,7 +64,7 @@ function CategoryChoices({
               justifyContent: "center",
               paddingHorizontal: 12,
               opacity: disabled ? 0.6 : 1,
-              backgroundColor: value === category ? C.purple : C.lavender,
+              backgroundColor: value === category ? themeAction(C.purple) : C.lavender,
             },
           ]}
         >
@@ -634,7 +635,7 @@ export function CareDocumentsScreen() {
                       minHeight: 42,
                       borderRadius: 21,
                       paddingHorizontal: 10,
-                      backgroundColor: uploadBiometric ? C.purple : "#E6E0E8",
+                      backgroundColor: uploadBiometric ? themeAction(C.purple) : "#E6E0E8",
                       alignItems: "center",
                       justifyContent: "center",
                       opacity: pressed ? 0.7 : 1,

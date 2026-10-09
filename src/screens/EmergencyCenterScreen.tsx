@@ -1,3 +1,4 @@
+import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "react-native-qrcode-svg";
 import { ActivityIndicator, Linking, Pressable, Text, View } from "react-native";
@@ -1045,7 +1046,7 @@ export function EmergencyCenterScreen() {
                 borderRadius: 24,
                 borderWidth: 1,
                 borderColor: "#E9E3EF",
-                backgroundColor: C.white,
+                backgroundColor: themeBackground(C.white),
                 paddingHorizontal: 16,
                 flexDirection: "row",
                 alignItems: "center",
@@ -1240,7 +1241,7 @@ export function EmergencyCenterScreen() {
                           alignItems: "center",
                           justifyContent: "center",
                           backgroundColor:
-                            codeStatus === value ? C.purple : C.lavender,
+                            codeStatus === value ? themeAction(C.purple) : C.lavender,
                         },
                       ]}
                     >
@@ -1280,7 +1281,7 @@ export function EmergencyCenterScreen() {
                           alignItems: "center",
                           justifyContent: "center",
                           backgroundColor:
-                            poaStatus === value ? C.purple : C.lavender,
+                            poaStatus === value ? themeAction(C.purple) : C.lavender,
                         },
                       ]}
                     >
@@ -1411,7 +1412,7 @@ export function EmergencyCenterScreen() {
                           justifyContent: "center",
                           backgroundColor:
                             shareMinutes === Number(minutes)
-                              ? C.purple
+                              ? themeAction(C.purple)
                               : C.white,
                         },
                       ]}
@@ -1459,7 +1460,7 @@ export function EmergencyCenterScreen() {
                   accessibilityLabel="Emergency QR code for the temporary read-only emergency summary"
                   style={{
                     borderRadius: 22,
-                    backgroundColor: C.white,
+                    backgroundColor: themeBackground(C.white),
                     padding: 18,
                     alignItems: "center",
                     gap: 10,
@@ -1469,7 +1470,7 @@ export function EmergencyCenterScreen() {
                     style={{
                       padding: 12,
                       borderRadius: 18,
-                      backgroundColor: C.white,
+                      backgroundColor: themeBackground(C.white),
                     }}
                   >
                     <QRCode
@@ -1490,7 +1491,7 @@ export function EmergencyCenterScreen() {
                 <View
                   style={{
                     borderRadius: 15,
-                    backgroundColor: C.white,
+                    backgroundColor: themeBackground(C.white),
                     padding: 12,
                   }}
                 >
@@ -1534,7 +1535,7 @@ export function EmergencyCenterScreen() {
                     key={share.id}
                     style={{
                       borderRadius: 16,
-                      backgroundColor: C.white,
+                      backgroundColor: themeBackground(C.white),
                       padding: 12,
                       flexDirection: "row",
                       alignItems: "center",
