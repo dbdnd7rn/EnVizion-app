@@ -9,7 +9,7 @@ const profile = readFileSync(
 const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 
 test("profile relies on the native stack header, not a duplicate inline back arrow", () => {
-  assert.match(app, /name="Profile"[\s\S]*?component=\{ProfileDashboardScreen\}[\s\S]*?title: "Your profile"/);
+  assert.match(app, /name="Profile"[\s\S]*?component=\{themedScreen\(ProfileDashboardScreen\)\}[\s\S]*?title: "Your profile"/);
   assert.doesNotMatch(profile, /accessibilityLabel="Go back"/);
 });
 
