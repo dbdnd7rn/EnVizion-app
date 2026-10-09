@@ -805,7 +805,7 @@ export function CareTeamScreen() {
         {canManage&&recipientId&&(
           <Glass>
             <Text accessibilityRole="header" style={[S.h3,{color:INK}]}>
-              Invitation overview
+              Invitation management
             </Text>
             <View style={{flexDirection:"row",flexWrap:"wrap",gap:7}}>
               {([
@@ -823,13 +823,14 @@ export function CareTeamScreen() {
             </View>
             <Text style={{fontSize:11.5,lineHeight:18,color:MUTED}}>
               Invitations last 14 days. Reminders can be sent once every 24 hours.
-              Email requests do not confirm delivery or opening.
+              “Email requested” means EnVizion handed the invite to the email provider;
+              it does not claim that the message was delivered or opened.
             </Text>
           </Glass>
         )}
         {canManage&&(
           <>
-            <ToolLink title="90-day access review" detail="Keep access, change role or revoke it."
+            <ToolLink title="Periodic Access Recertification" detail="90-day access review: keep access, change role or revoke it."
               icon="calendar-outline" tint="#EAF3EE"
               onPress={()=>n.navigate("CareAccessRecertification")}/>
             <ToolLink title="Care Team Security Review"
@@ -838,7 +839,7 @@ export function CareTeamScreen() {
               onPress={()=>n.navigate("CareTeamSecurityReview")}/>
           </>
         )}
-        <ToolLink title="Activity & accountability" detail="Review access and care activity."
+        <ToolLink title="Care Team Activity Center" detail="Review access and care activity."
           icon="time-outline" onPress={()=>n.navigate("CareTeamActivity")}/>
       </View>
     )}
