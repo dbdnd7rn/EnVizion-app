@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import React, {
   useCallback,
   useEffect,
@@ -387,7 +388,7 @@ export function WellnessScreen() {
                 transform: [{ scale: pressed ? 0.96 : 1 }],
               })}
             >
-              <Icon name="chevron-back" size={27} color="#713198" />
+              <Icon name="chevron-back" size={27} color={themeForeground("#713198")} />
             </Pressable>
             <Text
               accessibilityRole="header"
@@ -395,7 +396,7 @@ export function WellnessScreen() {
                 fontFamily: "DMSans_700Bold",
                 fontSize: 19,
                 lineHeight: 24,
-                color: "#713198",
+                color: themeForeground("#713198"),
               }}
             >
               Spiritual wellness
@@ -590,7 +591,7 @@ export function WellnessScreen() {
                 fontFamily: "DMSans_500Medium",
                 fontSize: 15.5,
                 lineHeight: 22,
-                color: "#252047",
+                color: themeForeground("#252047"),
               }}
             >
               What is one thing you can set down today?
@@ -671,7 +672,7 @@ export function WellnessScreen() {
                   gap: 8,
                 }}
               >
-                <Icon name="checkmark-circle-outline" size={18} color="#775090" />
+                <Icon name="checkmark-circle-outline" size={18} color={themeForeground("#775090")} />
                 <Text
                   style={{
                     fontFamily: "DMSans_500Medium",
@@ -696,14 +697,14 @@ export function WellnessScreen() {
               gap: 10,
             }}
           >
-            <Icon name="lock-closed-outline" size={22} color="#777486" />
+            <Icon name="lock-closed-outline" size={22} color={themeForeground("#777486")} />
             <View style={{ flex: 1, gap: 2 }}>
               <Text
                 style={{
                   fontFamily: "DMSans_400Regular",
                   fontSize: 11.5,
                   lineHeight: 17,
-                  color: "#777486",
+                  color: themeForeground("#777486"),
                   textAlign: "center",
                 }}
               >
@@ -714,7 +715,7 @@ export function WellnessScreen() {
                   fontFamily: "DMSans_400Regular",
                   fontSize: 11.5,
                   lineHeight: 17,
-                  color: "#777486",
+                  color: themeForeground("#777486"),
                   textAlign: "center",
                 }}
               >

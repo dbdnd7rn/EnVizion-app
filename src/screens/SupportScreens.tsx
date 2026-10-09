@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -537,7 +538,7 @@ export function OnboardingScreen() {
                   borderColor: careMode === "advocate" ? C.purple : "#CFC4D3",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: C.white,
+                  backgroundColor: themeBackground(C.white),
                 }}
               >
                 {careMode === "advocate" && (
@@ -546,7 +547,7 @@ export function OnboardingScreen() {
                       width: 14,
                       height: 14,
                       borderRadius: 7,
-                      backgroundColor: C.purple,
+                      backgroundColor: themeAction(C.purple),
                     }}
                   />
                 )}
@@ -601,7 +602,7 @@ export function OnboardingScreen() {
                   borderColor: careMode === "self" ? C.purple : "#CFC4D3",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: C.white,
+                  backgroundColor: themeBackground(C.white),
                 }}
               >
                 {careMode === "self" && (
@@ -610,7 +611,7 @@ export function OnboardingScreen() {
                       width: 14,
                       height: 14,
                       borderRadius: 7,
-                      backgroundColor: C.purple,
+                      backgroundColor: themeAction(C.purple),
                     }}
                   />
                 )}
@@ -683,7 +684,7 @@ export function OnboardingScreen() {
                       S.pill,
                       {
                         padding: 14,
-                        backgroundColor: r === relationship ? C.purple : C.lavender,
+                        backgroundColor: r === relationship ? themeAction(C.purple) : C.lavender,
                       },
                     ]}
                   >
@@ -1148,7 +1149,7 @@ export function SpecialistScreen({
               fontFamily: "DMSans_400Regular",
               fontSize: 15.5,
               lineHeight: 23,
-              color: "#747184",
+              color: themeForeground("#747184"),
               maxWidth: 180,
             }}
           >
@@ -1200,7 +1201,7 @@ export function SpecialistScreen({
             backgroundColor: "#FFFFFF",
             alignItems: "center",
             justifyContent: "center",
-            shadowColor: "#553066",
+            shadowColor: themeShadow("#553066"),
             shadowOpacity: 0.05,
             shadowRadius: 10,
             shadowOffset: { width: 0, height: 5 },
@@ -1245,7 +1246,7 @@ export function SpecialistScreen({
               fontFamily: "DMSans_400Regular",
               fontSize: 14.5,
               lineHeight: 21,
-              color: "#777187",
+              color: themeForeground("#777187"),
             }}
           >
             {item[2]}
@@ -1424,7 +1425,7 @@ export function SpecialistScreen({
             fontFamily: "DMSans_400Regular",
             fontSize: 12.5,
             lineHeight: 18,
-            color: "#777187",
+            color: themeForeground("#777187"),
           }}
         >
           This guide explains general roles. Your primary care team can help with

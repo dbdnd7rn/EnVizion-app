@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeTint, themedStyles } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -54,13 +55,13 @@ import {
 } from "../ui";
 import { useNav } from "./MainScreens";
 
-const styles = StyleSheet.create({
+const styles = themedStyles(StyleSheet.create({
   header: {
     paddingHorizontal: 22,
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderColor: C.line,
-    backgroundColor: C.white,
+    backgroundColor: themeBackground(C.white),
     gap: 12,
   },
   avatar: {
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     borderColor: C.line,
-    backgroundColor: C.white,
+    backgroundColor: themeBackground(C.white),
   },
   userBubble: {
     alignSelf: "flex-end",
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
   },
   assistantBubble: {
     alignSelf: "flex-start",
-    backgroundColor: C.white,
+    backgroundColor: themeBackground(C.white),
     borderBottomLeftRadius: 6,
   },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "#DED5E4",
-    backgroundColor: C.white,
+    backgroundColor: themeBackground(C.white),
   },
   composer: {
     padding: 16,
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     gap: 8,
     borderTopWidth: 1,
     borderColor: C.line,
-    backgroundColor: C.white,
+    backgroundColor: themeBackground(C.white),
   },
   inputRow: { flexDirection: "row", alignItems: "flex-end", gap: 10 },
 
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_400Regular",
     fontSize: 14,
     lineHeight: 21,
-    color: "#777589",
+    color: themeForeground("#777589"),
   },
   assistantRobot: {
     position: "absolute",
@@ -344,7 +345,7 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_600SemiBold",
     fontSize: 14,
     lineHeight: 18,
-    color: "#171943",
+    color: themeForeground("#171943"),
   },
   assistantQuestionSub: {
     marginTop: 3,
@@ -453,7 +454,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#713BA0",
   },
-});
+}));
 
 function Badge({ text }: { text: string }) {
   return (
@@ -561,7 +562,7 @@ function Composer({
             fontFamily: "DMSans_400Regular",
             fontSize: 14,
             lineHeight: 20,
-            color: "#171943",
+            color: themeForeground("#171943"),
             textAlignVertical: "center",
           }}
         />
@@ -756,7 +757,7 @@ function AssistantRobot() {
             <Stop offset="1" stopColor="#E7EAF8" />
           </LinearGradient>
           <LinearGradient id="robotFace" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#101542" />
+            <Stop offset="0" stopColor={themeTint("#101542")} />
             <Stop offset="0.58" stopColor="#171B52" />
             <Stop offset="1" stopColor="#27215D" />
           </LinearGradient>
@@ -956,7 +957,7 @@ function AssistantQuestion({
         <Text style={styles.assistantQuestionTitle}>{title}</Text>
         <Text style={styles.assistantQuestionSub}>{subtitle}</Text>
       </View>
-      <Icon name="chevron-forward" color="#151744" size={20} />
+      <Icon name="chevron-forward" color={themeForeground("#151744")} size={20} />
     </Pressable>
   );
 }
@@ -1027,7 +1028,7 @@ export function AssistantScreen() {
             { opacity: pressed ? 0.65 : 1 },
           ]}
         >
-          <Icon name="arrow-back" color="#171943" size={22} />
+          <Icon name="arrow-back" color={themeForeground("#171943")} size={22} />
         </Pressable>
 
         <View style={{ flex: 1 }}>
@@ -1200,10 +1201,10 @@ export function AssistantScreen() {
                 <Icon name="sparkles" color="#FFFFFF" size={21} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[S.h3, { color: "#171943" }]}>
+                <Text style={[S.h3, { color: themeForeground("#171943") }]}>
                   I’m here with you.
                 </Text>
-                <Text style={[S.small, { marginTop: 2, color: "#777589" }]}>
+                <Text style={[S.small, { marginTop: 2, color: themeForeground("#777589") }]}>
                   Ask a follow-up or choose another caregiving topic.
                 </Text>
               </View>

@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Switch, Text, View } from "react-native";
 import {
@@ -604,7 +605,7 @@ export function CarePacketScreen() {
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor:
-                      observationLimit === count ? C.purple : C.lavender,
+                      observationLimit === count ? themeAction(C.purple) : C.lavender,
                   },
                 ]}
               >

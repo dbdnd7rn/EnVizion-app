@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, Switch, Text, View } from "react-native";
 import {
@@ -205,7 +206,7 @@ export function NotificationSettingsScreen() {
       />
 
       {Boolean(message) && (
-        <Card style={{ backgroundColor: C.white }}>
+        <Card style={{ backgroundColor: themeBackground(C.white) }}>
           <Text accessibilityRole="alert" style={S.body}>
             {message}
           </Text>

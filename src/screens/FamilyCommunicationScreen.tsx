@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -77,7 +78,7 @@ function Choice<T extends string>({
             S.pill,
             {
               backgroundColor:
-                item === value ? C.purple : C.lavender,
+                item === value ? themeAction(C.purple) : C.lavender,
               paddingVertical: 10,
             },
           ]}
@@ -480,7 +481,7 @@ export function FamilyCommunicationScreen() {
               S.pill,
               {
                 backgroundColor:
-                  filter === value ? C.purple : C.lavender,
+                  filter === value ? themeAction(C.purple) : C.lavender,
                 paddingVertical: 10,
                 paddingHorizontal: 14,
               },
