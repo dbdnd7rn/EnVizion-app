@@ -56,10 +56,10 @@ import { CarePlanScreen } from "./src/screens/CarePlanScreen";
 import { MedicationManagementScreen } from "./src/screens/MedicationManagementScreen";
 import { HospitalToHomeScreen } from "./src/screens/HospitalToHomeScreen";
 import {
-  AssistantScreen,
   HandoffScreen,
   TeamConversationScreen,
 } from "./src/screens/ConversationScreens";
+import { EnVizionAIScreen } from "./src/screens/EnVizionAIScreen";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
 import { NotificationsProvider } from "./src/notifications";
@@ -482,7 +482,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           />
           <Stack.Screen
             name="Assistant"
-            component={themedScreen(AssistantScreen)}
+            component={themedScreen(EnVizionAIScreen)}
             options={{ headerShown: false }}
           />
           <Stack.Screen
