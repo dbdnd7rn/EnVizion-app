@@ -1,3 +1,4 @@
+import { themeShadow } from "./themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction, themeTint } from "./themeColors";
 import { useAppearance } from "./appearance";
@@ -85,13 +86,13 @@ export const S = themedStyles(StyleSheet.create({
     textTransform: "uppercase",
   },
   card: {
-    backgroundColor: C.white,
+    backgroundColor: themeBackground(C.white),
     borderRadius: 24,
     padding: 20,
     borderWidth: 1,
     borderColor: C.line,
     gap: 12,
-    shadowColor: "#35223F",
+    shadowColor: themeShadow("#35223F"),
     shadowOpacity: 0.045,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
@@ -99,15 +100,15 @@ export const S = themedStyles(StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#E6DCE9",
+    borderColor: themeBorder("#E6DCE9"),
     borderRadius: 20,
     padding: 15,
     fontSize: 15,
     fontFamily: "DMSans_400Regular",
     color: C.ink,
-    backgroundColor: C.white,
+    backgroundColor: themeBackground(C.white),
     minHeight: 54,
-    shadowColor: "#35223F",
+    shadowColor: themeShadow("#35223F"),
     shadowOpacity: 0.025,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
@@ -425,26 +426,26 @@ export function Landscape({ height = 145 }: { height?: number }) {
     >
       <Defs>
         <LinearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFF4F7" />
-          <Stop offset="1" stopColor="#EEE2F7" />
+          <Stop offset="0" stopColor={themeTint("#FFF4F7")} />
+          <Stop offset="1" stopColor={themeTint("#EEE2F7")} />
         </LinearGradient>
       </Defs>
       <Path d="M0 0H400V180H0Z" fill="url(#sky)" />
-      <Circle cx="294" cy="51" r="28" fill="#F9EED3" />
-      <Path d="M0 116Q75 46 166 111T400 70V180H0Z" fill="#D5C0DD" />
-      <Path d="M0 150Q95 75 227 140T400 104V180H0Z" fill="#AF94BE" />
-      <Path d="M0 175Q131 102 263 170T400 149V180H0Z" fill="#81618F" />
+      <Circle cx="294" cy="51" r="28" fill={themeTint("#F9EED3")} />
+      <Path d="M0 116Q75 46 166 111T400 70V180H0Z" fill={themeTint("#D5C0DD")} />
+      <Path d="M0 150Q95 75 227 140T400 104V180H0Z" fill={themeTint("#AF94BE")} />
+      <Path d="M0 175Q131 102 263 170T400 149V180H0Z" fill={themeTint("#81618F")} />
       <Path
         d="M195 180Q316 147 248 125Q207 110 263 101"
         fill="none"
-        stroke="#F8EDD9"
+        stroke={themeTint("#F8EDD9")}
         strokeWidth="7"
       />
       <Path
         d="M47 149V88M47 118Q20 111 26 92Q49 91 47 118M48 133Q74 122 70 105Q45 108 48 133"
-        stroke="#6D537E"
+        stroke={themeTint("#6D537E")}
         strokeWidth="3"
-        fill="#9273A1"
+        fill={themeTint("#9273A1")}
       />
     </Svg>
   );
@@ -460,24 +461,24 @@ export function HomeLandscape({ height = 180 }: { height?: number }) {
         ? { "aria-hidden": true }
         : { accessibilityElementsHidden: true })}
     >
-      <Circle cx="310" cy="48" r="27" fill="#FAEED5" opacity={0.94} />
+      <Circle cx="310" cy="48" r="27" fill={themeTint("#FAEED5")} opacity={0.94} />
       <Path
         d="M32 143Q105 70 184 119T398 79V180H32Z"
-        fill="#E7D9EE"
+        fill={themeTint("#E7D9EE")}
         opacity={0.98}
       />
       <Path
         d="M62 164Q143 102 228 145T398 111V180H62Z"
-        fill="#CDB8DA"
+        fill={themeTint("#CDB8DA")}
       />
       <Path
         d="M117 180Q188 132 278 164T400 142V180H117Z"
-        fill="#A88FB8"
+        fill={themeTint("#A88FB8")}
       />
       <Path
         d="M226 181Q334 147 282 126Q244 112 298 100"
         fill="none"
-        stroke="#FFF2D7"
+        stroke={themeTint("#FFF2D7")}
         strokeWidth="8"
         strokeLinecap="round"
       />
@@ -485,7 +486,7 @@ export function HomeLandscape({ height = 180 }: { height?: number }) {
         d="M352 133V75M352 104Q329 95 335 79Q355 80 352 104M353 119Q377 108 373 92Q350 96 353 119"
         stroke={themeTint("#745188")}
         strokeWidth="3"
-        fill="#8C68A0"
+        fill={themeTint("#8C68A0")}
       />
     </Svg>
   );

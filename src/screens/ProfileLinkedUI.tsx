@@ -1,3 +1,4 @@
+import { themeShadow } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -36,16 +37,16 @@ export const S = themedStyles({
   eyebrow: { ...BaseS.eyebrow, color: C.purple },
   body: { ...BaseS.body, color: C.muted, lineHeight: 21 },
   small: { ...BaseS.small, color: C.muted },
-  pill: { ...BaseS.pill, borderRadius: 18, borderWidth: 1, borderColor: "#E7DAEF" },
-  input: { ...BaseS.input, borderColor: "#E1D5EA", borderRadius: 16, backgroundColor: "#FFFFFF", minHeight: 52, color: C.ink },
+  pill: { ...BaseS.pill, borderRadius: 18, borderWidth: 1, borderColor: themeBorder("#E7DAEF") },
+  input: { ...BaseS.input, borderColor: themeBorder("#E1D5EA"), borderRadius: 16, backgroundColor: themeBackground("#FFFFFF"), minHeight: 52, color: C.ink },
   card: {
     ...BaseS.card,
     borderRadius: 24,
-    backgroundColor: "#FFFEFFF0",
-    borderColor: "#E8DDF0",
+    backgroundColor: themeBackground("#FFFEFFF0"),
+    borderColor: themeBorder("#E8DDF0"),
     padding: 17,
     gap: 12,
-    shadowColor: "#633C76",
+    shadowColor: themeShadow("#633C76"),
     shadowOpacity: 0.06,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 7 },
@@ -90,16 +91,16 @@ function DecorativeGlass({ compact = false }: { compact?: boolean }) {
       <Svg width={compact ? 122 : 180} height={compact ? 91 : 144} viewBox="0 0 180 144" accessibilityElementsHidden>
         <Defs>
           <LinearGradient id="linkedOrb" x1="0" x2="1" y1="0" y2="1">
-            <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.96}/>
-            <Stop offset="0.6" stopColor="#E8D6FA" stopOpacity={0.86}/>
-            <Stop offset="1" stopColor="#D4B8EF" stopOpacity={0.44}/>
+            <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity={0.96}/>
+            <Stop offset="0.6" stopColor={themeTint("#E8D6FA")} stopOpacity={0.86}/>
+            <Stop offset="1" stopColor={themeTint("#D4B8EF")} stopOpacity={0.44}/>
           </LinearGradient>
         </Defs>
-        <Circle cx="130" cy="28" r="71" fill="#EFDCF9" opacity={0.75}/>
-        <Circle cx="154" cy="114" r="51" fill="#E1D4F8" opacity={0.53}/>
-        <Circle cx="111" cy="62" r="29" stroke="#FFFFFF" strokeWidth="2" fill="url(#linkedOrb)"/>
-        <Path d="M95 61L107 73L128 49" fill="none" stroke="#A46AC7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <Circle cx="91" cy="43" r="6" fill="#FFFFFF" opacity={0.85}/>
+        <Circle cx="130" cy="28" r="71" fill={themeTint("#EFDCF9")} opacity={0.75}/>
+        <Circle cx="154" cy="114" r="51" fill={themeTint("#E1D4F8")} opacity={0.53}/>
+        <Circle cx="111" cy="62" r="29" stroke={themeTint("#FFFFFF")} strokeWidth="2" fill="url(#linkedOrb)"/>
+        <Path d="M95 61L107 73L128 49" fill="none" stroke={themeTint("#A46AC7")} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <Circle cx="91" cy="43" r="6" fill={themeTint("#FFFFFF")} opacity={0.85}/>
       </Svg>
     </View>
   );
@@ -132,7 +133,7 @@ export function Heading({ eyebrow, title, body }: { eyebrow?: string; title: str
           paddingHorizontal: 19,
           paddingVertical: 22,
           minHeight: 180,
-          shadowColor: "#603E76",
+          shadowColor: themeShadow("#603E76"),
           shadowOpacity: 0.05,
           shadowRadius: 17,
           shadowOffset: { width: 0, height: 7 },
