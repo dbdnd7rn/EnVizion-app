@@ -1,3 +1,4 @@
+import { themeBackground, themeBorder, themeTint } from "../themeColors";
 import { themeForeground, themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -124,22 +125,22 @@ function FolderGraphic() {
     >
       <Defs>
         <LinearGradient id="summaryFolderBack" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#E9C8FF" />
-          <Stop offset="0.55" stopColor="#AE70ED" />
-          <Stop offset="1" stopColor="#7136B5" />
+          <Stop offset="0" stopColor={themeTint("#E9C8FF")} />
+          <Stop offset="0.55" stopColor={themeTint("#AE70ED")} />
+          <Stop offset="1" stopColor={themeTint("#7136B5")} />
         </LinearGradient>
         <LinearGradient id="summaryFolderFront" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#F6E9FF" />
-          <Stop offset="0.43" stopColor="#D8B7F7" />
-          <Stop offset="1" stopColor="#9C63DE" />
+          <Stop offset="0" stopColor={themeTint("#F6E9FF")} />
+          <Stop offset="0.43" stopColor={themeTint("#D8B7F7")} />
+          <Stop offset="1" stopColor={themeTint("#9C63DE")} />
         </LinearGradient>
         <LinearGradient id="summaryFolderPaper" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" />
-          <Stop offset="1" stopColor="#F4EBFA" />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
+          <Stop offset="1" stopColor={themeTint("#F4EBFA")} />
         </LinearGradient>
         <LinearGradient id="summaryFolderGlass" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" stopOpacity="0.72" />
-          <Stop offset="1" stopColor="#FFFFFF" stopOpacity="0.06" />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity="0.72" />
+          <Stop offset="1" stopColor={themeTint("#FFFFFF")} stopOpacity="0.06" />
         </LinearGradient>
       </Defs>
 
@@ -148,7 +149,7 @@ function FolderGraphic() {
         cy="184"
         rx="92"
         ry="14"
-        fill="#7136B5"
+        fill={themeTint("#7136B5")}
         opacity={0.14}
       />
 
@@ -156,7 +157,7 @@ function FolderGraphic() {
         <Path
           d="M13 31c0-12 9-22 21-22h50c8 0 13 3 18 9l11 14h72c12 0 21 9 21 21v91c0 13-10 23-23 23H34c-13 0-23-10-23-23Z"
           fill="url(#summaryFolderBack)"
-          stroke="#EEDBFF"
+          stroke={themeTint("#EEDBFF")}
           strokeWidth="2"
         />
 
@@ -168,19 +169,19 @@ function FolderGraphic() {
             height="133"
             rx="17"
             fill="url(#summaryFolderPaper)"
-            stroke="#FFFFFF"
+            stroke={themeTint("#FFFFFF")}
             strokeWidth="2"
           />
-          <Rect x="22" y="29" width="58" height="7" rx="3.5" fill="#B493DB" />
-          <Rect x="22" y="49" width="76" height="7" rx="3.5" fill="#9E76CC" />
-          <Rect x="22" y="69" width="62" height="7" rx="3.5" fill="#B493DB" />
-          <Rect x="22" y="89" width="43" height="7" rx="3.5" fill="#C6ACE4" />
+          <Rect x="22" y="29" width="58" height="7" rx="3.5" fill={themeTint("#B493DB")} />
+          <Rect x="22" y="49" width="76" height="7" rx="3.5" fill={themeTint("#9E76CC")} />
+          <Rect x="22" y="69" width="62" height="7" rx="3.5" fill={themeTint("#B493DB")} />
+          <Rect x="22" y="89" width="43" height="7" rx="3.5" fill={themeTint("#C6ACE4")} />
         </G>
 
         <Path
           d="M2 72c0-12 10-22 22-22h157c12 0 22 10 22 22l-8 81c-1 12-11 21-23 21H34c-12 0-22-9-23-21Z"
           fill="url(#summaryFolderFront)"
-          stroke="#D6B2F6"
+          stroke={themeTint("#D6B2F6")}
           strokeWidth="2"
         />
         <Path
@@ -191,7 +192,7 @@ function FolderGraphic() {
         <Path
           d="M21 151c37 17 99 22 163 4"
           fill="none"
-          stroke="#FFFFFF"
+          stroke={themeTint("#FFFFFF")}
           strokeWidth="4"
           strokeLinecap="round"
           opacity={0.33}
@@ -271,9 +272,9 @@ function GlassCard({
         {
           borderRadius: 25,
           borderWidth: 1,
-          borderColor: "#E8DDF1",
-          backgroundColor: "#FFFFFFD6",
-          shadowColor: "#56346A",
+          borderColor: themeBorder("#E8DDF1"),
+          backgroundColor: themeBackground("#FFFFFFD6"),
+          shadowColor: themeShadow("#56346A"),
           shadowOpacity: 0.055,
           shadowRadius: 17,
           shadowOffset: { width: 0, height: 8 },
@@ -318,12 +319,12 @@ function MetricCard({
           borderRadius: 24,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#F4E9FC",
+          backgroundColor: themeBackground("#F4E9FC"),
           borderWidth: 1,
-          borderColor: "#FFFFFF",
+          borderColor: themeBorder("#FFFFFF"),
         }}
       >
-        <Icon name={icon} size={24} color="#71319B" />
+        <Icon name={icon} size={24} color={themeForeground("#71319B")} />
       </View>
       <Text
         accessibilityLabel={accessibilityValue || value + " " + label}
@@ -331,7 +332,7 @@ function MetricCard({
           fontFamily: "DMSans_700Bold",
           fontSize: 28,
           lineHeight: 31,
-          color: "#16143D",
+          color: themeForeground("#16143D"),
         }}
       >
         {value}
@@ -343,7 +344,7 @@ function MetricCard({
           fontFamily: "DMSans_400Regular",
           fontSize: 11.5,
           lineHeight: 16,
-          color: "#6F6B86",
+          color: themeForeground("#6F6B86"),
         }}
       >
         {label}
@@ -377,7 +378,7 @@ function SummaryAction({
         borderRadius: 30,
         overflow: "hidden",
         borderWidth: primary ? 0 : 1.3,
-        borderColor: "#B98CDA",
+        borderColor: themeBorder("#B98CDA"),
         backgroundColor: primary ? "#7B35A8" : "#FFFFFFA6",
         flexDirection: "row",
         alignItems: "center",
@@ -409,9 +410,9 @@ function SummaryAction({
               x2="1"
               y2="0"
             >
-              <Stop offset="0" stopColor="#8A43BC" />
-              <Stop offset="0.5" stopColor="#9844CC" />
-              <Stop offset="1" stopColor="#7431A7" />
+              <Stop offset="0" stopColor={themeTint("#8A43BC")} />
+              <Stop offset="0.5" stopColor={themeTint("#9844CC")} />
+              <Stop offset="1" stopColor={themeTint("#7431A7")} />
             </LinearGradient>
           </Defs>
           <Rect
@@ -451,7 +452,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
         fontSize: 24,
         lineHeight: 30,
         letterSpacing: -0.4,
-        color: "#17143D",
+        color: themeForeground("#17143D"),
       }}
     >
       {children}
@@ -507,24 +508,24 @@ function SummaryDisclosure({
             height: 42,
             borderRadius: 21,
             borderWidth: 2,
-            borderColor: "#77728D",
+            borderColor: themeBorder("#77728D"),
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Icon name="information-outline" size={22} color="#68647D" />
+          <Icon name="information-outline" size={22} color={themeForeground("#68647D")} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Text
             style={{
               fontFamily: "DMSans_600SemiBold",
               fontSize: 13.5,
-              color: "#25204B",
+              color: themeForeground("#25204B"),
             }}
           >
             Caregiver-entered records.
           </Text>
-          <Text style={[S.small, { color: "#77728D" }]}>
+          <Text style={[S.small, { color: themeForeground("#77728D") }]}>
             Review with your healthcare team.
           </Text>
         </View>
@@ -532,7 +533,7 @@ function SummaryDisclosure({
           style={{
             fontFamily: "DMSans_600SemiBold",
             fontSize: 12,
-            color: "#6E3A91",
+            color: themeForeground("#6E3A91"),
           }}
         >
           About this summary
@@ -549,7 +550,7 @@ function SummaryDisclosure({
             ],
           }}
         >
-          <Icon name="chevron-forward" size={18} color="#7A6E86" />
+          <Icon name="chevron-forward" size={18} color={themeForeground("#7A6E86")} />
         </Animated.View>
       </Pressable>
 
@@ -566,7 +567,7 @@ function SummaryDisclosure({
         <View
           style={{
             borderTopWidth: 1,
-            borderTopColor: "#EEE6F3",
+            borderTopColor: themeBorder("#EEE6F3"),
             paddingHorizontal: 18,
             paddingVertical: 16,
             gap: 9,
@@ -811,7 +812,7 @@ export function SummaryScreen() {
           paddingBottom: 48,
           gap: 20,
           overflow: "hidden",
-          backgroundColor: "#FBF7FF",
+          backgroundColor: themeBackground("#FBF7FF"),
         }}
       >
         <Svg
@@ -824,17 +825,17 @@ export function SummaryScreen() {
         >
           <Defs>
             <LinearGradient id="summaryPageBg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor="#FCF9FF" />
-              <Stop offset="0.36" stopColor="#F7EEFE" />
-              <Stop offset="0.7" stopColor="#FFFDFE" />
-              <Stop offset="1" stopColor="#F0E2FC" />
+              <Stop offset="0" stopColor={themeTint("#FCF9FF")} />
+              <Stop offset="0.36" stopColor={themeTint("#F7EEFE")} />
+              <Stop offset="0.7" stopColor={themeTint("#FFFDFE")} />
+              <Stop offset="1" stopColor={themeTint("#F0E2FC")} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="480" height="2100" fill="url(#summaryPageBg)" />
-          <Circle cx="430" cy="-5" r="150" fill="#FFFFFF" opacity={0.48} />
-          <Circle cx="486" cy="220" r="155" fill="#E6CCF9" opacity={0.33} />
-          <Circle cx="-38" cy="730" r="118" fill="#F4E4FE" opacity={0.34} />
-          <Circle cx="450" cy="1710" r="140" fill="#ECD8FB" opacity={0.35} />
+          <Circle cx="430" cy="-5" r="150" fill={themeTint("#FFFFFF")} opacity={0.48} />
+          <Circle cx="486" cy="220" r="155" fill={themeTint("#E6CCF9")} opacity={0.33} />
+          <Circle cx="-38" cy="730" r="118" fill={themeTint("#F4E4FE")} opacity={0.34} />
+          <Circle cx="450" cy="1710" r="140" fill={themeTint("#ECD8FB")} opacity={0.35} />
         </Svg>
 
         <Entrance reducedMotion={reducedMotion}>
@@ -856,9 +857,9 @@ export function SummaryScreen() {
                 borderRadius: 26,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: "#FFFFFFB5",
+                backgroundColor: themeBackground("#FFFFFFB5"),
                 borderWidth: 1,
-                borderColor: "#E7D7F0",
+                borderColor: themeBorder("#E7D7F0"),
                 opacity: pressed ? 0.68 : 1,
                 transform: [{ scale: pressed ? 0.96 : 1 }],
                 shadowColor: themeShadow("#573369"),
@@ -868,14 +869,14 @@ export function SummaryScreen() {
                 elevation: 1,
               })}
             >
-              <Icon name="arrow-back-outline" size={26} color="#71319B" />
+              <Icon name="arrow-back-outline" size={26} color={themeForeground("#71319B")} />
             </Pressable>
             <Text
               accessibilityRole="header"
               style={{
                 fontFamily: "DMSans_700Bold",
                 fontSize: 19,
-                color: "#17143D",
+                color: themeForeground("#17143D"),
               }}
             >
               Care summary
@@ -893,7 +894,7 @@ export function SummaryScreen() {
                 gap: 12,
               }}
             >
-              <ActivityIndicator color="#7839A2" />
+              <ActivityIndicator color={themeForeground("#7839A2")} />
               <Text style={S.body}>Loading care summary…</Text>
             </GlassCard>
           </Entrance>
@@ -928,7 +929,7 @@ export function SummaryScreen() {
                       fontSize: 41,
                       lineHeight: 44,
                       letterSpacing: -1.25,
-                      color: "#12103B",
+                      color: themeForeground("#12103B"),
                     }}
                   >
                     Your care,{"\n"}together.
@@ -938,7 +939,7 @@ export function SummaryScreen() {
                       fontFamily: "DMSans_400Regular",
                       fontSize: 18,
                       lineHeight: 25,
-                      color: "#77738E",
+                      color: themeForeground("#77738E"),
                     }}
                   >
                     Ready for your next visit.
@@ -1011,7 +1012,7 @@ export function SummaryScreen() {
                     gap: 10,
                   }}
                 >
-                  <Icon name="eye-outline" size={20} color="#74359C" />
+                  <Icon name="eye-outline" size={20} color={themeForeground("#74359C")} />
                   <Text style={[S.small, { flex: 1 }]}>
                     View-only access. Print and packet export are available to
                     Owner and Caregiver roles.
@@ -1026,8 +1027,8 @@ export function SummaryScreen() {
                   style={{
                     padding: 15,
                     gap: 10,
-                    borderColor: "#E7D2A9",
-                    backgroundColor: "#FFF9ECDF",
+                    borderColor: themeBorder("#E7D2A9"),
+                    backgroundColor: themeBackground("#FFF9ECDF"),
                   }}
                 >
                   <Text accessibilityRole="alert" style={S.small}>
@@ -1043,7 +1044,7 @@ export function SummaryScreen() {
                     <Text
                       style={[
                         S.h3,
-                        { fontSize: 13, color: "#71319B" },
+                        { fontSize: 13, color: themeForeground("#71319B") },
                       ]}
                     >
                       Try again
@@ -1076,8 +1077,8 @@ export function SummaryScreen() {
                     minHeight: 94,
                     borderRadius: 25,
                     borderWidth: 1,
-                    borderColor: "#E7DCEE",
-                    backgroundColor: "#FFFFFFD5",
+                    borderColor: themeBorder("#E7DCEE"),
+                    backgroundColor: themeBackground("#FFFFFFD5"),
                     paddingHorizontal: 16,
                     paddingVertical: 15,
                     flexDirection: "row",
@@ -1085,7 +1086,7 @@ export function SummaryScreen() {
                     gap: 14,
                     opacity: pressed ? 0.76 : 1,
                     transform: [{ scale: pressed ? 0.993 : 1 }],
-                    shadowColor: "#56346A",
+                    shadowColor: themeShadow("#56346A"),
                     shadowOpacity: 0.045,
                     shadowRadius: 15,
                     shadowOffset: { width: 0, height: 7 },
@@ -1097,12 +1098,12 @@ export function SummaryScreen() {
                       width: 52,
                       height: 52,
                       borderRadius: 19,
-                      backgroundColor: "#F1E6FB",
+                      backgroundColor: themeBackground("#F1E6FB"),
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <Icon name="calendar-outline" size={27} color="#71319B" />
+                    <Icon name="calendar-outline" size={27} color={themeForeground("#71319B")} />
                   </View>
                   <View style={{ flex: 1, gap: 4 }}>
                     <Text style={[S.h3, { fontSize: 17 }]}>
@@ -1115,7 +1116,7 @@ export function SummaryScreen() {
                       {appointment.subtitle}
                     </Text>
                   </View>
-                  <Icon name="chevron-forward" size={21} color="#827A92" />
+                  <Icon name="chevron-forward" size={21} color={themeForeground("#827A92")} />
                 </Pressable>
               </View>
             </Entrance>
@@ -1135,7 +1136,7 @@ export function SummaryScreen() {
                           gap: 12,
                           paddingVertical: 10,
                           borderTopWidth: index ? 1 : 0,
-                          borderTopColor: "#EEE8F2",
+                          borderTopColor: themeBorder("#EEE8F2"),
                         }}
                       >
                         <View
@@ -1143,7 +1144,7 @@ export function SummaryScreen() {
                             width: 38,
                             height: 38,
                             borderRadius: 16,
-                            backgroundColor: "#F2E8FA",
+                            backgroundColor: themeBackground("#F2E8FA"),
                             alignItems: "center",
                             justifyContent: "center",
                           }}
@@ -1152,7 +1153,7 @@ export function SummaryScreen() {
                             style={{
                               fontFamily: "DMSans_700Bold",
                               fontSize: 12,
-                              color: "#71319B",
+                              color: themeForeground("#71319B"),
                             }}
                           >
                             {String(index + 1).padStart(2, "0")}
@@ -1182,7 +1183,7 @@ export function SummaryScreen() {
                           width: 50,
                           height: 50,
                           borderRadius: 19,
-                          backgroundColor: "#F2E8FA",
+                          backgroundColor: themeBackground("#F2E8FA"),
                           alignItems: "center",
                           justifyContent: "center",
                         }}
@@ -1190,7 +1191,7 @@ export function SummaryScreen() {
                         <Icon
                           name="chatbubble-outline"
                           size={25}
-                          color="#71319B"
+                          color={themeForeground("#71319B")}
                         />
                       </View>
                       <Text style={[S.body, { flex: 1 }]}>
@@ -1216,7 +1217,7 @@ export function SummaryScreen() {
                             paddingVertical: 12,
                             gap: 5,
                             borderTopWidth: index ? 1 : 0,
-                            borderTopColor: "#EEE8F2",
+                            borderTopColor: themeBorder("#EEE8F2"),
                           }}
                         >
                           <View
@@ -1231,7 +1232,7 @@ export function SummaryScreen() {
                                 width: 44,
                                 height: 44,
                                 borderRadius: 17,
-                                backgroundColor: "#F1E6FB",
+                                backgroundColor: themeBackground("#F1E6FB"),
                                 alignItems: "center",
                                 justifyContent: "center",
                               }}
@@ -1239,7 +1240,7 @@ export function SummaryScreen() {
                               <Icon
                                 name="document-text-outline"
                                 size={22}
-                                color="#71319B"
+                                color={themeForeground("#71319B")}
                               />
                             </View>
                             <View style={{ flex: 1, gap: 2 }}>
@@ -1254,7 +1255,7 @@ export function SummaryScreen() {
                               key={lineIndex}
                               style={[
                                 S.small,
-                                { color: "#6D687E", marginLeft: 55 },
+                                { color: themeForeground("#6D687E"), marginLeft: 55 },
                               ]}
                             >
                               {line}
@@ -1277,7 +1278,7 @@ export function SummaryScreen() {
                           width: 50,
                           height: 50,
                           borderRadius: 19,
-                          backgroundColor: "#F1E6FB",
+                          backgroundColor: themeBackground("#F1E6FB"),
                           alignItems: "center",
                           justifyContent: "center",
                         }}
@@ -1285,7 +1286,7 @@ export function SummaryScreen() {
                         <Icon
                           name="document-text-outline"
                           size={25}
-                          color="#71319B"
+                          color={themeForeground("#71319B")}
                         />
                       </View>
                       <View style={{ flex: 1, gap: 3 }}>
@@ -1300,7 +1301,7 @@ export function SummaryScreen() {
                   <View
                     style={{
                       height: 1,
-                      backgroundColor: "#EEE8F2",
+                      backgroundColor: themeBackground("#EEE8F2"),
                       marginVertical: 10,
                     }}
                   />
@@ -1314,7 +1315,7 @@ export function SummaryScreen() {
                     style={({ pressed }) => ({
                       minHeight: 48,
                       borderRadius: 21,
-                      backgroundColor: "#F3E7FB",
+                      backgroundColor: themeBackground("#F3E7FB"),
                       flexDirection: "row",
                       alignItems: "center",
                       justifyContent: "center",
@@ -1327,18 +1328,18 @@ export function SummaryScreen() {
                         width: 29,
                         height: 29,
                         borderRadius: 15,
-                        backgroundColor: "#7531A0",
+                        backgroundColor: themeBackground("#7531A0"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Icon name="add" size={19} color="#FFFFFF" />
+                      <Icon name="add" size={19} color={themeForeground("#FFFFFF")} />
                     </View>
                     <Text
                       style={{
                         fontFamily: "DMSans_600SemiBold",
                         fontSize: 14,
-                        color: "#71319B",
+                        color: themeForeground("#71319B"),
                       }}
                     >
                       Add observation
@@ -1360,7 +1361,7 @@ export function SummaryScreen() {
                           style={{
                             paddingTop: index ? 10 : 0,
                             borderTopWidth: index ? 1 : 0,
-                            borderTopColor: "#EEE8F2",
+                            borderTopColor: themeBorder("#EEE8F2"),
                             gap: 2,
                           }}
                         >
@@ -1377,7 +1378,7 @@ export function SummaryScreen() {
                     <Text style={S.body}>No active medications recorded.</Text>
                   )}
 
-                  <View style={{ height: 1, backgroundColor: "#EEE8F2" }} />
+                  <View style={{ height: 1, backgroundColor: themeBackground("#EEE8F2") }} />
 
                   <Pressable
                     accessibilityRole="button"
@@ -1396,12 +1397,12 @@ export function SummaryScreen() {
                         width: 50,
                         height: 50,
                         borderRadius: 19,
-                        backgroundColor: "#F1E6FB",
+                        backgroundColor: themeBackground("#F1E6FB"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Icon name="journal-outline" size={25} color="#71319B" />
+                      <Icon name="journal-outline" size={25} color={themeForeground("#71319B")} />
                     </View>
                     <View style={{ flex: 1, gap: 3 }}>
                       <Text style={S.h3}>Medication history</Text>
@@ -1412,7 +1413,7 @@ export function SummaryScreen() {
                     <Icon
                       name="chevron-forward"
                       size={20}
-                      color="#827A92"
+                      color={themeForeground("#827A92")}
                     />
                   </Pressable>
 
@@ -1424,7 +1425,7 @@ export function SummaryScreen() {
                         justifyContent: "center",
                       }}
                     >
-                      <ActivityIndicator color="#7839A2" />
+                      <ActivityIndicator color={themeForeground("#7839A2")} />
                     </View>
                   ) : medError && !historyRecords.length ? (
                     <View style={{ gap: 8 }}>
@@ -1439,7 +1440,7 @@ export function SummaryScreen() {
                         <Text
                           style={[
                             S.h3,
-                            { fontSize: 13, color: "#71319B" },
+                            { fontSize: 13, color: themeForeground("#71319B") },
                           ]}
                         >
                           Try again
@@ -1462,7 +1463,7 @@ export function SummaryScreen() {
                               paddingVertical: 11,
                               gap: 3,
                               borderTopWidth: 1,
-                              borderTopColor: "#EEE8F2",
+                              borderTopColor: themeBorder("#EEE8F2"),
                             }}
                           >
                             <View
@@ -1504,7 +1505,7 @@ export function SummaryScreen() {
                               <Text
                                 style={[
                                   S.small,
-                                  { color: "#A64A63" },
+                                  { color: themeForeground("#A64A63") },
                                 ]}
                               >
                                 Withdrawn:{" "}
@@ -1523,7 +1524,7 @@ export function SummaryScreen() {
                         <Text
                           style={[
                             S.small,
-                            { paddingTop: 8, color: "#71319B" },
+                            { paddingTop: 8, color: themeForeground("#71319B") },
                           ]}
                         >
                           + {historyRecords.length - 5} more in medication

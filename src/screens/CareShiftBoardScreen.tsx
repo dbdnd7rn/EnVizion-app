@@ -1,3 +1,4 @@
+import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, View } from "react-native";
@@ -265,62 +266,62 @@ function ShiftHeroGraphic() {
       <Svg width="100%" height="100%" viewBox="0 0 190 176">
         <Defs>
           <LinearGradient id="boardPurple" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#9D5BDC" />
-            <Stop offset="1" stopColor="#6530A2" />
+            <Stop offset="0" stopColor={themeTint("#9D5BDC")} />
+            <Stop offset="1" stopColor={themeTint("#6530A2")} />
           </LinearGradient>
           <LinearGradient id="boardRed" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#FF777D" />
-            <Stop offset="1" stopColor="#F43E56" />
+            <Stop offset="0" stopColor={themeTint("#FF777D")} />
+            <Stop offset="1" stopColor={themeTint("#F43E56")} />
           </LinearGradient>
         </Defs>
 
         <Path
           d="M61 19 C94 -7 155 6 179 45 C200 80 183 129 150 150 C117 172 65 158 45 127 C23 93 28 45 61 19 Z"
-          fill="#F0E8FD"
+          fill={themeTint("#F0E8FD")}
         />
-        <Circle cx="169" cy="42" r="2.8" fill="#B07DDF" />
-        <Circle cx="151" cy="25" r="2.2" fill="#C196EA" />
-        <Circle cx="176" cy="67" r="2.2" fill="#C196EA" />
+        <Circle cx="169" cy="42" r="2.8" fill={themeTint("#B07DDF")} />
+        <Circle cx="151" cy="25" r="2.2" fill={themeTint("#C196EA")} />
+        <Circle cx="176" cy="67" r="2.2" fill={themeTint("#C196EA")} />
 
         <G transform="translate(29 93) rotate(-25)">
-          <Ellipse cx="8" cy="23" rx="8" ry="29" fill="#8D55CA" />
-          <Ellipse cx="22" cy="19" rx="7" ry="27" fill="#B184E8" />
-          <Ellipse cx="35" cy="17" rx="6" ry="23" fill="#D0B5F6" />
+          <Ellipse cx="8" cy="23" rx="8" ry="29" fill={themeTint("#8D55CA")} />
+          <Ellipse cx="22" cy="19" rx="7" ry="27" fill={themeTint("#B184E8")} />
+          <Ellipse cx="35" cy="17" rx="6" ry="23" fill={themeTint("#D0B5F6")} />
         </G>
 
         <G transform="translate(63 30)">
-          <Rect x="16" y="20" width="95" height="115" rx="19" fill="#C6AAEE" opacity="0.45" />
-          <Rect x="8" y="13" width="99" height="116" rx="19" fill="#FFFFFF" stroke="#E5DDF1" strokeWidth="1.4" />
+          <Rect x="16" y="20" width="95" height="115" rx="19" fill={themeTint("#C6AAEE")} opacity="0.45" />
+          <Rect x="8" y="13" width="99" height="116" rx="19" fill={themeTint("#FFFFFF")} stroke={themeTint("#E5DDF1")} strokeWidth="1.4" />
           <Rect x="8" y="13" width="99" height="30" rx="19" fill="url(#boardPurple)" />
-          <Rect x="36" y="3" width="43" height="23" rx="7" fill="#6B32A5" />
-          <Rect x="45" y="9" width="25" height="6" rx="3" fill="#D9C7F4" />
+          <Rect x="36" y="3" width="43" height="23" rx="7" fill={themeTint("#6B32A5")} />
+          <Rect x="45" y="9" width="25" height="6" rx="3" fill={themeTint("#D9C7F4")} />
 
-          <Rect x="23" y="55" width="20" height="20" rx="5" fill="#8A43C3" />
-          <Path d="M28 64 L33 69 L40 60" stroke="#FFFFFF" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Rect x="52" y="57" width="37" height="6" rx="3" fill="#D9D2E8" />
-          <Rect x="52" y="68" width="29" height="5" rx="2.5" fill="#ECE7F2" />
+          <Rect x="23" y="55" width="20" height="20" rx="5" fill={themeTint("#8A43C3")} />
+          <Path d="M28 64 L33 69 L40 60" stroke={themeTint("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Rect x="52" y="57" width="37" height="6" rx="3" fill={themeTint("#D9D2E8")} />
+          <Rect x="52" y="68" width="29" height="5" rx="2.5" fill={themeTint("#ECE7F2")} />
 
-          <Rect x="23" y="86" width="20" height="20" rx="5" fill="#8A43C3" />
-          <Path d="M28 95 L33 100 L40 91" stroke="#FFFFFF" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Rect x="52" y="88" width="43" height="6" rx="3" fill="#D9D2E8" />
-          <Rect x="52" y="99" width="31" height="5" rx="2.5" fill="#ECE7F2" />
+          <Rect x="23" y="86" width="20" height="20" rx="5" fill={themeTint("#8A43C3")} />
+          <Path d="M28 95 L33 100 L40 91" stroke={themeTint("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Rect x="52" y="88" width="43" height="6" rx="3" fill={themeTint("#D9D2E8")} />
+          <Rect x="52" y="99" width="31" height="5" rx="2.5" fill={themeTint("#ECE7F2")} />
 
-          <Rect x="23" y="117" width="20" height="20" rx="5" fill="#D5C9EA" />
-          <Path d="M28 126 L33 131 L40 122" stroke="#FFFFFF" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Rect x="52" y="119" width="39" height="6" rx="3" fill="#D9D2E8" />
-          <Rect x="52" y="130" width="26" height="5" rx="2.5" fill="#ECE7F2" />
+          <Rect x="23" y="117" width="20" height="20" rx="5" fill={themeTint("#D5C9EA")} />
+          <Path d="M28 126 L33 131 L40 122" stroke={themeTint("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Rect x="52" y="119" width="39" height="6" rx="3" fill={themeTint("#D9D2E8")} />
+          <Rect x="52" y="130" width="26" height="5" rx="2.5" fill={themeTint("#ECE7F2")} />
         </G>
 
         <G transform="translate(12 52)">
           <Path d="M38 30 C22 18 18 7 26 2 C34 -2 39 6 39 6 C39 6 45 -2 53 2 C62 7 57 19 38 30 Z" fill="url(#boardRed)" />
-          <Path d="M49 25 L53 34 L43 29 Z" fill="#F55367" />
+          <Path d="M49 25 L53 34 L43 29 Z" fill={themeTint("#F55367")} />
         </G>
 
         <G transform="translate(130 111)">
-          <Circle cx="28" cy="28" r="27" fill="#5D248D" />
-          <Circle cx="28" cy="28" r="20" fill="#F3EAFB" />
-          <Path d="M28 14 V28 L37 31" stroke="#5D248D" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Circle cx="28" cy="28" r="3.2" fill="#5D248D" />
+          <Circle cx="28" cy="28" r="27" fill={themeTint("#5D248D")} />
+          <Circle cx="28" cy="28" r="20" fill={themeTint("#F3EAFB")} />
+          <Path d="M28 14 V28 L37 31" stroke={themeTint("#5D248D")} strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Circle cx="28" cy="28" r="3.2" fill={themeTint("#5D248D")} />
         </G>
       </Svg>
     </View>
@@ -335,12 +336,12 @@ function ShiftMiniGraphic({ kind }: { kind: "tasks" | "handoffs" | "clear" }) {
           width: 76,
           height: 76,
           borderRadius: 38,
-          backgroundColor: "#DDF7E6",
+          backgroundColor: themeBackground("#DDF7E6"),
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name="shield-checkmark" size={40} color="#1AAA62" />
+        <Icon name="shield-checkmark" size={40} color={themeForeground("#1AAA62")} />
       </View>
     );
   }
@@ -360,7 +361,7 @@ function ShiftMiniGraphic({ kind }: { kind: "tasks" | "handoffs" | "clear" }) {
           width: 66,
           height: 66,
           borderRadius: 22,
-          backgroundColor: "#EFE5FB",
+          backgroundColor: themeBackground("#EFE5FB"),
           transform: [{ rotate: kind === "tasks" ? "8deg" : "-7deg" }],
         }}
       />
@@ -369,12 +370,12 @@ function ShiftMiniGraphic({ kind }: { kind: "tasks" | "handoffs" | "clear" }) {
           width: 54,
           height: 63,
           borderRadius: 12,
-          backgroundColor: "#FFFFFF",
+          backgroundColor: themeBackground("#FFFFFF"),
           borderWidth: 1,
-          borderColor: "#E5DDEF",
+          borderColor: themeBorder("#E5DDEF"),
           alignItems: "center",
           justifyContent: "center",
-          shadowColor: "#5B3D72",
+          shadowColor: themeShadow("#5B3D72"),
           shadowOpacity: 0.06,
           shadowRadius: 8,
           shadowOffset: { width: 0, height: 4 },
@@ -384,7 +385,7 @@ function ShiftMiniGraphic({ kind }: { kind: "tasks" | "handoffs" | "clear" }) {
         <Icon
           name={kind === "tasks" ? "checkmark-done-outline" : "swap-horizontal-outline"}
           size={28}
-          color="#8241B2"
+          color={themeForeground("#8241B2")}
         />
       </View>
       <View
@@ -395,7 +396,7 @@ function ShiftMiniGraphic({ kind }: { kind: "tasks" | "handoffs" | "clear" }) {
           width: 28,
           height: 28,
           borderRadius: 14,
-          backgroundColor: "#8742C0",
+          backgroundColor: themeBackground("#8742C0"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -403,7 +404,7 @@ function ShiftMiniGraphic({ kind }: { kind: "tasks" | "handoffs" | "clear" }) {
         <Icon
           name={kind === "tasks" ? "checkmark" : "arrow-forward"}
           size={17}
-          color="#FFFFFF"
+          color={themeForeground("#FFFFFF")}
         />
       </View>
     </View>
@@ -1118,12 +1119,12 @@ export function CareShiftBoardScreen() {
               width: 44,
               height: 44,
               borderRadius: 22,
-              backgroundColor: "#F5F1F8",
+              backgroundColor: themeBackground("#F5F1F8"),
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Icon name="arrow-back" size={22} color="#1A1742" />
+            <Icon name="arrow-back" size={22} color={themeForeground("#1A1742")} />
           </Pressable>
           <Text style={[S.title, { fontSize: 32, lineHeight: 38 }]}>
             Choose a care profile first.
@@ -1146,13 +1147,13 @@ export function CareShiftBoardScreen() {
               width: 46,
               height: 46,
               borderRadius: 23,
-              backgroundColor: "#F6F2F9",
+              backgroundColor: themeBackground("#F6F2F9"),
               alignItems: "center",
               justifyContent: "center",
               opacity: pressed ? 0.66 : 1,
             })}
           >
-            <Icon name="arrow-back" size={23} color="#17143C" />
+            <Icon name="arrow-back" size={23} color={themeForeground("#17143C")} />
           </Pressable>
 
           <Text
@@ -1160,7 +1161,7 @@ export function CareShiftBoardScreen() {
               flex: 1,
               fontFamily: "DMSans_700Bold",
               fontSize: 17,
-              color: "#6F2EA0",
+              color: themeForeground("#6F2EA0"),
             }}
           >
             Caregiver shift board
@@ -1174,15 +1175,15 @@ export function CareShiftBoardScreen() {
               width: 46,
               height: 46,
               borderRadius: 23,
-              backgroundColor: "#FFFFFF",
+              backgroundColor: themeBackground("#FFFFFF"),
               borderWidth: 1,
-              borderColor: "#EFE8F3",
+              borderColor: themeBorder("#EFE8F3"),
               alignItems: "center",
               justifyContent: "center",
               opacity: pressed ? 0.65 : 1,
             })}
           >
-            <Icon name="notifications-outline" size={23} color="#26194A" />
+            <Icon name="notifications-outline" size={23} color={themeForeground("#26194A")} />
             <View
               style={{
                 position: "absolute",
@@ -1191,7 +1192,7 @@ export function CareShiftBoardScreen() {
                 width: 7,
                 height: 7,
                 borderRadius: 4,
-                backgroundColor: "#F15368",
+                backgroundColor: themeBackground("#F15368"),
               }}
             />
           </Pressable>
@@ -1216,10 +1217,10 @@ export function CareShiftBoardScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 8,
-                  backgroundColor: "#F4EEFB",
+                  backgroundColor: themeBackground("#F4EEFB"),
                 }}
               >
-                <Icon name="calendar-outline" size={17} color="#7F37AE" />
+                <Icon name="calendar-outline" size={17} color={themeForeground("#7F37AE")} />
                 <Text
                   style={{
                     fontFamily: "DMSans_600SemiBold",
@@ -1237,7 +1238,7 @@ export function CareShiftBoardScreen() {
                   fontSize: 38,
                   lineHeight: 42,
                   letterSpacing: -0.9,
-                  color: "#11133D",
+                  color: themeForeground("#11133D"),
                 }}
               >
                 Your day,{"\n"}at a glance
@@ -1249,7 +1250,7 @@ export function CareShiftBoardScreen() {
                   fontFamily: "DMSans_400Regular",
                   fontSize: 14,
                   lineHeight: 21,
-                  color: "#79758A",
+                  color: themeForeground("#79758A"),
                 }}
               >
                 Everything you need for a smooth and informed caregiving shift.
@@ -1284,7 +1285,7 @@ export function CareShiftBoardScreen() {
               flexDirection: "row",
               alignItems: "center",
               gap: 16,
-              backgroundColor: "#6C2A98",
+              backgroundColor: themeBackground("#6C2A98"),
               opacity: pressed ? 0.8 : 1,
             })}
           >
@@ -1297,7 +1298,7 @@ export function CareShiftBoardScreen() {
                 borderRadius: 110,
                 right: -65,
                 top: -105,
-                backgroundColor: "#914DC0",
+                backgroundColor: themeBackground("#914DC0"),
                 opacity: 0.55,
               }}
             />
@@ -1306,7 +1307,7 @@ export function CareShiftBoardScreen() {
                 width: 58,
                 height: 58,
                 borderRadius: 29,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: themeBackground("#FFFFFF"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -1315,7 +1316,7 @@ export function CareShiftBoardScreen() {
                 style={{
                   fontFamily: "DMSans_700Bold",
                   fontSize: 19,
-                  color: "#6C2A98",
+                  color: themeForeground("#6C2A98"),
                 }}
               >
                 {profileInitials}
@@ -1328,7 +1329,7 @@ export function CareShiftBoardScreen() {
                   fontFamily: "DMSans_700Bold",
                   fontSize: 9.5,
                   letterSpacing: 2.5,
-                  color: "#E9D9F2",
+                  color: themeForeground("#E9D9F2"),
                 }}
               >
                 ACTIVE CARE PROFILE
@@ -1337,7 +1338,7 @@ export function CareShiftBoardScreen() {
                 style={{
                   fontFamily: "DMSans_700Bold",
                   fontSize: 23,
-                  color: "#FFFFFF",
+                  color: themeForeground("#FFFFFF"),
                 }}
               >
                 {profileName}
@@ -1346,7 +1347,7 @@ export function CareShiftBoardScreen() {
                 style={{
                   fontFamily: "DMSans_400Regular",
                   fontSize: 12.5,
-                  color: "#E7DBEC",
+                  color: themeForeground("#E7DBEC"),
                 }}
               >
                 {state.accessRole === "owner"
@@ -1358,7 +1359,7 @@ export function CareShiftBoardScreen() {
               </Text>
             </View>
 
-            <Icon name="chevron-forward" size={24} color="#FFFFFF" />
+            <Icon name="chevron-forward" size={24} color={themeForeground("#FFFFFF")} />
           </Pressable>
         </ShiftReveal>
 
@@ -1367,9 +1368,9 @@ export function CareShiftBoardScreen() {
             style={{
               minHeight: 117,
               borderRadius: 26,
-              backgroundColor: "#FFFFFF",
+              backgroundColor: themeBackground("#FFFFFF"),
               borderWidth: 1,
-              borderColor: "#ECE6F0",
+              borderColor: themeBorder("#ECE6F0"),
               flexDirection: "row",
               alignItems: "stretch",
               overflow: "hidden",
@@ -1381,28 +1382,28 @@ export function CareShiftBoardScreen() {
                 value: counts.overdue,
                 icon: "warning-outline",
                 bg: "#FFE8EA",
-                color: "#CE4058",
+                color: themeForeground("#CE4058"),
               },
               {
                 label: "Due soon",
                 value: counts.dueSoon,
                 icon: "time-outline",
                 bg: "#F2E9FB",
-                color: "#7A35A9",
+                color: themeForeground("#7A35A9"),
               },
               {
                 label: "Due today",
                 value: counts.dueToday,
                 icon: "calendar-outline",
                 bg: "#E6F3FF",
-                color: "#2776C4",
+                color: themeForeground("#2776C4"),
               },
               {
                 label: "Completed",
                 value: counts.completedToday,
                 icon: "checkmark-circle-outline",
                 bg: "#E5F8EB",
-                color: "#209B57",
+                color: themeForeground("#209B57"),
               },
             ].map((item, index) => (
               <View
@@ -1413,7 +1414,7 @@ export function CareShiftBoardScreen() {
                   alignItems: "center",
                   justifyContent: "center",
                   borderLeftWidth: index ? 1 : 0,
-                  borderLeftColor: "#EEE9F1",
+                  borderLeftColor: themeBorder("#EEE9F1"),
                   gap: 5,
                 }}
               >
@@ -1433,7 +1434,7 @@ export function CareShiftBoardScreen() {
                   style={{
                     fontFamily: "DMSans_700Bold",
                     fontSize: 19,
-                    color: "#14143C",
+                    color: themeForeground("#14143C"),
                   }}
                 >
                   {item.value}
@@ -1460,9 +1461,9 @@ export function CareShiftBoardScreen() {
                 borderRadius: 20,
                 paddingHorizontal: 15,
                 paddingVertical: 12,
-                backgroundColor: "#F6F1FA",
+                backgroundColor: themeBackground("#F6F1FA"),
                 borderWidth: 1,
-                borderColor: "#E8DDF0",
+                borderColor: themeBorder("#E8DDF0"),
               }}
             >
               <Text accessibilityRole="alert" style={[S.body, { fontSize: 12.5 }]}>
@@ -1477,13 +1478,13 @@ export function CareShiftBoardScreen() {
             style={{
               borderRadius: 20,
               padding: 15,
-              backgroundColor: "#F4EFF9",
+              backgroundColor: themeBackground("#F4EFF9"),
               flexDirection: "row",
               alignItems: "center",
               gap: 11,
             }}
           >
-            <Icon name="eye-outline" size={21} color="#7A36A5" />
+            <Icon name="eye-outline" size={21} color={themeForeground("#7A36A5")} />
             <View style={{ flex: 1 }}>
               <Text style={[S.h3, { fontSize: 13 }]}>Viewer access</Text>
               <Txt style={[S.small, { fontSize: 11.5 }]}>
@@ -1499,15 +1500,15 @@ export function CareShiftBoardScreen() {
               style={{
                 borderRadius: 25,
                 padding: 17,
-                backgroundColor: "#FFF8ED",
+                backgroundColor: themeBackground("#FFF8ED"),
                 borderWidth: 1,
-                borderColor: "#F1DFC1",
+                borderColor: themeBorder("#F1DFC1"),
                 gap: 12,
               }}
             >
               <View style={S.between}>
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={[S.eyebrow, { color: "#9B651F" }]}>
+                  <Text style={[S.eyebrow, { color: themeForeground("#9B651F") }]}>
                     TAKEOVER READY
                   </Text>
                   <Text style={[S.h2, { fontSize: 18 }]}>
@@ -1518,7 +1519,7 @@ export function CareShiftBoardScreen() {
                     {new Date(pendingTakeover.createdAt).toLocaleString()}
                   </Txt>
                 </View>
-                <Icon name="hand-left-outline" size={27} color="#9B651F" />
+                <Icon name="hand-left-outline" size={27} color={themeForeground("#9B651F")} />
               </View>
 
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
@@ -1532,10 +1533,10 @@ export function CareShiftBoardScreen() {
                     key={String(label)}
                     style={[
                       S.pill,
-                      { backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#F0E2CB" },
+                      { backgroundColor: themeBackground("#FFFFFF"), borderWidth: 1, borderColor: themeBorder("#F0E2CB") },
                     ]}
                   >
-                    <Text style={[S.small, { color: "#6B542F" }]}>
+                    <Text style={[S.small, { color: themeForeground("#6B542F") }]}>
                       {String(value)} {String(label)}
                     </Text>
                   </View>
@@ -1587,7 +1588,7 @@ export function CareShiftBoardScreen() {
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 10,
-                backgroundColor: "#F4EEFA",
+                backgroundColor: themeBackground("#F4EEFA"),
                 opacity: pressed ? 0.72 : 1,
               })}
             >
@@ -1596,20 +1597,20 @@ export function CareShiftBoardScreen() {
                   width: 39,
                   height: 39,
                   borderRadius: 14,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: themeBackground("#FFFFFF"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon name="document-text-outline" size={21} color="#7B35A8" />
+                <Icon name="document-text-outline" size={21} color={themeForeground("#7B35A8")} />
               </View>
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={[S.h3, { fontSize: 13.5, color: "#6F2D9D" }]}>
+                <Text style={[S.h3, { fontSize: 13.5, color: themeForeground("#6F2D9D") }]}>
                   Full care plan
                 </Text>
                 <Txt style={[S.small, { fontSize: 10.5 }]}>View today’s plan</Txt>
               </View>
-              <Icon name="chevron-forward" size={18} color="#71309F" />
+              <Icon name="chevron-forward" size={18} color={themeForeground("#71309F")} />
             </Pressable>
 
             {!readOnly && (
@@ -1624,7 +1625,7 @@ export function CareShiftBoardScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 10,
-                  backgroundColor: "#7B35A8",
+                  backgroundColor: themeBackground("#7B35A8"),
                   opacity: pressed ? 0.8 : 1,
                 })}
               >
@@ -1638,23 +1639,23 @@ export function CareShiftBoardScreen() {
                     justifyContent: "center",
                   }}
                 >
-                  <Icon name="swap-horizontal-outline" size={22} color="#FFFFFF" />
+                  <Icon name="swap-horizontal-outline" size={22} color={themeForeground("#FFFFFF")} />
                 </View>
                 <View style={{ flex: 1, gap: 2 }}>
-                  <Text style={[S.h3, { fontSize: 13.5, color: "#FFFFFF" }]}>
+                  <Text style={[S.h3, { fontSize: 13.5, color: themeForeground("#FFFFFF") }]}>
                     Create shift briefing
                   </Text>
                   <Text
                     style={{
                       fontFamily: "DMSans_400Regular",
                       fontSize: 10.5,
-                      color: "#EADFF0",
+                      color: themeForeground("#EADFF0"),
                     }}
                   >
                     Generate handoff
                   </Text>
                 </View>
-                <Icon name="chevron-forward" size={18} color="#FFFFFF" />
+                <Icon name="chevron-forward" size={18} color={themeForeground("#FFFFFF")} />
               </Pressable>
             )}
           </View>
@@ -1666,15 +1667,15 @@ export function CareShiftBoardScreen() {
               style={{
                 borderRadius: 26,
                 padding: 17,
-                backgroundColor: "#FBF8FC",
+                backgroundColor: themeBackground("#FBF8FC"),
                 borderWidth: 1,
-                borderColor: "#E9E0EE",
+                borderColor: themeBorder("#E9E0EE"),
                 gap: 13,
               }}
             >
               <View style={S.between}>
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={[S.eyebrow, { color: "#7A35A6" }]}>
+                  <Text style={[S.eyebrow, { color: themeForeground("#7A35A6") }]}>
                     NEW SHIFT BRIEFING
                   </Text>
                   <Text style={[S.h2, { fontSize: 18 }]}>Prepare the handoff</Text>
@@ -1687,12 +1688,12 @@ export function CareShiftBoardScreen() {
                     width: 36,
                     height: 36,
                     borderRadius: 18,
-                    backgroundColor: "#F1EAF5",
+                    backgroundColor: themeBackground("#F1EAF5"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Icon name="close" size={19} color="#7A35A6" />
+                  <Icon name="close" size={19} color={themeForeground("#7A35A6")} />
                 </Pressable>
               </View>
 
@@ -1735,9 +1736,9 @@ export function CareShiftBoardScreen() {
                 style={{
                   borderRadius: 20,
                   padding: 14,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: themeBackground("#FFFFFF"),
                   borderWidth: 1,
-                  borderColor: "#EEE6F2",
+                  borderColor: themeBorder("#EEE6F2"),
                   gap: 7,
                 }}
               >
@@ -1790,9 +1791,9 @@ export function CareShiftBoardScreen() {
             style={{
               minHeight: 140,
               borderRadius: 25,
-              backgroundColor: "#FFFFFF",
+              backgroundColor: themeBackground("#FFFFFF"),
               borderWidth: 1,
-              borderColor: "#ECE6F0",
+              borderColor: themeBorder("#ECE6F0"),
               alignItems: "center",
               justifyContent: "center",
               gap: 10,
@@ -1810,9 +1811,9 @@ export function CareShiftBoardScreen() {
                     minHeight: 130,
                     borderRadius: 25,
                     padding: 17,
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: themeBackground("#FFFFFF"),
                     borderWidth: 1,
-                    borderColor: "#ECE6F0",
+                    borderColor: themeBorder("#ECE6F0"),
                     flexDirection: "row",
                     alignItems: "center",
                     overflow: "hidden",
@@ -1824,12 +1825,12 @@ export function CareShiftBoardScreen() {
                         width: 43,
                         height: 43,
                         borderRadius: 22,
-                        backgroundColor: "#F4ECFB",
+                        backgroundColor: themeBackground("#F4ECFB"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Icon name="checkmark-done-outline" size={23} color="#7936A7" />
+                      <Icon name="checkmark-done-outline" size={23} color={themeForeground("#7936A7")} />
                     </View>
                     <Text style={[S.h3, { fontSize: 15.5 }]}>No open care tasks</Text>
                     <Txt style={[S.small, { fontSize: 11.5 }]}>
@@ -1970,13 +1971,13 @@ export function CareShiftBoardScreen() {
                     style={({ pressed }) => ({
                       minHeight: 46,
                       borderRadius: 23,
-                      backgroundColor: "#F3ECF8",
+                      backgroundColor: themeBackground("#F3ECF8"),
                       alignItems: "center",
                       justifyContent: "center",
                       opacity: pressed ? 0.72 : 1,
                     })}
                   >
-                    <Text style={[S.h3, { fontSize: 12.5, color: "#71309F" }]}>
+                    <Text style={[S.h3, { fontSize: 12.5, color: themeForeground("#71309F") }]}>
                       View all {openTasks.length} open tasks
                     </Text>
                   </Pressable>
@@ -1991,9 +1992,9 @@ export function CareShiftBoardScreen() {
                     minHeight: 126,
                     borderRadius: 25,
                     padding: 17,
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: themeBackground("#FFFFFF"),
                     borderWidth: 1,
-                    borderColor: "#ECE6F0",
+                    borderColor: themeBorder("#ECE6F0"),
                     flexDirection: "row",
                     alignItems: "center",
                     overflow: "hidden",
@@ -2005,12 +2006,12 @@ export function CareShiftBoardScreen() {
                         width: 43,
                         height: 43,
                         borderRadius: 22,
-                        backgroundColor: "#F4ECFB",
+                        backgroundColor: themeBackground("#F4ECFB"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Icon name="swap-horizontal-outline" size={23} color="#7936A7" />
+                      <Icon name="swap-horizontal-outline" size={23} color={themeForeground("#7936A7")} />
                     </View>
                     <Text style={[S.h3, { fontSize: 15.5 }]}>
                       No recent caregiver handoffs
@@ -2030,9 +2031,9 @@ export function CareShiftBoardScreen() {
                   minHeight: 104,
                   borderRadius: 24,
                   padding: 16,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: themeBackground("#FFFFFF"),
                   borderWidth: 1,
-                  borderColor: "#ECE6F0",
+                  borderColor: themeBorder("#ECE6F0"),
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 13,
@@ -2044,12 +2045,12 @@ export function CareShiftBoardScreen() {
                     width: 46,
                     height: 46,
                     borderRadius: 23,
-                    backgroundColor: "#F4ECFB",
+                    backgroundColor: themeBackground("#F4ECFB"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Icon name="swap-horizontal-outline" size={24} color="#7936A7" />
+                  <Icon name="swap-horizontal-outline" size={24} color={themeForeground("#7936A7")} />
                 </View>
                 <View style={{ flex: 1, gap: 4 }}>
                   <Text style={[S.h3, { fontSize: 15 }]}>
@@ -2060,7 +2061,7 @@ export function CareShiftBoardScreen() {
                     {handoffs[0].openTaskSnapshot.length} unfinished
                   </Txt>
                 </View>
-                <Icon name="chevron-forward" size={20} color="#7936A7" />
+                <Icon name="chevron-forward" size={20} color={themeForeground("#7936A7")} />
               </Pressable>
             )}
 
@@ -2132,9 +2133,9 @@ export function CareShiftBoardScreen() {
                       style={{
                         borderRadius: 20,
                         padding: 14,
-                        backgroundColor: "#FFFFFF",
+                        backgroundColor: themeBackground("#FFFFFF"),
                         borderWidth: 1,
-                        borderColor: "#ECE6F0",
+                        borderColor: themeBorder("#ECE6F0"),
                         gap: 5,
                       }}
                     >
@@ -2171,9 +2172,9 @@ export function CareShiftBoardScreen() {
                       style={{
                         borderRadius: 20,
                         padding: 14,
-                        backgroundColor: "#FFF8ED",
+                        backgroundColor: themeBackground("#FFF8ED"),
                         borderWidth: 1,
-                        borderColor: "#F2E4CB",
+                        borderColor: themeBorder("#F2E4CB"),
                       }}
                     >
                       <Text style={[S.h3, { fontSize: 13.5 }]}>
@@ -2201,9 +2202,9 @@ export function CareShiftBoardScreen() {
                       minHeight: 86,
                       borderRadius: 22,
                       padding: 15,
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: themeBackground("#FFFFFF"),
                       borderWidth: 1,
-                      borderColor: "#ECE6F0",
+                      borderColor: themeBorder("#ECE6F0"),
                       flexDirection: "row",
                       alignItems: "center",
                       gap: 12,
@@ -2214,12 +2215,12 @@ export function CareShiftBoardScreen() {
                         width: 44,
                         height: 44,
                         borderRadius: 22,
-                        backgroundColor: "#E5F8EB",
+                        backgroundColor: themeBackground("#E5F8EB"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
                     >
-                      <Icon name="checkmark" size={22} color="#1B9B59" />
+                      <Icon name="checkmark" size={22} color={themeForeground("#1B9B59")} />
                     </View>
                     <View style={{ flex: 1, gap: 4 }}>
                       <Text style={[S.h3, { fontSize: 14.5 }]}>
@@ -2243,9 +2244,9 @@ export function CareShiftBoardScreen() {
                 style={{
                   minHeight: 150,
                   borderRadius: 25,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: themeBackground("#FFFFFF"),
                   borderWidth: 1,
-                  borderColor: "#ECE6F0",
+                  borderColor: themeBorder("#ECE6F0"),
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 9,
@@ -2257,12 +2258,12 @@ export function CareShiftBoardScreen() {
                     width: 54,
                     height: 54,
                     borderRadius: 27,
-                    backgroundColor: "#F3ECF8",
+                    backgroundColor: themeBackground("#F3ECF8"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Icon name="checkmark-done-outline" size={27} color="#7C39AA" />
+                  <Icon name="checkmark-done-outline" size={27} color={themeForeground("#7C39AA")} />
                 </View>
                 <Text style={[S.h3, { fontSize: 15.5 }]}>Nothing completed yet</Text>
                 <Txt style={[S.small, { textAlign: "center", fontSize: 11.5 }]}>
@@ -2289,9 +2290,9 @@ export function CareShiftBoardScreen() {
                       style={({ pressed }) => ({
                         borderRadius: 24,
                         padding: 16,
-                        backgroundColor: "#FFFFFF",
+                        backgroundColor: themeBackground("#FFFFFF"),
                         borderWidth: 1,
-                        borderColor: "#ECE6F0",
+                        borderColor: themeBorder("#ECE6F0"),
                         gap: 10,
                         opacity: pressed ? 0.82 : 1,
                       })}
@@ -2314,7 +2315,7 @@ export function CareShiftBoardScreen() {
                             width: 38,
                             height: 38,
                             borderRadius: 19,
-                            backgroundColor: "#F3ECF8",
+                            backgroundColor: themeBackground("#F3ECF8"),
                             alignItems: "center",
                             justifyContent: "center",
                           }}
@@ -2322,18 +2323,18 @@ export function CareShiftBoardScreen() {
                           <Icon
                             name={expanded ? "chevron-up" : "chevron-down"}
                             size={18}
-                            color="#7A35A6"
+                            color={themeForeground("#7A35A6")}
                           />
                         </View>
                       </View>
 
                       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
-                        <View style={[S.pill, { backgroundColor: "#F4EEFA" }]}>
+                        <View style={[S.pill, { backgroundColor: themeBackground("#F4EEFA") }]}>
                           <Text style={S.small}>
                             {handoff.openTaskSnapshot.length} unfinished
                           </Text>
                         </View>
-                        <View style={[S.pill, { backgroundColor: "#F4EEFA" }]}>
+                        <View style={[S.pill, { backgroundColor: themeBackground("#F4EEFA") }]}>
                           <Text style={S.small}>
                             {handoff.completedTaskSnapshot.length} completed
                           </Text>
@@ -2395,9 +2396,9 @@ export function CareShiftBoardScreen() {
                   minHeight: 156,
                   borderRadius: 25,
                   padding: 20,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: themeBackground("#FFFFFF"),
                   borderWidth: 1,
-                  borderColor: "#ECE6F0",
+                  borderColor: themeBorder("#ECE6F0"),
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 9,
@@ -2419,9 +2420,9 @@ export function CareShiftBoardScreen() {
           style={{
             borderRadius: 24,
             padding: 15,
-            backgroundColor: "#F8F5FA",
+            backgroundColor: themeBackground("#F8F5FA"),
             borderWidth: 1,
-            borderColor: "#EEE8F1",
+            borderColor: themeBorder("#EEE8F1"),
             gap: 10,
           }}
         >
@@ -2443,16 +2444,16 @@ export function CareShiftBoardScreen() {
                 minHeight: 54,
                 borderRadius: 18,
                 paddingHorizontal: 12,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: themeBackground("#FFFFFF"),
                 borderWidth: 1,
-                borderColor: "#EEE7F1",
+                borderColor: themeBorder("#EEE7F1"),
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 9,
                 opacity: pressed ? 0.72 : 1,
               })}
             >
-              <Icon name="calendar-outline" size={19} color="#7936A7" />
+              <Icon name="calendar-outline" size={19} color={themeForeground("#7936A7")} />
               <Text style={[S.h3, { fontSize: 11.5, flex: 1 }]}>Schedule</Text>
             </Pressable>
             <Pressable
@@ -2463,16 +2464,16 @@ export function CareShiftBoardScreen() {
                 minHeight: 54,
                 borderRadius: 18,
                 paddingHorizontal: 12,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: themeBackground("#FFFFFF"),
                 borderWidth: 1,
-                borderColor: "#EEE7F1",
+                borderColor: themeBorder("#EEE7F1"),
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 9,
                 opacity: pressed ? 0.72 : 1,
               })}
             >
-              <Icon name="bar-chart-outline" size={19} color="#7936A7" />
+              <Icon name="bar-chart-outline" size={19} color={themeForeground("#7936A7")} />
               <Text style={[S.h3, { fontSize: 11.5, flex: 1 }]}>Analytics</Text>
             </Pressable>
           </View>

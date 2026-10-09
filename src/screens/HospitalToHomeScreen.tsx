@@ -1,3 +1,4 @@
+import { themeBorder, themeShadow } from "../themeColors";
 import { themeBackground, themeForeground, themeTint } from "../themeColors";
 import React, {
   useCallback,
@@ -260,33 +261,33 @@ function HospitalToHomeArtwork({ reducedMotion }: { reducedMotion: boolean }) {
       >
         <Defs>
           <LinearGradient id="transitionGround" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#FFF9F4" />
-            <Stop offset="0.55" stopColor="#F5ECFB" />
-            <Stop offset="1" stopColor="#E9DCF8" />
+            <Stop offset="0" stopColor={themeTint("#FFF9F4")} />
+            <Stop offset="0.55" stopColor={themeTint("#F5ECFB")} />
+            <Stop offset="1" stopColor={themeTint("#E9DCF8")} />
           </LinearGradient>
           <LinearGradient id="transitionHospital" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#FFFFFF" />
-            <Stop offset="1" stopColor="#E4D4F1" />
+            <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
+            <Stop offset="1" stopColor={themeTint("#E4D4F1")} />
           </LinearGradient>
           <LinearGradient id="transitionHome" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#F4E7FF" />
-            <Stop offset="1" stopColor="#B386D0" />
+            <Stop offset="0" stopColor={themeTint("#F4E7FF")} />
+            <Stop offset="1" stopColor={themeTint("#B386D0")} />
           </LinearGradient>
           <LinearGradient id="transitionPath" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor="#FFE8A7" />
-            <Stop offset="0.5" stopColor="#FFF8E9" />
-            <Stop offset="1" stopColor="#F1D8FF" />
+            <Stop offset="0" stopColor={themeTint("#FFE8A7")} />
+            <Stop offset="0.5" stopColor={themeTint("#FFF8E9")} />
+            <Stop offset="1" stopColor={themeTint("#F1D8FF")} />
           </LinearGradient>
         </Defs>
 
         <Rect x="0" y="0" width="440" height="190" rx="28" fill="url(#transitionGround)" />
-        <Circle cx="356" cy="48" r="44" fill="#F7EEFF" opacity={0.75} />
-        <Ellipse cx="216" cy="167" rx="194" ry="17" fill="#AF8BC7" opacity={0.11} />
+        <Circle cx="356" cy="48" r="44" fill={themeTint("#F7EEFF")} opacity={0.75} />
+        <Ellipse cx="216" cy="167" rx="194" ry="17" fill={themeTint("#AF8BC7")} opacity={0.11} />
 
         <Path
           d="M146 151C190 136 198 118 237 118C281 118 291 143 337 137"
           fill="none"
-          stroke="#DABEFF"
+          stroke={themeTint("#DABEFF")}
           strokeWidth="15"
           strokeLinecap="round"
           opacity={0.22}
@@ -301,7 +302,7 @@ function HospitalToHomeArtwork({ reducedMotion }: { reducedMotion: boolean }) {
         <Path
           d="M145 151C190 136 198 118 237 118C281 118 291 143 337 137"
           fill="none"
-          stroke="#FFFFFF"
+          stroke={themeTint("#FFFFFF")}
           strokeWidth="2"
           strokeLinecap="round"
           opacity={0.9}
@@ -309,35 +310,35 @@ function HospitalToHomeArtwork({ reducedMotion }: { reducedMotion: boolean }) {
 
         <G transform="translate(28 63)">
           <Ellipse cx="74" cy="96" rx="66" ry="12" fill={themeTint("#704490")} opacity={0.12} />
-          <Rect x="16" y="28" width="94" height="72" rx="7" fill="url(#transitionHospital)" stroke="#CBB2DE" />
-          <Rect x="0" y="48" width="28" height="52" rx="5" fill="#EFE6F5" stroke="#CFB9DE" />
-          <Rect x="99" y="45" width="30" height="55" rx="5" fill="#EADCF3" stroke="#C8AEDB" />
-          <Rect x="51" y="70" width="25" height="30" rx="3" fill="#D5B6E8" />
-          <Rect x="31" y="42" width="12" height="12" rx="2" fill="#FFEFC2" />
-          <Rect x="82" y="42" width="12" height="12" rx="2" fill="#FFEFC2" />
-          <Rect x="31" y="61" width="12" height="12" rx="2" fill="#F4ECFF" />
-          <Rect x="82" y="61" width="12" height="12" rx="2" fill="#F4ECFF" />
-          <Circle cx="63" cy="49" r="16" fill="#F8F1FF" stroke="#C8ACDA" />
-          <Path d="M58 39H68V45H74V55H68V61H58V55H52V45H58Z" fill="#8040B0" />
+          <Rect x="16" y="28" width="94" height="72" rx="7" fill="url(#transitionHospital)" stroke={themeTint("#CBB2DE")} />
+          <Rect x="0" y="48" width="28" height="52" rx="5" fill={themeTint("#EFE6F5")} stroke={themeTint("#CFB9DE")} />
+          <Rect x="99" y="45" width="30" height="55" rx="5" fill={themeTint("#EADCF3")} stroke={themeTint("#C8AEDB")} />
+          <Rect x="51" y="70" width="25" height="30" rx="3" fill={themeTint("#D5B6E8")} />
+          <Rect x="31" y="42" width="12" height="12" rx="2" fill={themeTint("#FFEFC2")} />
+          <Rect x="82" y="42" width="12" height="12" rx="2" fill={themeTint("#FFEFC2")} />
+          <Rect x="31" y="61" width="12" height="12" rx="2" fill={themeTint("#F4ECFF")} />
+          <Rect x="82" y="61" width="12" height="12" rx="2" fill={themeTint("#F4ECFF")} />
+          <Circle cx="63" cy="49" r="16" fill={themeTint("#F8F1FF")} stroke={themeTint("#C8ACDA")} />
+          <Path d="M58 39H68V45H74V55H68V61H58V55H52V45H58Z" fill={themeTint("#8040B0")} />
         </G>
 
         <G transform="translate(307 74)">
           <Ellipse cx="55" cy="81" rx="52" ry="10" fill={themeTint("#704490")} opacity={0.11} />
-          <Path d="M8 42L55 7L104 42V89H8Z" fill="#F8F1FF" stroke="#C7ADD9" />
+          <Path d="M8 42L55 7L104 42V89H8Z" fill={themeTint("#F8F1FF")} stroke={themeTint("#C7ADD9")} />
           <Path d="M1 43L55 2L111 43L99 51L55 19L12 51Z" fill="url(#transitionHome)" />
-          <Rect x="44" y="58" width="22" height="31" rx="3" fill="#E1C8F0" />
-          <Rect x="18" y="51" width="18" height="17" rx="3" fill="#FFF0B8" />
-          <Rect x="77" y="51" width="18" height="17" rx="3" fill="#FFF0B8" />
+          <Rect x="44" y="58" width="22" height="31" rx="3" fill={themeTint("#E1C8F0")} />
+          <Rect x="18" y="51" width="18" height="17" rx="3" fill={themeTint("#FFF0B8")} />
+          <Rect x="77" y="51" width="18" height="17" rx="3" fill={themeTint("#FFF0B8")} />
         </G>
 
         <G opacity={0.82}>
-          <Path d="M283 126V78" stroke="#84629A" strokeWidth="3" strokeLinecap="round" />
-          <Circle cx="283" cy="73" r="15" fill="#C3ACD1" />
-          <Circle cx="273" cy="87" r="12" fill="#B99DC9" />
-          <Circle cx="293" cy="89" r="11" fill="#D1C0DC" />
-          <Path d="M405 132V91" stroke="#84629A" strokeWidth="3" strokeLinecap="round" />
-          <Circle cx="405" cy="87" r="13" fill="#BFA5CF" />
-          <Circle cx="397" cy="99" r="10" fill="#D4C3DE" />
+          <Path d="M283 126V78" stroke={themeTint("#84629A")} strokeWidth="3" strokeLinecap="round" />
+          <Circle cx="283" cy="73" r="15" fill={themeTint("#C3ACD1")} />
+          <Circle cx="273" cy="87" r="12" fill={themeTint("#B99DC9")} />
+          <Circle cx="293" cy="89" r="11" fill={themeTint("#D1C0DC")} />
+          <Path d="M405 132V91" stroke={themeTint("#84629A")} strokeWidth="3" strokeLinecap="round" />
+          <Circle cx="405" cy="87" r="13" fill={themeTint("#BFA5CF")} />
+          <Circle cx="397" cy="99" r="10" fill={themeTint("#D4C3DE")} />
         </G>
       </Svg>
     </Animated.View>
@@ -439,14 +440,14 @@ function GlassField({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           placeholder={placeholder}
-          placeholderTextColor="#A8A0B5"
+          placeholderTextColor={themeForeground("#A8A0B5")}
           autoCapitalize={date ? "none" : "sentences"}
           style={{
             minHeight: multiline ? 96 : 54,
             borderRadius: 16,
             borderWidth: focused ? 1.5 : 1,
             borderColor: focused ? PURPLE : "#DDD2E6",
-            backgroundColor: "#FFFFFFE8",
+            backgroundColor: themeBackground("#FFFFFFE8"),
             paddingHorizontal: 15,
             paddingRight: date ? 48 : 15,
             paddingTop: multiline ? 14 : 0,
@@ -463,7 +464,7 @@ function GlassField({
             pointerEvents="none"
             style={{ position: "absolute", right: 14, top: 15 }}
           >
-            <Icon name="calendar-outline" size={21} color="#4F2784" />
+            <Icon name="calendar-outline" size={21} color={themeForeground("#4F2784")} />
           </View>
         ) : null}
       </View>
@@ -490,11 +491,11 @@ function SummaryPanel({
       style={{
         borderRadius: 25,
         borderWidth: 1,
-        borderColor: "#E7D8F1",
-        backgroundColor: "#F8F2FCDE",
+        borderColor: themeBorder("#E7D8F1"),
+        backgroundColor: themeBackground("#F8F2FCDE"),
         padding: 17,
         gap: 14,
-        shadowColor: "#5A3A68",
+        shadowColor: themeShadow("#5A3A68"),
         shadowOpacity: 0.05,
         shadowRadius: 15,
         shadowOffset: { width: 0, height: 8 },
@@ -525,7 +526,7 @@ function SummaryPanel({
                 style={{
                   width: 1,
                   marginVertical: 3,
-                  backgroundColor: "#DDD0E8",
+                  backgroundColor: themeBackground("#DDD0E8"),
                 }}
               />
             ) : null}
@@ -577,7 +578,7 @@ function SummaryPanel({
         style={{
           height: 8,
           borderRadius: 999,
-          backgroundColor: "#E2D6EB",
+          backgroundColor: themeBackground("#E2D6EB"),
           overflow: "hidden",
         }}
       >
@@ -614,15 +615,15 @@ function Shortcut({
         minHeight: 66,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: "#E6D9F0",
-        backgroundColor: "#FFFFFFC9",
+        borderColor: themeBorder("#E6D9F0"),
+        backgroundColor: themeBackground("#FFFFFFC9"),
         paddingHorizontal: 14,
         flexDirection: "row",
         alignItems: "center",
         gap: 11,
         opacity: pressed ? 0.76 : 1,
         transform: [{ scale: pressed ? 0.99 : 1 }],
-        shadowColor: "#4E3659",
+        shadowColor: themeShadow("#4E3659"),
         shadowOpacity: 0.035,
         shadowRadius: 11,
         shadowOffset: { width: 0, height: 5 },
@@ -636,7 +637,7 @@ function Shortcut({
           borderRadius: 19,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#F1E5FA",
+          backgroundColor: themeBackground("#F1E5FA"),
         }}
       >
         <Icon name={icon} size={21} color={themeForeground(PURPLE)} />
@@ -647,7 +648,7 @@ function Shortcut({
           fontFamily: "DMSans_600SemiBold",
           fontSize: 13,
           lineHeight: 18,
-          color: "#3A1E72",
+          color: themeForeground("#3A1E72"),
         }}
       >
         {title}
@@ -719,9 +720,9 @@ function PlanAccordion({
         borderRadius: 23,
         borderWidth: 1,
         borderColor: GLASS_BORDER,
-        backgroundColor: "#FFFFFFC8",
+        backgroundColor: themeBackground("#FFFFFFC8"),
         overflow: "hidden",
-        shadowColor: "#53365E",
+        shadowColor: themeShadow("#53365E"),
         shadowOpacity: 0.035,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 5 },
@@ -749,7 +750,7 @@ function PlanAccordion({
             borderRadius: 20,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#EFE2F9",
+            backgroundColor: themeBackground("#EFE2F9"),
           }}
         >
           <Text
@@ -790,7 +791,7 @@ function PlanAccordion({
               fontFamily: "DMSans_400Regular",
               fontSize: 11.5,
               lineHeight: 16,
-              color: "#8A8297",
+              color: themeForeground("#8A8297"),
             }}
           >
             {meta.subtitle}
@@ -809,7 +810,7 @@ function PlanAccordion({
             ],
           }}
         >
-          <Icon name="chevron-down-outline" size={20} color="#5B3A80" />
+          <Icon name="chevron-down-outline" size={20} color={themeForeground("#5B3A80")} />
         </Animated.View>
       </Pressable>
 
@@ -829,8 +830,8 @@ function PlanAccordion({
             paddingTop: 15,
             gap: 14,
             borderTopWidth: 1,
-            borderTopColor: "#EAE0F0",
-            backgroundColor: "#FFFEFFD9",
+            borderTopColor: themeBorder("#EAE0F0"),
+            backgroundColor: themeBackground("#FFFEFFD9"),
           }}
         >
           {children}
@@ -950,7 +951,7 @@ function ChecklistRow({
         paddingVertical: 11,
         paddingHorizontal: 8,
         borderBottomWidth: index === transitionSteps.length - 1 ? 0 : 1,
-        borderBottomColor: "#E9E2ED",
+        borderBottomColor: themeBorder("#E9E2ED"),
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
@@ -971,7 +972,7 @@ function ChecklistRow({
           borderRadius: 17,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#F4ECFA",
+          backgroundColor: themeBackground("#F4ECFA"),
         }}
       >
         <Icon name={checklistIcons[index]} size={19} color={themeForeground(PURPLE)} />
@@ -1380,8 +1381,8 @@ export function HospitalToHomeScreen() {
             style={{
               borderRadius: 18,
               borderWidth: 1,
-              borderColor: "#E5D8ED",
-              backgroundColor: "#F6EFFA",
+              borderColor: themeBorder("#E5D8ED"),
+              backgroundColor: themeBackground("#F6EFFA"),
               padding: 13,
               flexDirection: "row",
               alignItems: "center",
@@ -1445,7 +1446,7 @@ export function HospitalToHomeScreen() {
               borderRadius: 23,
               borderWidth: 1,
               borderColor: GLASS_BORDER,
-              backgroundColor: "#FFFFFFC7",
+              backgroundColor: themeBackground("#FFFFFFC7"),
               alignItems: "center",
               justifyContent: "center",
               gap: 10,
@@ -1543,7 +1544,7 @@ export function HospitalToHomeScreen() {
                     fontFamily: "DMSans_400Regular",
                     fontSize: 11.5,
                     lineHeight: 17,
-                    color: "#8A8297",
+                    color: themeForeground("#8A8297"),
                   }}
                 >
                   Record discharge-team medication changes exactly as provided. EnVizion does not generate medication instructions.
@@ -1704,7 +1705,7 @@ export function HospitalToHomeScreen() {
         <View
           style={{
             height: 1,
-            backgroundColor: "#E7DDEC",
+            backgroundColor: themeBackground("#E7DDEC"),
             marginVertical: 2,
           }}
         />
@@ -1737,8 +1738,8 @@ export function HospitalToHomeScreen() {
               minHeight: 112,
               borderRadius: 23,
               borderWidth: 1,
-              borderColor: "#E8DFED",
-              backgroundColor: "#FFFFFFC9",
+              borderColor: themeBorder("#E8DFED"),
+              backgroundColor: themeBackground("#FFFFFFC9"),
               padding: 17,
               flexDirection: "row",
               alignItems: "center",
@@ -1750,12 +1751,12 @@ export function HospitalToHomeScreen() {
                 width: 52,
                 height: 52,
                 borderRadius: 26,
-                backgroundColor: "#F0E5F8",
+                backgroundColor: themeBackground("#F0E5F8"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name="calendar-outline" size={25} color="#6C4B8B" />
+              <Icon name="calendar-outline" size={25} color={themeForeground("#6C4B8B")} />
             </View>
             <View style={{ flex: 1, gap: 4 }}>
               <Text style={[S.h3, { fontSize: 14.5 }]}>
@@ -1895,7 +1896,7 @@ export function HospitalToHomeScreen() {
                   borderRadius: 23,
                   borderWidth: 1,
                   borderColor: GLASS_BORDER,
-                  backgroundColor: "#FFFFFFD0",
+                  backgroundColor: themeBackground("#FFFFFFD0"),
                   padding: 16,
                   gap: 14,
                 }}
@@ -1938,7 +1939,7 @@ export function HospitalToHomeScreen() {
         <View
           style={{
             height: 1,
-            backgroundColor: "#E7DDEC",
+            backgroundColor: themeBackground("#E7DDEC"),
             marginVertical: 2,
           }}
         />
@@ -1987,8 +1988,8 @@ export function HospitalToHomeScreen() {
           style={{
             borderRadius: 23,
             borderWidth: 1,
-            borderColor: "#E8DFED",
-            backgroundColor: "#FFFFFFC9",
+            borderColor: themeBorder("#E8DFED"),
+            backgroundColor: themeBackground("#FFFFFFC9"),
             paddingHorizontal: 8,
             overflow: "hidden",
           }}
@@ -2040,8 +2041,8 @@ export function HospitalToHomeScreen() {
           style={{
             borderRadius: 24,
             borderWidth: 1,
-            borderColor: "#F1D7DE",
-            backgroundColor: "#FFF0F3",
+            borderColor: themeBorder("#F1D7DE"),
+            backgroundColor: themeBackground("#FFF0F3"),
             padding: 17,
             gap: 13,
           }}
@@ -2058,19 +2059,19 @@ export function HospitalToHomeScreen() {
                 width: 44,
                 height: 44,
                 borderRadius: 22,
-                backgroundColor: "#FFF8FA",
+                backgroundColor: themeBackground("#FFF8FA"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name="warning-outline" size={24} color="#C23857" />
+              <Icon name="warning-outline" size={24} color={themeForeground("#C23857")} />
             </View>
             <View style={{ flex: 1, gap: 4 }}>
               <Text
                 style={{
                   fontFamily: "DMSans_700Bold",
                   fontSize: 15,
-                  color: "#B83250",
+                  color: themeForeground("#B83250"),
                 }}
               >
                 Urgent help comes first.
@@ -2080,7 +2081,7 @@ export function HospitalToHomeScreen() {
                   fontFamily: "DMSans_400Regular",
                   fontSize: 12.5,
                   lineHeight: 18,
-                  color: "#8E6570",
+                  color: themeForeground("#8E6570"),
                 }}
               >
                 Use the warning signs and contact instructions given by the discharge team. For a possible emergency, use local emergency services rather than waiting on the app.
@@ -2107,7 +2108,7 @@ export function HospitalToHomeScreen() {
             fontFamily: "DMSans_400Regular",
             fontSize: 11.5,
             lineHeight: 17,
-            color: "#8A8297",
+            color: themeForeground("#8A8297"),
             textAlign: "center",
           }}
         >

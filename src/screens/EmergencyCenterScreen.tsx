@@ -1,3 +1,4 @@
+import { themeForeground, themeBorder, themeShadow, themeTint } from "../themeColors";
 import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "react-native-qrcode-svg";
@@ -88,36 +89,36 @@ function EmergencyHeroArt() {
     <Svg width="100%" height="100%" viewBox="0 0 230 190" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="kitBody" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" />
-          <Stop offset="1" stopColor="#DDD0F8" />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
+          <Stop offset="1" stopColor={themeTint("#DDD0F8")} />
         </LinearGradient>
         <LinearGradient id="kitEdge" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#A66BF0" />
-          <Stop offset="1" stopColor="#6235B6" />
+          <Stop offset="0" stopColor={themeTint("#A66BF0")} />
+          <Stop offset="1" stopColor={themeTint("#6235B6")} />
         </LinearGradient>
         <LinearGradient id="cross" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FF7892" />
-          <Stop offset="1" stopColor="#F04462" />
+          <Stop offset="0" stopColor={themeTint("#FF7892")} />
+          <Stop offset="1" stopColor={themeTint("#F04462")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="126" cy="91" r="84" fill="#F2EAFF" />
-      <Circle cx="186" cy="45" r="40" fill="#E3D4FF" opacity={0.88} />
-      <Ellipse cx="45" cy="96" rx="35" ry="56" fill="#EFE7FF" transform="rotate(-28 45 96)" />
-      <Ellipse cx="194" cy="137" rx="31" ry="56" fill="#D9C8FA" transform="rotate(28 194 137)" />
+      <Circle cx="126" cy="91" r="84" fill={themeTint("#F2EAFF")} />
+      <Circle cx="186" cy="45" r="40" fill={themeTint("#E3D4FF")} opacity={0.88} />
+      <Ellipse cx="45" cy="96" rx="35" ry="56" fill={themeTint("#EFE7FF")} transform="rotate(-28 45 96)" />
+      <Ellipse cx="194" cy="137" rx="31" ry="56" fill={themeTint("#D9C8FA")} transform="rotate(28 194 137)" />
 
       <G transform="translate(71 42) rotate(7 59 62)">
-        <Rect x="5" y="8" width="116" height="108" rx="25" fill="#6540B0" opacity={0.14} />
-        <Rect x="0" y="0" width="116" height="108" rx="25" fill="url(#kitBody)" stroke="#C8B5EB" strokeWidth="2" />
+        <Rect x="5" y="8" width="116" height="108" rx="25" fill={themeTint("#6540B0")} opacity={0.14} />
+        <Rect x="0" y="0" width="116" height="108" rx="25" fill="url(#kitBody)" stroke={themeTint("#C8B5EB")} strokeWidth="2" />
         <Rect x="32" y="-14" width="52" height="29" rx="12" fill="url(#kitEdge)" />
-        <Rect x="43" y="-7" width="30" height="14" rx="7" fill="#7F52C8" />
+        <Rect x="43" y="-7" width="30" height="14" rx="7" fill={themeTint("#7F52C8")} />
         <Path d="M49 28H67V45H84V63H67V80H49V63H32V45H49Z" fill="url(#cross)" />
-        <Path d="M84 72C84 59 94 50 106 50C118 50 127 59 127 72V98H84V72Z" fill="#6D40BE" />
-        <Path d="M101 60H110V70H120V79H110V89H101V79H92V70H101Z" fill="#F6F0FF" />
+        <Path d="M84 72C84 59 94 50 106 50C118 50 127 59 127 72V98H84V72Z" fill={themeTint("#6D40BE")} />
+        <Path d="M101 60H110V70H120V79H110V89H101V79H92V70H101Z" fill={themeTint("#F6F0FF")} />
       </G>
 
-      <Path d="M32 154C46 137 55 123 64 107" stroke="#D1BCEE" strokeWidth="5" strokeLinecap="round" />
-      <Path d="M207 158C199 137 193 121 180 108" stroke="#CAB4EC" strokeWidth="5" strokeLinecap="round" />
+      <Path d="M32 154C46 137 55 123 64 107" stroke={themeTint("#D1BCEE")} strokeWidth="5" strokeLinecap="round" />
+      <Path d="M207 158C199 137 193 121 180 108" stroke={themeTint("#CAB4EC")} strokeWidth="5" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -144,7 +145,7 @@ function SmallStatusCard({
         padding: 15,
         backgroundColor: background,
         borderWidth: 1,
-        borderColor: "#EAE4F2",
+        borderColor: themeBorder("#EAE4F2"),
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
@@ -155,7 +156,7 @@ function SmallStatusCard({
           width: 52,
           height: 52,
           borderRadius: 26,
-          backgroundColor: "#FFFFFFB8",
+          backgroundColor: themeBackground("#FFFFFFB8"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -175,7 +176,7 @@ function SmallStatusCard({
         >
           {value}
         </Text>
-        <View style={{ height: 7, borderRadius: 4, backgroundColor: "#FFFFFF9C", overflow: "hidden", marginTop: 4 }}>
+        <View style={{ height: 7, borderRadius: 4, backgroundColor: themeBackground("#FFFFFF9C"), overflow: "hidden", marginTop: 4 }}>
           <View style={{ width: "18%", height: 7, borderRadius: 4, backgroundColor: accent + "30" }} />
         </View>
       </View>
@@ -223,7 +224,7 @@ function ContactTile({
           width: 50,
           height: 50,
           borderRadius: 25,
-          backgroundColor: "#FFFFFFA8",
+          backgroundColor: themeBackground("#FFFFFFA8"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -279,7 +280,7 @@ function ProfileTile({
           width: 48,
           height: 48,
           borderRadius: 24,
-          backgroundColor: "#FFFFFFA8",
+          backgroundColor: themeBackground("#FFFFFFA8"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -576,11 +577,11 @@ export function EmergencyCenterScreen() {
             borderRadius: 24,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#F6F0FD",
+            backgroundColor: themeBackground("#F6F0FD"),
             opacity: pressed ? 0.68 : 1,
           })}
         >
-          <Icon name="chevron-back-outline" size={25} color="#241B53" />
+          <Icon name="chevron-back-outline" size={25} color={themeForeground("#241B53")} />
         </Pressable>
 
         <Text
@@ -605,11 +606,11 @@ export function EmergencyCenterScreen() {
             borderRadius: 24,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#F6F0FD",
+            backgroundColor: themeBackground("#F6F0FD"),
             opacity: pressed ? 0.68 : 1,
           })}
         >
-          <Icon name="help-circle-outline" size={25} color="#5144B8" />
+          <Icon name="help-circle-outline" size={25} color={themeForeground("#5144B8")} />
         </Pressable>
       </View>
 
@@ -622,8 +623,8 @@ export function EmergencyCenterScreen() {
           paddingRight: 155,
           justifyContent: "center",
           borderWidth: 1,
-          borderColor: "#ECE4F8",
-          shadowColor: "#5B3470",
+          borderColor: themeBorder("#ECE4F8"),
+          shadowColor: themeShadow("#5B3470"),
           shadowOpacity: 0.06,
           shadowRadius: 22,
           shadowOffset: { width: 0, height: 10 },
@@ -640,14 +641,14 @@ export function EmergencyCenterScreen() {
         >
           <Defs>
             <LinearGradient id="emergencyHeroBg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor="#FBF8FF" />
-              <Stop offset="0.55" stopColor="#F3ECFF" />
-              <Stop offset="1" stopColor="#EADFFF" />
+              <Stop offset="0" stopColor={themeTint("#FBF8FF")} />
+              <Stop offset="0.55" stopColor={themeTint("#F3ECFF")} />
+              <Stop offset="1" stopColor={themeTint("#EADFFF")} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="420" height="300" rx="30" fill="url(#emergencyHeroBg)" />
-          <Circle cx="374" cy="54" r="85" fill="#FFFFFF" opacity={0.42} />
-          <Circle cx="390" cy="238" r="96" fill="#DCCAF9" opacity={0.42} />
+          <Circle cx="374" cy="54" r="85" fill={themeTint("#FFFFFF")} opacity={0.42} />
+          <Circle cx="390" cy="238" r="96" fill={themeTint("#DCCAF9")} opacity={0.42} />
         </Svg>
 
         <View style={{ gap: 12 }}>
@@ -657,17 +658,17 @@ export function EmergencyCenterScreen() {
                 width: 42,
                 height: 42,
                 borderRadius: 13,
-                backgroundColor: "#E7D6FF",
+                backgroundColor: themeBackground("#E7D6FF"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name="shield-checkmark-outline" size={22} color="#7B3ACA" />
+              <Icon name="shield-checkmark-outline" size={22} color={themeForeground("#7B3ACA")} />
             </View>
             <Text
               style={[
                 S.eyebrow,
-                { color: "#7432AF", letterSpacing: 1.8, fontSize: 10.5 },
+                { color: themeForeground("#7432AF"), letterSpacing: 1.8, fontSize: 10.5 },
               ]}
             >
               EMERGENCY INFORMATION
@@ -680,12 +681,12 @@ export function EmergencyCenterScreen() {
               fontSize: 39,
               lineHeight: 43,
               letterSpacing: -1.15,
-              color: "#17143D",
+              color: themeForeground("#17143D"),
               maxWidth: 265,
             }}
           >
             Be prepared{"\n"}when{" "}
-            <Text style={{ color: "#8C3ED1" }}>it matters.</Text>
+            <Text style={{ color: themeForeground("#8C3ED1") }}>it matters.</Text>
           </Text>
 
           <View style={{ flexDirection: "row", gap: 9, marginTop: 4 }}>
@@ -747,8 +748,8 @@ export function EmergencyCenterScreen() {
           minHeight: 110,
           borderRadius: 26,
           borderWidth: 1,
-          borderColor: "#F3CBD3",
-          backgroundColor: "#FFF0F3",
+          borderColor: themeBorder("#F3CBD3"),
+          backgroundColor: themeBackground("#FFF0F3"),
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: 18,
@@ -761,7 +762,7 @@ export function EmergencyCenterScreen() {
             width: 56,
             height: 56,
             borderRadius: 28,
-            backgroundColor: "#E93D62",
+            backgroundColor: themeBackground("#E93D62"),
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -783,7 +784,7 @@ export function EmergencyCenterScreen() {
               fontFamily: "DMSans_700Bold",
               fontSize: 17,
               lineHeight: 22,
-              color: "#C8284C",
+              color: themeForeground("#C8284C"),
             }}
           >
             Emergency alert
@@ -793,13 +794,13 @@ export function EmergencyCenterScreen() {
               fontFamily: "DMSans_400Regular",
               fontSize: 14,
               lineHeight: 19,
-              color: "#B64E64",
+              color: themeForeground("#B64E64"),
             }}
           >
             Know what to do
           </Text>
         </View>
-        <Icon name="chevron-forward-outline" size={23} color="#D63A56" />
+        <Icon name="chevron-forward-outline" size={23} color={themeForeground("#D63A56")} />
       </Pressable>
 
       <View style={{ flexDirection: "row", gap: 10 }}>
@@ -823,20 +824,20 @@ export function EmergencyCenterScreen() {
         <Card
           style={{
             borderRadius: 28,
-            backgroundColor: "#21162D",
+            backgroundColor: themeBackground("#21162D"),
             borderWidth: 0,
             gap: 14,
           }}
         >
           <View style={S.between}>
             <View style={{ flex: 1, gap: 4 }}>
-              <Text style={[S.eyebrow, { color: "#D8BFE3" }]}>
+              <Text style={[S.eyebrow, { color: themeForeground("#D8BFE3") }]}>
                 ONE-TAP EMERGENCY SUMMARY
               </Text>
               <Text style={[S.h2, { color: C.white, fontSize: 22 }]}>
                 {criticalSummary.recipientName}
               </Text>
-              <Txt style={{ color: "#E6DCE9" }}>
+              <Txt style={{ color: themeForeground("#E6DCE9") }}>
                 {data.profile
                   ? "Live care information"
                   : "Offline cached emergency snapshot"}
@@ -847,12 +848,12 @@ export function EmergencyCenterScreen() {
                 width: 54,
                 height: 54,
                 borderRadius: 18,
-                backgroundColor: "#FFFFFF14",
+                backgroundColor: themeBackground("#FFFFFF14"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name="medical-outline" size={28} color="#F4D9FF" />
+              <Icon name="medical-outline" size={28} color={themeForeground("#F4D9FF")} />
             </View>
           </View>
 
@@ -875,12 +876,12 @@ export function EmergencyCenterScreen() {
                   width: "48%",
                   minHeight: 76,
                   borderRadius: 17,
-                  backgroundColor: "#FFFFFF0F",
+                  backgroundColor: themeBackground("#FFFFFF0F"),
                   padding: 12,
                   gap: 4,
                 }}
               >
-                <Text style={[S.eyebrow, { color: "#CBBAD1", fontSize: 9 }]}>
+                <Text style={[S.eyebrow, { color: themeForeground("#CBBAD1"), fontSize: 9 }]}>
                   {label}
                 </Text>
                 <Text
@@ -903,7 +904,7 @@ export function EmergencyCenterScreen() {
             {criticalSummary.medications.slice(0, 4).map((medication, index) => (
               <Txt
                 key={`${medication.name}-${index}`}
-                style={{ color: "#E5D9E8" }}
+                style={{ color: themeForeground("#E5D9E8") }}
               >
                 •{" "}
                 {[
@@ -917,7 +918,7 @@ export function EmergencyCenterScreen() {
               </Txt>
             ))}
             {criticalSummary.medications.length > 4 && (
-              <Txt style={{ color: "#CBBAD1" }}>
+              <Txt style={{ color: themeForeground("#CBBAD1") }}>
                 + {criticalSummary.medications.length - 4} more medication
                 {criticalSummary.medications.length - 4 === 1 ? "" : "s"}
               </Txt>
@@ -945,7 +946,7 @@ export function EmergencyCenterScreen() {
             </View>
           </View>
 
-          <Txt style={{ color: "#BFAFC4", fontSize: 10.5 }}>
+          <Txt style={{ color: themeForeground("#BFAFC4"), fontSize: 10.5 }}>
             Offline copy updated{" "}
             {new Date(criticalSummary.cachedAt).toLocaleString()}.
           </Txt>
@@ -986,7 +987,7 @@ export function EmergencyCenterScreen() {
                 minHeight: 46,
                 borderRadius: 23,
                 borderWidth: 1.5,
-                borderColor: "#B36CE2",
+                borderColor: themeBorder("#B36CE2"),
                 paddingHorizontal: 16,
                 flexDirection: "row",
                 alignItems: "center",
@@ -995,8 +996,8 @@ export function EmergencyCenterScreen() {
                 opacity: pressed ? 0.7 : 1,
               })}
             >
-              <Icon name="add-outline" size={18} color="#823CB9" />
-              <Text style={[S.h3, { fontSize: 12.5, color: "#823CB9" }]}>Add contact</Text>
+              <Icon name="add-outline" size={18} color={themeForeground("#823CB9")} />
+              <Text style={[S.h3, { fontSize: 12.5, color: themeForeground("#823CB9") }]}>Add contact</Text>
             </Pressable>
           </View>
 
@@ -1045,7 +1046,7 @@ export function EmergencyCenterScreen() {
                 minHeight: 110,
                 borderRadius: 24,
                 borderWidth: 1,
-                borderColor: "#E9E3EF",
+                borderColor: themeBorder("#E9E3EF"),
                 backgroundColor: themeBackground(C.white),
                 paddingHorizontal: 16,
                 flexDirection: "row",
@@ -1059,12 +1060,12 @@ export function EmergencyCenterScreen() {
                   width: 54,
                   height: 54,
                   borderRadius: 27,
-                  backgroundColor: "#FFE7EE",
+                  backgroundColor: themeBackground("#FFE7EE"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon name="medical-outline" size={25} color="#E34168" />
+                <Icon name="medical-outline" size={25} color={themeForeground("#E34168")} />
               </View>
               <View style={{ flex: 1, gap: 4 }}>
                 <Text style={S.h3}>Medication list</Text>
@@ -1072,7 +1073,7 @@ export function EmergencyCenterScreen() {
                   {data.medications.length} active
                 </Txt>
               </View>
-              <Icon name="chevron-forward-outline" size={19} color="#7D35B5" />
+              <Icon name="chevron-forward-outline" size={19} color={themeForeground("#7D35B5")} />
             </Pressable>
           </View>
 
@@ -1098,7 +1099,7 @@ export function EmergencyCenterScreen() {
                     minHeight: 44,
                     borderRadius: 22,
                     borderWidth: 1.5,
-                    borderColor: "#AE69DE",
+                    borderColor: themeBorder("#AE69DE"),
                     paddingHorizontal: 15,
                     flexDirection: "row",
                     alignItems: "center",
@@ -1107,8 +1108,8 @@ export function EmergencyCenterScreen() {
                     opacity: pressed ? 0.7 : 1,
                   })}
                 >
-                  <Icon name="create-outline" size={17} color="#7D35B5" />
-                  <Text style={[S.h3, { fontSize: 12.5, color: "#7D35B5" }]}>Edit</Text>
+                  <Icon name="create-outline" size={17} color={themeForeground("#7D35B5")} />
+                  <Text style={[S.h3, { fontSize: 12.5, color: themeForeground("#7D35B5") }]}>Edit</Text>
                 </Pressable>
               )}
             </View>
@@ -1359,8 +1360,8 @@ export function EmergencyCenterScreen() {
           <Card
             style={{
               borderRadius: 26,
-              backgroundColor: "#F8F3FB",
-              borderColor: "#E7DCEE",
+              backgroundColor: themeBackground("#F8F3FB"),
+              borderColor: themeBorder("#E7DCEE"),
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -1369,7 +1370,7 @@ export function EmergencyCenterScreen() {
                   width: 50,
                   height: 50,
                   borderRadius: 17,
-                  backgroundColor: "#E9DDF1",
+                  backgroundColor: themeBackground("#E9DDF1"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -1445,7 +1446,7 @@ export function EmergencyCenterScreen() {
             )}
 
             {createdShare && (
-              <Card style={{ backgroundColor: "#EEF7F3" }}>
+              <Card style={{ backgroundColor: themeBackground("#EEF7F3") }}>
                 <View style={S.between}>
                   <View style={{ flex: 1, gap: 4 }}>
                     <Text style={S.h3}>Temporary link ready</Text>
@@ -1476,8 +1477,8 @@ export function EmergencyCenterScreen() {
                     <QRCode
                       value={createdShare.shareUrl}
                       size={204}
-                      color="#1E1730"
-                      backgroundColor="#FFFFFF"
+                      color={themeForeground("#1E1730")}
+                      backgroundColor={themeBackground("#FFFFFF")}
                     />
                   </View>
                   <Text style={S.h3}>Scan at ER or triage</Text>
@@ -1560,7 +1561,7 @@ export function EmergencyCenterScreen() {
                         width: 42,
                         height: 42,
                         borderRadius: 14,
-                        backgroundColor: "#FFF0F3",
+                        backgroundColor: themeBackground("#FFF0F3"),
                         alignItems: "center",
                         justifyContent: "center",
                         opacity: pressed ? 0.65 : 1,
@@ -1591,7 +1592,7 @@ export function EmergencyCenterScreen() {
               justifyContent: "center",
               gap: 10,
               opacity: pressed ? 0.8 : 1,
-              shadowColor: "#6B2A93",
+              shadowColor: themeShadow("#6B2A93"),
               shadowOpacity: 0.15,
               shadowRadius: 14,
               shadowOffset: { width: 0, height: 7 },
@@ -1608,9 +1609,9 @@ export function EmergencyCenterScreen() {
             >
               <Defs>
                 <LinearGradient id="packetGradient" x1="0" y1="0" x2="1" y2="0">
-                  <Stop offset="0" stopColor="#7B2FA6" />
-                  <Stop offset="0.55" stopColor="#9A3EC9" />
-                  <Stop offset="1" stopColor="#7127A4" />
+                  <Stop offset="0" stopColor={themeTint("#7B2FA6")} />
+                  <Stop offset="0.55" stopColor={themeTint("#9A3EC9")} />
+                  <Stop offset="1" stopColor={themeTint("#7127A4")} />
                 </LinearGradient>
               </Defs>
               <Rect x="0" y="0" width="420" height="62" rx="31" fill="url(#packetGradient)" />
@@ -1639,14 +1640,14 @@ export function EmergencyCenterScreen() {
           paddingHorizontal: 3,
         }}
       >
-        <Icon name="information-circle-outline" size={20} color="#68647A" />
+        <Icon name="information-circle-outline" size={20} color={themeForeground("#68647A")} />
         <Text
           style={{
             flex: 1,
             fontFamily: "DMSans_400Regular",
             fontSize: 11.5,
             lineHeight: 17,
-            color: "#77758B",
+            color: themeForeground("#77758B"),
           }}
         >
           Emergency information is a caregiver-entered preparedness aid, not emergency monitoring.
