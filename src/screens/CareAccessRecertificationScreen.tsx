@@ -198,11 +198,12 @@ export function CareAccessRecertificationScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [loadError, setLoadError] = useState("");
 
   const recipientId = state.careRecipientId;
   const primaryAdvocate = state.accessRole === "owner";
 
-  async function refresh() {
+  async function refresh(clearFeedback = true) {
     if (!recipientId || !primaryAdvocate) {
       setOverview(null);
       setLoading(false);
@@ -210,21 +211,27 @@ export function CareAccessRecertificationScreen() {
     }
 
     setLoading(true);
-    setMessage("");
+    setLoadError("");
+    if (clearFeedback) setMessage("");
     try {
-      setOverview(await loadCareAccessRecertifications(recipientId));
+      const latest = await loadCareAccessRecertifications(recipientId);
+      setOverview(latest);
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not load the access recertification schedule.",
-      );
+      // A stale schedule must not be presented as current account data.
+      setOverview(null);
+      setLoadError(error instanceof Error
+        ? error.message
+        : "We could not load the access recertification schedule.");
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
+    setOverview(null);
+    setSelectedId(null);
+    setDecision(null);
+    setConfirmed(false);
     void refresh();
   }, [primaryAdvocate, recipientId]);
 
@@ -289,13 +296,14 @@ export function CareAccessRecertificationScreen() {
         roleAfter: decision === "change_role" ? roleAfter : null,
       });
 
-      setMessage(
-        `${selected.displayName}: ${result.before} → ${result.after}. The 90-day access review was signed off and recorded.`,
-      );
       setSelectedId(null);
       setDecision(null);
       setConfirmed(false);
-      await refresh();
+      // Keep the saved sign-off confirmation visible after refreshing server data.
+      await refresh(false);
+      setMessage(
+        `${selected.displayName}: ${result.before} → ${result.after}. The 90-day access review was signed off and recorded.`,
+      );
     } catch (error) {
       setConfirmed(false);
       setMessage(
@@ -339,6 +347,29 @@ export function CareAccessRecertificationScreen() {
       <Page>
         <ActivityIndicator color={C.purple} />
         <Txt>Loading 90-day access reviews…</Txt>
+      </Page>
+    );
+  }
+
+  if (!overview && !loading) {
+    return (
+      <Page>
+        <Heading eyebrow="90-DAY ACCESS RECERTIFICATION"
+          title="Reconfirm who still needs care-team access."
+          body="Access-review information must come from your care-team records." />
+        <Card style={{ borderColor: "#EECEDA", backgroundColor: "#FFF8FA" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
+            <IconTile icon="alert-circle-outline" />
+            <Text accessibilityRole="alert" style={{ flex: 1, color: INK,
+              fontFamily: "DMSans_400Regular", fontSize: 13, lineHeight: 20 }}>
+              {loadError || "Access reviews are unavailable. Please refresh."}
+            </Text>
+          </View>
+        </Card>
+        <Button title="Try again" secondary icon="refresh-outline"
+          onPress={() => void refresh()} />
+        <Button title="Back to Care Team" icon="people-outline"
+          onPress={() => n.navigate("CareTeam")} />
       </Page>
     );
   }
