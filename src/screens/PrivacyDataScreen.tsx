@@ -27,7 +27,7 @@ import {
   S,
   Section,
   Txt,
-} from "../ui";
+} from "./ProfileLinkedUI";
 import { useNav } from "./MainScreens";
 
 function safeFilename(value: string) {
@@ -101,8 +101,8 @@ export function PrivacyDataScreen() {
     <Page>
       <Heading
         eyebrow="ACCOUNT, PRIVACY & DATA"
-        title="You stay in control of your EnVizion Life data."
-        body="Review your account, export information you are authorized to access, and manage destructive actions carefully."
+        title="Your information. Your choice."
+        body="Keep your account secure, review sharing, and manage your data in one place."
       />
 
       {Boolean(message) && (
