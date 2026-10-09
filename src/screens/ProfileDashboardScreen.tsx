@@ -352,7 +352,6 @@ export function ProfileDashboardScreen() {
         <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12.5, lineHeight: 18, color: MUTED, marginBottom: 4 }}>
           Your personal settings stay here. Care tasks and team coordination live in the Care tab.
         </Text>
-      <View style={{ gap: 9 }}>
         <View style={{ flexDirection: "row", gap: 9 }}>
           {settings.slice(0, 2).map((item) => (
             <MiniEntry key={item.title} title={item.title} subtitle={item.subtitle}
