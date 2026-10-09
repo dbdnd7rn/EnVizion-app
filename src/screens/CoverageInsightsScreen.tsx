@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -250,7 +251,7 @@ export function CoverageInsightsScreen({ navigation }: Props) {
                       style={{
                         height: "100%",
                         width: `${width}%` as `${number}%`,
-                        backgroundColor: C.purple,
+                        backgroundColor: themeAction(C.purple),
                       }}
                     />
                   </View>

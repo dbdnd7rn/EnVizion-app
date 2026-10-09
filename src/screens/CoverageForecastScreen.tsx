@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -597,7 +598,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
                     />
                   </Card>
                 ) : (
-                  <Card style={{ backgroundColor: C.white }}>
+                  <Card style={{ backgroundColor: themeBackground(C.white) }}>
                     <View style={S.row}>
                       <Icon name="moon-outline" color={C.purple} />
                       <View style={{ flex: 1, gap: 2 }}>
