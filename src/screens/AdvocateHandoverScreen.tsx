@@ -1,3 +1,4 @@
+import { themeForeground, themeShadow } from "../themeColors";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator, Pressable, ScrollView, Text, View,
@@ -37,7 +38,7 @@ function Glass({
       padding: 17,
       gap: 12,
       overflow: "hidden",
-      shadowColor: "#604778",
+      shadowColor: themeShadow("#604778"),
       shadowOpacity: 0.085,
       shadowRadius: 15,
       shadowOffset: { width: 0, height: 7 },
@@ -63,14 +64,14 @@ function Tile({ name, size = 48 }: { name: string; size?: number }) {
       backgroundColor: "#F1E7FB",
       alignItems: "center", justifyContent: "center",
     }}>
-      <Icon name={name} size={Math.round(size * 0.48)} color={PURPLE} />
+      <Icon name={name} size={Math.round(size * 0.48)} color={themeForeground(PURPLE)} />
     </View>
   );
 }
 
 function BlockTitle({ children }: { children: React.ReactNode }) {
   return <Text accessibilityRole="header" style={{
-    color: INK, fontFamily: BOLD, fontSize: 21, lineHeight: 27, letterSpacing: -0.55,
+    color: themeForeground(INK), fontFamily: BOLD, fontSize: 21, lineHeight: 27, letterSpacing: -0.55,
   }}>{children}</Text>;
 }
 
@@ -82,14 +83,14 @@ function EmptyGlass({
       <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
         <Tile name={icon} size={51} />
         <View style={{ flex: 1, gap: 4 }}>
-          <Text style={{ color: INK, fontFamily: SEMI, fontSize: 13.5, lineHeight: 19 }}>
+          <Text style={{ color: themeForeground(INK), fontFamily: SEMI, fontSize: 13.5, lineHeight: 19 }}>
             {title}
           </Text>
-          <Text style={{ fontFamily: FAMILY, color: MUTED, fontSize: 12.5, lineHeight: 18 }}>
+          <Text style={{ fontFamily: FAMILY, color: themeForeground(MUTED), fontSize: 12.5, lineHeight: 18 }}>
             {detail}
           </Text>
         </View>
-        {onPress && <Icon name="chevron-forward" color={PURPLE} size={19} />}
+        {onPress && <Icon name="chevron-forward" color={themeForeground(PURPLE)} size={19} />}
       </View>
     </Glass>
   );
@@ -197,7 +198,7 @@ export function AdvocateHandoverScreen() {
     return (
       <View style={{ backgroundColor: "#FCF9FF", flex: 1, padding: 22, gap: 14 }}>
         <BlockTitle>Select a care profile</BlockTitle>
-        <Text style={{ color: MUTED, fontFamily: FAMILY }}>
+        <Text style={{ color: themeForeground(MUTED), fontFamily: FAMILY }}>
           Select a care profile to review its handover.
         </Text>
         <PillButton title="Back to Care Team" icon="people-outline"
@@ -347,11 +348,11 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
               borderColor: "#FFFFFF", borderWidth: 1, alignItems: "center",
               justifyContent: "center", opacity: pressed ? 0.75 : 1,
             })}>
-            <Icon name="arrow-back-outline" size={24} color={PURPLE} />
+            <Icon name="arrow-back-outline" size={24} color={themeForeground(PURPLE)} />
           </Pressable>
           <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit
             style={{ flex: 1, fontFamily: BOLD, fontSize: compact ? 16 : 18,
-              color: INK, letterSpacing: -0.25 }}>
+              color: themeForeground(INK), letterSpacing: -0.25 }}>
             Primary Advocate handover
           </Text>
         </View>
@@ -362,7 +363,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
             borderRadius: 125, backgroundColor: "#F1EAFE",
           }} />
           <Text style={{
-            fontFamily: BOLD, color: PURPLE, fontSize: 10.5,
+            fontFamily: BOLD, color: themeForeground(PURPLE), fontSize: 10.5,
             letterSpacing: 2.1, marginTop: 8,
           }}>CARE TEAM RESPONSIBILITY</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 1 }}>
@@ -370,9 +371,9 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
               <Text style={{
                 fontFamily: BOLD, fontSize: compact ? 27 : 30,
                 lineHeight: compact ? 33 : 36, letterSpacing: -0.9,
-                color: INK,
+                color: themeForeground(INK),
               }}>Primary Advocate handover</Text>
-              <Text style={{ color: MUTED, fontSize: 13, lineHeight: 20, fontFamily: FAMILY }}>
+              <Text style={{ color: themeForeground(MUTED), fontSize: 13, lineHeight: 20, fontFamily: FAMILY }}>
                 Pass responsibility to someone you trust, with agreement from both people.
               </Text>
             </View>
@@ -385,10 +386,10 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
             <Tile name="document-text-outline" size={49}/>
             <View style={{ flex: 1, gap: 7 }}>
               <Text style={{ fontFamily: BOLD, fontSize: 16.5, lineHeight: 22,
-                letterSpacing: -0.25, color: INK }}>
+                letterSpacing: -0.25, color: themeForeground(INK) }}>
                 A deliberate change of responsibility
               </Text>
-              <Text style={{ fontSize: 12.5, lineHeight: 19, color: MUTED, fontFamily: FAMILY }}>
+              <Text style={{ fontSize: 12.5, lineHeight: 19, color: themeForeground(MUTED), fontFamily: FAMILY }}>
                 The incoming advocate manages this care profile and its team.
                 The outgoing advocate stays as a Co-Caregiver and can still help
                 with care, but no longer manages access.
@@ -400,7 +401,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
               <Tile name="people-outline" size={37}/>
               <Text style={{ flex: 1, fontSize: 11.5, lineHeight: 16.5,
-                color: MUTED, fontFamily: FAMILY }}>
+                color: themeForeground(MUTED), fontFamily: FAMILY }}>
                 Both people must confirm the handover.
               </Text>
             </View>
@@ -408,7 +409,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
               <Tile name="time-outline" size={37}/>
               <Text style={{ flex: 1, fontSize: 11.5, lineHeight: 16.5,
-                color: MUTED, fontFamily: FAMILY }}>
+                color: themeForeground(MUTED), fontFamily: FAMILY }}>
                 Requests expire after seven days without changing permissions.
               </Text>
             </View>
@@ -418,8 +419,8 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
         {Boolean(message) && (
           <Glass tint="#EEE4FC" style={{ padding: 13 }}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
-              <Icon name="information-circle-outline" color={PURPLE} size={20}/>
-              <Text accessibilityRole="alert" style={{ color: INK, flex: 1,
+              <Icon name="information-circle-outline" color={themeForeground(PURPLE)} size={20}/>
+              <Text accessibilityRole="alert" style={{ color: themeForeground(INK), flex: 1,
                 fontSize: 12.5, lineHeight: 19, fontFamily: FAMILY }}>{message}</Text>
             </View>
           </Glass>
@@ -437,8 +438,8 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
         {loading && (
           <View accessibilityLabel="Loading handover data"
             style={{ alignItems: "center", paddingVertical: 14 }}>
-            <ActivityIndicator color={PURPLE}/>
-            <Text style={{ color: MUTED, fontSize: 12, paddingTop: 9 }}>
+            <ActivityIndicator color={themeForeground(PURPLE)}/>
+            <Text style={{ color: themeForeground(MUTED), fontSize: 12, paddingTop: 9 }}>
               Loading handover details…
             </Text>
           </View>
@@ -458,16 +459,16 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                     <Tile name="swap-horizontal-outline"/>
                     <View style={{ flex: 1, gap: 5 }}>
-                      <Text style={{ fontFamily: BOLD, color: INK, fontSize: 14.5 }}>
+                      <Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 14.5 }}>
                         {request.fromName} → {request.toName}
                       </Text>
-                      <Text style={{ color: MUTED, fontFamily: FAMILY, fontSize: 12 }}>
+                      <Text style={{ color: themeForeground(MUTED), fontFamily: FAMILY, fontSize: 12 }}>
                         Expires {new Date(request.expiresAt).toLocaleString()}
                       </Text>
                     </View>
                     <View style={{ borderRadius: 18, paddingHorizontal: 10,
                       paddingVertical: 7, backgroundColor: "#F6EDF9" }}>
-                      <Text style={{ color: PURPLE, fontFamily: SEMI, fontSize: 11 }}>
+                      <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 11 }}>
                         Pending
                       </Text>
                     </View>
@@ -494,7 +495,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                       }}/>
                   )}
                   {!request.canRespond && !request.canCancel && (
-                    <Text style={{ color: MUTED, fontFamily: FAMILY, fontSize: 12 }}>
+                    <Text style={{ color: themeForeground(MUTED), fontFamily: FAMILY, fontSize: 12 }}>
                       Waiting for the designated advocate to respond.
                     </Text>
                   )}
@@ -505,7 +506,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
             {overview.canInitiate && !pending.length && (
               <View style={{ gap: 12 }}>
                 <BlockTitle>Choose the incoming advocate</BlockTitle>
-                <Text style={{ color: MUTED, fontFamily: FAMILY, fontSize: 12.5, lineHeight: 19 }}>
+                <Text style={{ color: themeForeground(MUTED), fontFamily: FAMILY, fontSize: 12.5, lineHeight: 19 }}>
                   Choose an active Co-Caregiver. Care Recipients and Family Members
                   are excluded from this handover.
                 </Text>
@@ -519,11 +520,11 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                       <Tile name="person-outline"/>
                       <View style={{ flex: 1, gap: 4 }}>
-                        <Text style={{ color: INK, fontFamily: BOLD, fontSize: 15 }}>
+                        <Text style={{ color: themeForeground(INK), fontFamily: BOLD, fontSize: 15 }}>
                           {member.displayName}
                         </Text>
                         <Text style={{ fontFamily: FAMILY, fontSize: 12,
-                          color: MUTED }}>Co-Caregiver → Primary Advocate</Text>
+                          color: themeForeground(MUTED) }}>Co-Caregiver → Primary Advocate</Text>
                       </View>
                     </View>
                     <PillButton title="Preview handover" icon="eye-outline" secondary
@@ -539,27 +540,27 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                 <Glass tint="#E8DBFA" style={{ borderColor: "#C4ABE1" }}>
                   {(preview || decision?.action === "accept") ? (
                     <>
-                      <Text style={{ color: PURPLE, fontFamily: BOLD, fontSize: 10.5,
+                      <Text style={{ color: themeForeground(PURPLE), fontFamily: BOLD, fontSize: 10.5,
                         letterSpacing: 1.6 }}>BEFORE</Text>
-                      <Text style={{ fontFamily: FAMILY, color: INK, lineHeight: 22 }}>
+                      <Text style={{ fontFamily: FAMILY, color: themeForeground(INK), lineHeight: 22 }}>
                         {preview ? "You: Primary Advocate\n" + chosenName + ": Co-Caregiver"
                           : decision!.request.fromName + ": Primary Advocate\nYou: Co-Caregiver"}
                       </Text>
-                      <Icon name="arrow-down-outline" size={20} color={PURPLE}/>
-                      <Text style={{ color: PURPLE, fontFamily: BOLD, fontSize: 10.5,
+                      <Icon name="arrow-down-outline" size={20} color={themeForeground(PURPLE)}/>
+                      <Text style={{ color: themeForeground(PURPLE), fontFamily: BOLD, fontSize: 10.5,
                         letterSpacing: 1.6 }}>AFTER ACCEPTANCE</Text>
-                      <Text style={{ fontFamily: FAMILY, color: INK, lineHeight: 22 }}>
+                      <Text style={{ fontFamily: FAMILY, color: themeForeground(INK), lineHeight: 22 }}>
                         {preview ? "You: Co-Caregiver\n" + chosenName + ": Primary Advocate"
                           : decision!.request.fromName + ": Co-Caregiver\nYou: Primary Advocate"}
                       </Text>
-                      <Text style={{ fontFamily: FAMILY, fontSize: 12, color: MUTED,
+                      <Text style={{ fontFamily: FAMILY, fontSize: 12, color: themeForeground(MUTED),
                         lineHeight: 18 }}>
                         Care records stay in place. Other members keep their roles.
                         Changed permissions invalidate this request.
                       </Text>
                     </>
                   ) : (
-                    <Text style={{ fontFamily: FAMILY, fontSize: 13, color: MUTED,
+                    <Text style={{ fontFamily: FAMILY, fontSize: 13, color: themeForeground(MUTED),
                       lineHeight: 19 }}>
                       This closes the request. Ownership and access stay unchanged.
                     </Text>
@@ -573,9 +574,9 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                       paddingVertical: 10, opacity: pressed ? 0.7 : 1,
                     })}>
                     <Icon name={confirmed ? "checkbox-outline" : "square-outline"}
-                      size={25} color={PURPLE}/>
+                      size={25} color={themeForeground(PURPLE)}/>
                     <Text style={{ flex: 1, fontFamily: FAMILY, fontSize: 12.5,
-                      lineHeight: 19, color: INK }}>
+                      lineHeight: 19, color: themeForeground(INK) }}>
                       I have reviewed and agree to this decision.
                     </Text>
                   </Pressable>
@@ -601,10 +602,10 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
                     <Tile name="time-outline" size={46}/>
                     <View style={{ flex: 1, gap: 4 }}>
-                      <Text style={{ color: INK, fontFamily: BOLD, fontSize: 14 }}>
+                      <Text style={{ color: themeForeground(INK), fontFamily: BOLD, fontSize: 14 }}>
                         {request.fromName} → {request.toName}
                       </Text>
-                      <Text style={{ color: MUTED, fontFamily: FAMILY, fontSize: 12 }}>
+                      <Text style={{ color: themeForeground(MUTED), fontFamily: FAMILY, fontSize: 12 }}>
                         {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                         {" · "}
                         {new Date(request.resolvedAt ?? request.expiresAt).toLocaleDateString()}

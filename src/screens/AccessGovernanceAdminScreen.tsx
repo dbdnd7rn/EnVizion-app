@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -254,14 +255,14 @@ export function AccessGovernanceAdminScreen() {
               width: 50,
               height: 50,
               borderRadius: 18,
-              backgroundColor: C.white,
+              backgroundColor: themeBackground(C.white),
               alignItems: "center",
               justifyContent: "center",
             }}
           >
             <Icon name={status.icon} size={26} color={status.color} />
           </View>
-          <View style={[S.pill, { backgroundColor: C.white }]}>
+          <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
             <Text
               style={[
                 S.small,
@@ -383,14 +384,14 @@ export function AccessGovernanceAdminScreen() {
           value={search}
           onChangeText={setSearch}
           placeholder="Care profile, member or Primary Advocate"
-          placeholderTextColor="#918897"
+          placeholderTextColor={themeForeground("#918897")}
           autoCapitalize="none"
           style={{
             minHeight: 46,
             borderRadius: 16,
             borderWidth: 1,
             borderColor: "#DDD2E1",
-            backgroundColor: C.white,
+            backgroundColor: themeBackground(C.white),
             paddingHorizontal: 13,
             color: C.deep,
             fontFamily: "DMSans_400Regular",
