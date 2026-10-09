@@ -14,6 +14,7 @@ function section(start: string, end: string) {
 
 const home = section("export function HomeScreen()", "export function ToolkitScreen()");
 const care = section("export function ToolkitScreen()", "function LearnHeroGraphic()");
+const learn = section("export function LibraryScreen()", "export function SupportScreen()");
 const support = main.slice(main.indexOf("export function SupportScreen()"));
 
 test("Account contains settings, not a second care-tool directory", () => {
@@ -28,7 +29,7 @@ test("Care directory has one canonical entry per care feature", () => {
   const required = [
     "CareTeam", "CarePlan", "Medications", "CareCalendar",
     "CareTasks", "CareSchedule", "CareContacts",
-    "CareCoordinationInbox", "Transition", "Specialists",
+    "CareCoordinationInbox", "Transition",
   ];
   for (const route of required) {
     const matches = care.match(new RegExp('onPress: \\(\\) => n\\.navigate\\("' + route + '"', "g")) ?? [];
@@ -42,6 +43,13 @@ test("Care tab does not repeat category links in suggested or quick lists", () =
   assert.match(care, /findCareTools/);
   assert.match(care, /<ToolGroup/);
   assert.match(care, /scope === "pinned"/);
+});
+
+test("educational navigation has a single home under Learn", () => {
+  assert.doesNotMatch(care, /n\\.navigate\\("Specialists"\\)/);
+  assert.match(learn, /n\\.navigate\\("Specialists"\\)/);
+  assert.doesNotMatch(learn, /Medication basics/);
+  assert.match(learn, /popular\\.map\\(\\(guide/);
 });
 
 test("Support no longer duplicates clinical care tools", () => {
