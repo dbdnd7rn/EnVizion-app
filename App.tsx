@@ -619,7 +619,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="CareAccessRecertification"
             component={themedScreen(CareAccessRecertificationScreen)}
-            options={{ title: "90-day access review" }}
+            options={{ title: "90-day access review", headerShown: false }}
           />
           <Stack.Screen
             name="Notifications"
