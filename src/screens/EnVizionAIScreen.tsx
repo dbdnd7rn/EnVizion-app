@@ -359,6 +359,9 @@ export function EnVizionAIScreen() {
               <>
                 <Editable label="Note summary" value={pending.summary} onChange={v => editPending({ summary: v })}/>
                 <Editable label="Details" value={pending.notes} onChange={v => editPending({ notes: v })} multiline/>
+                <Text style={{ fontFamily: "DMSans_400Regular", color: MUTED, fontSize: 11.5, lineHeight: 17 }}>
+                  This note will be saved in the selected care profile’s communication log and may be seen by its authorized care team.
+                </Text>
               </>
             )}
             {!canEdit && <Text accessibilityRole="alert" style={{ color: "#A84160", fontSize: 12.5 }}>
@@ -382,11 +385,13 @@ export function EnVizionAIScreen() {
             <Text accessibilityRole="alert" style={{ fontSize: 12.5, lineHeight: 18, color: "#A73556" }}>
               {problem}
             </Text>
-            {!busy && <ActionButton title="Try again" secondary icon="refresh-outline" onPress={() => {
-              const last = messages.filter(m => m.role === "user").at(-1);
-              if (last) void send(last.text);
-              else setProblem("");
-            }}/>}
+            {!busy && <ActionButton title={pending ? "Retry saving draft" : "Retry AI reply"}
+              secondary icon="refresh-outline" onPress={() => {
+                if (pending) { void confirm(); return; }
+                const last = [...messages].reverse().find(m => m.role === "user");
+                if (last) void send(last.text);
+                else setProblem("");
+              }}/>}
           </View>
         )}
       </ScrollView>
