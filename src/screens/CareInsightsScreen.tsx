@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -206,7 +207,7 @@ function CareInsightsTopBar({
         onPress={onBack}
         style={buttonStyle}
       >
-        <Icon name="chevron-back-outline" size={28} color={INK} />
+        <Icon name="chevron-back-outline" size={28} color={themeForeground(INK)} />
       </Pressable>
 
       <Text
@@ -215,7 +216,7 @@ function CareInsightsTopBar({
           fontFamily: "Lora_500Medium",
           fontSize: 24,
           lineHeight: 31,
-          color: INK,
+          color: themeForeground(INK),
           letterSpacing: -0.5,
         }}
       >
@@ -229,7 +230,7 @@ function CareInsightsTopBar({
         onPress={onInfo}
         style={buttonStyle}
       >
-        <Icon name="information-circle-outline" size={29} color={INK} />
+        <Icon name="information-circle-outline" size={29} color={themeForeground(INK)} />
       </Pressable>
     </View>
   );
@@ -357,7 +358,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
         fontSize: 25,
         lineHeight: 32,
         letterSpacing: -0.55,
-        color: INK,
+        color: themeForeground(INK),
       }}
     >
       {children}
@@ -546,7 +547,7 @@ function LatestReading({
           fontFamily: "DMSans_600SemiBold",
           fontSize: 12,
           lineHeight: 17,
-          color: INK,
+          color: themeForeground(INK),
         }}
       >
         {displayValue} {unit}
@@ -556,7 +557,7 @@ function LatestReading({
           fontFamily: "DMSans_400Regular",
           fontSize: 10.5,
           lineHeight: 15,
-          color: MUTED,
+          color: themeForeground(MUTED),
         }}
       >
         Latest · {formatRecordedAt(latest.recordedAt)}
@@ -599,7 +600,7 @@ function RecordedValueCard({
             justifyContent: "center",
           }}
         >
-          <Icon name={icon} size={25} color={PURPLE} />
+          <Icon name={icon} size={25} color={themeForeground(PURPLE)} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text
@@ -608,7 +609,7 @@ function RecordedValueCard({
               fontFamily: "DMSans_600SemiBold",
               fontSize: 14,
               lineHeight: 19,
-              color: INK,
+              color: themeForeground(INK),
             }}
           >
             {title}
@@ -619,14 +620,14 @@ function RecordedValueCard({
                 fontFamily: "DMSans_400Regular",
                 fontSize: 12,
                 lineHeight: 18,
-                color: MUTED,
+                color: themeForeground(MUTED),
               }}
             >
               No readings yet
             </Text>
           )}
         </View>
-        <Icon name="arrow-forward-outline" size={20} color={INK} />
+        <Icon name="arrow-forward-outline" size={20} color={themeForeground(INK)} />
       </View>
 
       {hasReadings && (
@@ -733,7 +734,7 @@ function PreparationRow({
             fontFamily: "DMSans_600SemiBold",
             fontSize: 14,
             lineHeight: 19,
-            color: INK,
+            color: themeForeground(INK),
           }}
         >
           {title}
@@ -743,7 +744,7 @@ function PreparationRow({
             fontFamily: "DMSans_400Regular",
             fontSize: 12,
             lineHeight: 18,
-            color: MUTED,
+            color: themeForeground(MUTED),
           }}
         >
           {subtitle}
@@ -756,7 +757,7 @@ function PreparationRow({
           textAlign: "center",
           fontFamily: "DMSans_600SemiBold",
           fontSize: 13,
-          color: INK,
+          color: themeForeground(INK),
         }}
       >
         {value}/{total}
@@ -783,21 +784,21 @@ function InfoPanel() {
         style={{
           fontFamily: "DMSans_600SemiBold",
           fontSize: 13,
-          color: INK,
+          color: themeForeground(INK),
         }}
       >
         About these insights
       </Text>
-      <Text style={[S.small, { color: MUTED, lineHeight: 18 }]}>
+      <Text style={[S.small, { color: themeForeground(MUTED), lineHeight: 18 }]}>
         These views organise recorded care information only. They do not diagnose,
         score medical risk, identify deterioration, or recommend treatment changes.
       </Text>
-      <Text style={[S.small, { color: MUTED, lineHeight: 18 }]}>
+      <Text style={[S.small, { color: themeForeground(MUTED), lineHeight: 18 }]}>
         Medication counts are caregiver-entered records and do not verify adherence.
         Corrected or withdrawn medication entries remain in history but are excluded
         from current dose-entry totals.
       </Text>
-      <Text style={[S.small, { color: MUTED, lineHeight: 18 }]}>
+      <Text style={[S.small, { color: themeForeground(MUTED), lineHeight: 18 }]}>
         Preparation progress counts completed information or checklist items. It is
         not a measure of clinical readiness. Discuss symptoms, readings, medicines,
         and care decisions with the healthcare team.
@@ -880,8 +881,8 @@ export function CareInsightsScreen() {
             gap: 12,
           }}
         >
-          <ActivityIndicator color={PURPLE} />
-          <Text style={[S.body, { color: MUTED }]}>Loading care insights…</Text>
+          <ActivityIndicator color={themeForeground(PURPLE)} />
+          <Text style={[S.body, { color: themeForeground(MUTED) }]}>Loading care insights…</Text>
         </View>
       </InsightsPage>
     );
@@ -913,7 +914,7 @@ export function CareInsightsScreen() {
             opacity: pressed ? 0.72 : 1,
           })}
         >
-          <Icon name="cloud-offline-outline" size={18} color={PURPLE} />
+          <Icon name="cloud-offline-outline" size={18} color={themeForeground(PURPLE)} />
           <Text style={[S.small, { flex: 1, color: "#6C5677" }]}>
             {state.hydrated
               ? "Couldn’t refresh. Showing the latest loaded care record."
@@ -923,7 +924,7 @@ export function CareInsightsScreen() {
             style={{
               fontFamily: "DMSans_600SemiBold",
               fontSize: 11,
-              color: PURPLE,
+              color: themeForeground(PURPLE),
             }}
           >
             Retry
@@ -955,7 +956,7 @@ export function CareInsightsScreen() {
                 fontFamily: "DMSans_600SemiBold",
                 fontSize: 10,
                 letterSpacing: 4.1,
-                color: PURPLE,
+                color: themeForeground(PURPLE),
               }}
             >
               YOUR CARE STORY
@@ -967,7 +968,7 @@ export function CareInsightsScreen() {
                 fontSize: 39,
                 lineHeight: 44,
                 letterSpacing: -1.25,
-                color: INK,
+                color: themeForeground(INK),
               }}
             >
               Every detail.{"\n"}One clear view.
@@ -1134,10 +1135,10 @@ export function CareInsightsScreen() {
                       fontFamily: "Lora_500Medium",
                       fontSize: 25,
                       lineHeight: 31,
-                      color: INK,
+                      color: themeForeground(INK),
                     }}
                   />
-                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: MUTED }}>
+                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: themeForeground(MUTED) }}>
                     {label}
                   </Text>
                 </View>
@@ -1203,7 +1204,7 @@ export function CareInsightsScreen() {
                         justifyContent: "center",
                       }}
                     >
-                      <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 8, color: PURPLE }}>
+                      <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 8, color: themeForeground(PURPLE) }}>
                         {day.total}
                       </Text>
                     </View>
@@ -1217,7 +1218,7 @@ export function CareInsightsScreen() {
               textAlign: "center",
               fontFamily: "DMSans_400Regular",
               fontSize: 11.5,
-              color: MUTED,
+              color: themeForeground(MUTED),
             }}
           >
             {sevenDayEvents === 0
@@ -1276,10 +1277,10 @@ export function CareInsightsScreen() {
                       fontFamily: "Lora_500Medium",
                       fontSize: 24,
                       lineHeight: 30,
-                      color: INK,
+                      color: themeForeground(INK),
                     }}
                   />
-                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10.5, color: MUTED }}>
+                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10.5, color: themeForeground(MUTED) }}>
                     {label}
                   </Text>
                 </View>
@@ -1298,10 +1299,10 @@ export function CareInsightsScreen() {
                 opacity: pressed ? 0.62 : 1,
               })}
             >
-              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 11.5, color: PURPLE }}>
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 11.5, color: themeForeground(PURPLE) }}>
                 View history
               </Text>
-              <Icon name="arrow-forward-outline" size={17} color={PURPLE} />
+              <Icon name="arrow-forward-outline" size={17} color={themeForeground(PURPLE)} />
             </Pressable>
           </View>
         </View>
@@ -1361,13 +1362,13 @@ export function CareInsightsScreen() {
                     justifyContent: "center",
                   }}
                 >
-                  <Icon name="book-outline" size={23} color="#535078" />
+                  <Icon name="book-outline" size={23} color={themeForeground("#535078")} />
                 </View>
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13.5, color: INK }}>
+                  <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13.5, color: themeForeground(INK) }}>
                     Your story starts here
                   </Text>
-                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, lineHeight: 17, color: MUTED }}>
+                  <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, lineHeight: 17, color: themeForeground(MUTED) }}>
                     Saved care events appear here in time order.
                   </Text>
                 </View>
@@ -1420,10 +1421,10 @@ export function CareInsightsScreen() {
                       />
                     </View>
                     <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-                      <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13, color: INK }}>
+                      <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13, color: themeForeground(INK) }}>
                         {item.title}
                       </Text>
-                      <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11, lineHeight: 16, color: MUTED }}>
+                      <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11, lineHeight: 16, color: themeForeground(MUTED) }}>
                         {item.subtitle}
                       </Text>
                       <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 10, lineHeight: 15, color: "#918CA0" }}>
@@ -1456,10 +1457,10 @@ export function CareInsightsScreen() {
           })}
         >
           <Icon name="information-circle-outline" size={21} color="#4E4A72" />
-          <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: MUTED }}>
+          <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: themeForeground(MUTED) }}>
             Records, not clinical interpretation.
           </Text>
-          <Icon name={footerInfoOpen ? "chevron-up-outline" : "chevron-forward-outline"} size={16} color={PURPLE} />
+          <Icon name={footerInfoOpen ? "chevron-up-outline" : "chevron-forward-outline"} size={16} color={themeForeground(PURPLE)} />
         </Pressable>
         {footerInfoOpen ? <InfoPanel /> : null}
       </Entrance>

@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -426,7 +427,7 @@ export function CareCoverageRequirementsScreen() {
                       alignItems: "center",
                       paddingHorizontal: 12,
                       paddingVertical: 10,
-                      backgroundColor: selected ? C.purple : C.lavender,
+                      backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                     },
                   ]}
                 >
