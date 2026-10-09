@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated, Easing, Pressable, Text, View,
+  AccessibilityInfo, Animated, Easing, Pressable, Text, View,
 } from "react-native";
 import Svg, {
   Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop,
@@ -220,15 +220,31 @@ export function ScheduleOverviewTile({
 }
 
 export function ScheduleReveal({ children }: { children: React.ReactNode }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const y = useRef(new Animated.Value(8)).current;
+  const [reduceMotion, setReduceMotion] = useState(true);
+  const opacity = useRef(new Animated.Value(1)).current;
+  const y = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let active = true;
+    void AccessibilityInfo.isReduceMotionEnabled().then((value) => {
+      if (active) setReduceMotion(value);
+    });
+    const subscription = AccessibilityInfo.addEventListener("reduceMotionChanged", setReduceMotion);
+    return () => { active = false; subscription.remove(); };
+  }, []);
+  useEffect(() => {
+    if (reduceMotion) {
+      opacity.setValue(1);
+      y.setValue(0);
+      return;
+    }
+    opacity.setValue(0);
+    y.setValue(8);
     const effect = Animated.parallel([
       Animated.timing(opacity, { toValue: 1, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
       Animated.timing(y, { toValue: 0, duration: 240, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
     ]);
     effect.start();
     return () => effect.stop();
-  }, [opacity, y]);
+  }, [opacity, reduceMotion, y]);
   return <Animated.View style={{ opacity, transform: [{ translateY: y }], gap: 10 }}>{children}</Animated.View>;
 }
