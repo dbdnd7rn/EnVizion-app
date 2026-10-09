@@ -1714,7 +1714,6 @@ function ToolGroup({
 
 export function ToolkitScreen() {
   const n = useNav();
-  const { state } = useCare();
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [scope, setScope] = useState<CareToolScope>("all");
@@ -2011,7 +2010,6 @@ export function ToolkitScreen() {
 
   // Index real registered destinations with their category for discovery.
   // No patient data or fabricated search results are included.
-  const allItems = groups.flatMap((group) => group.items);
   const searchableItems = groups.flatMap((group) =>
     group.items.map((item) => ({
       ...item,
