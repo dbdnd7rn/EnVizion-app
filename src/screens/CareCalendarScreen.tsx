@@ -1,3 +1,4 @@
+import { themeBorder, themeTint } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -357,34 +358,34 @@ function HeroCalendarArt() {
     <Svg width={154} height={154} viewBox="0 0 160 160" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="heroCalendarTop" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#8B4BD8" />
-          <Stop offset="1" stopColor="#6D2FC3" />
+          <Stop offset="0" stopColor={themeTint("#8B4BD8")} />
+          <Stop offset="1" stopColor={themeTint("#6D2FC3")} />
         </LinearGradient>
         <LinearGradient id="heroClock" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#A975F2" />
-          <Stop offset="1" stopColor="#6E35C8" />
+          <Stop offset="0" stopColor={themeTint("#A975F2")} />
+          <Stop offset="1" stopColor={themeTint("#6E35C8")} />
         </LinearGradient>
       </Defs>
-      <Circle cx="82" cy="78" r="69" fill="#F1E9FF" />
-      <Circle cx="126" cy="38" r="24" fill="#E7D9FF" opacity={0.9} />
-      <Path d="M22 117C32 89 48 75 72 67C96 59 117 66 137 83C145 90 148 103 144 117C138 137 116 148 86 147C54 145 18 137 22 117Z" fill="#EDE5FF" />
+      <Circle cx="82" cy="78" r="69" fill={themeTint("#F1E9FF")} />
+      <Circle cx="126" cy="38" r="24" fill={themeTint("#E7D9FF")} opacity={0.9} />
+      <Path d="M22 117C32 89 48 75 72 67C96 59 117 66 137 83C145 90 148 103 144 117C138 137 116 148 86 147C54 145 18 137 22 117Z" fill={themeTint("#EDE5FF")} />
       <G>
-        <Rect x="33" y="34" width="92" height="92" rx="18" fill="#FFFFFF" stroke="#E2D8F6" strokeWidth="2" />
+        <Rect x="33" y="34" width="92" height="92" rx="18" fill={themeTint("#FFFFFF")} stroke={themeTint("#E2D8F6")} strokeWidth="2" />
         <Path d="M33 52C33 42.06 41.06 34 51 34H107C116.94 34 125 42.06 125 52V61H33V52Z" fill="url(#heroCalendarTop)" />
-        <Rect x="47" y="25" width="8" height="23" rx="4" fill="#7D49CA" />
-        <Rect x="101" y="25" width="8" height="23" rx="4" fill="#7D49CA" />
-        <Rect x="47" y="72" width="18" height="16" rx="4" fill="#F0EAFE" />
-        <Rect x="70" y="72" width="18" height="16" rx="4" fill="#F0EAFE" />
-        <Rect x="93" y="72" width="18" height="16" rx="4" fill="#A46CEE" />
-        <Rect x="47" y="93" width="18" height="16" rx="4" fill="#F0EAFE" />
-        <Rect x="70" y="93" width="18" height="16" rx="4" fill="#F0EAFE" />
-        <Rect x="93" y="93" width="18" height="16" rx="4" fill="#F0EAFE" />
+        <Rect x="47" y="25" width="8" height="23" rx="4" fill={themeTint("#7D49CA")} />
+        <Rect x="101" y="25" width="8" height="23" rx="4" fill={themeTint("#7D49CA")} />
+        <Rect x="47" y="72" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
+        <Rect x="70" y="72" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
+        <Rect x="93" y="72" width="18" height="16" rx="4" fill={themeTint("#A46CEE")} />
+        <Rect x="47" y="93" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
+        <Rect x="70" y="93" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
+        <Rect x="93" y="93" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
       </G>
-      <Circle cx="118" cy="119" r="28" fill="#F5F1FF" />
+      <Circle cx="118" cy="119" r="28" fill={themeTint("#F5F1FF")} />
       <Circle cx="118" cy="119" r="23" fill="url(#heroClock)" />
-      <Line x1="118" y1="119" x2="118" y2="107" stroke="#FFFFFF" strokeWidth="3.6" strokeLinecap="round" />
-      <Line x1="118" y1="119" x2="127" y2="125" stroke="#FFFFFF" strokeWidth="3.6" strokeLinecap="round" />
-      <Circle cx="118" cy="119" r="2.6" fill="#FFFFFF" />
+      <Line x1="118" y1="119" x2="118" y2="107" stroke={themeTint("#FFFFFF")} strokeWidth="3.6" strokeLinecap="round" />
+      <Line x1="118" y1="119" x2="127" y2="125" stroke={themeTint("#FFFFFF")} strokeWidth="3.6" strokeLinecap="round" />
+      <Circle cx="118" cy="119" r="2.6" fill={themeTint("#FFFFFF")} />
     </Svg>
   );
 }
@@ -392,18 +393,18 @@ function HeroCalendarArt() {
 function EmptyCalendarArt() {
   return (
     <Svg width={150} height={94} viewBox="0 0 160 100" accessibilityElementsHidden>
-      <Circle cx="52" cy="48" r="25" fill="#F3ECFF" />
-      <Circle cx="111" cy="49" r="31" fill="#EEE6FD" />
-      <Circle cx="79" cy="36" r="34" fill="#F6F1FF" />
-      <Rect x="58" y="24" width="55" height="54" rx="12" fill="#FFFFFF" stroke="#DDD1F3" strokeWidth="2" />
-      <Rect x="58" y="24" width="55" height="15" rx="12" fill="#8350CB" />
-      <Rect x="66" y="47" width="11" height="9" rx="2" fill="#E8DEFA" />
-      <Rect x="81" y="47" width="11" height="9" rx="2" fill="#E8DEFA" />
-      <Rect x="96" y="47" width="11" height="9" rx="2" fill="#B687EE" />
-      <Rect x="66" y="60" width="11" height="9" rx="2" fill="#E8DEFA" />
-      <Rect x="81" y="60" width="11" height="9" rx="2" fill="#E8DEFA" />
-      <Circle cx="111" cy="72" r="20" fill="#7440C4" />
-      <Path d="M102 72L109 79L121 65" fill="none" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx="52" cy="48" r="25" fill={themeTint("#F3ECFF")} />
+      <Circle cx="111" cy="49" r="31" fill={themeTint("#EEE6FD")} />
+      <Circle cx="79" cy="36" r="34" fill={themeTint("#F6F1FF")} />
+      <Rect x="58" y="24" width="55" height="54" rx="12" fill={themeTint("#FFFFFF")} stroke={themeTint("#DDD1F3")} strokeWidth="2" />
+      <Rect x="58" y="24" width="55" height="15" rx="12" fill={themeTint("#8350CB")} />
+      <Rect x="66" y="47" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
+      <Rect x="81" y="47" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
+      <Rect x="96" y="47" width="11" height="9" rx="2" fill={themeTint("#B687EE")} />
+      <Rect x="66" y="60" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
+      <Rect x="81" y="60" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
+      <Circle cx="111" cy="72" r="20" fill={themeTint("#7440C4")} />
+      <Path d="M102 72L109 79L121 65" fill="none" stroke={themeTint("#FFFFFF")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
@@ -536,7 +537,7 @@ function AgendaFilter({
         gap: 6,
         backgroundColor: selected ? C.purple : "#F6F2FB",
         borderWidth: selected ? 0 : 1,
-        borderColor: "#ECE5F2",
+        borderColor: themeBorder("#ECE5F2"),
         opacity: pressed ? 0.75 : 1,
       })}
     >
@@ -1027,7 +1028,7 @@ const categoryCounts = useMemo(
             borderRadius: 24,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#F7F2FC",
+            backgroundColor: themeBackground("#F7F2FC"),
             opacity: pressed ? 0.65 : 1,
           })}
         >
@@ -1052,7 +1053,7 @@ const categoryCounts = useMemo(
             borderRadius: 24,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#F7F2FC",
+            backgroundColor: themeBackground("#F7F2FC"),
             opacity: pressed ? 0.65 : 1,
           })}
         >
@@ -1069,8 +1070,8 @@ const categoryCounts = useMemo(
           paddingRight: 150,
           justifyContent: "center",
           borderWidth: 1,
-          borderColor: "#EEE7FB",
-          shadowColor: "#5B3470",
+          borderColor: themeBorder("#EEE7FB"),
+          shadowColor: themeShadow("#5B3470"),
           shadowOpacity: 0.07,
           shadowRadius: 22,
           shadowOffset: { width: 0, height: 10 },
@@ -1087,20 +1088,20 @@ const categoryCounts = useMemo(
         >
           <Defs>
             <LinearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor="#FBF8FF" />
-              <Stop offset="0.48" stopColor="#F4EEFF" />
-              <Stop offset="1" stopColor="#EEE4FB" />
+              <Stop offset="0" stopColor={themeTint("#FBF8FF")} />
+              <Stop offset="0.48" stopColor={themeTint("#F4EEFF")} />
+              <Stop offset="1" stopColor={themeTint("#EEE4FB")} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="400" height="250" rx="30" fill="url(#heroBg)" />
-          <Circle cx="346" cy="52" r="78" fill="#F8F4FF" opacity={0.8} />
-          <Circle cx="360" cy="205" r="92" fill="#EADDFC" opacity={0.62} />
+          <Circle cx="346" cy="52" r="78" fill={themeTint("#F8F4FF")} opacity={0.8} />
+          <Circle cx="360" cy="205" r="92" fill={themeTint("#EADDFC")} opacity={0.62} />
         </Svg>
 
         <View style={{ gap: 11 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Icon name="calendar-outline" size={20} color="#8A3DC8" />
-            <Text style={[S.eyebrow, { color: "#8A3DC8", letterSpacing: 1.8 }]}>
+            <Icon name="calendar-outline" size={20} color={themeForeground("#8A3DC8")} />
+            <Text style={[S.eyebrow, { color: themeForeground("#8A3DC8"), letterSpacing: 1.8 }]}>
               FAMILY CARE CALENDAR & AGENDA
             </Text>
           </View>
@@ -1116,10 +1117,10 @@ const categoryCounts = useMemo(
             ]}
           >
             See the whole care day{" "}
-            <Text style={{ color: "#8B35D3" }}>in one place.</Text>
+            <Text style={{ color: themeForeground("#8B35D3") }}>in one place.</Text>
           </Text>
 
-          <Txt style={{ maxWidth: 250, color: "#66627D", lineHeight: 21 }}>
+          <Txt style={{ maxWidth: 250, color: themeForeground("#66627D"), lineHeight: 21 }}>
             Appointments, caregiver shifts, tasks, reminders, and medication times —
             all in one coordinated timeline.
           </Txt>
@@ -1128,12 +1129,12 @@ const categoryCounts = useMemo(
             style={{
               alignSelf: "flex-start",
               marginTop: 2,
-              backgroundColor: "#FFFFFFB8",
+              backgroundColor: themeBackground("#FFFFFFB8"),
               borderRadius: 999,
               paddingHorizontal: 11,
               paddingVertical: 6,
               borderWidth: 1,
-              borderColor: "#E9E0F5",
+              borderColor: themeBorder("#E9E0F5"),
             }}
           >
             <Text style={[S.small, { color: C.deep, fontFamily: "DMSans_600SemiBold" }]}>
@@ -1151,7 +1152,7 @@ const categoryCounts = useMemo(
         style={{
           flexDirection: "row",
           padding: 4,
-          backgroundColor: "#F5F1F8",
+          backgroundColor: themeBackground("#F5F1F8"),
           borderRadius: 29,
           gap: 4,
         }}
@@ -1204,7 +1205,7 @@ const categoryCounts = useMemo(
           minHeight: 94,
           borderRadius: 24,
           borderWidth: 1,
-          borderColor: "#EAE4EF",
+          borderColor: themeBorder("#EAE4EF"),
           backgroundColor: themeBackground(C.white),
           paddingHorizontal: 14,
           flexDirection: "row",
@@ -1219,7 +1220,7 @@ const categoryCounts = useMemo(
         <Pressable
           accessibilityRole="button"
           onPress={() => setAgendaOffset((value) => value - 1)}
-          style={{ width: 50, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: "#F8F4FC" }}
+          style={{ width: 50, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: themeBackground("#F8F4FC") }}
         >
           <Icon name="chevron-back-outline" size={23} />
         </Pressable>
@@ -1241,7 +1242,7 @@ const categoryCounts = useMemo(
         <Pressable
           accessibilityRole="button"
           onPress={() => setAgendaOffset((value) => value + 1)}
-          style={{ width: 50, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: "#F8F4FC" }}
+          style={{ width: 50, height: 50, borderRadius: 25, alignItems: "center", justifyContent: "center", backgroundColor: themeBackground("#F8F4FC") }}
         >
           <Icon name="chevron-forward-outline" size={23} />
         </Pressable>
@@ -1351,7 +1352,7 @@ const categoryCounts = useMemo(
                 paddingHorizontal: 15,
                 borderRadius: 21,
                 borderWidth: 1.5,
-                borderColor: "#8A3CC7",
+                borderColor: themeBorder("#8A3CC7"),
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
@@ -1359,8 +1360,8 @@ const categoryCounts = useMemo(
                 opacity: pressed ? 0.65 : 1,
               })}
             >
-              <Icon name="add-outline" size={18} color="#7E34B8" />
-              <Text style={[S.h3, { fontSize: 12, color: "#7E34B8" }]}>Add new</Text>
+              <Icon name="add-outline" size={18} color={themeForeground("#7E34B8")} />
+              <Text style={[S.h3, { fontSize: 12, color: themeForeground("#7E34B8") }]}>Add new</Text>
             </Pressable>
           )}
         </View>
@@ -1371,7 +1372,7 @@ const categoryCounts = useMemo(
               minHeight: 250,
               borderRadius: 26,
               borderWidth: 1,
-              borderColor: "#EAE4EF",
+              borderColor: themeBorder("#EAE4EF"),
               backgroundColor: themeBackground(C.white),
               alignItems: "center",
               justifyContent: "center",
@@ -1388,7 +1389,7 @@ const categoryCounts = useMemo(
               minHeight: 300,
               borderRadius: 26,
               borderWidth: 1,
-              borderColor: "#EAE4EF",
+              borderColor: themeBorder("#EAE4EF"),
               backgroundColor: themeBackground(C.white),
               alignItems: "center",
               justifyContent: "center",
@@ -1454,7 +1455,7 @@ const categoryCounts = useMemo(
                     style={({ pressed }) => ({
                       borderRadius: 23,
                       borderWidth: 1,
-                      borderColor: "#EAE4EF",
+                      borderColor: themeBorder("#EAE4EF"),
                       backgroundColor: event.completed ? "#F7F4F8" : C.white,
                       padding: 16,
                       flexDirection: "row",
@@ -1468,7 +1469,7 @@ const categoryCounts = useMemo(
                         width: 48,
                         height: 48,
                         borderRadius: 16,
-                        backgroundColor: "#F2EAF8",
+                        backgroundColor: themeBackground("#F2EAF8"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
@@ -1498,7 +1499,7 @@ const categoryCounts = useMemo(
                     </View>
 
                     {event.category !== "reminder" && (
-                      <Icon name="chevron-forward-outline" size={18} color="#A99DAF" />
+                      <Icon name="chevron-forward-outline" size={18} color={themeForeground("#A99DAF")} />
                     )}
                   </Pressable>
                 );
@@ -1519,28 +1520,28 @@ const categoryCounts = useMemo(
               title="Appointment prep"
               icon="calendar-outline"
               background="#EEF6FF"
-              color="#2D72CC"
+              color={themeForeground("#2D72CC")}
               onPress={appointmentPreset}
             />
             <QuickAddTile
               title="Transition task"
               icon="home-outline"
               background="#F5EEFF"
-              color="#7431B9"
+              color={themeForeground("#7431B9")}
               onPress={transitionPreset}
             />
             <QuickAddTile
               title="Medication record"
               icon="medical-outline"
               background="#ECFAF4"
-              color="#128B6D"
+              color={themeForeground("#128B6D")}
               onPress={() => medicationPreset()}
             />
             <QuickAddTile
               title="Custom reminder"
               icon="notifications-outline"
               background="#FFF4EA"
-              color="#C75D27"
+              color={themeForeground("#C75D27")}
               onPress={() => setShowForm(true)}
             />
           </View>
@@ -1553,9 +1554,9 @@ const categoryCounts = useMemo(
           gap: 6,
           padding: 5,
           borderRadius: 29,
-          backgroundColor: "#FAF8FC",
+          backgroundColor: themeBackground("#FAF8FC"),
           borderWidth: 1,
-          borderColor: "#ECE6F1",
+          borderColor: themeBorder("#ECE6F1"),
         }}
       >
         {primaryFilters.map((filter) => (
@@ -1574,8 +1575,8 @@ const categoryCounts = useMemo(
           style={{
             borderRadius: 28,
             padding: 22,
-            backgroundColor: "#FBF8FF",
-            borderColor: "#E8DDF4",
+            backgroundColor: themeBackground("#FBF8FF"),
+            borderColor: themeBorder("#E8DDF4"),
           }}
         >
           <View style={S.between}>
@@ -1653,14 +1654,14 @@ const categoryCounts = useMemo(
       <View style={{ gap: 12 }}>
         <Section title="What happens next?" />
         {nextEvent ? (
-          <Card style={{ backgroundColor: "#F0F8F4", borderRadius: 26 }}>
+          <Card style={{ backgroundColor: themeBackground("#F0F8F4"), borderRadius: 26 }}>
             <View style={S.row}>
               <View
                 style={{
                   width: 48,
                   height: 48,
                   borderRadius: 16,
-                  backgroundColor: "#DFF2E9",
+                  backgroundColor: themeBackground("#DFF2E9"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -1688,14 +1689,14 @@ const categoryCounts = useMemo(
         )}
       </View>
 
-      <Card style={{ backgroundColor: "#F5EEFB", borderWidth: 0, borderRadius: 28 }}>
+      <Card style={{ backgroundColor: themeBackground("#F5EEFB"), borderWidth: 0, borderRadius: 28 }}>
         <View style={{ flexDirection: "row", gap: 12, alignItems: "flex-start" }}>
           <View
             style={{
               width: 42,
               height: 42,
               borderRadius: 15,
-              backgroundColor: "#E9DDF5",
+              backgroundColor: themeBackground("#E9DDF5"),
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -1714,7 +1715,7 @@ const categoryCounts = useMemo(
       </Card>
 
       {readOnly && (
-        <Card style={{ backgroundColor: "#F5EEFB", borderWidth: 0, borderRadius: 28 }}>
+        <Card style={{ backgroundColor: themeBackground("#F5EEFB"), borderWidth: 0, borderRadius: 28 }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>
             {state.accessRole === "patient"
@@ -1812,7 +1813,7 @@ const categoryCounts = useMemo(
         style={({ pressed }) => ({
           minHeight: 58,
           borderRadius: 29,
-          backgroundColor: "#F2E9FA",
+          backgroundColor: themeBackground("#F2E9FA"),
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
@@ -1826,7 +1827,7 @@ const categoryCounts = useMemo(
         </Text>
       </Pressable>
 
-      <Card style={{ backgroundColor: "#F5EEFB", borderWidth: 0, borderRadius: 28 }}>
+      <Card style={{ backgroundColor: themeBackground("#F5EEFB"), borderWidth: 0, borderRadius: 28 }}>
         <Text style={S.h3}>About reminder notifications</Text>
         <Txt>
           EnVizion checks due reminders approximately every five minutes and places

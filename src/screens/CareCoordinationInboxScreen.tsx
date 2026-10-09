@@ -1,3 +1,4 @@
+import { themeBackground, themeBorder } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -163,7 +164,7 @@ function ConflictCard({
             >
               <Txt style={S.small}>{handling}</Txt>
             </View>
-            <View style={[S.pill, { backgroundColor: "#F3EFF5" }]}>
+            <View style={[S.pill, { backgroundColor: themeBackground("#F3EFF5") }]}>
               <Txt style={S.small}>
                 {commentCount} comment{commentCount === 1 ? "" : "s"}
               </Txt>
@@ -277,7 +278,7 @@ function WorkflowPanel({
   };
 
   return (
-    <Card style={{ borderColor: "#CDB8D6", backgroundColor: "#FBF8FC" }}>
+    <Card style={{ borderColor: themeBorder("#CDB8D6"), backgroundColor: themeBackground("#FBF8FC") }}>
       <View style={S.between}>
         <View style={{ flex: 1, gap: 3 }}>
           <Text style={S.eyebrow}>COORDINATION WORKFLOW</Text>
@@ -294,7 +295,7 @@ function WorkflowPanel({
       </View>
 
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        <View style={[S.pill, { backgroundColor: "#EAF4EF" }]}>
+        <View style={[S.pill, { backgroundColor: themeBackground("#EAF4EF") }]}>
           <Txt style={S.small}>
             {resolution?.assignedTo
               ? coordinationHandlingLabel(resolution, caregiverName)
@@ -891,7 +892,7 @@ export function CareCoordinationInboxScreen() {
         body="See what needs attention over the next seven days, who's handling it, and what's been resolved."
       />
 
-      <Card style={{ backgroundColor: "#F6EFFC", borderColor: "#E6D7EF", gap: 14 }}>
+      <Card style={{ backgroundColor: themeBackground("#F6EFFC"), borderColor: themeBorder("#E6D7EF"), gap: 14 }}>
         <Text style={S.eyebrow}>NEXT 7 DAYS · CARE TEAM OVERVIEW</Text>
         <Text accessibilityRole="header" style={[S.h2, { fontSize: 22, lineHeight: 30 }]}>
           {counts.total
@@ -905,7 +906,7 @@ export function CareCoordinationInboxScreen() {
             { label: "Snoozed", value: snoozed.length, icon: "time-outline" },
           ].map((item, index) => (
             <React.Fragment key={item.label}>
-              {index > 0 && <View style={{ width: 1, backgroundColor: "#DFD0EA", marginVertical: 5 }}/>}
+              {index > 0 && <View style={{ width: 1, backgroundColor: themeBackground("#DFD0EA"), marginVertical: 5 }}/>}
               <View style={{ flex: 1, minWidth: 0, alignItems: "center", gap: 4, paddingHorizontal: 5 }}>
                 <Icon name={item.icon} size={19} color={item.label === "Time-sensitive" && item.value > 0 ? C.rose : C.purple}/>
                 <Text style={{ fontFamily: "Lora_500Medium", color: C.ink, fontSize: 25 }}>{item.value}</Text>
@@ -1005,7 +1006,7 @@ export function CareCoordinationInboxScreen() {
           <Txt>Checking the shared care plan and family workflow…</Txt>
         </Card>
       ) : !visibleActionable.length && !visibleSnoozed.length ? (
-        <Card style={{ backgroundColor: "#EAF4EF" }}>
+        <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
           <Icon name="checkmark-circle-outline" size={30} />
           <Text style={S.h3}>
             Nothing in the selected filters needs active coordination.
@@ -1068,7 +1069,7 @@ export function CareCoordinationInboxScreen() {
                 const resolution =
                   resolutionsByConflict.get(conflict.id) ?? null;
                 return (
-                  <Card key={conflict.id} style={{ backgroundColor: "#F7F2F8" }}>
+                  <Card key={conflict.id} style={{ backgroundColor: themeBackground("#F7F2F8") }}>
                     <View style={S.row}>
                       <Icon name="time-outline" />
                       <View style={{ flex: 1, gap: 4 }}>
@@ -1111,7 +1112,7 @@ export function CareCoordinationInboxScreen() {
               (comment) => comment.conflictKey === resolution.conflictKey,
             );
             return (
-              <Card key={resolution.id} style={{ backgroundColor: "#F4F1F4" }}>
+              <Card key={resolution.id} style={{ backgroundColor: themeBackground("#F4F1F4") }}>
                 <View style={S.row}>
                   <Icon name="checkmark-circle-outline" color={C.green} />
                   <View style={{ flex: 1, gap: 4 }}>

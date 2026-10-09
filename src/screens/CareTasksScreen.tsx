@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -840,11 +841,11 @@ export function CareTasksScreen() {
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E7CFEF" }]}>ACTIVE CARE PROFILE</Text>
+        <Text style={[S.eyebrow, { color: themeForeground("#E7CFEF") }]}>ACTIVE CARE PROFILE</Text>
         <Text style={[S.h2, { color: C.white }]}>
           {state.careRecipientName || "Care profile"}
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           {state.accessRole === "owner"
             ? "Primary Advocate"
             : state.accessRole === "caregiver"
@@ -1221,7 +1222,7 @@ export function CareTasksScreen() {
         <TextInput
           accessibilityLabel="Search care tasks"
           placeholder="Search tasks, providers, medications…"
-          placeholderTextColor="#AAA0AF"
+          placeholderTextColor={themeForeground("#AAA0AF")}
           value={query}
           onChangeText={setQuery}
           style={{
@@ -1394,7 +1395,7 @@ export function CareTasksScreen() {
                 task.status === "open" &&
                 pendingMine &&
                 assignment && (
-                  <Card style={{ backgroundColor: "#FFF9F2" }}>
+                  <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
                     <Text style={S.h3}>This task was assigned to you.</Text>
                     <Txt style={S.small}>
                       Accept it to confirm ownership, or decline it to return the
@@ -1432,7 +1433,7 @@ export function CareTasksScreen() {
                 )}
 
               {medication && (
-                <Card style={{ backgroundColor: "#F8F4F9", padding: 14 }}>
+                <Card style={{ backgroundColor: themeBackground("#F8F4F9"), padding: 14 }}>
                   <Text style={S.eyebrow}>LINKED MEDICATION</Text>
                   <Text style={S.h3}>{medication.name}</Text>
                   <Txt style={S.small}>{medication.instructions}</Txt>
@@ -1440,7 +1441,7 @@ export function CareTasksScreen() {
               )}
 
               {task.appointmentId && (
-                <Card style={{ backgroundColor: "#F8F4F9", padding: 14 }}>
+                <Card style={{ backgroundColor: themeBackground("#F8F4F9"), padding: 14 }}>
                   <Text style={S.eyebrow}>LINKED APPOINTMENT</Text>
                   <Text style={S.h3}>{state.appointment.title}</Text>
                   <Txt style={S.small}>
@@ -1452,7 +1453,7 @@ export function CareTasksScreen() {
               )}
 
               {contact && (
-                <Card style={{ backgroundColor: "#F8F4F9", padding: 14 }}>
+                <Card style={{ backgroundColor: themeBackground("#F8F4F9"), padding: 14 }}>
                   <Text style={S.eyebrow}>LINKED CARE CONTACT</Text>
                   <Text style={S.h3}>{contact.providerName}</Text>
                   <Txt style={S.small}>
@@ -1468,7 +1469,7 @@ export function CareTasksScreen() {
               )}
 
               {communication && (
-                <Card style={{ backgroundColor: "#F8F4F9", padding: 14 }}>
+                <Card style={{ backgroundColor: themeBackground("#F8F4F9"), padding: 14 }}>
                   <Text style={S.eyebrow}>LINKED COMMUNICATION</Text>
                   <Text style={S.h3}>{communication.summary}</Text>
                   <Txt style={S.small}>

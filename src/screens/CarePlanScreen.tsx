@@ -1,3 +1,4 @@
+import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -147,27 +148,27 @@ function ChecklistGraphic() {
     >
       <Defs>
         <LinearGradient id="planBoard" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#F9F2FF" />
-          <Stop offset="0.48" stopColor="#C995F2" />
-          <Stop offset="1" stopColor="#7B3AAF" />
+          <Stop offset="0" stopColor={themeTint("#F9F2FF")} />
+          <Stop offset="0.48" stopColor={themeTint("#C995F2")} />
+          <Stop offset="1" stopColor={themeTint("#7B3AAF")} />
         </LinearGradient>
         <LinearGradient id="planPaper" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" />
-          <Stop offset="1" stopColor="#F3E8FC" />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
+          <Stop offset="1" stopColor={themeTint("#F3E8FC")} />
         </LinearGradient>
         <LinearGradient id="planGlass" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.8} />
-          <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0.08} />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity={0.8} />
+          <Stop offset="1" stopColor={themeTint("#FFFFFF")} stopOpacity={0.08} />
         </LinearGradient>
         <LinearGradient id="planClip" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#E3C5FA" />
-          <Stop offset="1" stopColor="#6D2AA2" />
+          <Stop offset="0" stopColor={themeTint("#E3C5FA")} />
+          <Stop offset="1" stopColor={themeTint("#6D2AA2")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="143" cy="104" r="92" fill="#F6EEFC" />
-      <Circle cx="210" cy="58" r="44" fill="#E8D5F8" opacity={0.7} />
-      <Ellipse cx="139" cy="193" rx="74" ry="12" fill="#6F2D9C" opacity={0.13} />
+      <Circle cx="143" cy="104" r="92" fill={themeTint("#F6EEFC")} />
+      <Circle cx="210" cy="58" r="44" fill={themeTint("#E8D5F8")} opacity={0.7} />
+      <Ellipse cx="139" cy="193" rx="74" ry="12" fill={themeTint("#6F2D9C")} opacity={0.13} />
 
       <G transform="translate(49 16) rotate(5 83 91)">
         <Rect
@@ -176,7 +177,7 @@ function ChecklistGraphic() {
           width="162"
           height="177"
           rx="28"
-          fill="#6D2D9B"
+          fill={themeTint("#6D2D9B")}
           opacity={0.15}
         />
         <Rect
@@ -186,7 +187,7 @@ function ChecklistGraphic() {
           height="177"
           rx="28"
           fill="url(#planBoard)"
-          stroke="#D9BAF3"
+          stroke={themeTint("#D9BAF3")}
           strokeWidth="2"
         />
         <Rect
@@ -196,7 +197,7 @@ function ChecklistGraphic() {
           height="136"
           rx="21"
           fill="url(#planPaper)"
-          stroke="#FFFFFF"
+          stroke={themeTint("#FFFFFF")}
           strokeWidth="2"
         />
         <Path
@@ -221,7 +222,7 @@ function ChecklistGraphic() {
               <Path
                 d={`M${39} ${y + 10}l4 4 8-9`}
                 fill="none"
-                stroke="#FFFFFF"
+                stroke={themeTint("#FFFFFF")}
                 strokeWidth="2.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -233,7 +234,7 @@ function ChecklistGraphic() {
               width={index === 1 ? 54 : 61}
               height="6"
               rx="3"
-              fill="#76508F"
+              fill={themeTint("#76508F")}
               opacity={0.72}
             />
             <Rect
@@ -242,7 +243,7 @@ function ChecklistGraphic() {
               width={index === 0 ? 45 : 37}
               height="5"
               rx="2.5"
-              fill="#C9B3D8"
+              fill={themeTint("#C9B3D8")}
             />
           </G>
         ))}
@@ -255,10 +256,10 @@ function ChecklistGraphic() {
             height="31"
             rx="15.5"
             fill="url(#planClip)"
-            stroke="#EEDFFF"
+            stroke={themeTint("#EEDFFF")}
             strokeWidth="2"
           />
-          <Rect x="20" y="7" width="27" height="7" rx="3.5" fill="#FFFFFF" opacity={0.58} />
+          <Rect x="20" y="7" width="27" height="7" rx="3.5" fill={themeTint("#FFFFFF")} opacity={0.58} />
         </G>
       </G>
     </Svg>
@@ -424,7 +425,7 @@ function Metric({
           fontFamily: "Lora_600SemiBold",
           fontSize: 31,
           lineHeight: 37,
-          color: "#FFFFFF",
+          color: themeForeground("#FFFFFF"),
           letterSpacing: -0.7,
         }}
       >
@@ -465,13 +466,13 @@ function Shortcut({
         borderRadius: 22,
         borderWidth: 1,
         borderColor: LINE,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: themeBackground("#FFFFFF"),
         paddingHorizontal: 16,
         paddingVertical: 14,
         flexDirection: "row",
         alignItems: "center",
         gap: 11,
-        shadowColor: "#3B2149",
+        shadowColor: themeShadow("#3B2149"),
         shadowOpacity: 0.04,
         shadowRadius: 13,
         shadowOffset: { width: 0, height: 6 },
@@ -512,7 +513,7 @@ function Shortcut({
           Open
         </Text>
       </View>
-      <Icon name="chevron-forward-outline" size={17} color="#A899B3" />
+      <Icon name="chevron-forward-outline" size={17} color={themeForeground("#A899B3")} />
     </Pressable>
   );
 }
@@ -756,7 +757,7 @@ export function CarePlanScreen() {
         <TopBar onBack={() => n.goBack()} />
         <Card
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: themeBackground("#FFFFFF"),
             alignItems: "center",
             paddingVertical: 30,
           }}
@@ -830,7 +831,7 @@ export function CarePlanScreen() {
             borderRadius: 29,
             overflow: "hidden",
             backgroundColor: DEEP_PURPLE,
-            shadowColor: "#4C235E",
+            shadowColor: themeShadow("#4C235E"),
             shadowOpacity: 0.18,
             shadowRadius: 22,
             shadowOffset: { width: 0, height: 11 },
@@ -879,7 +880,7 @@ export function CarePlanScreen() {
                   fontFamily: "Lora_500Medium",
                   fontSize: 23,
                   lineHeight: 30,
-                  color: "#FFFFFF",
+                  color: themeForeground("#FFFFFF"),
                 }}
               >
                 Everyday care, in one place.
@@ -916,7 +917,7 @@ export function CarePlanScreen() {
       </Entrance>
 
       {readOnly ? (
-        <Card style={{ backgroundColor: "#FBF7FD", borderColor: "#E8DAEF" }}>
+        <Card style={{ backgroundColor: themeBackground("#FBF7FD"), borderColor: themeBorder("#E8DAEF") }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Icon name="eye-outline" size={20} color={themeForeground(PURPLE)} />
             <Text style={[S.h3, { flex: 1 }]}>Read-only care plan</Text>
@@ -933,8 +934,8 @@ export function CarePlanScreen() {
           style={{
             borderRadius: 18,
             borderWidth: 1,
-            borderColor: "#E4D7EA",
-            backgroundColor: "#FCF9FE",
+            borderColor: themeBorder("#E4D7EA"),
+            backgroundColor: themeBackground("#FCF9FE"),
             paddingHorizontal: 16,
             paddingVertical: 13,
           }}
@@ -963,7 +964,7 @@ export function CarePlanScreen() {
                 borderRadius: 24,
                 borderWidth: 1,
                 borderColor: LINE,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: themeBackground("#FFFFFF"),
                 padding: 22,
                 alignItems: "center",
                 gap: 9,
@@ -1017,7 +1018,7 @@ export function CarePlanScreen() {
                       backgroundColor: completion ? "#F8FCFA" : "#FFFFFF",
                       padding: 17,
                       gap: 13,
-                      shadowColor: "#3B2149",
+                      shadowColor: themeShadow("#3B2149"),
                       shadowOpacity: 0.035,
                       shadowRadius: 13,
                       shadowOffset: { width: 0, height: 6 },
@@ -1168,8 +1169,8 @@ export function CarePlanScreen() {
             style={{
               borderRadius: 27,
               borderWidth: 1,
-              borderColor: "#E6D9EB",
-              backgroundColor: "#FBF8FD",
+              borderColor: themeBorder("#E6D9EB"),
+              backgroundColor: themeBackground("#FBF8FD"),
               padding: 18,
               gap: 15,
             }}
@@ -1204,7 +1205,7 @@ export function CarePlanScreen() {
                   width: 40,
                   height: 40,
                   borderRadius: 20,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: themeBackground("#FFFFFF"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -1385,7 +1386,7 @@ export function CarePlanScreen() {
                 borderRadius: 23,
                 borderWidth: 1,
                 borderColor: LINE,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: themeBackground("#FFFFFF"),
                 padding: 20,
                 gap: 6,
               }}
@@ -1406,7 +1407,7 @@ export function CarePlanScreen() {
                       borderRadius: 22,
                       borderWidth: 1,
                       borderColor: LINE,
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: themeBackground("#FFFFFF"),
                       padding: 16,
                       gap: 12,
                     }}
@@ -1461,7 +1462,7 @@ export function CarePlanScreen() {
                           {item.localTime ? " · " + item.localTime : ""}
                         </Text>
                       </View>
-                      <Icon name="repeat-outline" size={20} color="#AA9BB3" />
+                      <Icon name="repeat-outline" size={20} color={themeForeground("#AA9BB3")} />
                     </View>
 
                     {!readOnly ? (
@@ -1506,8 +1507,8 @@ export function CarePlanScreen() {
                             minHeight: 42,
                             borderRadius: 21,
                             borderWidth: 1,
-                            borderColor: "#E4D9E8",
-                            backgroundColor: "#FFFFFF",
+                            borderColor: themeBorder("#E4D9E8"),
+                            backgroundColor: themeBackground("#FFFFFF"),
                             alignItems: "center",
                             justifyContent: "center",
                             flexDirection: "row",
@@ -1550,7 +1551,7 @@ export function CarePlanScreen() {
       <View
         style={{
           borderTopWidth: 1,
-          borderTopColor: "#EEE7F1",
+          borderTopColor: themeBorder("#EEE7F1"),
           paddingTop: 18,
           paddingBottom: 3,
           flexDirection: "row",
@@ -1558,7 +1559,7 @@ export function CarePlanScreen() {
           gap: 10,
         }}
       >
-        <Icon name="information-circle-outline" size={18} color="#9D8EA7" />
+        <Icon name="information-circle-outline" size={18} color={themeForeground("#9D8EA7")} />
         <Text
           style={{
             flex: 1,
