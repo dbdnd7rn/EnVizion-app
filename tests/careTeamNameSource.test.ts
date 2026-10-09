@@ -28,3 +28,16 @@ test("care-team name correction does not invent or add memberships", () => {
   assert.match(roster, /const members = \[\.\.\.merged\.values\(\)\]/);
   assert.match(roster, /members: members\.map\(\(row\) =>/);
 });
+
+test("pending invitation cards show the inviter's current saved profile name", () => {
+  const pending = source.slice(
+    source.indexOf('if (action === "pending")'),
+    source.indexOf('if (action === "accept" || action === "decline")'),
+  );
+  assert.match(pending, /savedInviterNames/);
+  assert.match(pending, /\.from\("profiles"\)/);
+  assert.match(
+    pending,
+    /row\.invited_by \? savedInviterNames\.get\(row\.invited_by\) : ""/,
+  );
+});
