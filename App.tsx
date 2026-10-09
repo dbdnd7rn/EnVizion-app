@@ -494,7 +494,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           <Stack.Screen
             name="CarePlan"
             component={CarePlanScreen}
-            options={{ title: "Daily care plan" }}
+            options={{ title: "Daily care plan", headerShown: false }}
           />
           <Stack.Screen
             name="Medications"
