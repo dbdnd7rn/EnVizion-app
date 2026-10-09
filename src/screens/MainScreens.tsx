@@ -2188,7 +2188,8 @@ export function ToolkitScreen() {
 
   // Index real registered destinations with their category for discovery.
   // No patient data or fabricated search results are included.
-  const allItems = groups.flatMap((group) =>
+  const allItems = groups.flatMap((group) => group.items);
+  const searchableItems = groups.flatMap((group) =>
     group.items.map((item) => ({
       ...item,
       category: group.title,
@@ -2253,7 +2254,7 @@ export function ToolkitScreen() {
   const normalizedQuery = query.trim();
   const hasActiveResults =
     Boolean(normalizedQuery) || scope !== "all" || sort !== "relevance";
-  const matches = findCareTools(allItems, normalizedQuery, scope, sort, preferences);
+  const matches = findCareTools(searchableItems, normalizedQuery, scope, sort, preferences);
 
   return (
     <Page>
