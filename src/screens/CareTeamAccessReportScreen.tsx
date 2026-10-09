@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
 import {
@@ -247,7 +248,7 @@ export function CareTeamAccessReportScreen() {
                         justifyContent: "center",
                         paddingHorizontal: 13,
                         backgroundColor: selected
-                          ? C.purple
+                          ? themeAction(C.purple)
                           : C.lavender,
                         opacity: loading || exporting ? 0.65 : 1,
                       },

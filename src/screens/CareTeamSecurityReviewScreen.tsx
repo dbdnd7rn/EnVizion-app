@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import { themeBackground, themeForeground } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -346,7 +347,7 @@ export function CareTeamSecurityReviewScreen() {
                           minHeight: 40,
                           justifyContent: "center",
                           paddingHorizontal: 13,
-                          backgroundColor: selected ? C.purple : C.lavender,
+                          backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                         },
                       ]}
                     >

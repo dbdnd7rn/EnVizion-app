@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -275,7 +276,7 @@ export function CareTeamActivityScreen() {
                   {
                     minHeight: 40,
                     justifyContent: "center",
-                    backgroundColor: selected ? C.purple : C.lavender,
+                    backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                     paddingHorizontal: 13,
                   },
                 ]}
@@ -308,7 +309,7 @@ export function CareTeamActivityScreen() {
                 minHeight: 40,
                 justifyContent: "center",
                 backgroundColor:
-                  memberUserId === null ? C.purple : C.lavender,
+                  memberUserId === null ? themeAction(C.purple) : C.lavender,
                 paddingHorizontal: 13,
               },
             ]}
@@ -339,7 +340,7 @@ export function CareTeamActivityScreen() {
                   {
                     minHeight: 40,
                     justifyContent: "center",
-                    backgroundColor: selected ? C.purple : C.lavender,
+                    backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                     paddingHorizontal: 13,
                   },
                 ]}
