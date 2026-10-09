@@ -1978,34 +1978,6 @@ export function ToolkitScreen() {
         },
       ],
     },
-    {
-      title: "Understand & advocate",
-      subtitle: "Healthcare navigation and clinically governed guidance",
-      icon: "shield-checkmark-outline",
-      items: [
-        {
-          title: "Healthcare navigation",
-          subtitle: "Understand each specialist’s role",
-          icon: "compass-outline",
-          keywords: "specialists healthcare navigation doctors",
-          onPress: () => n.navigate("Specialists"),
-        },
-        {
-          title: "Patient rights",
-          subtitle: "Available after EnVizion clinical publication",
-          icon: "shield-checkmark-outline",
-          keywords: "rights advocacy patient",
-          onPress: () => n.navigate("Guide", { id: "rights" }),
-        },
-        {
-          title: "Advance directive starter",
-          subtitle: "Available after EnVizion clinical publication",
-          icon: "chatbubbles-outline",
-          keywords: "advance directive wishes planning advocate",
-          onPress: () => n.navigate("Guide", { id: "advance" }),
-        },
-      ],
-    },
   ];
 
   // Index real registered destinations with their category for discovery.
@@ -2889,21 +2861,6 @@ export function LibraryScreen() {
             >
               Explore by topic
             </Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => n.navigate("Resources")}
-              style={{ minHeight: 40, justifyContent: "center" }}
-            >
-              <Text
-                style={{
-                  fontFamily: "DMSans_600SemiBold",
-                  fontSize: 12,
-                  color: C.purple,
-                }}
-              >
-                See all →
-              </Text>
-            </Pressable>
           </View>
 
           <View style={{ flexDirection: "row", gap: 8 }}>
@@ -2961,6 +2918,13 @@ export function LibraryScreen() {
           </View>
         </View>
 
+        <Row
+          title="Healthcare navigation"
+          subtitle="Learn what different specialists do and how they help"
+          icon="compass-outline"
+          onPress={() => n.navigate("Specialists")}
+        />
+
         {Boolean(message) && (
           <Card style={{ backgroundColor: C.redBg }}>
             <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
@@ -3016,111 +2980,65 @@ export function LibraryScreen() {
           </View>
         ) : (
           <View style={{ gap: 12 }}>
-            <View style={S.between}>
-              <Text
-                style={{
+            {popular.length > 0 && (
+              <View style={{ gap: 11 }}>
+                <Text style={{
                   fontFamily: "DMSans_700Bold",
                   fontSize: 21,
                   lineHeight: 27,
                   color: C.ink,
-                }}
-              >
-                Popular guides
-              </Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => n.navigate("Resources")}
-                style={{ minHeight: 40, justifyContent: "center" }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "DMSans_600SemiBold",
-                    fontSize: 12,
-                    color: C.purple,
-                  }}
-                >
-                  See all →
+                }}>
+                  Popular guides
                 </Text>
-              </Pressable>
-            </View>
-
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              {[0, 1].map((index) => {
-                const guide = popular[index];
-                const medication = index === 0;
-                const title = guide
-                  ? guide.title
-                  : medication
-                    ? "Medication basics"
-                    : "Understanding symptoms";
-                const subtitle = guide
-                  ? guide.category + " · " + guide.readTime
-                  : medication
-                    ? "What to know, what to expect."
-                    : "Common signs and how to respond.";
-
-                return (
-                  <Pressable
-                    key={index}
-                    accessibilityRole="button"
-                    accessibilityLabel={title}
-                    onPress={() =>
-                      guide
-                        ? n.navigate("Guide", { id: guide.id })
-                        : n.navigate("Resources")
-                    }
-                    style={({ pressed }) => ({
-                      flex: 1,
-                      minWidth: 0,
-                      borderRadius: 22,
-                      backgroundColor: C.white,
-                      borderWidth: 1,
-                      borderColor: "#EEE8F0",
-                      padding: 10,
-                      gap: 9,
-                      opacity: pressed ? 0.75 : 1,
-                      transform: [{ scale: pressed ? 0.99 : 1 }],
-                    })}
-                  >
-                    <View
-                      style={{
+                <View style={{ flexDirection: "row", gap: 10 }}>
+                  {popular.map((guide, index) => (
+                    <Pressable
+                      key={guide.id}
+                      accessibilityRole="button"
+                      accessibilityLabel={guide.title}
+                      onPress={() => n.navigate("Guide", { id: guide.id })}
+                      style={({ pressed }) => ({
+                        flex: 1,
+                        minWidth: 0,
+                        borderRadius: 22,
+                        backgroundColor: C.white,
+                        borderWidth: 1,
+                        borderColor: "#EEE8F0",
+                        padding: 10,
+                        gap: 9,
+                        opacity: pressed ? 0.75 : 1,
+                        transform: [{ scale: pressed ? 0.99 : 1 }],
+                      })}
+                    >
+                      <View style={{
                         height: 108,
                         borderRadius: 16,
                         overflow: "hidden",
                         backgroundColor: "#F4ECFB",
-                      }}
-                    >
-                      <LearnGuideGraphic
-                        kind={medication ? "medication" : "symptoms"}
-                      />
-                    </View>
-
-                    <Text
-                      numberOfLines={2}
-                      style={{
+                      }}>
+                        <LearnGuideGraphic kind={index === 0 ? "medication" : "symptoms"} />
+                      </View>
+                      <Text numberOfLines={2} style={{
                         fontFamily: "DMSans_700Bold",
                         fontSize: 14,
                         lineHeight: 18,
                         color: C.ink,
-                      }}
-                    >
-                      {title}
-                    </Text>
-                    <Text
-                      numberOfLines={2}
-                      style={{
+                      }}>
+                        {guide.title}
+                      </Text>
+                      <Text numberOfLines={2} style={{
                         fontFamily: "DMSans_400Regular",
                         fontSize: 11,
                         lineHeight: 15,
                         color: C.muted,
-                      }}
-                    >
-                      {subtitle}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+                      }}>
+                        {guide.category + " · " + guide.readTime}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            )}
 
             {!guides.length && (
               <Card
