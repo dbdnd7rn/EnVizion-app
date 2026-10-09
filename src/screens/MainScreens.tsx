@@ -16,6 +16,7 @@ import {
 } from "../careTeam";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
+import { ProfileAvatar } from "../profileAvatar";
 import { findCareTools, type CareToolScope, type CareToolSort } from "../careToolSearch";
 import { CareToolFilters } from "./CareToolFilters";
 import {
@@ -176,7 +177,6 @@ export function HomeScreen() {
   const coordinationCount = Number(!state.careRecipientId);
   const fullName = state.name.trim() || "Caregiver";
   const displayName = fullName.split(/\s+/)[0];
-  const profileInitial = displayName.slice(0, 1).toUpperCase();
 
   useEffect(() => {
     let active = true;
@@ -297,15 +297,7 @@ export function HomeScreen() {
                   transform: [{ scale: pressed ? 0.96 : 1 }],
                 })}
               >
-                <Text
-                  style={{
-                    fontFamily: "DMSans_600SemiBold",
-                    fontSize: 20,
-                    color: "#6F2F8E",
-                  }}
-                >
-                  {profileInitial}
-                </Text>
+                <ProfileAvatar name={fullName} size={42} />
               </Pressable>
             </View>
           </View>
