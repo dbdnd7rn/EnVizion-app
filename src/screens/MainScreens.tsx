@@ -21,7 +21,6 @@ import { findCareTools, type CareToolScope, type CareToolSort } from "../careToo
 import { CareToolFilters } from "./CareToolFilters";
 import {
   loadToolPreferences,
-  rankToolTitles,
   recordToolUse,
   togglePinnedTool,
   withRecordedUse,
@@ -916,21 +915,9 @@ export function HomeScreen() {
               >
                 TODAY AT A GLANCE
               </Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => n.navigate("CarePlan")}
-                style={{ minHeight: 36, justifyContent: "center" }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "DMSans_600SemiBold",
-                    fontSize: 12,
-                    color: "#74328F",
-                  }}
-                >
-                  View details →
-                </Text>
-              </Pressable>
+              <Text style={[S.small, { color: "#80758B" }]}>
+                From your care records
+              </Text>
             </View>
 
             <View style={{ flexDirection: "row", gap: 8 }}>
@@ -946,7 +933,7 @@ export function HomeScreen() {
                 iconColor="#74328F"
                 iconBackground="#F1E9FA"
                 value={upcomingCount}
-                label="Overdue tasks"
+                label="Upcoming visits"
               />
               <HomeStat
                 icon="people-outline"
@@ -968,14 +955,16 @@ export function HomeScreen() {
             />
 
             <View style={{ flexDirection: "row", gap: 8 }}>
-              <HomeActionCard
-                title="Check-in"
-                subtitle="Record health"
-                icon="pulse-outline"
-                background="#F6F0FB"
-                iconBackground="#EEE5F8"
-                onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
-              />
+              {logged && (
+                <HomeActionCard
+                  title="Check-in"
+                  subtitle="Record health"
+                  icon="pulse-outline"
+                  background="#F6F0FB"
+                  iconBackground="#EEE5F8"
+                  onPress={() => n.navigate("Tracker", { kind: "Vitals" })}
+                />
+              )}
               <HomeActionCard
                 title="Medications"
                 subtitle="Open log"
@@ -993,177 +982,19 @@ export function HomeScreen() {
                 iconBackground="#EEE5F8"
                 onPress={() => n.navigate("CareCalendar")}
               />
-              <HomeActionCard
-                title="Care plan"
-                subtitle="See today"
-                icon="document-text-outline"
-                background="#FFF3F1"
-                iconBackground="#FFE8E5"
-                iconColor="#C64D69"
-                onPress={() => n.navigate("CarePlan")}
-              />
+              {!logged && (
+                <HomeActionCard
+                  title="Care plan"
+                  subtitle="See today"
+                  icon="document-text-outline"
+                  background="#FFF3F1"
+                  iconBackground="#FFE8E5"
+                  iconColor="#C64D69"
+                  onPress={() => n.navigate("CarePlan")}
+                />
+              )}
             </View>
           </View>
-        </HomeReveal>
-
-        {state.careRecipientId && (
-          <HomeReveal delay={248}>
-            <Card
-              onPress={() => n.navigate("DoctorVisitCompanion")}
-              label="Open Doctor Visit Companion"
-              style={{
-                borderRadius: 25,
-                padding: 17,
-                backgroundColor: "#F7F2FB",
-                borderColor: "#E5D9EC",
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-                <View
-                  style={{
-                    width: 54,
-                    height: 54,
-                    borderRadius: 19,
-                    backgroundColor: "#EADDF2",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Icon name="medkit-outline" size={27} color={C.purple} />
-                </View>
-                <View style={{ flex: 1, gap: 3 }}>
-                  <Text style={S.eyebrow}>DOCTOR VISIT COMPANION</Text>
-                  <Text style={[S.h2, { fontSize: 18 }]}>
-                    Prepare → capture → review → share
-                  </Text>
-                  <Txt style={S.small}>
-                    Keep questions and the visit recap together.
-                  </Txt>
-                </View>
-                <Icon name="chevron-forward" size={20} color={C.purple} />
-              </View>
-            </Card>
-          </HomeReveal>
-        )}
-
-        {state.careRecipientId && (
-          <HomeReveal delay={255}>
-            <View style={{ gap: 13 }}>
-              <Section
-                title="Family coordination"
-                action="Care team"
-                onPress={() => n.navigate("CareTeam")}
-              />
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <HomeActionCard
-                  title="Shared tasks"
-                  subtitle="Claim & complete"
-                  icon="checkbox-outline"
-                  background="#F4EFF8"
-                  iconBackground="#E9DFF0"
-                  onPress={() => n.navigate("CareTasks")}
-                />
-                <HomeActionCard
-                  title="Care feed"
-                  subtitle="Family updates"
-                  icon="chatbubbles-outline"
-                  background="#FFF2F6"
-                  iconBackground="#FFE3EC"
-                  iconColor="#BD4876"
-                  onPress={() => n.navigate("FamilyCommunication")}
-                />
-              </View>
-            </View>
-          </HomeReveal>
-        )}
-
-        <HomeReveal delay={285}>
-          <Card
-            onPress={() => n.navigate("Assistant")}
-            label="Ask EnVizion Assistant"
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: 25,
-              minHeight: 138,
-              padding: 20,
-              backgroundColor: "#F5EEFA",
-              borderColor: "#E5D8EE",
-            }}
-          >
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                width: 150,
-                height: 150,
-                borderRadius: 75,
-                right: -58,
-                bottom: -83,
-                backgroundColor: "#E5D3F2",
-              }}
-            />
-            <View style={{ gap: 8, paddingRight: 58 }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Icon name="sparkles-outline" color="#B34E9A" size={19} />
-                <Text
-                  style={[
-                    S.eyebrow,
-                    { color: "#7B4196", fontSize: 10, letterSpacing: 2.2 },
-                  ]}
-                >
-                  ENVIZION ASSISTANT
-                </Text>
-              </View>
-              <Text
-                style={{
-                  fontFamily: "DMSans_700Bold",
-                  fontSize: 21,
-                  lineHeight: 27,
-                  color: "#18163C",
-                }}
-              >
-                A question is a good place to start.
-              </Text>
-              <Text
-                style={{
-                  fontFamily: "DMSans_400Regular",
-                  fontSize: 13,
-                  lineHeight: 19,
-                  color: "#77758B",
-                }}
-              >
-                Get guidance, find resources, or bring up a concern.
-              </Text>
-            </View>
-            <View
-              style={{
-                position: "absolute",
-                right: 18,
-                top: 44,
-              }}
-            >
-              <HomeFloat distance={4} duration={1400}>
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 24,
-                    backgroundColor: C.white,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    shadowColor: "#4B3155",
-                    shadowOpacity: 0.06,
-                    shadowRadius: 9,
-                    shadowOffset: { width: 0, height: 4 },
-                    elevation: 2,
-                  }}
-                >
-                  <Icon name="arrow-forward" size={23} color="#74328F" />
-                </View>
-              </HomeFloat>
-            </View>
-          </Card>
         </HomeReveal>
 
         <HomeReveal delay={340}>
@@ -2207,42 +2038,6 @@ export function ToolkitScreen() {
     void togglePinnedTool(preferences, title);
   }
 
-  const learnedTitles = rankToolTitles(preferences);
-  const roleSuggestions = !state.careRecipientId
-    ? ["Care team & sharing", "Daily care plan & routines", "Appointment prep"]
-    : state.accessRole === "owner"
-      ? [
-          "Needs coordination",
-          "Weekly coverage approval",
-          "Care team & sharing",
-          "Family care calendar & agenda",
-        ]
-      : state.accessRole === "caregiver"
-        ? [
-            "Today & caregiver shift board",
-            "On-shift caregiver mode",
-            "Daily care plan & routines",
-            "Family care calendar & agenda",
-          ]
-        : [
-            "Care summary",
-            "Care timeline & insights",
-            "Family communication center",
-            "Care contacts & providers",
-          ];
-
-  const forYouTitles = [...learnedTitles, ...roleSuggestions].filter(
-    (title, index, items) => items.indexOf(title) === index,
-  );
-
-  const personalizedItems = forYouTitles
-    .map((title) => allItems.find((item) => item.title === title))
-    .filter((item): item is ToolItem => Boolean(item))
-    .slice(0, 4);
-
-  const hasLearnedPreferences =
-    preferences.pinned.length > 0 || preferences.recent.length > 0;
-
   const normalizedQuery = query.trim();
   const hasActiveResults =
     Boolean(normalizedQuery) || scope !== "all" || sort !== "relevance";
@@ -2424,33 +2219,6 @@ export function ToolkitScreen() {
 
         {!hasActiveResults && (
           <>
-        <HomeReveal delay={70}>
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <QuickCard
-              title="Today"
-              subtitle="Tasks & handoffs"
-              icon="checkbox-outline"
-              onPress={() => {
-                const item = allItems.find(
-                  (tool) => tool.title === "Today & caregiver shift board",
-                );
-                if (item) openTool(item);
-              }}
-            />
-            <QuickCard
-              title="Calendar"
-              subtitle="Visits & shifts"
-              icon="calendar-outline"
-              onPress={() => {
-                const item = allItems.find(
-                  (tool) => tool.title === "Family care calendar & agenda",
-                );
-                if (item) openTool(item);
-              }}
-            />
-          </View>
-        </HomeReveal>
-
         <HomeReveal delay={110}>
           <Pressable
             accessibilityRole="button"
@@ -2605,80 +2373,6 @@ export function ToolkitScreen() {
           </View>
         ) : (
           <View style={{ gap: 18 }}>
-            {personalizedItems.length > 0 && (
-              <View style={{ gap: 11 }}>
-                <View style={{ marginTop: 4, gap: 5 }}>
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <Text
-                      style={{
-                        fontFamily: "DMSans_700Bold",
-                        fontSize: 24,
-                        lineHeight: 30,
-                        color: "#14153D",
-                      }}
-                    >
-                      {preferences.pinned.length
-                        ? "Your shortcuts"
-                        : hasLearnedPreferences
-                          ? "Pick up where you left off"
-                          : "Suggested for you"}
-                    </Text>
-                    <HomeFloat distance={3} duration={1700}>
-                      <View style={{ flexDirection: "row", gap: 4 }}>
-                        <View
-                          style={{
-                            width: 5,
-                            height: 16,
-                            borderRadius: 3,
-                            backgroundColor: "#C486ED",
-                            transform: [{ rotate: "32deg" }],
-                          }}
-                        />
-                        <View
-                          style={{
-                            marginTop: 11,
-                            width: 13,
-                            height: 5,
-                            borderRadius: 3,
-                            backgroundColor: "#D2A0F3",
-                            transform: [{ rotate: "12deg" }],
-                          }}
-                        />
-                      </View>
-                    </HomeFloat>
-                  </View>
-                  <Text
-                    style={{
-                      fontFamily: "DMSans_400Regular",
-                      fontSize: 13,
-                      lineHeight: 19,
-                      color: "#777489",
-                    }}
-                  >
-                    {preferences.pinned.length
-                      ? "Pinned tools stay first. Recent activity fills the remaining spots."
-                      : hasLearnedPreferences
-                        ? "Recent and frequently used tools rise automatically."
-                        : "Useful tools for this care profile, ready when you need them."}
-                  </Text>
-                </View>
-
-                {personalizedItems.map((item, index) => (
-                  <HomeReveal
-                    key={`personal-${item.title}`}
-                    delay={Math.min(100 + index * 55, 300)}
-                  >
-                    <ToolItemRow
-                      item={item}
-                      pinned={preferences.pinned.includes(item.title)}
-                      onOpen={openTool}
-                      onTogglePin={togglePin}
-                    />
-                  </HomeReveal>
-                ))}
-              </View>
-            )}
-
             <View style={{ gap: 5, marginTop: 4 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Text
@@ -2723,7 +2417,7 @@ export function ToolkitScreen() {
                   color: "#777489",
                 }}
               >
-                Everything you need, organized by what you want to do.
+                Open a category to choose a task, or use search and the pinned filter above for your favorites.
               </Text>
             </View>
 
@@ -3511,18 +3205,6 @@ export function SupportScreen() {
         subtitle="Faith, reflection, and room to breathe"
         icon="sparkles-outline"
         onPress={() => n.navigate("Wellness")}
-      />
-      <Row
-        title="Walking Through the Transition"
-        subtitle="Feel more prepared for the move home"
-        icon="home-outline"
-        onPress={() => n.navigate("Transition")}
-      />
-      <Row
-        title="Find your way through healthcare"
-        subtitle="Meet the roles on your care team"
-        icon="compass-outline"
-        onPress={() => n.navigate("Specialists")}
       />
       <Card>
         <Text style={S.eyebrow}>A GENTLE REMINDER</Text>
