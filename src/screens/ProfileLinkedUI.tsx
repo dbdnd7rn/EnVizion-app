@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { C as BaseC, Icon, S as BaseS } from "../ui";
-import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction } from "../themeColors";
+import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction, themeTint } from "../themeColors";
 import { useAppearance } from "../appearance";
 
 export { Icon };

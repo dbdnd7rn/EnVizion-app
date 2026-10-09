@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction } from "./themeColors";
+import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction, themeTint } from "./themeColors";
 import { useAppearance } from "./appearance";
 import {
   AccessibilityInfo,
@@ -483,7 +483,7 @@ export function HomeLandscape({ height = 180 }: { height?: number }) {
       />
       <Path
         d="M352 133V75M352 104Q329 95 335 79Q355 80 352 104M353 119Q377 108 373 92Q350 96 353 119"
-        stroke="#745188"
+        stroke={themeTint("#745188")}
         strokeWidth="3"
         fill="#8C68A0"
       />
