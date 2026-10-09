@@ -387,17 +387,6 @@ export function CareTeamScreen() {
           "View your shared care records in one secure space.":
           "Update shared care records and manage who has access."}
       </Text>
-      <Pressable accessibilityRole="button" accessibilityLabel="Edit your account profile picture"
-        onPress={()=>n.navigate("Profile")} style={({pressed})=>({
-        flexDirection:"row",alignItems:"center",gap:9,padding:8,
-        backgroundColor:"#FFFFFFB9",borderRadius:20,opacity:pressed?0.7:1
-      })}>
-        <ProfileAvatar name={state.name||"My account"} size={33}/>
-        <Text style={{flex:1,fontFamily:"DMSans_600SemiBold",fontSize:12,color:P}}>
-          My profile picture
-        </Text>
-        <Icon name="camera-outline" size={18} color={P}/>
-      </Pressable>
     </Glass>
     {Boolean(message)&&(
       <View style={{backgroundColor:"#F9F1FC",padding:13,borderRadius:17,
