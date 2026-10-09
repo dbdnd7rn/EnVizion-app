@@ -139,6 +139,17 @@ export function PilotFeedbackScreen() {
         </Card>
       )}
 
+      <Card style={{ backgroundColor: "#F8F2FC", gap: 7 }}>
+        <View style={S.row}>
+          <Icon name="shield-checkmark-outline" color={C.purple} size={21} />
+          <Text style={[S.h3, { fontSize: 13, flex: 1 }]}>Handled separately from care records</Text>
+        </View>
+        <Txt style={S.small}>
+          Pilot feedback is kept separate from clinical care records. Bugs go to technical diagnostics;
+          experience feedback and suggestions go to the support triage queue.
+        </Txt>
+      </Card>
+
       <Section title="Feedback type" />
       {categories.map((item) => {
         const selected = item.id === category;
