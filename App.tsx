@@ -744,7 +744,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
     setStaffError("");
 
     withStartupTimeout(
-      getStaffMembership(session.user.id),
+      getStaffMembership(session.user.id, false),
       9000,
       "Workspace verification is taking longer than expected.",
     )
