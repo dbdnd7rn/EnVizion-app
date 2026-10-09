@@ -21,6 +21,7 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { AuthProvider, AuthScreen, PasswordRecoveryScreen, useAuth } from "./src/auth";
+import { withAuthTimeout } from "./src/authHelpers";
 import { CareProvider } from "./src/store";
 import { CarePresenceProvider } from "./src/CarePresenceProvider";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
@@ -740,7 +741,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
     setCheckingStaff(true);
     setStaffError("");
 
-    getStaffMembership()
+    withAuthTimeout(getStaffMembership(), 15_000)
       .then((membership) => {
         if (!active) return;
         setStaff(membership);

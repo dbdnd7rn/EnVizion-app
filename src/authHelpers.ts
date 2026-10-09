@@ -50,3 +50,28 @@ export function parseAuthCallback(url: string): AuthCallback {
 export function isPasswordRecoveryCallback(callback: AuthCallback) {
   return callback.type === "recovery";
 }
+
+export const AUTH_REQUEST_TIMEOUT_MS = 20_000;
+export const AUTH_STARTUP_TIMEOUT_MS = 12_000;
+
+export class AuthTimeoutError extends Error {
+  constructor() {
+    super("Authentication request timed out.");
+    this.name = "AuthTimeoutError";
+  }
+}
+
+/** A timeout does not imply that the remote auth request was rejected. */
+export async function withAuthTimeout<T>(request: PromiseLike<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      Promise.resolve(request),
+      new Promise<T>((_resolve, reject) => {
+        timer = setTimeout(() => reject(new AuthTimeoutError()), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}

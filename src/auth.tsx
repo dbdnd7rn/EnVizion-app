@@ -22,6 +22,10 @@ import Svg, { Path } from "react-native-svg";
 import { supabase } from "./supabase";
 import {
   MIN_PASSWORD_LENGTH,
+  AUTH_REQUEST_TIMEOUT_MS,
+  AUTH_STARTUP_TIMEOUT_MS,
+  AuthTimeoutError,
+  withAuthTimeout,
   isPasswordRecoveryCallback,
   normalizeEmail,
   parseAuthCallback,
@@ -100,6 +104,21 @@ function isDefinitiveSessionError(error: { status?: number } | null) {
   return error?.status === 401 || error?.status === 403;
 }
 
+function authRequestFailure(error: unknown, action: "signup" | "signin" | "reset" | "resend" | "google"): string {
+  if (error instanceof AuthTimeoutError) {
+    if (action === "signup") {
+      return "We couldn't confirm whether your account was created. Check your inbox, then try Sign in or Forgot your password before submitting another signup request.";
+    }
+    if (action === "google") {
+      return "Google sign-in has taken too long. Close the sign-in window and try again.";
+    }
+    return "The request is taking too long. Check your connection and try again.";
+  }
+  return error instanceof Error && error.message
+    ? error.message
+    : "The request could not be completed. Please try again.";
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -142,35 +161,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let active = true;
 
     async function bootstrap() {
-      const {
-        data: { session: storedSession },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session: storedSession },
+        } = await withAuthTimeout(supabase.auth.getSession(), AUTH_STARTUP_TIMEOUT_MS);
 
-      if (!active) return;
+        if (!active) return;
 
-      if (storedSession) {
-        const { error } = await supabase.auth.getUser();
-        if (isDefinitiveSessionError(error)) {
-          await supabase.auth.signOut({ scope: "local" });
+        if (storedSession) {
+          const { error } = await withAuthTimeout(
+            supabase.auth.getUser(),
+            AUTH_STARTUP_TIMEOUT_MS,
+          );
           if (!active) return;
-          setSession(null);
-          setAuthMessage("Your session expired. Sign in again to continue.");
+
+          if (isDefinitiveSessionError(error)) {
+            try {
+              await withAuthTimeout(
+                supabase.auth.signOut({ scope: "local" }),
+                AUTH_STARTUP_TIMEOUT_MS,
+              );
+            } catch {
+              // Failed local cleanup must not trap the user on a spinner.
+            }
+            if (!active) return;
+            setSession(null);
+            setAuthMessage("Your session expired. Sign in again to continue.");
+          } else if (error) {
+            setSession(null);
+            setAuthMessage("We couldn't verify your session. Check your connection and sign in again.");
+          } else {
+            setSession(storedSession);
+          }
         } else {
-          setSession(storedSession);
+          setSession(null);
         }
-      } else {
-        setSession(null);
+      } catch {
+        if (active) {
+          setAuthMessage("We couldn't restore your session. Check your connection and try signing in.");
+        }
+      } finally {
+        if (active) {
+          if (
+            Platform.OS === "web" &&
+            typeof window !== "undefined" &&
+            isPasswordRecoveryCallback(parseAuthCallback(window.location.href))
+          ) {
+            setRecoveryMode(true);
+          }
+          setLoading(false);
+        }
       }
-
-      if (
-        Platform.OS === "web" &&
-        typeof window !== "undefined" &&
-        isPasswordRecoveryCallback(parseAuthCallback(window.location.href))
-      ) {
-        setRecoveryMode(true);
-      }
-
-      if (active) setLoading(false);
     }
 
     void bootstrap();
@@ -241,10 +282,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authMessage,
       async signIn(email, password) {
         setAuthMessage("");
-        const { error } = await supabase.auth.signInWithPassword({
-          email: normalizeEmail(email),
-          password,
-        });
+        const { error } = await withAuthTimeout(
+          supabase.auth.signInWithPassword({
+            email: normalizeEmail(email),
+            password,
+          }),
+          AUTH_REQUEST_TIMEOUT_MS,
+        );
         return error?.message ?? null;
       },
       async signInWithGoogle() {
@@ -290,14 +334,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { error: passwordIssue, needsConfirmation: false };
         }
 
-        const { data, error } = await supabase.auth.signUp({
-          email: normalizeEmail(email),
-          password,
-          options: {
-            data: { full_name: fullName.trim() },
-            emailRedirectTo: redirectUrl("confirm"),
-          },
-        });
+        const { data, error } = await withAuthTimeout(
+          supabase.auth.signUp({
+            email: normalizeEmail(email),
+            password,
+            options: {
+              data: { full_name: fullName.trim() },
+              emailRedirectTo: redirectUrl("confirm"),
+            },
+          }),
+          AUTH_REQUEST_TIMEOUT_MS,
+        );
 
         return {
           error: error?.message ?? null,
@@ -306,19 +353,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
       async requestPasswordReset(email) {
         setAuthMessage("");
-        const { error } = await supabase.auth.resetPasswordForEmail(
-          normalizeEmail(email),
-          { redirectTo: redirectUrl("recovery") },
+        const { error } = await withAuthTimeout(
+          supabase.auth.resetPasswordForEmail(
+            normalizeEmail(email),
+            { redirectTo: redirectUrl("recovery") },
+          ),
+          AUTH_REQUEST_TIMEOUT_MS,
         );
         return error?.message ?? null;
       },
       async resendConfirmation(email) {
         setAuthMessage("");
-        const { error } = await supabase.auth.resend({
-          type: "signup",
-          email: normalizeEmail(email),
-          options: { emailRedirectTo: redirectUrl("confirm") },
-        });
+        const { error } = await withAuthTimeout(
+          supabase.auth.resend({
+            type: "signup",
+            email: normalizeEmail(email),
+            options: { emailRedirectTo: redirectUrl("confirm") },
+          }),
+          AUTH_REQUEST_TIMEOUT_MS,
+        );
         return error?.message ?? null;
       },
       async completePasswordRecovery(password) {
@@ -497,6 +550,7 @@ export function AuthScreen() {
   }
 
   async function submit() {
+    if (busy || googleBusy) return;
     setMessage("");
 
     if (mode === "forgot") {
@@ -515,6 +569,8 @@ export function AuthScreen() {
             "If an EnVizion Life account exists for that email, a password-reset link has been sent.",
           );
         }
+      } catch (error) {
+        setMessage(authRequestFailure(error, "reset"));
       } finally {
         setBusy(false);
       }
@@ -570,6 +626,8 @@ export function AuthScreen() {
           setPassword("");
         }
       }
+    } catch (error) {
+      setMessage(authRequestFailure(error, mode === "signup" ? "signup" : "signin"));
     } finally {
       setBusy(false);
     }
@@ -587,6 +645,8 @@ export function AuthScreen() {
           ? error
           : "Request accepted. If this account is still awaiting confirmation, a new email will be sent. Check your spam folder too. If you already confirmed this address, sign in with your password instead.",
       );
+    } catch (error) {
+      setMessage(authRequestFailure(error, "resend"));
     } finally {
       setBusy(false);
     }
@@ -598,6 +658,8 @@ export function AuthScreen() {
     try {
       const error = await signInWithGoogle();
       if (error) setMessage(error);
+    } catch (error) {
+      setMessage(authRequestFailure(error, "google"));
     } finally {
       setGoogleBusy(false);
     }
@@ -607,7 +669,9 @@ export function AuthScreen() {
   const successMessage =
     message.toLowerCase().includes("check your email") ||
     message.toLowerCase().includes("has been sent") ||
-    message.toLowerCase().includes("password updated");
+    message.toLowerCase().includes("password updated") ||
+    message.toLowerCase().includes("account request accepted") ||
+    message.toLowerCase().includes("request accepted");
 
   return (
     <Page>

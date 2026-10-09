@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   MIN_PASSWORD_LENGTH,
+  AuthTimeoutError,
+  withAuthTimeout,
   isPasswordRecoveryCallback,
   normalizeEmail,
   parseAuthCallback,
@@ -35,4 +37,16 @@ test("auth callbacks preserve provider errors without throwing", () => {
   );
   assert.equal(callback.error, "access_denied");
   assert.equal(callback.errorDescription, "Link expired");
+});
+
+test("auth requests finish normally before their timeout", async () => {
+  assert.equal(await withAuthTimeout(Promise.resolve("ready"), 100), "ready");
+});
+
+test("stalled auth requests fail instead of spinning indefinitely", async () => {
+  await assert.rejects(withAuthTimeout(new Promise<never>(() => {}), 5), AuthTimeoutError);
+});
+
+test("auth errors are not suppressed by timeout protection", async () => {
+  await assert.rejects(withAuthTimeout(Promise.reject(new Error("test failure")), 100), /test failure/);
 });
