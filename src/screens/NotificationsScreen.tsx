@@ -193,7 +193,7 @@ function NotificationCard({
         ]}
       >
         <View style={styles.cardIcon}>
-          <Icon name={iconFor(item)} size={26} color="#7431A8" />
+          <Icon name={iconFor(item)} size={26} color={themeForeground("#7431A8")} />
         </View>
 
         <View style={styles.cardBody}>
@@ -218,7 +218,7 @@ function NotificationCard({
 
         {destination && (
           <View style={styles.chevron}>
-            <Icon name="chevron-forward" size={24} color="#8A879D" />
+            <Icon name="chevron-forward" size={24} color={themeForeground("#8A879D")} />
           </View>
         )}
       </Pressable>
@@ -403,7 +403,7 @@ export function NotificationsScreen() {
                 pressed && styles.pressed,
               ]}
             >
-              <Icon name="settings-outline" size={28} color="#58227C" />
+              <Icon name="settings-outline" size={28} color={themeForeground("#58227C")} />
             </Pressable>
           </View>
 
@@ -490,9 +490,9 @@ export function NotificationsScreen() {
               ]}
             >
               {loading ? (
-                <ActivityIndicator color="#6C2A98" size="small" />
+                <ActivityIndicator color={themeForeground("#6C2A98")} size="small" />
               ) : (
-                <Icon name="refresh-outline" size={29} color="#6C2A98" />
+                <Icon name="refresh-outline" size={29} color={themeForeground("#6C2A98")} />
               )}
             </Pressable>
           </View>
@@ -515,9 +515,9 @@ export function NotificationsScreen() {
               ]}
             >
               {markingAll ? (
-                <ActivityIndicator color="#6C2A98" size="small" />
+                <ActivityIndicator color={themeForeground("#6C2A98")} size="small" />
               ) : (
-                <Icon name="checkmark-done-outline" size={21} color="#6C2A98" />
+                <Icon name="checkmark-done-outline" size={21} color={themeForeground("#6C2A98")} />
               )}
               <Text style={styles.markButtonText}>Mark all read</Text>
             </Pressable>
@@ -545,13 +545,13 @@ export function NotificationsScreen() {
           >
             {loading && !items.length ? (
               <View style={[styles.stateCard, glassShadow]}>
-                <ActivityIndicator color="#6C2A98" />
+                <ActivityIndicator color={themeForeground("#6C2A98")} />
                 <Text style={styles.stateTitle}>Loading notifications…</Text>
               </View>
             ) : !items.length ? (
               <View style={[styles.stateCard, glassShadow]}>
                 <View style={styles.stateIcon}>
-                  <Icon name="notifications-outline" size={28} color="#7431A8" />
+                  <Icon name="notifications-outline" size={28} color={themeForeground("#7431A8")} />
                 </View>
                 <Text style={styles.stateTitle}>No notifications yet</Text>
                 <Text style={styles.stateText}>
@@ -561,7 +561,7 @@ export function NotificationsScreen() {
             ) : !visibleItems.length ? (
               <View style={[styles.stateCard, glassShadow]}>
                 <View style={styles.stateIcon}>
-                  <Icon name="checkmark-done-outline" size={28} color="#7431A8" />
+                  <Icon name="checkmark-done-outline" size={28} color={themeForeground("#7431A8")} />
                 </View>
                 <Text style={styles.stateTitle}>All caught up</Text>
                 <Text style={styles.stateText}>No unread notifications.</Text>
@@ -580,7 +580,7 @@ export function NotificationsScreen() {
           </Animated.View>
 
           <View style={styles.footer}>
-            <Icon name="shield-outline" size={25} color="#8A879D" />
+            <Icon name="shield-outline" size={25} color={themeForeground("#8A879D")} />
             <Text style={styles.footerText}>
               Account updates only. Not emergency monitoring.
             </Text>

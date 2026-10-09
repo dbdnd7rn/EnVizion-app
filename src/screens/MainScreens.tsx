@@ -1,3 +1,4 @@
+import { themeTint } from "../themeColors";
 import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
@@ -872,7 +873,7 @@ export function HomeScreen() {
                       transform: [{ rotate: "4deg" }],
                     }}
                   >
-                    <Icon name={priority.icon} size={35} color="#9B58B3" />
+                    <Icon name={priority.icon} size={35} color={themeForeground("#9B58B3")} />
                   </View>
                 </HomeFloat>
                 <View
@@ -890,7 +891,7 @@ export function HomeScreen() {
                     elevation: 2,
                   }}
                 >
-                  <Icon name="arrow-forward" size={25} color="#6E3288" />
+                  <Icon name="arrow-forward" size={25} color={themeForeground("#6E3288")} />
                 </View>
               </View>
             </View>
@@ -1026,7 +1027,7 @@ export function HomeScreen() {
             </View>
             <View style={{ maxWidth: 275, gap: 10 }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Icon name="heart" color="#EF8FA9" size={18} />
+                <Icon name="heart" color={themeForeground("#EF8FA9")} size={18} />
                 <Text
                   style={[
                     S.eyebrow,
@@ -1217,7 +1218,7 @@ function ToolkitWave({ tint = "#F4ECFB" }: { tint?: string }) {
         />
         <Path
           d="M54 118 C99 91 113 66 190 48 L190 118 Z"
-          fill="#FBF8FE"
+          fill={themeTint("#FBF8FE")}
           opacity="0.88"
         />
       </Svg>
@@ -1287,7 +1288,7 @@ function ToolkitHeroGraphic() {
             elevation: 2,
           }}
         >
-          <Icon name="heart-outline" size={44} color="#8739B2" />
+          <Icon name="heart-outline" size={44} color={themeForeground("#8739B2")} />
           <View
             style={{
               position: "absolute",
@@ -1332,7 +1333,7 @@ function ToolkitHeroGraphic() {
             transform: [{ rotate: "8deg" }],
           }}
         >
-          <Icon name="calendar-outline" size={27} color="#8739B2" />
+          <Icon name="calendar-outline" size={27} color={themeForeground("#8739B2")} />
         </View>
       </HomeFloat>
 
@@ -1353,7 +1354,7 @@ function ToolkitHeroGraphic() {
             transform: [{ rotate: "10deg" }],
           }}
         >
-          <Icon name="checkbox-outline" size={28} color="#B34B83" />
+          <Icon name="checkbox-outline" size={28} color={themeForeground("#B34B83")} />
         </View>
       </HomeFloat>
     </View>
@@ -1405,7 +1406,7 @@ function QuickCard({
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={27} color="#8233A6" />
+        <Icon name={icon} size={27} color={themeForeground("#8233A6")} />
       </View>
 
       <View style={{ marginTop: 18, gap: 4 }}>
@@ -1443,7 +1444,7 @@ function QuickCard({
           justifyContent: "center",
         }}
       >
-        <Icon name="chevron-forward" color="#7F2FA1" size={18} />
+        <Icon name="chevron-forward" color={themeForeground("#7F2FA1")} size={18} />
       </View>
     </Pressable>
   );
@@ -1511,7 +1512,7 @@ function ToolItemRow({
             justifyContent: "center",
           }}
         >
-          <Icon name={item.icon} size={27} color="#8233A6" />
+          <Icon name={item.icon} size={27} color={themeForeground("#8233A6")} />
         </View>
 
         <View style={{ flex: 1, gap: 5 }}>
@@ -1547,7 +1548,7 @@ function ToolItemRow({
             justifyContent: "center",
           }}
         >
-          <Icon name="chevron-forward" color="#7F2FA1" size={18} />
+          <Icon name="chevron-forward" color={themeForeground("#7F2FA1")} size={18} />
         </View>
       </Pressable>
 
@@ -1646,7 +1647,7 @@ function ToolGroup({
             justifyContent: "center",
           }}
         >
-          <Icon name={icon} size={29} color="#8233A6" />
+          <Icon name={icon} size={29} color={themeForeground("#8233A6")} />
         </View>
 
         <View style={{ flex: 1, gap: 6 }}>
@@ -1690,7 +1691,7 @@ function ToolGroup({
             ],
           }}
         >
-          <Icon name="chevron-down" color="#7F2FA1" size={20} />
+          <Icon name="chevron-down" color={themeForeground("#7F2FA1")} size={20} />
         </Animated.View>
       </Pressable>
 
@@ -2094,11 +2095,11 @@ export function ToolkitScreen() {
             elevation: 1,
           }}
         >
-          <Icon name="search-outline" size={24} color="#7F2FA1" />
+          <Icon name="search-outline" size={24} color={themeForeground("#7F2FA1")} />
           <TextInput
             accessibilityLabel="Search care tools"
             placeholder="Try “medication”, “coverage”, “documents”…"
-            placeholderTextColor="#AAA0B2"
+            placeholderTextColor={themeForeground("#AAA0B2")}
             value={query}
             onChangeText={setQuery}
             autoCapitalize="none"
@@ -2127,7 +2128,7 @@ export function ToolkitScreen() {
                 opacity: pressed ? 0.6 : 1,
               })}
             >
-              <Icon name="close-circle-outline" size={22} color="#897C9B" />
+              <Icon name="close-circle-outline" size={22} color={themeForeground("#897C9B")} />
             </Pressable>
           )}
           <Pressable
@@ -2152,7 +2153,7 @@ export function ToolkitScreen() {
               opacity: pressed ? 0.6 : 1,
             })}
           >
-            <Icon name="options-outline" size={24} color="#7F2FA1" />
+            <Icon name="options-outline" size={24} color={themeForeground("#7F2FA1")} />
             {(scope !== "all" || sort !== "relevance") && (
               <View
                 style={{
@@ -2220,7 +2221,7 @@ export function ToolkitScreen() {
                 justifyContent: "center",
               }}
             >
-              <Icon name="alert-circle-outline" size={29} color="#CE365C" />
+              <Icon name="alert-circle-outline" size={29} color={themeForeground("#CE365C")} />
             </View>
             <View style={{ flex: 1, gap: 3 }}>
               <Text
@@ -2252,7 +2253,7 @@ export function ToolkitScreen() {
                 justifyContent: "center",
               }}
             >
-              <Icon name="chevron-forward" size={19} color="#D1395D" />
+              <Icon name="chevron-forward" size={19} color={themeForeground("#D1395D")} />
             </View>
           </Pressable>
         </HomeReveal>
@@ -2300,7 +2301,7 @@ export function ToolkitScreen() {
                   gap: 10,
                 }}
               >
-                <Icon name="search-outline" size={27} color="#70338F" />
+                <Icon name="search-outline" size={27} color={themeForeground("#70338F")} />
                 <Text style={S.h3}>
                   {scope === "pinned" && !normalizedQuery
                     ? "No pinned tools yet."
@@ -2419,20 +2420,20 @@ function LearnHeroGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 300 240">
       <Defs>
         <LinearGradient id="learnHalo" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#F7F1FC" />
-          <Stop offset="1" stopColor="#E7D9F5" />
+          <Stop offset="0" stopColor={themeTint("#F7F1FC")} />
+          <Stop offset="1" stopColor={themeTint("#E7D9F5")} />
         </LinearGradient>
         <LinearGradient id="learnHair" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#51375F" />
-          <Stop offset="1" stopColor="#36263F" />
+          <Stop offset="0" stopColor={themeTint("#51375F")} />
+          <Stop offset="1" stopColor={themeTint("#36263F")} />
         </LinearGradient>
         <LinearGradient id="learnTop" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#8150A2" />
-          <Stop offset="1" stopColor="#64357F" />
+          <Stop offset="0" stopColor={themeTint("#8150A2")} />
+          <Stop offset="1" stopColor={themeTint("#64357F")} />
         </LinearGradient>
         <LinearGradient id="learnBook" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#75408F" />
-          <Stop offset="1" stopColor="#4F2967" />
+          <Stop offset="0" stopColor={themeTint("#75408F")} />
+          <Stop offset="1" stopColor={themeTint("#4F2967")} />
         </LinearGradient>
       </Defs>
 
@@ -2440,15 +2441,15 @@ function LearnHeroGraphic() {
       <Circle cx="178" cy="105" r="92" fill="url(#learnHalo)" />
 
       {/* layered leaves behind the reader */}
-      <Ellipse cx="224" cy="50" rx="17" ry="55" fill="#C7AFE3" transform="rotate(17 224 50)" />
-      <Ellipse cx="252" cy="79" rx="14" ry="47" fill="#B89AD8" transform="rotate(34 252 79)" />
-      <Ellipse cx="270" cy="121" rx="14" ry="43" fill="#D7C6EB" transform="rotate(51 270 121)" />
-      <Ellipse cx="197" cy="37" rx="12" ry="37" fill="#DCCEF0" transform="rotate(-10 197 37)" />
+      <Ellipse cx="224" cy="50" rx="17" ry="55" fill={themeTint("#C7AFE3")} transform="rotate(17 224 50)" />
+      <Ellipse cx="252" cy="79" rx="14" ry="47" fill={themeTint("#B89AD8")} transform="rotate(34 252 79)" />
+      <Ellipse cx="270" cy="121" rx="14" ry="43" fill={themeTint("#D7C6EB")} transform="rotate(51 270 121)" />
+      <Ellipse cx="197" cy="37" rx="12" ry="37" fill={themeTint("#DCCEF0")} transform="rotate(-10 197 37)" />
 
       {/* shoulders / cardigan */}
       <Path
         d="M119 194 C126 151 153 127 191 127 C228 127 255 153 261 196 L261 222 L113 222 C113 211 115 202 119 194 Z"
-        fill="#FFF9F6"
+        fill={themeTint("#FFF9F6")}
       />
       <Path
         d="M119 185 C132 161 147 149 162 145 L174 219 L108 219 C107 205 110 193 119 185 Z"
@@ -2456,7 +2457,7 @@ function LearnHeroGraphic() {
       />
       <Path
         d="M218 145 C237 151 250 166 260 188 L266 219 L207 219 L208 161 Z"
-        fill="#F5ECE7"
+        fill={themeTint("#F5ECE7")}
       />
 
       {/* hair mass */}
@@ -2466,42 +2467,42 @@ function LearnHeroGraphic() {
       />
 
       {/* face and neck */}
-      <Rect x="181" y="119" width="24" height="25" rx="10" fill="#EDC0AC" />
-      <Circle cx="193" cy="84" r="38" fill="#F0C8B5" />
+      <Rect x="181" y="119" width="24" height="25" rx="10" fill={themeTint("#EDC0AC")} />
+      <Circle cx="193" cy="84" r="38" fill={themeTint("#F0C8B5")} />
       <Path
         d="M158 72 C168 43 198 36 223 47 C239 54 248 67 249 83 C239 70 226 63 208 62 C188 61 172 66 158 72 Z"
         fill="url(#learnHair)"
       />
-      <Path d="M164 58 C151 72 150 95 156 113 C143 102 139 84 145 69 C149 59 155 52 164 47 Z" fill="#4B3255" />
+      <Path d="M164 58 C151 72 150 95 156 113 C143 102 139 84 145 69 C149 59 155 52 164 47 Z" fill={themeTint("#4B3255")} />
 
       {/* face details */}
-      <Circle cx="181" cy="84" r="2.6" fill="#74505A" />
-      <Circle cx="206" cy="84" r="2.6" fill="#74505A" />
-      <Path d="M184 101 C190 106 198 106 204 101" stroke="#C77976" strokeWidth="2.4" strokeLinecap="round" fill="none" />
-      <Path d="M181 75 C176 73 172 73 168 75" stroke="#B07C76" strokeWidth="1.8" strokeLinecap="round" fill="none" />
-      <Path d="M207 75 C212 73 216 73 220 75" stroke="#B07C76" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <Circle cx="181" cy="84" r="2.6" fill={themeTint("#74505A")} />
+      <Circle cx="206" cy="84" r="2.6" fill={themeTint("#74505A")} />
+      <Path d="M184 101 C190 106 198 106 204 101" stroke={themeTint("#C77976")} strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <Path d="M181 75 C176 73 172 73 168 75" stroke={themeTint("#B07C76")} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <Path d="M207 75 C212 73 216 73 220 75" stroke={themeTint("#B07C76")} strokeWidth="1.8" strokeLinecap="round" fill="none" />
 
       {/* open book */}
       <Path
         d="M101 166 C126 154 151 156 177 170 L171 222 C146 208 124 206 99 215 Z"
-        fill="#7A45A0"
+        fill={themeTint("#7A45A0")}
       />
       <Path
         d="M177 170 C200 156 225 154 250 166 L252 215 C228 206 204 208 171 222 Z"
         fill="url(#learnBook)"
       />
-      <Path d="M177 171 L171 222" stroke="#A983BC" strokeWidth="2" />
-      <Path d="M112 173 C131 167 148 169 165 178" stroke="#AA7CC0" strokeWidth="3" strokeLinecap="round" fill="none" />
-      <Path d="M113 184 C131 180 146 181 160 187" stroke="#AA7CC0" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <Path d="M177 171 L171 222" stroke={themeTint("#A983BC")} strokeWidth="2" />
+      <Path d="M112 173 C131 167 148 169 165 178" stroke={themeTint("#AA7CC0")} strokeWidth="3" strokeLinecap="round" fill="none" />
+      <Path d="M113 184 C131 180 146 181 160 187" stroke={themeTint("#AA7CC0")} strokeWidth="2.4" strokeLinecap="round" fill="none" />
 
       {/* hands */}
-      <Ellipse cx="126" cy="161" rx="14" ry="22" fill="#F0C8B5" transform="rotate(-19 126 161)" />
-      <Ellipse cx="228" cy="154" rx="14" ry="23" fill="#F0C8B5" transform="rotate(10 228 154)" />
+      <Ellipse cx="126" cy="161" rx="14" ry="22" fill={themeTint("#F0C8B5")} transform="rotate(-19 126 161)" />
+      <Ellipse cx="228" cy="154" rx="14" ry="23" fill={themeTint("#F0C8B5")} transform="rotate(10 228 154)" />
 
       {/* mug */}
-      <Rect x="234" y="121" width="42" height="43" rx="10" fill="#FFFFFF" stroke="#E8DDEB" strokeWidth="3" />
-      <Path d="M275 132 C287 131 291 151 278 154" stroke="#D9CCE0" strokeWidth="4" fill="none" strokeLinecap="round" />
-      <Path d="M241 128 C249 124 260 124 269 128" stroke="#F4EDF6" strokeWidth="3" strokeLinecap="round" />
+      <Rect x="234" y="121" width="42" height="43" rx="10" fill={themeTint("#FFFFFF")} stroke={themeTint("#E8DDEB")} strokeWidth="3" />
+      <Path d="M275 132 C287 131 291 151 278 154" stroke={themeTint("#D9CCE0")} strokeWidth="4" fill="none" strokeLinecap="round" />
+      <Path d="M241 128 C249 124 260 124 269 128" stroke={themeTint("#F4EDF6")} strokeWidth="3" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -2511,40 +2512,40 @@ function LearnFeaturedGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 190 178">
       <Defs>
         <LinearGradient id="featuredPaper" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" />
-          <Stop offset="1" stopColor="#F8F4FB" />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
+          <Stop offset="1" stopColor={themeTint("#F8F4FB")} />
         </LinearGradient>
         <LinearGradient id="featuredLeaf" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#D7C3EB" />
-          <Stop offset="1" stopColor="#B495D4" />
+          <Stop offset="0" stopColor={themeTint("#D7C3EB")} />
+          <Stop offset="1" stopColor={themeTint("#B495D4")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="126" cy="90" r="65" fill="#EDE0F7" />
+      <Circle cx="126" cy="90" r="65" fill={themeTint("#EDE0F7")} />
       <Ellipse cx="47" cy="121" rx="19" ry="61" fill="url(#featuredLeaf)" transform="rotate(28 47 121)" />
-      <Ellipse cx="76" cy="116" rx="15" ry="50" fill="#D2BDE7" transform="rotate(-8 76 116)" />
-      <Ellipse cx="160" cy="105" rx="18" ry="57" fill="#D9C9EC" transform="rotate(24 160 105)" />
+      <Ellipse cx="76" cy="116" rx="15" ry="50" fill={themeTint("#D2BDE7")} transform="rotate(-8 76 116)" />
+      <Ellipse cx="160" cy="105" rx="18" ry="57" fill={themeTint("#D9C9EC")} transform="rotate(24 160 105)" />
 
       {/* rear paper */}
       <G transform="translate(76 30) rotate(10 50 62)">
-        <Rect x="18" y="11" width="93" height="122" rx="15" fill="#DCCFE8" opacity="0.85" />
+        <Rect x="18" y="11" width="93" height="122" rx="15" fill={themeTint("#DCCFE8")} opacity="0.85" />
       </G>
 
       {/* front resource card */}
       <G transform="translate(63 22) rotate(8 50 62)">
         <Rect x="0" y="0" width="101" height="127" rx="15" fill="url(#featuredPaper)" />
-        <Circle cx="50" cy="34" r="21" fill="#E7D6F2" />
+        <Circle cx="50" cy="34" r="21" fill={themeTint("#E7D6F2")} />
         <Path
           d="M50 47 C35 36 33 27 41 23 C47 20 50 25 50 25 C50 25 53 20 59 23 C67 27 65 36 50 47 Z"
-          fill="#9D6FB8"
+          fill={themeTint("#9D6FB8")}
         />
-        <Rect x="22" y="68" width="58" height="7" rx="3.5" fill="#D6C2E5" />
-        <Rect x="22" y="84" width="66" height="7" rx="3.5" fill="#D6C2E5" />
-        <Rect x="22" y="100" width="51" height="7" rx="3.5" fill="#D6C2E5" />
+        <Rect x="22" y="68" width="58" height="7" rx="3.5" fill={themeTint("#D6C2E5")} />
+        <Rect x="22" y="84" width="66" height="7" rx="3.5" fill={themeTint("#D6C2E5")} />
+        <Rect x="22" y="100" width="51" height="7" rx="3.5" fill={themeTint("#D6C2E5")} />
       </G>
 
       {/* small sparkle */}
-      <Path d="M156 26 L160 36 L170 40 L160 44 L156 54 L152 44 L142 40 L152 36 Z" fill="#B489CC" opacity="0.75" />
+      <Path d="M156 26 L160 36 L170 40 L160 44 L156 54 L152 44 L142 40 L152 36 Z" fill={themeTint("#B489CC")} opacity="0.75" />
     </Svg>
   );
 }
@@ -2552,26 +2553,26 @@ function LearnFeaturedGraphic() {
 function LearnGuideGraphic({ kind }: { kind: "medication" | "symptoms" }) {
   return (
     <Svg width="100%" height="100%" viewBox="0 0 180 100">
-      <Circle cx="28" cy="91" r="42" fill="#DCC8ED" />
-      <Circle cx="160" cy="13" r="42" fill="#F7E9EB" />
+      <Circle cx="28" cy="91" r="42" fill={themeTint("#DCC8ED")} />
+      <Circle cx="160" cy="13" r="42" fill={themeTint("#F7E9EB")} />
       {kind === "medication" ? (
         <>
-          <Ellipse cx="74" cy="67" rx="13" ry="38" fill="#A283B6" transform="rotate(38 74 67)" />
-          <Rect x="82" y="18" width="43" height="65" rx="8" fill="#C97836" />
-          <Rect x="86" y="26" width="35" height="17" rx="4" fill="#FFFFFF" />
-          <Rect x="90" y="12" width="27" height="10" rx="4" fill="#EAE2E5" />
-          <Ellipse cx="126" cy="77" rx="11" ry="5" fill="#FFFDFD" stroke="#D8CADF" strokeWidth="1.5" transform="rotate(-10 126 77)" />
-          <Ellipse cx="146" cy="70" rx="11" ry="5" fill="#FFFDFD" stroke="#D8CADF" strokeWidth="1.5" transform="rotate(17 146 70)" />
+          <Ellipse cx="74" cy="67" rx="13" ry="38" fill={themeTint("#A283B6")} transform="rotate(38 74 67)" />
+          <Rect x="82" y="18" width="43" height="65" rx="8" fill={themeTint("#C97836")} />
+          <Rect x="86" y="26" width="35" height="17" rx="4" fill={themeTint("#FFFFFF")} />
+          <Rect x="90" y="12" width="27" height="10" rx="4" fill={themeTint("#EAE2E5")} />
+          <Ellipse cx="126" cy="77" rx="11" ry="5" fill={themeTint("#FFFDFD")} stroke={themeTint("#D8CADF")} strokeWidth="1.5" transform="rotate(-10 126 77)" />
+          <Ellipse cx="146" cy="70" rx="11" ry="5" fill={themeTint("#FFFDFD")} stroke={themeTint("#D8CADF")} strokeWidth="1.5" transform="rotate(17 146 70)" />
         </>
       ) : (
         <>
-          <Path d="M91 15c28 0 47 20 47 46 0 11-4 21-10 29H78c-10-9-16-22-16-36 0-22 9-39 29-39Z" fill="#8A6AA0" />
-          <Path d="M79 36c-12 14-17 25-17 43 0 12 4 20 12 29h35v-14c-10-8-15-16-15-28 0-12 4-22 12-30H79Z" fill="#7A5C91" />
-          <Circle cx="111" cy="45" r="17" fill="#F1DFF4" />
-          <Path d="M111 54c-11-8-13-14-6-17 4-2 6 2 6 2s2-4 6-2c7 3 5 9-6 17Z" fill="#6E3D82" />
-          <Line x1="145" y1="29" x2="154" y2="20" stroke="#B58BC6" strokeWidth="3" strokeLinecap="round" />
-          <Line x1="150" y1="43" x2="162" y2="41" stroke="#B58BC6" strokeWidth="3" strokeLinecap="round" />
-          <Line x1="141" y1="17" x2="145" y2="6" stroke="#B58BC6" strokeWidth="3" strokeLinecap="round" />
+          <Path d="M91 15c28 0 47 20 47 46 0 11-4 21-10 29H78c-10-9-16-22-16-36 0-22 9-39 29-39Z" fill={themeTint("#8A6AA0")} />
+          <Path d="M79 36c-12 14-17 25-17 43 0 12 4 20 12 29h35v-14c-10-8-15-16-15-28 0-12 4-22 12-30H79Z" fill={themeTint("#7A5C91")} />
+          <Circle cx="111" cy="45" r="17" fill={themeTint("#F1DFF4")} />
+          <Path d="M111 54c-11-8-13-14-6-17 4-2 6 2 6 2s2-4 6-2c7 3 5 9-6 17Z" fill={themeTint("#6E3D82")} />
+          <Line x1="145" y1="29" x2="154" y2="20" stroke={themeTint("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
+          <Line x1="150" y1="43" x2="162" y2="41" stroke={themeTint("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
+          <Line x1="141" y1="17" x2="145" y2="6" stroke={themeTint("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
         </>
       )}
     </Svg>
@@ -2702,7 +2703,7 @@ export function LibraryScreen() {
           <TextInput
             accessibilityLabel="Search resources"
             placeholder="Search guides, topics, or conditions"
-            placeholderTextColor="#A9A1B1"
+            placeholderTextColor={themeForeground("#A9A1B1")}
             value={query}
             onChangeText={setQuery}
             style={{
@@ -3074,7 +3075,7 @@ export function LibraryScreen() {
                     More trusted guides are on the way.
                   </Text>
                 </View>
-                <Icon name="sparkles-outline" size={20} color="#B57AC8" />
+                <Icon name="sparkles-outline" size={20} color={themeForeground("#B57AC8")} />
               </Card>
             )}
           </View>
@@ -3105,7 +3106,7 @@ export function SupportScreen() {
         onPress={() => n.navigate("TeamConversation")}
       />
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Icon name="people-outline" color="#E5C8ED" size={32} />
+        <Icon name="people-outline" color={themeForeground("#E5C8ED")} size={32} />
         <Text style={[S.h2, { color: C.white }]}>
           An advocate. A listening ear.{"\n"}A clearer next step.
         </Text>

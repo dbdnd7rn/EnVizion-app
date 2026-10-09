@@ -1,3 +1,4 @@
+import { themeBorder, themeShadow } from "../themeColors";
 import { themeBackground, themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
@@ -135,14 +136,14 @@ const P="#70338F", INK="#19163D", MUTED="#77728D";
 function Glass({children,style,tint="#F1E4FB"}:{
   children:React.ReactNode;style?:any;tint?:string
 }) {
- return <View style={[{backgroundColor:"#FBF8FDEA",borderColor:"#FFFFFF",borderWidth:1,
+ return <View style={[{backgroundColor:themeBackground("#FBF8FDEA"),borderColor:themeBorder("#FFFFFF"),borderWidth:1,
     borderRadius:27,padding:16,gap:13,overflow:"hidden",
-    shadowColor:"#59356B",shadowOpacity:0.09,shadowRadius:17,
+    shadowColor:themeShadow("#59356B"),shadowOpacity:0.09,shadowRadius:17,
     shadowOffset:{width:0,height:8},elevation:2},style]}>
    <View pointerEvents="none" style={{position:"absolute",right:-70,top:-85,
      width:175,height:175,borderRadius:100,backgroundColor:tint,opacity:0.66}}/>
    <View pointerEvents="none" style={{position:"absolute",left:-55,bottom:-75,
-     width:120,height:120,borderRadius:70,backgroundColor:"#EEDDF8",opacity:0.42}}/>
+     width:120,height:120,borderRadius:70,backgroundColor:themeBackground("#EEDDF8"),opacity:0.42}}/>
    {children}
  </View>;
 }
@@ -150,7 +151,7 @@ function Chip({text,active=false}:{text:string;active?:boolean}){
  return <View style={{backgroundColor:active?"#E4F3EC":"#F1EDF5",
    borderRadius:30,paddingHorizontal:10,paddingVertical:7,
    flexDirection:"row",gap:5,alignItems:"center"}}>
-   {active&&<View style={{height:7,width:7,borderRadius:4,backgroundColor:"#15986B"}}/>}
+   {active&&<View style={{height:7,width:7,borderRadius:4,backgroundColor:themeBackground("#15986B")}}/>}
    <Text numberOfLines={1} style={{fontFamily:"DMSans_600SemiBold",
      fontSize:11,color:active?"#15966B":"#706584"}}>{text}</Text>
  </View>;
@@ -158,7 +159,7 @@ function Chip({text,active=false}:{text:string;active?:boolean}){
 function MemberFace({member}:{member:CareTeamMember}){
  if(member.isCurrentUser)return <ProfileAvatar name={member.displayName} size={47}/>;
  return <View style={{height:47,width:47,borderRadius:24,alignItems:"center",
-   justifyContent:"center",backgroundColor:"#EFE4F9",borderWidth:2,borderColor:"#FFFFFF"}}>
+   justifyContent:"center",backgroundColor:themeBackground("#EFE4F9"),borderWidth:2,borderColor:themeBorder("#FFFFFF")}}>
    <Text style={{color:themeForeground(P),fontSize:17,fontFamily:"DMSans_700Bold"}}>
      {(member.displayName.trim()[0]||"?").toUpperCase()}
    </Text></View>;
@@ -338,8 +339,8 @@ export function CareTeamScreen() {
       <Pressable accessibilityRole="button" accessibilityLabel="Back"
         onPress={()=>n.goBack()} style={({pressed})=>({
           height:44,width:44,borderRadius:23,justifyContent:"center",
-          alignItems:"center",backgroundColor:"#F6EDFBEA",
-          borderWidth:1,borderColor:"#FFFFFF",opacity:pressed?0.65:1
+          alignItems:"center",backgroundColor:themeBackground("#F6EDFBEA"),
+          borderWidth:1,borderColor:themeBorder("#FFFFFF"),opacity:pressed?0.65:1
         })}>
         <Icon name="arrow-back-outline" size={23} color={themeForeground(P)}/>
       </Pressable>
@@ -354,19 +355,19 @@ export function CareTeamScreen() {
       <Pressable accessibilityRole="button" accessibilityLabel="Open profile settings"
         onPress={()=>n.navigate("Profile")} style={({pressed})=>({
           height:43,width:43,borderRadius:22,justifyContent:"center",
-          alignItems:"center",backgroundColor:"#F7F0FB",
-          borderWidth:1,borderColor:"#FFFFFF",opacity:pressed?0.65:1
+          alignItems:"center",backgroundColor:themeBackground("#F7F0FB"),
+          borderWidth:1,borderColor:themeBorder("#FFFFFF"),opacity:pressed?0.65:1
         })}>
         <Icon name="settings-outline" size={22} color={themeForeground(P)}/>
       </Pressable>
     </View>
-    <Glass tint="#E7D3F7" style={{backgroundColor:"#F6EBFBDD"}}>
+    <Glass tint="#E7D3F7" style={{backgroundColor:themeBackground("#F6EBFBDD")}}>
       <View style={{flexDirection:"row",alignItems:"center",gap:13}}>
         {state.careMode==="self" ? (
           <ProfileAvatar name={state.careRecipientName||state.name||"Care profile"} size={84}/>
         ) : (
           <View style={{height:84,width:84,borderRadius:42,borderWidth:4,
-            borderColor:"#FFFFFF",backgroundColor:"#E9DAF7",alignItems:"center",
+            borderColor:themeBorder("#FFFFFF"),backgroundColor:themeBackground("#E9DAF7"),alignItems:"center",
             justifyContent:"center"}}>
             <Text style={{fontFamily:"DMSans_700Bold",fontSize:29,color:themeForeground(P)}}>
               {(state.careRecipientName.trim()[0]||"C").toUpperCase()}
@@ -390,8 +391,8 @@ export function CareTeamScreen() {
       </Text>
     </Glass>
     {Boolean(message)&&(
-      <View style={{backgroundColor:"#F9F1FC",padding:13,borderRadius:17,
-        borderWidth:1,borderColor:"#E7D4EE"}}>
+      <View style={{backgroundColor:themeBackground("#F9F1FC"),padding:13,borderRadius:17,
+        borderWidth:1,borderColor:themeBorder("#E7D4EE")}}>
         <Text accessibilityRole="alert" style={{fontSize:12.5,color:themeForeground(INK)}}>{message}</Text>
       </View>
     )}
@@ -403,7 +404,7 @@ export function CareTeamScreen() {
               key={invitation.careRecipientId}
               style={{
                 backgroundColor: C.lavender,
-                borderColor: "#DCCBE4",
+                borderColor: themeBorder("#DCCBE4"),
                 gap: 12,
               }}
             >
@@ -428,7 +429,7 @@ export function CareTeamScreen() {
               <View
                 style={{
                   borderRadius: 16,
-                  backgroundColor: "#FFFFFFA8",
+                  backgroundColor: themeBackground("#FFFFFFA8"),
                   padding: 12,
                   flexDirection: "row",
                   gap: 10,
@@ -461,7 +462,7 @@ export function CareTeamScreen() {
 
     <Glass tint="#EEE3FB">
       <View style={{flexDirection:"row",alignItems:"center",gap:9}}>
-        <View style={{height:42,width:42,borderRadius:16,backgroundColor:"#F1E7FC",
+        <View style={{height:42,width:42,borderRadius:16,backgroundColor:themeBackground("#F1E7FC"),
           justifyContent:"center",alignItems:"center"}}>
           <Icon name="people-outline" size={23} color={themeForeground(P)}/>
         </View>
@@ -473,8 +474,8 @@ export function CareTeamScreen() {
         <Pressable accessibilityRole="button" accessibilityLabel="Refresh members"
           disabled={loading} onPress={()=>void refresh(true)}
           style={({pressed})=>({paddingVertical:10,paddingHorizontal:11,
-            borderRadius:22,backgroundColor:"#FFFFFFBA",borderWidth:1,
-            borderColor:"#F0E3F6",flexDirection:"row",alignItems:"center",
+            borderRadius:22,backgroundColor:themeBackground("#FFFFFFBA"),borderWidth:1,
+            borderColor:themeBorder("#F0E3F6"),flexDirection:"row",alignItems:"center",
             gap:5,opacity:pressed||loading?0.6:1})}>
           <Icon name="refresh-outline" size={15} color={themeForeground(P)}/>
           <Text style={{color:themeForeground(P),fontSize:11,fontFamily:"DMSans_600SemiBold"}}>Refresh</Text>
@@ -484,8 +485,8 @@ export function CareTeamScreen() {
         No members are listed for this care profile yet.
       </Text>}
       {members.map(member=>(
-        <View key={member.userId} style={{backgroundColor:"#FFFFFFE9",
-          borderRadius:21,borderColor:"#FFFFFF",borderWidth:1,padding:11,gap:11}}>
+        <View key={member.userId} style={{backgroundColor:themeBackground("#FFFFFFE9"),
+          borderRadius:21,borderColor:themeBorder("#FFFFFF"),borderWidth:1,padding:11,gap:11}}>
           <Pressable accessibilityRole="button"
             accessibilityLabel={member.displayName+", "+roleLabel(member.role)+". Details"}
             accessibilityState={{expanded:expandedMember===member.userId}}
@@ -501,10 +502,10 @@ export function CareTeamScreen() {
             </View>
             <Chip text={invitationStatusLabel(member)} active={member.status==="active"}/>
             <Icon name={expandedMember===member.userId?"chevron-up":"chevron-forward"}
-              size={17} color="#897B96"/>
+              size={17} color={themeForeground("#897B96")}/>
           </Pressable>
           {expandedMember===member.userId&&(
-            <View style={{gap:12,borderTopWidth:1,borderColor:"#F0E7F5",paddingTop:10}}>
+            <View style={{gap:12,borderTopWidth:1,borderColor:themeBorder("#F0E7F5"),paddingTop:10}}>
               {Boolean(member.email)&&<Text selectable style={{fontSize:12,color:themeForeground(MUTED)}}>
                 {member.email}
               </Text>}
@@ -691,7 +692,7 @@ export function CareTeamScreen() {
       <Glass tint="#F3E8FA">
         <View style={{flexDirection:"row",gap:11,alignItems:"center"}}>
           <View style={{width:43,height:43,borderRadius:16,
-            backgroundColor:"#F0E4FB",justifyContent:"center",alignItems:"center"}}>
+            backgroundColor:themeBackground("#F0E4FB"),justifyContent:"center",alignItems:"center"}}>
             <Icon name="person-add-outline" size={23} color={themeForeground(P)}/>
           </View>
           <View style={{flex:1,gap:3}}>
@@ -701,21 +702,21 @@ export function CareTeamScreen() {
           </View>
         </View>
         <View style={{flexDirection:"row",alignItems:"center",gap:10,
-          backgroundColor:"#FFFFFF",borderRadius:21,borderColor:"#E7DAEF",
+          backgroundColor:themeBackground("#FFFFFF"),borderRadius:21,borderColor:themeBorder("#E7DAEF"),
           borderWidth:1,paddingHorizontal:14,minHeight:52}}>
-          <Icon name="person-outline" size={19} color="#93849F"/>
+          <Icon name="person-outline" size={19} color={themeForeground("#93849F")}/>
           <TextInput accessibilityLabel="Full name" placeholder="Full name"
-            placeholderTextColor="#9A8EA6" autoCapitalize="words"
+            placeholderTextColor={themeForeground("#9A8EA6")} autoCapitalize="words"
             value={inviteName} onChangeText={setInviteName} editable={busyId===null}
             style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:themeForeground(INK),
               fontFamily:"DMSans_400Regular"}}/>
         </View>
         <View style={{flexDirection:"row",alignItems:"center",gap:10,
-          backgroundColor:"#FFFFFF",borderRadius:21,borderColor:"#E7DAEF",
+          backgroundColor:themeBackground("#FFFFFF"),borderRadius:21,borderColor:themeBorder("#E7DAEF"),
           borderWidth:1,paddingHorizontal:14,minHeight:52}}>
-          <Icon name="mail-outline" size={19} color="#93849F"/>
+          <Icon name="mail-outline" size={19} color={themeForeground("#93849F")}/>
           <TextInput accessibilityLabel="Email address" placeholder="Email address"
-            placeholderTextColor="#9A8EA6" autoCapitalize="none" autoCorrect={false}
+            placeholderTextColor={themeForeground("#9A8EA6")} autoCapitalize="none" autoCorrect={false}
             keyboardType="email-address" value={inviteEmail} onChangeText={setInviteEmail}
             editable={busyId===null}
             style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:themeForeground(INK),
@@ -740,7 +741,7 @@ export function CareTeamScreen() {
       <Glass tint="#F2E8F9">
         <View style={{flexDirection:"row",alignItems:"center",gap:11}}>
           <View style={{width:44,height:44,borderRadius:16,
-            backgroundColor:"#FAECEF",justifyContent:"center",alignItems:"center"}}>
+            backgroundColor:themeBackground("#FAECEF"),justifyContent:"center",alignItems:"center"}}>
             <Icon name="swap-horizontal-outline" size={24} color={themeForeground(P)}/>
           </View>
           <View style={{flex:1,gap:4}}>
@@ -760,8 +761,8 @@ export function CareTeamScreen() {
       accessibilityState={{expanded:showTools}}
       onPress={()=>setShowTools(old=>!old)}
       style={({pressed})=>({flexDirection:"row",gap:10,alignItems:"center",
-        borderRadius:21,backgroundColor:"#F2E9F8",
-        borderWidth:1,borderColor:"#E6D8EE",padding:15,
+        borderRadius:21,backgroundColor:themeBackground("#F2E9F8"),
+        borderWidth:1,borderColor:themeBorder("#E6D8EE"),padding:15,
         opacity:pressed?0.75:1})}>
       <Icon name="settings-outline" size={21} color={themeForeground(P)}/>
       <Text style={{flex:1,fontFamily:"DMSans_700Bold",fontSize:14.5,color:themeForeground(P)}}>
@@ -780,7 +781,7 @@ export function CareTeamScreen() {
                 "Switch to "+space.careRecipientName}
               disabled={space.active||busyId!==null}
               onPress={()=>void switchSpace(space)}
-              style={({pressed})=>({backgroundColor:"#FFFFFFCC",padding:12,
+              style={({pressed})=>({backgroundColor:themeBackground("#FFFFFFCC"),padding:12,
                 borderRadius:17,flexDirection:"row",gap:12,alignItems:"center",
                 opacity:pressed?0.7:1})}>
               <View style={{flex:1,gap:4}}>
@@ -805,7 +806,7 @@ export function CareTeamScreen() {
                 ["Closed",invitationSummary.closed],
               ] as const).map(([label,value])=>(
                 <View key={label} style={{flexGrow:1,minWidth:67,alignItems:"center",
-                  borderRadius:15,padding:10,backgroundColor:"#FFFFFFC9"}}>
+                  borderRadius:15,padding:10,backgroundColor:themeBackground("#FFFFFFC9")}}>
                   <Text style={[S.h3,{fontSize:18}]}>{value}</Text>
                   <Text style={S.small}>{label}</Text>
                 </View>

@@ -1,3 +1,4 @@
+import { themeTint } from "../themeColors";
 import { themeBackground, themeForeground, themeBorder, themeShadow } from "../themeColors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -35,7 +36,7 @@ function Glass({
       <View pointerEvents="none" style={{ position: "absolute", right: -1, bottom: -1, opacity: 0.9 }}>
         <Svg width="142" height="66" viewBox="0 0 142 66" accessibilityElementsHidden>
           <Path d="M0 66C31 44 48 9 142 0V66Z" fill={tint} />
-          <Path d="M40 66C89 46 97 34 142 29V66Z" fill="#FFFFFF" opacity={0.48}/>
+          <Path d="M40 66C89 46 97 34 142 29V66Z" fill={themeTint("#FFFFFF")} opacity={0.48}/>
         </Svg>
       </View>
       {children}
@@ -82,7 +83,7 @@ function ProfileEntry({
               color: themeForeground(MUTED),
             }}>{subtitle}</Text>
           </View>
-          <Icon name="chevron-forward-outline" size={20} color="#6B5082" />
+          <Icon name="chevron-forward-outline" size={20} color={themeForeground("#6B5082")} />
         </View>
       </Glass>
     </Pressable>
@@ -205,8 +206,8 @@ export function ProfileDashboardScreen() {
           <View style={{ padding: 18, gap: 12, backgroundColor: themeBackground("#F9F3FCCD") }}>
             <View pointerEvents="none" style={{ position: "absolute", right: -20, top: -20 }}>
               <Svg width="170" height="140" viewBox="0 0 170 140">
-                <Circle cx="118" cy="35" r="76" fill="#F0DDFB" opacity={0.54}/>
-                <Circle cx="150" cy="112" r="60" fill="#E7DAFD" opacity={0.45}/>
+                <Circle cx="118" cy="35" r="76" fill={themeTint("#F0DDFB")} opacity={0.54}/>
+                <Circle cx="150" cy="112" r="60" fill={themeTint("#E7DAFD")} opacity={0.45}/>
               </Svg>
             </View>
             <Text style={{
