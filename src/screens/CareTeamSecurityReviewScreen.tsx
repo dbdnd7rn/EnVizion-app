@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -38,7 +39,7 @@ function statusPresentation(
       label: "Attention needed",
       icon: "warning-outline",
       background: "#FFF7E8",
-      color: "#946824",
+      color: themeForeground("#946824"),
       body: "No critical conflict was found, but one or more membership states should be reviewed.",
     };
   }
@@ -203,7 +204,7 @@ export function CareTeamSecurityReviewScreen() {
               width: 50,
               height: 50,
               borderRadius: 18,
-              backgroundColor: C.white,
+              backgroundColor: themeBackground(C.white),
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -211,7 +212,7 @@ export function CareTeamSecurityReviewScreen() {
             <Icon name={status.icon} size={26} color={status.color} />
           </View>
           {review && (
-            <View style={[S.pill, { backgroundColor: C.white }]}>
+            <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
               <Text
                 style={[
                   S.small,

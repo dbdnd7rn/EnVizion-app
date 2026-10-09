@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -44,7 +45,7 @@ function toneStyle(tone: CareTeamActivityItem["tone"]) {
     return { backgroundColor: "#EAF3EE", color: C.green };
   }
   if (tone === "amber") {
-    return { backgroundColor: "#FFF4E2", color: "#956824" };
+    return { backgroundColor: "#FFF4E2", color: themeForeground("#956824") };
   }
   if (tone === "rose") {
     return { backgroundColor: "#FBE8E4", color: C.rose };
