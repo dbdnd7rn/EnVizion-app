@@ -5,6 +5,7 @@ import {
   Animated,
   Easing,
   Platform,
+  Pressable,
   Text,
   View,
 } from "react-native";
@@ -21,7 +22,7 @@ import {
 } from "@expo-google-fonts/dm-sans";
 import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { AuthProvider, AuthScreen, PasswordRecoveryScreen, useAuth } from "./src/auth";
-import { withAuthTimeout } from "./src/authHelpers";
+import { withStartupTimeout } from "./src/startupTimeout";
 import { CareProvider } from "./src/store";
 import { CarePresenceProvider } from "./src/CarePresenceProvider";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
@@ -204,7 +205,7 @@ function useReducedMotion() {
   return reduced;
 }
 
-function LoadingState() {
+function LoadingState({ message = "Preparing your care companion…" }: { message?: string }) {
   return (
     <View
       style={{
@@ -216,7 +217,7 @@ function LoadingState() {
     >
       <ActivityIndicator color={C.purple} />
       <Text style={{ marginTop: 12, color: C.deep }}>
-        Preparing your care companion…
+        {message}
       </Text>
     </View>
   );
@@ -721,10 +722,11 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
-  const { session, loading, recoveryMode } = useAuth();
+  const { session, loading, recoveryMode, startupError, retryStartup, signOut } = useAuth();
   const [staff, setStaff] = useState<StaffMembership | null>(null);
   const [checkingStaff, setCheckingStaff] = useState(true);
   const [staffError, setStaffError] = useState("");
+  const [staffRetry, setStaffRetry] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -741,16 +743,22 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
     setCheckingStaff(true);
     setStaffError("");
 
-    withAuthTimeout(getStaffMembership(), 15_000)
+    withStartupTimeout(
+      getStaffMembership(session.user.id),
+      9000,
+      "Workspace verification is taking longer than expected.",
+    )
       .then((membership) => {
         if (!active) return;
         setStaff(membership);
       })
-      .catch(() => {
+      .catch((error) => {
         if (!active) return;
         setStaff(null);
         setStaffError(
-          "We could not verify your workspace access. Check your connection and sign in again.",
+          error instanceof Error
+            ? error.message
+            : "We could not verify your workspace access. Check your connection and try again.",
         );
       })
       .finally(() => {
@@ -760,11 +768,52 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
     return () => {
       active = false;
     };
-  }, [session?.user.id]);
+  }, [session?.user.id, staffRetry]);
 
-  if (loading || (session && checkingStaff && !recoveryMode)) return <LoadingState />;
+  if (loading) return <LoadingState message="Checking your account…" />;
+
+  if (startupError) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          padding: 28,
+          justifyContent: "center",
+          backgroundColor: C.paper,
+          gap: 14,
+        }}
+      >
+        <Icon name="cloud-offline-outline" size={32} color={C.purple} />
+        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 23, color: C.ink }}>
+          We couldn't finish opening your account.
+        </Text>
+        <Text accessibilityRole="alert" style={{ fontSize: 14, lineHeight: 21, color: C.muted }}>
+          {startupError} Check your connection, then try again. Your care records have not been changed.
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Retry account loading"
+          onPress={retryStartup}
+          style={({ pressed }) => ({
+            minHeight: 52,
+            borderRadius: 26,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: C.purple,
+            opacity: pressed ? 0.8 : 1,
+          })}
+        >
+          <Text style={{ color: C.white, fontFamily: "DMSans_700Bold" }}>
+            Try again
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+
   if (session && recoveryMode) return <PasswordRecoveryScreen />;
   if (!session) return <AuthScreen />;
+  if (checkingStaff) return <LoadingState message="Checking workspace access…" />;
 
   if (staffError) {
     return (
@@ -796,6 +845,33 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
         >
           {staffError}
         </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Retry workspace verification"
+          onPress={() => setStaffRetry((attempt) => attempt + 1)}
+          style={({ pressed }) => ({
+            minHeight: 52,
+            borderRadius: 26,
+            backgroundColor: C.purple,
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: pressed ? 0.8 : 1,
+          })}
+        >
+          <Text style={{ color: C.white, fontFamily: "DMSans_700Bold" }}>
+            Try again
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Sign out"
+          onPress={() => void signOut()}
+          style={{ minHeight: 48, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text style={{ color: C.purple, fontFamily: "DMSans_600SemiBold" }}>
+            Sign out
+          </Text>
+        </Pressable>
       </View>
     );
   }
@@ -812,6 +888,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
 export default function App() {
   const reducedMotion = useReducedMotion();
   const [showLaunch, setShowLaunch] = useState(true);
+  const [fontsTimedOut, setFontsTimedOut] = useState(false);
   const [loaded, error] = useFonts({
     DMSans_400Regular,
     DMSans_600SemiBold,
@@ -820,15 +897,23 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (!loaded && !error) return;
+    if (loaded || error) return;
+    const timeout = setTimeout(() => setFontsTimedOut(true), 8000);
+    return () => clearTimeout(timeout);
+  }, [loaded, error]);
+
+  const fontsReady = loaded || Boolean(error) || fontsTimedOut;
+
+  useEffect(() => {
+    if (!fontsReady) return;
     const timer = setTimeout(
       () => setShowLaunch(false),
-      reducedMotion ? 700 : 2100,
+      reducedMotion ? 300 : 950,
     );
     return () => clearTimeout(timer);
-  }, [error, loaded, reducedMotion]);
+  }, [fontsReady, reducedMotion]);
 
-  if (!loaded && !error) return <LoadingState />;
+  if (!fontsReady) return <LoadingState message="Loading app resources…" />;
 
   return (
     <SafeAreaProvider>
