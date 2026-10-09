@@ -162,11 +162,22 @@ Deno.serve(async (req: Request) => {
       const recipientMap = new Map(
         (recipients ?? []).map((row) => [row.id, row]),
       );
-      const inviterMap = await getUsersById(
-        admin,
+      const inviterIds = [...new Set(
         (pending ?? [])
           .map((row) => row.invited_by)
           .filter((value): value is string => Boolean(value)),
+      )];
+      const inviterMap = await getUsersById(admin, inviterIds);
+      const { data: savedInviters, error: savedInvitersError } =
+        inviterIds.length
+          ? await admin.from("profiles")
+              .select("id, full_name").in("id", inviterIds)
+          : { data: [], error: null };
+      if (savedInvitersError) throw savedInvitersError;
+      const savedInviterNames = new Map(
+        (savedInviters ?? []).map((profile) => [
+          profile.id, String(profile.full_name ?? "").trim(),
+        ]),
       );
 
       return json({
@@ -178,6 +189,7 @@ Deno.serve(async (req: Request) => {
             ? inviterMap.get(row.invited_by)
             : null;
           const inviterName =
+            (row.invited_by ? savedInviterNames.get(row.invited_by) : "") ||
             String(inviter?.user_metadata?.full_name ?? "").trim() ||
             String(inviter?.email ?? "").trim() ||
             "Your Primary Advocate";
