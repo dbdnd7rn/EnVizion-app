@@ -192,7 +192,7 @@ export function ProfileDashboardScreen() {
 
   const settings = [
     { title: "Account, privacy & data", subtitle: "Password, exports, consent and deletion.", icon: "shield-checkmark-outline", route: "PrivacyData" },
-    { title: "Accessibility & display", subtitle: "Text scaling, motion and screen readers.", icon: "accessibility-outline", route: "Accessibility" },
+    { title: "Accessibility & display", subtitle: "Dark theme, text scaling and accessibility.", icon: "accessibility-outline", route: "Accessibility" },
     { title: "Pilot launch validation", subtitle: "Role, device and recovery checks.", icon: "flag-outline", route: "LaunchValidation" },
     { title: "Pilot feedback", subtitle: "Report issues and suggest improvements.", icon: "chatbubble-ellipses-outline", route: "PilotFeedback" },
   ] as const;
