@@ -4,11 +4,12 @@ import * as DocumentPicker from "expo-document-picker";
 import { File as ExpoFile } from "expo-file-system";
 import { useAuth } from "./auth";
 import { supabase } from "./supabase";
+import {
+  PROFILE_PHOTO_MIME_TYPES, isOwnProfilePhoto,
+  profilePhotoExtension, validateProfilePhoto,
+} from "./profileAvatarHelpers";
 
 const BUCKET = "caregiver-avatars";
-const MAX_BYTES = 5 * 1024 * 1024;
-const MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
 type AvatarContextValue = {
   url: string | null;
   path: string | null;
@@ -20,10 +21,6 @@ type AvatarContextValue = {
 };
 
 const AvatarContext = createContext<AvatarContextValue | null>(null);
-
-function extensionFor(mime: string): string {
-  return mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg";
-}
 
 async function signedAvatarUrl(path: string): Promise<string> {
   const result = await supabase.storage.from(BUCKET).createSignedUrl(path, 60 * 60);
@@ -37,6 +34,7 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const [path, setPath] = useState<string | null>(null);
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -45,6 +43,7 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
     if (!userId) {
       setPath(null);
       setUrl(null);
+      setLoadedUserId(null);
       return;
     }
     const { data, error: queryError } = await supabase
@@ -60,6 +59,7 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
       : null;
     setPath(nextPath);
     setUrl(nextUrl);
+    setLoadedUserId(userId);
   }, [userId]);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
     setError("");
     try {
       const picked = await DocumentPicker.getDocumentAsync({
-        type: MIME_TYPES,
+        type: [...PROFILE_PHOTO_MIME_TYPES],
         multiple: false,
         copyToCacheDirectory: true,
       });
@@ -98,18 +98,13 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
         ? asset.file
         : new ExpoFile(asset.uri);
       const mime = (asset.mimeType || file.type || "").toLowerCase();
-      if (!MIME_TYPES.includes(mime)) {
-        throw new Error("Please choose a JPEG, PNG, or WebP photo.");
-      }
-      if (file.size === 0 || file.size > MAX_BYTES) {
-        throw new Error("Choose a photo smaller than 5 MB.");
-      }
+      const validation = validateProfilePhoto(mime, file.size);
+      if (validation) throw new Error(validation);
       setBusy(true);
       const data = await file.arrayBuffer();
-      if (!data.byteLength || data.byteLength > MAX_BYTES) {
-        throw new Error("Choose a photo smaller than 5 MB.");
-      }
-      const nextPath = `${userId}/avatar-${Date.now()}.${extensionFor(mime)}`;
+      const dataIssue = validateProfilePhoto(mime, data.byteLength);
+      if (dataIssue) throw new Error(dataIssue);
+      const nextPath = `${userId}/avatar-${Date.now()}.${profilePhotoExtension(mime)}`;
       const upload = await supabase.storage.from(BUCKET).upload(nextPath, data, {
         contentType: mime,
         cacheControl: "3600",
@@ -125,7 +120,8 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
         const previousPath = path;
         setPath(nextPath);
         setUrl(nextUrl);
-        if (previousPath && previousPath.startsWith(userId + "/")) {
+        setLoadedUserId(userId);
+        if (isOwnProfilePhoto(previousPath, userId)) {
           void supabase.storage.from(BUCKET).remove([previousPath]);
         }
       } catch (failure) {
@@ -152,7 +148,8 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
       const previousPath = path;
       setPath(null);
       setUrl(null);
-      if (previousPath?.startsWith(userId + "/")) {
+      setLoadedUserId(userId);
+      if (isOwnProfilePhoto(previousPath, userId)) {
         void supabase.storage.from(BUCKET).remove([previousPath]);
       }
       return true;
@@ -165,8 +162,10 @@ export function ProfileAvatarProvider({ children }: { children: React.ReactNode 
   }, [busy, path, userId]);
 
   const value = useMemo(() => ({
-    path, url, busy, error, pickAndUpload, remove, refresh,
-  }), [path, url, busy, error, pickAndUpload, remove, refresh]);
+    path: loadedUserId === userId ? path : null,
+    url: loadedUserId === userId ? url : null,
+    busy, error, pickAndUpload, remove, refresh,
+  }), [path, url, busy, error, pickAndUpload, remove, refresh, loadedUserId, userId]);
 
   return <AvatarContext.Provider value={value}>{children}</AvatarContext.Provider>;
 }
