@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { validateAssistantDraft } from "../src/assistant/careAI.ts";
+import { validateAssistantDraft } from "../src/assistant/validateAssistantDraft.ts";
 
 test("reminder AI drafts are strictly validated and cannot be silently executed", () => {
   assert.deepEqual(validateAssistantDraft({
