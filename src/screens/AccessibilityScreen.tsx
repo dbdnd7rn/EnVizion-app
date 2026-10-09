@@ -20,7 +20,7 @@ import {
   S,
   Section,
   Txt,
-} from "../ui";
+} from "./ProfileLinkedUI";
 
 export function AccessibilityScreen() {
   const [fontScale, setFontScale] = useState(PixelRatio.getFontScale());
@@ -69,8 +69,8 @@ export function AccessibilityScreen() {
     <Page>
       <Heading
         eyebrow="ACCESSIBILITY & DISPLAY"
-        title="Built to adapt to the way you use your device."
-        body="EnVizion follows system text scaling and reduced-motion preferences, uses labelled controls, and keeps primary touch targets at least 44 points high."
+        title="Comfort in every detail."
+        body="Your device's text, motion and accessibility preferences guide your experience."
       />
 
       <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
