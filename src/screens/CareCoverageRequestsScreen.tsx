@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -777,7 +778,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                           style={{
                             padding: 12,
                             borderRadius: 13,
-                            backgroundColor: C.white,
+                            backgroundColor: themeBackground(C.white),
                             borderWidth: 1,
                             borderColor: C.line,
                             gap: 5,
