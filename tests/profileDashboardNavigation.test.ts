@@ -24,11 +24,14 @@ test("care overview statistics are not misleading duplicates of Care team naviga
   assert.doesNotMatch(summary, /navigate\(/);
 });
 
-test("Care team & sharing remains the one clear navigation destination", () => {
-  const destinations = profile.match(/route: "CareTeam"/g) ?? [];
-  assert.equal(destinations.length, 1);
-  assert.match(profile, /title: "Care team & sharing"/);
-  assert.match(profile, /onPress=\{\(\) => n\.navigate\(item\.route\)\}/);
+test("profile keeps account settings separate from the Care tab", () => {
+  assert.match(profile, /Account & preferences/);
+  assert.match(profile, /Account, privacy & data/);
+  assert.match(profile, /Accessibility & display/);
+  assert.match(profile, /Notification preferences/);
+  assert.doesNotMatch(profile, /route: "CareTeam"/);
+  assert.doesNotMatch(profile, /route: "CareCoordinationInbox"/);
+  assert.doesNotMatch(profile, /route: "CareTasks"/);
 });
 
 test("account overview is display-only and profile photo editor remains available", () => {
