@@ -21,6 +21,7 @@ import {
   Section,
   Txt,
 } from "../ui";
+import { OnboardingWelcomeStep } from "../components/OnboardingWelcomeStep";
 import { useNav } from "./MainScreens";
 import { printResource } from "../printing";
 import { useAuth } from "../auth";
@@ -475,54 +476,19 @@ export function OnboardingScreen() {
 
   return (
     <Page>
-      <View style={S.between}>
-        <Brand />
-        <Text style={S.small}>WELCOME • {step + 1} / 3</Text>
-      </View>
+      {step > 0 && (
+        <View style={S.between}>
+          <Brand />
+          <Text style={S.small}>WELCOME • {step + 1} / 3</Text>
+        </View>
+      )}
 
       {step === 0 ? (
-        <>
-          <View style={{ borderRadius: 28, overflow: "hidden" }}>
-            <Landscape height={240} />
-          </View>
-          <Heading
-            eyebrow="FAITH. CLARITY. COMPASSION."
-            title={"Care is a journey.\nLet’s walk together."}
-            body="A calmer place to organize care, prepare for appointments, coordinate family, and keep important information close."
-          />
-          <View style={{ gap: 17 }}>
-            {[
-              [
-                "heart-outline",
-                "Organize everyday care",
-                "Keep medicines, appointments, observations, and tasks together.",
-              ],
-              [
-                "people-outline",
-                "Coordinate the people around care",
-                "Share the right information with family and caregivers.",
-              ],
-              [
-                "shield-checkmark-outline",
-                "Be ready when it matters",
-                "Keep important care information easier to find in urgent moments.",
-              ],
-            ].map(([icon, title, body]) => (
-              <View key={title} style={S.row}>
-                <Icon name={icon} size={24} />
-                <View style={{ flex: 1 }}>
-                  <Text style={S.h3}>{title}</Text>
-                  <Txt>{body}</Txt>
-                </View>
-              </View>
-            ))}
-          </View>
-          <Button
-            title="Let’s get started"
-            icon="arrow-forward"
-            onPress={() => setStep(1)}
-          />
-        </>
+        <OnboardingWelcomeStep
+          step={step}
+          totalSteps={3}
+          onContinue={() => setStep(1)}
+        />
       ) : step === 1 ? (
         <>
           <Heading
