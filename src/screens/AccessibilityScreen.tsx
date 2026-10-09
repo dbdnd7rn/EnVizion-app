@@ -73,27 +73,28 @@ export function AccessibilityScreen() {
         body="Your device's text, motion and accessibility preferences guide your experience."
       />
 
-      <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-        <Card style={{ flex: 1, minWidth: 145 }}>
-          <Text style={S.eyebrow}>TEXT SIZE</Text>
-          <Text style={S.h3}>{readiness.fontScaleLabel}</Text>
-          <Txt style={S.small}>System scale {fontScale.toFixed(2)}×</Txt>
-        </Card>
-        <Card style={{ flex: 1, minWidth: 145 }}>
-          <Text style={S.eyebrow}>MOTION</Text>
-          <Text style={S.h3}>
-            {reduceMotion ? "Reduced motion on" : "Standard motion"}
-          </Text>
-          <Txt style={S.small}>Animations respect the system preference.</Txt>
-        </Card>
-        <Card style={{ flex: 1, minWidth: 145 }}>
-          <Text style={S.eyebrow}>SCREEN READER</Text>
-          <Text style={S.h3}>{screenReader ? "Active" : "Not detected"}</Text>
-          <Txt style={S.small}>
-            Interactive controls expose labels and roles.
-          </Txt>
-        </Card>
-      </View>
+      <Card style={{ backgroundColor: "#F7F0FC", paddingHorizontal: 8, paddingVertical: 19 }}>
+        <Text style={[S.eyebrow, { paddingHorizontal: 9 }]}>YOUR DEVICE RIGHT NOW</Text>
+        <View style={{ flexDirection: "row", alignItems: "stretch" }}>
+          {[
+            { icon: "text-outline", label: "Text size", value: readiness.fontScaleLabel, detail: fontScale.toFixed(2) + "× scale" },
+            { icon: "sparkles-outline", label: "Motion", value: reduceMotion ? "Reduced" : "Standard", detail: "System setting" },
+            { icon: "accessibility-outline", label: "Screen reader", value: screenReader ? "Active" : "Off", detail: screenReader ? "Detected" : "Not detected" },
+          ].map((item, index) => (
+            <React.Fragment key={item.label}>
+              {index > 0 && <View style={{ width: 1, marginVertical: 7, backgroundColor: "#E2D3EA" }} />}
+              <View style={{ flex: 1, minWidth: 0, alignItems: "center", gap: 5, paddingHorizontal: 6 }}>
+                <Icon name={item.icon} color={C.purple} size={23}/>
+                <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 12.5, lineHeight: 18, color: C.ink, textAlign: "center" }}>
+                  {item.value}
+                </Text>
+                <Text style={[S.small, { fontSize: 10.5, textAlign: "center" }]}>{item.label}</Text>
+                <Text style={[S.small, { fontSize: 9.5, textAlign: "center" }]}>{item.detail}</Text>
+              </View>
+            </React.Fragment>
+          ))}
+        </View>
+      </Card>
 
       <Section title="Interaction contract" />
       <Card>
