@@ -24,6 +24,8 @@ import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { AuthProvider, AuthScreen, PasswordRecoveryScreen, useAuth } from "./src/auth";
 import { withStartupTimeout } from "./src/startupTimeout";
 import { CareProvider } from "./src/store";
+import { ProfileAvatarProvider } from "./src/profileAvatar";
+import { ProfileDashboardScreen } from "./src/screens/ProfileDashboardScreen";
 import { CarePresenceProvider } from "./src/CarePresenceProvider";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
@@ -104,7 +106,6 @@ import {
   SpecialistScreen,
   CoachingScreen,
   ResourcesScreen,
-  ProfileScreen,
 } from "./src/screens/SupportScreens";
 import { WellnessScreen } from "./src/screens/WellnessScreen";
 
@@ -557,7 +558,7 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
           />
           <Stack.Screen
             name="Profile"
-            component={ProfileScreen}
+            component={ProfileDashboardScreen}
             options={{ title: "Your profile" }}
           />
           <Stack.Screen
@@ -879,9 +880,11 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
   if (staff) return <StaffSignedInApp reducedMotion={reducedMotion} />;
 
   return (
-    <PilotConsentGate>
-      <SignedInApp reducedMotion={reducedMotion} />
-    </PilotConsentGate>
+    <ProfileAvatarProvider>
+      <PilotConsentGate>
+        <SignedInApp reducedMotion={reducedMotion} />
+      </PilotConsentGate>
+    </ProfileAvatarProvider>
   );
 }
 
