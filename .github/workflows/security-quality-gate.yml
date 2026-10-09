@@ -23,9 +23,6 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --no-audit
 
-      - name: Dependency security audit
-        run: node scripts/security-audit.mjs
-
       - name: TypeScript
         run: npm run typecheck
 
@@ -37,3 +34,8 @@ jobs:
 
       - name: Production artifact smoke
         run: npm run smoke:dist
+
+      # Keep security enforcement blocking, but run typecheck/tests first so
+      # pre-existing advisories cannot conceal unrelated application failures.
+      - name: Dependency security audit
+        run: node scripts/security-audit.mjs
