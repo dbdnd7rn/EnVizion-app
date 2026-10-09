@@ -14,9 +14,11 @@ import {
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
 import { C as BaseC, Icon, S as BaseS } from "../ui";
+import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder } from "../themeColors";
+import { useAppearance } from "../appearance";
 
 export { Icon };
-export const C = {
+export const C = createPalette({
   ...BaseC,
   ink: "#15113C",
   muted: "#77718A",
@@ -25,8 +27,8 @@ export const C = {
   lavender: "#F4EBFA",
   paper: "#FFFCFB",
   line: "#E8DDF0",
-};
-export const S = {
+});
+export const S = themedStyles({
   ...BaseS,
   title: { ...BaseS.title, fontFamily: "Lora_500Medium", fontSize: 31, lineHeight: 40, letterSpacing: -0.95, color: C.ink },
   h2: { ...BaseS.h2, fontFamily: "Lora_500Medium", fontSize: 24, lineHeight: 32, letterSpacing: -0.6, color: C.ink },
@@ -49,7 +51,7 @@ export const S = {
     shadowOffset: { width: 0, height: 7 },
     elevation: 2,
   },
-};
+});
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(true);
@@ -65,6 +67,7 @@ function useReducedMotion() {
 }
 
 export function Page({ children }: { children: React.ReactNode }) {
+  useAppearance();
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: C.paper }}
@@ -123,9 +126,9 @@ export function Heading({ eyebrow, title, body }: { eyebrow?: string; title: str
         style={{
           borderRadius: 27,
           borderWidth: 1,
-          borderColor: "#E8DDF0",
+          borderColor: themeBorder("#E8DDF0"),
           overflow: "hidden",
-          backgroundColor: "#FAF4FD",
+          backgroundColor: themeBackground("#FAF4FD"),
           paddingHorizontal: 19,
           paddingVertical: 22,
           minHeight: 180,
@@ -173,7 +176,7 @@ export function Section({
             borderRadius: 18,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#F3E9FA",
+            backgroundColor: themeBackground("#F3E9FA"),
             opacity: pressed ? 0.7 : 1,
           })}
         >
@@ -238,7 +241,7 @@ export function Field({
           focused && { borderColor: C.purple, borderWidth: 2 },
         ]}
         placeholder={numeric ? "0" : "Write here…"}
-        placeholderTextColor="#9B91A7"
+        placeholderTextColor={themeForeground("#9B91A7")}
       />
     </View>
   );
@@ -268,8 +271,8 @@ export function Button({
         paddingHorizontal: 18,
         paddingVertical: 13,
         borderWidth: secondary ? 1 : 0,
-        borderColor: destructive ? "#F0CFD8" : "#E7D8F0",
-        backgroundColor: secondary ? destructive ? "#FFF1F4" : "#F4E9FB" : tone,
+        borderColor: themeBorder(destructive ? "#F0CFD8" : "#E7D8F0"),
+        backgroundColor: secondary ? themeBackground(destructive ? "#FFF1F4" : "#F4E9FB") : tone,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
