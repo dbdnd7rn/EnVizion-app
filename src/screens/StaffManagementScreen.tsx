@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -53,7 +54,7 @@ function RolePicker({
               minHeight: 42,
               justifyContent: "center",
               paddingHorizontal: 14,
-              backgroundColor: value === role ? C.purple : C.lavender,
+              backgroundColor: value === role ? themeAction(C.purple) : C.lavender,
               opacity: disabled ? 0.5 : 1,
             },
           ]}

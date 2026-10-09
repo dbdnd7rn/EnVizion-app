@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -312,7 +313,7 @@ export function StaffWorkspaceScreen() {
               minHeight: 46,
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: section === "support" ? C.purple : C.lavender,
+              backgroundColor: section === "support" ? themeAction(C.purple) : C.lavender,
             },
           ]}
         >
@@ -340,7 +341,7 @@ export function StaffWorkspaceScreen() {
                 minHeight: 46,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: section === "coaching" ? C.purple : C.lavender,
+                backgroundColor: section === "coaching" ? themeAction(C.purple) : C.lavender,
               },
             ]}
           >
