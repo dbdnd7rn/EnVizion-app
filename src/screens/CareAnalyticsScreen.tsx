@@ -1,3 +1,4 @@
+import { themeShadow } from "../themeColors";
 import React, {
   useCallback,
   useEffect,
@@ -1457,7 +1458,7 @@ export function CareAnalyticsScreen() {
                 padding: 17,
                 gap: 14,
                 overflow: "hidden",
-                shadowColor: "#583267",
+                shadowColor: themeShadow("#583267"),
                 shadowOpacity: 0.045,
                 shadowRadius: 15,
                 shadowOffset: { width: 0, height: 6 },

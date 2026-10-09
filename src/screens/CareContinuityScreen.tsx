@@ -1,3 +1,4 @@
+import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -449,7 +450,7 @@ export function CareContinuityScreen() {
         </View>
 
         <View style={{ flexDirection: "row", gap: 10, flexWrap: "wrap" }}>
-          <Card style={{ flex: 1, minWidth: 140, backgroundColor: C.white }}>
+          <Card style={{ flex: 1, minWidth: 140, backgroundColor: themeBackground(C.white) }}>
             <Text style={S.eyebrow}>CARE NOW</Text>
             <Text style={S.h3}>
               {coverageBridge.currentCaregiverId
@@ -475,7 +476,7 @@ export function CareContinuityScreen() {
             )}
           </Card>
 
-          <Card style={{ flex: 1, minWidth: 140, backgroundColor: C.white }}>
+          <Card style={{ flex: 1, minWidth: 140, backgroundColor: themeBackground(C.white) }}>
             <Text style={S.eyebrow}>NEXT SCHEDULED</Text>
             <Text style={S.h3}>
               {coverageBridge.nextShift
@@ -697,7 +698,7 @@ export function CareContinuityScreen() {
                   minHeight: 42,
                   justifyContent: "center",
                   paddingHorizontal: 13,
-                  backgroundColor: selected ? C.purple : C.lavender,
+                  backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                 },
               ]}
             >
