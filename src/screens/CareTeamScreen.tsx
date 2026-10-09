@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import {
   inviteCareTeamMember,
   loadCareSpaces,
@@ -17,6 +17,7 @@ import {
   type CareTeamMember,
 } from "../careTeam";
 import { useCare } from "../store";
+import { ProfileAvatar } from "../profileAvatar";
 import {
   Button,
   C,
@@ -128,6 +129,60 @@ function RolePicker({
   );
 }
 
+
+const P="#70338F", INK="#19163D", MUTED="#77728D";
+function Glass({children,style,tint="#F1E4FB"}:{
+  children:React.ReactNode;style?:any;tint?:string
+}) {
+ return <View style={[{backgroundColor:"#FBF8FDEA",borderColor:"#FFFFFF",borderWidth:1,
+    borderRadius:27,padding:16,gap:13,overflow:"hidden",
+    shadowColor:"#59356B",shadowOpacity:0.09,shadowRadius:17,
+    shadowOffset:{width:0,height:8},elevation:2},style]}>
+   <View pointerEvents="none" style={{position:"absolute",right:-70,top:-85,
+     width:175,height:175,borderRadius:100,backgroundColor:tint,opacity:0.66}}/>
+   <View pointerEvents="none" style={{position:"absolute",left:-55,bottom:-75,
+     width:120,height:120,borderRadius:70,backgroundColor:"#EEDDF8",opacity:0.42}}/>
+   {children}
+ </View>;
+}
+function Chip({text,active=false}:{text:string;active?:boolean}){
+ return <View style={{backgroundColor:active?"#E4F3EC":"#F1EDF5",
+   borderRadius:30,paddingHorizontal:10,paddingVertical:7,
+   flexDirection:"row",gap:5,alignItems:"center"}}>
+   {active&&<View style={{height:7,width:7,borderRadius:4,backgroundColor:"#15986B"}}/>}
+   <Text numberOfLines={1} style={{fontFamily:"DMSans_600SemiBold",
+     fontSize:11,color:active?"#15966B":"#706584"}}>{text}</Text>
+ </View>;
+}
+function MemberFace({member}:{member:CareTeamMember}){
+ if(member.isCurrentUser)return <ProfileAvatar name={member.displayName} size={47}/>;
+ return <View style={{height:47,width:47,borderRadius:24,alignItems:"center",
+   justifyContent:"center",backgroundColor:"#EFE4F9",borderWidth:2,borderColor:"#FFFFFF"}}>
+   <Text style={{color:P,fontSize:17,fontFamily:"DMSans_700Bold"}}>
+     {(member.displayName.trim()[0]||"?").toUpperCase()}
+   </Text></View>;
+}
+function ToolLink({title,detail,icon,onPress,tint="#F1E6FB"}:{
+ title:string;detail:string;icon:string;onPress:()=>void;tint?:string
+}){
+ return <Pressable accessibilityRole="button" accessibilityLabel={title}
+ onPress={onPress} style={({pressed})=>({opacity:pressed?0.72:1})}>
+   <Glass tint={tint} style={{padding:15}}>
+     <View style={{flexDirection:"row",alignItems:"center",gap:12}}>
+       <View style={{width:44,height:44,borderRadius:16,alignItems:"center",
+       justifyContent:"center",backgroundColor:tint}}>
+       <Icon name={icon} size={22} color={P}/></View>
+       <View style={{flex:1,gap:3}}>
+         <Text style={{fontFamily:"DMSans_700Bold",fontSize:15,color:INK}}>{title}</Text>
+         <Text style={{fontFamily:"DMSans_400Regular",fontSize:12,color:MUTED,
+           lineHeight:18}}>{detail}</Text>
+       </View>
+       <Icon name="chevron-forward" size={19} color={P}/>
+     </View>
+   </Glass>
+ </Pressable>;
+}
+
 export function CareTeamScreen() {
   const n = useNav();
   const { state, refresh: refreshCare } = useCare();
@@ -139,6 +194,8 @@ export function CareTeamScreen() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [expandedMember, setExpandedMember] = useState<string | null>(null);
+  const [showTools, setShowTools] = useState(false);
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] =
@@ -271,44 +328,63 @@ export function CareTeamScreen() {
     }
   }
 
+
   if (loading && !spaces.length && !pending.length) {
-    return (
-      <Page>
-        <ActivityIndicator color={C.purple} />
-        <Txt>Loading your care team…</Txt>
-      </Page>
-    );
+    return <Page><ActivityIndicator color={P}/><Txt>Loading your care team…</Txt></Page>;
   }
-
-  return (
-    <Page>
-      <Heading
-        eyebrow="CARE TEAM & SHARING"
-        title="Care is easier when the right people can help."
-        body="Choose who can see this care profile, who can make updates, and which care space you’re working in."
-      />
-
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E5C8ED" }]}>ACTIVE CARE PROFILE</Text>
-        <Text style={[S.h2, { color: C.white }]}>
-          {state.careRecipientName || "Care profile"}
+  return <Page>
+    <View style={{gap:5,marginBottom:2}}>
+      <Text accessibilityRole="header" style={{
+        fontFamily:"DMSans_700Bold",fontSize:23,color:INK}}>Care team & sharing</Text>
+      <Text style={{fontFamily:"DMSans_400Regular",fontSize:13.5,
+        lineHeight:20,color:MUTED}}>Care is easier when the right people can help.</Text>
+    </View>
+    <Glass tint="#E7D3F7" style={{backgroundColor:"#F6EBFBDD"}}>
+      <View style={{flexDirection:"row",alignItems:"center",gap:13}}>
+        {state.careMode==="self" ? (
+          <ProfileAvatar name={state.careRecipientName||state.name||"Care profile"} size={84}/>
+        ) : (
+          <View style={{height:84,width:84,borderRadius:42,borderWidth:4,
+            borderColor:"#FFFFFF",backgroundColor:"#E9DAF7",alignItems:"center",
+            justifyContent:"center"}}>
+            <Text style={{fontFamily:"DMSans_700Bold",fontSize:29,color:P}}>
+              {(state.careRecipientName.trim()[0]||"C").toUpperCase()}
+            </Text>
+          </View>
+        )}
+        <View style={{flex:1,gap:5}}>
+          <Text style={[S.eyebrow,{color:P,letterSpacing:1.5}]}>ACTIVE CARE PROFILE</Text>
+          <Text numberOfLines={2} style={{fontFamily:"DMSans_700Bold",fontSize:23,
+            color:INK}}>{state.careRecipientName||"Care profile"}</Text>
+          <Text style={{fontFamily:"DMSans_600SemiBold",fontSize:12.5,
+            color:"#615477"}}>{roleLabel(state.accessRole)} access</Text>
+          <View style={{alignSelf:"flex-start"}}><Chip text="Active" active/></View>
+        </View>
+      </View>
+      <Text style={{fontSize:12.5,lineHeight:19,color:MUTED,
+        fontFamily:"DMSans_400Regular"}}>
+        {state.accessRole==="viewer"||state.accessRole==="patient"?
+          "View your shared care records in one secure space.":
+          "Update shared care records and manage who has access."}
+      </Text>
+      <Pressable accessibilityRole="button" accessibilityLabel="Edit your account profile picture"
+        onPress={()=>n.navigate("Profile")} style={({pressed})=>({
+        flexDirection:"row",alignItems:"center",gap:9,padding:8,
+        backgroundColor:"#FFFFFFB9",borderRadius:20,opacity:pressed?0.7:1
+      })}>
+        <ProfileAvatar name={state.name||"My account"} size={33}/>
+        <Text style={{flex:1,fontFamily:"DMSans_600SemiBold",fontSize:12,color:P}}>
+          My profile picture
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
-          {roleLabel(state.accessRole)} access
-          {state.accessRole === "viewer" || state.accessRole === "patient"
-            ? " · read-only"
-            : " · can update shared care records"}
-        </Txt>
-      </Card>
-
-      {Boolean(message) && (
-        <Card style={{ backgroundColor: C.white }}>
-          <Text accessibilityRole="alert" style={S.body}>
-            {message}
-          </Text>
-        </Card>
-      )}
-
+        <Icon name="camera-outline" size={18} color={P}/>
+      </Pressable>
+    </Glass>
+    {Boolean(message)&&(
+      <View style={{backgroundColor:"#F9F1FC",padding:13,borderRadius:17,
+        borderWidth:1,borderColor:"#E7D4EE"}}>
+        <Text accessibilityRole="alert" style={{fontSize:12.5,color:INK}}>{message}</Text>
+      </View>
+    )}
       {pending.length > 0 && (
         <>
           <Section title="Invitations waiting for you" />
@@ -372,136 +448,56 @@ export function CareTeamScreen() {
         </>
       )}
 
-      <Section title="Your care spaces" />
-      {spaces.map((space) => (
-        <Card
-          key={space.careRecipientId}
-          onPress={() => void switchSpace(space)}
-          label={space.active ? `${space.careRecipientName}, active care profile` : `Switch to ${space.careRecipientName}`}
-          style={{
-            borderColor: space.active ? "#CBB2D6" : C.line,
-            backgroundColor: space.active ? "#F6F0F8" : C.white,
-          }}
-        >
-          <View style={S.between}>
-            <View style={{ flex: 1 }}>
-              <Text style={S.h3}>{space.careRecipientName}</Text>
-              <Txt>
-                {space.relationship} · {roleLabel(space.role)}
-              </Txt>
-            </View>
-            {space.active ? (
-              <View style={[S.pill, { backgroundColor: "#E8F1ED" }]}>
-                <Text style={[S.small, { color: C.green }]}>Active</Text>
-              </View>
-            ) : (
-              <Icon name="swap-horizontal-outline" />
-            )}
-          </View>
-        </Card>
-      ))}
 
-      {canManage && recipientId && (
-        <>
-          <Section title="Invitation management" />
-          <Card
-            style={{
-              backgroundColor: "#FBF8FC",
-              borderColor: "#E7DCEB",
-              gap: 15,
-            }}
-          >
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              {[
-                ["Pending", invitationSummary.pending, "#F6EEF9"],
-                ["Active", invitationSummary.active, "#EAF3EE"],
-                ["Expired", invitationSummary.expired, "#FFF3E6"],
-                ["Closed", invitationSummary.closed, "#F2EFF3"],
-              ].map(([label, value, background]) => (
-                <View
-                  key={String(label)}
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    borderRadius: 16,
-                    paddingVertical: 11,
-                    paddingHorizontal: 8,
-                    backgroundColor: String(background),
-                    alignItems: "center",
-                    gap: 3,
-                  }}
-                >
-                  <Text style={[S.h3, { fontSize: 18 }]}>{String(value)}</Text>
-                  <Text
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    style={[S.small, { textAlign: "center" }]}
-                  >
-                    {String(label)}
-                  </Text>
-                </View>
-              ))}
+    <Glass tint="#EEE3FB">
+      <View style={{flexDirection:"row",alignItems:"center",gap:9}}>
+        <View style={{height:42,width:42,borderRadius:16,backgroundColor:"#F1E7FC",
+          justifyContent:"center",alignItems:"center"}}>
+          <Icon name="people-outline" size={23} color={P}/>
+        </View>
+        <View style={{flex:1,gap:3}}>
+          <Text accessibilityRole="header" style={{fontFamily:"DMSans_700Bold",
+            fontSize:18,color:INK}}>People with access</Text>
+          <Text style={{fontSize:11.5,color:MUTED}}>Your trusted care team</Text>
+        </View>
+        <Pressable accessibilityRole="button" accessibilityLabel="Refresh members"
+          disabled={loading} onPress={()=>void refresh()}
+          style={({pressed})=>({paddingVertical:10,paddingHorizontal:11,
+            borderRadius:22,backgroundColor:"#FFFFFFBA",borderWidth:1,
+            borderColor:"#F0E3F6",flexDirection:"row",alignItems:"center",
+            gap:5,opacity:pressed||loading?0.6:1})}>
+          <Icon name="refresh-outline" size={15} color={P}/>
+          <Text style={{color:P,fontSize:11,fontFamily:"DMSans_600SemiBold"}}>Refresh</Text>
+        </Pressable>
+      </View>
+      {!members.length&&<Text style={{color:MUTED,fontSize:12.5,lineHeight:19}}>
+        No members are listed for this care profile yet.
+      </Text>}
+      {members.map(member=>(
+        <View key={member.userId} style={{backgroundColor:"#FFFFFFE9",
+          borderRadius:21,borderColor:"#FFFFFF",borderWidth:1,padding:11,gap:11}}>
+          <Pressable accessibilityRole="button"
+            accessibilityLabel={member.displayName+", "+roleLabel(member.role)+". Details"}
+            accessibilityState={{expanded:expandedMember===member.userId}}
+            onPress={()=>setExpandedMember(id=>id===member.userId?null:member.userId)}
+            style={({pressed})=>({flexDirection:"row",alignItems:"center",gap:10,
+              minHeight:52,opacity:pressed?0.73:1})}>
+            <MemberFace member={member}/>
+            <View style={{flex:1,gap:4}}>
+              <Text numberOfLines={1} style={{fontFamily:"DMSans_700Bold",
+                fontSize:14.5,color:INK}}>{member.displayName}</Text>
+              <Text numberOfLines={1} style={{fontFamily:"DMSans_400Regular",
+                fontSize:12,color:MUTED}}>{roleLabel(member.role)}</Text>
             </View>
-
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Icon name="time-outline" size={20} color={C.purple} />
-              <Txt style={[S.small, { flex: 1 }]}>
-                New invitations stay open for 14 days. A Primary Advocate can
-                send one in-app reminder per 24 hours or re-open an expired
-                invitation.
-              </Txt>
-            </View>
-
-            <View style={{ flexDirection: "row", gap: 10 }}>
-              <Icon name="mail-outline" size={20} color={C.purple} />
-              <Txt style={[S.small, { flex: 1 }]}>
-                “Email requested” means EnVizion successfully handed the invite
-                to the email provider. It does not claim that the message was
-                delivered or opened.
-              </Txt>
-            </View>
-          </Card>
-        </>
-      )}
-
-      <Section title="People with access" action="Refresh" onPress={() => void refresh()} />
-      {members.map((member) => (
-        <Card key={member.userId}>
-          <View style={S.between}>
-            <View style={{ flex: 1 }}>
-              <Text style={S.h3}>{member.displayName}</Text>
-              {Boolean(member.email) && <Text style={S.small}>{member.email}</Text>}
-            </View>
-            <View
-              style={[
-                S.pill,
-                {
-                  backgroundColor:
-                    member.status === "active" ? "#E8F1ED" : C.lavender,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  S.small,
-                  {
-                    color: member.status === "active" ? C.green : C.deep,
-                    fontFamily: "DMSans_600SemiBold",
-                  },
-                ]}
-              >
-                {invitationStatusLabel(member)}
-              </Text>
-            </View>
-          </View>
-
-          <Txt>
-            {roleLabel(member.role)}
-            {member.role === "viewer" || member.role === "patient"
-              ? " · read-only"
-              : ""}
-          </Txt>
-
+            <Chip text={invitationStatusLabel(member)} active={member.status==="active"}/>
+            <Icon name={expandedMember===member.userId?"chevron-up":"chevron-forward"}
+              size={17} color="#897B96"/>
+          </Pressable>
+          {expandedMember===member.userId&&(
+            <View style={{gap:12,borderTopWidth:1,borderColor:"#F0E7F5",paddingTop:10}}>
+              {Boolean(member.email)&&<Text selectable style={{fontSize:12,color:MUTED}}>
+                {member.email}
+              </Text>}
           {member.status === "invited" && (
             <View
               style={{
@@ -674,183 +670,157 @@ export function CareTeamScreen() {
               )}
             </>
           )}
-        </Card>
+
+            </View>
+          )}
+        </View>
       ))}
+    </Glass>
 
-      {canManage && recipientId && (
-        <>
-          <Section title="Invite someone you trust" />
-          <Card>
-            <Field
-              label="Name"
-              value={inviteName}
-              onChange={setInviteName}
-            />
-            <Field
-              label="Email address"
-              value={inviteEmail}
-              onChange={setInviteEmail}
-            />
-            <Text style={S.h3}>Access level</Text>
-            <RolePicker
-              value={inviteRole}
-              disabled={busyId !== null}
-              onChange={setInviteRole}
-            />
-            <Txt style={S.small}>
-              Co-Caregiver can view and update shared care records. Care
-              Recipient can view their shared care record. Family Member can
-              read shared updates but cannot change medical data.
-            </Txt>
-            <Button
-              title={busyId === "invite-new" ? "Sending invitation…" : "Invite to care team"}
-              icon="person-add-outline"
-              disabled={
-                busyId !== null || !inviteName.trim() || !inviteEmail.trim()
-              }
-              onPress={() => void invite()}
-            />
-          </Card>
-        </>
-      )}
+    {canManage&&recipientId&&(
+      <Glass tint="#F3E8FA">
+        <View style={{flexDirection:"row",gap:11,alignItems:"center"}}>
+          <View style={{width:43,height:43,borderRadius:16,
+            backgroundColor:"#F0E4FB",justifyContent:"center",alignItems:"center"}}>
+            <Icon name="person-add-outline" size={23} color={P}/>
+          </View>
+          <View style={{flex:1,gap:3}}>
+            <Text accessibilityRole="header" style={{fontFamily:"DMSans_700Bold",
+              fontSize:18,color:INK}}>Invite someone you trust</Text>
+            <Text style={{fontSize:12,color:MUTED}}>Add a family member or caregiver.</Text>
+          </View>
+        </View>
+        <View style={{flexDirection:"row",alignItems:"center",gap:10,
+          backgroundColor:"#FFFFFF",borderRadius:21,borderColor:"#E7DAEF",
+          borderWidth:1,paddingHorizontal:14,minHeight:52}}>
+          <Icon name="person-outline" size={19} color="#93849F"/>
+          <TextInput accessibilityLabel="Full name" placeholder="Full name"
+            placeholderTextColor="#9A8EA6" autoCapitalize="words"
+            value={inviteName} onChangeText={setInviteName} editable={busyId===null}
+            style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:INK,
+              fontFamily:"DMSans_400Regular"}}/>
+        </View>
+        <View style={{flexDirection:"row",alignItems:"center",gap:10,
+          backgroundColor:"#FFFFFF",borderRadius:21,borderColor:"#E7DAEF",
+          borderWidth:1,paddingHorizontal:14,minHeight:52}}>
+          <Icon name="mail-outline" size={19} color="#93849F"/>
+          <TextInput accessibilityLabel="Email address" placeholder="Email address"
+            placeholderTextColor="#9A8EA6" autoCapitalize="none" autoCorrect={false}
+            keyboardType="email-address" value={inviteEmail} onChangeText={setInviteEmail}
+            editable={busyId===null}
+            style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:INK,
+              fontFamily:"DMSans_400Regular"}}/>
+        </View>
+        <Text style={{fontFamily:"DMSans_700Bold",fontSize:13,color:INK}}>Access level</Text>
+        <RolePicker value={inviteRole} disabled={busyId!==null} onChange={setInviteRole}/>
+        <Text style={{fontFamily:"DMSans_400Regular",fontSize:11.5,
+          lineHeight:18,color:MUTED}}>
+          {inviteRole==="caregiver"?"Can view and update shared records.":
+           inviteRole==="patient"?"Can view their shared care record.":
+           "Can read shared updates, without changing medical data."}
+        </Text>
+        <Button title={busyId==="invite-new"?"Sending invitation…":"Send invitation"}
+          icon="person-add-outline"
+          disabled={busyId!==null||!inviteName.trim()||!inviteEmail.trim()}
+          onPress={()=>void invite()}/>
+      </Glass>
+    )}
 
-      {recipientId && (
-        <Card style={{ gap: 10 }}>
-          <Icon name="swap-horizontal-outline" size={26} color={C.purple} />
-          <Text style={S.h2}>Primary Advocate handover</Text>
-          <Txt>Transfer responsibility or respond to a handover request with a clear permission preview.</Txt>
-          <Button title="Review handover" secondary onPress={() => n.navigate("AdvocateHandover")} />
-        </Card>
-      )}
-
-      {canManage && (
-        <>
-          <Section title="90-day access review" />
-          <Card
-            onPress={() => n.navigate("CareAccessRecertification")}
-            label="Open 90-day care access recertification"
-            style={{
-              backgroundColor: "#F7FAF8",
-              borderColor: "#D7E5DB",
-              gap: 12,
-            }}
-          >
-            <View style={S.between}>
-              <View
-                style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: 17,
-                  backgroundColor: "#EAF3EE",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="calendar-outline" size={23} color={C.green} />
+    {recipientId&&(
+      <Glass tint="#F2E8F9">
+        <View style={{flexDirection:"row",alignItems:"center",gap:11}}>
+          <View style={{width:44,height:44,borderRadius:16,
+            backgroundColor:"#FAECEF",justifyContent:"center",alignItems:"center"}}>
+            <Icon name="swap-horizontal-outline" size={24} color={P}/>
+          </View>
+          <View style={{flex:1,gap:4}}>
+            <Text accessibilityRole="header" style={{fontSize:17,
+              color:INK,fontFamily:"DMSans_700Bold"}}>Primary Advocate handover</Text>
+            <Text style={{fontSize:12,color:MUTED,lineHeight:18}}>
+              Transfer responsibility with a clear permissions review.
+            </Text>
+          </View>
+          <Icon name="chevron-forward" color={P} size={19}/>
+        </View>
+        <Button title="Review handover" secondary
+          onPress={()=>n.navigate("AdvocateHandover")}/>
+      </Glass>
+    )}
+    <Pressable accessibilityRole="button" accessibilityLabel="More sharing tools"
+      accessibilityState={{expanded:showTools}}
+      onPress={()=>setShowTools(old=>!old)}
+      style={({pressed})=>({flexDirection:"row",gap:10,alignItems:"center",
+        borderRadius:21,backgroundColor:"#F2E9F8",
+        borderWidth:1,borderColor:"#E6D8EE",padding:15,
+        opacity:pressed?0.75:1})}>
+      <Icon name="settings-outline" size={21} color={P}/>
+      <Text style={{flex:1,fontFamily:"DMSans_700Bold",fontSize:14.5,color:P}}>
+        More sharing tools
+      </Text>
+      <Icon name={showTools?"chevron-up":"chevron-down"} size={19} color={P}/>
+    </Pressable>
+    {showTools&&(
+      <View style={{gap:13}}>
+        <Glass>
+          <Text accessibilityRole="header" style={[S.h3,{color:INK}]}>Your care spaces</Text>
+          {!spaces.length&&<Txt>No care spaces yet.</Txt>}
+          {spaces.map(space=>(
+            <Pressable key={space.careRecipientId} accessibilityRole="button"
+              accessibilityLabel={space.active?space.careRecipientName+", active":
+                "Switch to "+space.careRecipientName}
+              disabled={space.active||busyId!==null}
+              onPress={()=>void switchSpace(space)}
+              style={({pressed})=>({backgroundColor:"#FFFFFFCC",padding:12,
+                borderRadius:17,flexDirection:"row",gap:12,alignItems:"center",
+                opacity:pressed?0.7:1})}>
+              <View style={{flex:1,gap:4}}>
+                <Text style={[S.h3,{fontSize:14}]}>{space.careRecipientName}</Text>
+                <Text style={S.small}>{space.relationship} · {roleLabel(space.role)}</Text>
               </View>
-              <Icon name="chevron-forward" size={20} color={C.purple} />
-            </View>
-            <View style={{ gap: 5 }}>
-              <Text style={S.h2}>Periodic Access Recertification</Text>
-              <Txt>
-                Every 90 days, reconfirm whether each active Co-Caregiver or
-                Family Member should keep access, change role, or be revoked.
-              </Txt>
-            </View>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-              {["Keep access", "Change role", "Revoke access"].map((label) => (
-                <View
-                  key={label}
-                  style={[S.pill, { backgroundColor: C.white }]}
-                >
-                  <Text style={[S.small, { color: C.green }]}>{label}</Text>
+              {space.active?<Chip text="Active" active/>:
+                <Icon name="swap-horizontal-outline" size={20}/>}
+            </Pressable>
+          ))}
+        </Glass>
+        {canManage&&recipientId&&(
+          <Glass>
+            <Text accessibilityRole="header" style={[S.h3,{color:INK}]}>
+              Invitation overview
+            </Text>
+            <View style={{flexDirection:"row",flexWrap:"wrap",gap:7}}>
+              {([
+                ["Pending",invitationSummary.pending],
+                ["Active",invitationSummary.active],
+                ["Expired",invitationSummary.expired],
+                ["Closed",invitationSummary.closed],
+              ] as const).map(([label,value])=>(
+                <View key={label} style={{flexGrow:1,minWidth:67,alignItems:"center",
+                  borderRadius:15,padding:10,backgroundColor:"#FFFFFFC9"}}>
+                  <Text style={[S.h3,{fontSize:18}]}>{value}</Text>
+                  <Text style={S.small}>{label}</Text>
                 </View>
               ))}
             </View>
-          </Card>
-
-          <Section title="Security review" />
-          <Card
-            onPress={() => n.navigate("CareTeamSecurityReview")}
-            label="Open Care Team Security Review"
-            style={{
-              backgroundColor: "#FFF9F4",
-              borderColor: "#EAD8C6",
-              gap: 12,
-            }}
-          >
-            <View style={S.between}>
-              <View
-                style={{
-                  width: 46,
-                  height: 46,
-                  borderRadius: 17,
-                  backgroundColor: "#F8ECDD",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="shield-outline" size={23} color="#8F6529" />
-              </View>
-              <Icon name="chevron-forward" size={20} color={C.purple} />
-            </View>
-            <View style={{ gap: 5 }}>
-              <Text style={S.h2}>Care Team Security Review</Text>
-              <Txt>
-                Check for permission conflicts, inconsistent membership states,
-                unresolved invitations and access that may no longer be needed.
-              </Txt>
-            </View>
-          </Card>
-        </>
-      )}
-
-      <Section title="Activity & accountability" />
-      <Card
-        onPress={() => n.navigate("CareTeamActivity")}
-        label="Open care team activity and accountability"
-        style={{
-          backgroundColor: "#FAF7FB",
-          borderColor: "#E4D9E8",
-          gap: 12,
-        }}
-      >
-        <View style={S.between}>
-          <View
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: 17,
-              backgroundColor: "#F1E7F5",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="shield-checkmark-outline" size={23} color={C.purple} />
-          </View>
-          <Icon name="chevron-forward" size={20} color={C.purple} />
-        </View>
-        <View style={{ gap: 5 }}>
-          <Text style={S.h2}>Care Team Activity Center</Text>
-          <Txt>
-            See who invited whom, acceptance or decline, reminders, role
-            changes, revocations, re-invitations and recorded shared-care
-            activity in one filtered timeline.
-          </Txt>
-        </View>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-          {["Access history", "Team-member filters", "Workspace activity"].map(
-            (label) => (
-              <View
-                key={label}
-                style={[S.pill, { backgroundColor: C.white }]}
-              >
-                <Text style={[S.small, { color: C.purple }]}>{label}</Text>
-              </View>
-            ),
-          )}
-        </View>
-      </Card>
-    </Page>
-  );
+            <Text style={{fontSize:11.5,lineHeight:18,color:MUTED}}>
+              Invitations last 14 days. Reminders can be sent once every 24 hours.
+              Email requests do not confirm delivery or opening.
+            </Text>
+          </Glass>
+        )}
+        {canManage&&(
+          <>
+            <ToolLink title="90-day access review" detail="Keep access, change role or revoke it."
+              icon="calendar-outline" tint="#EAF3EE"
+              onPress={()=>n.navigate("CareAccessRecertification")}/>
+            <ToolLink title="Care Team Security Review"
+              detail="Check permissions and invitation issues."
+              icon="shield-checkmark-outline" tint="#F9ECE0"
+              onPress={()=>n.navigate("CareTeamSecurityReview")}/>
+          </>
+        )}
+        <ToolLink title="Activity & accountability" detail="Review access and care activity."
+          icon="time-outline" onPress={()=>n.navigate("CareTeamActivity")}/>
+      </View>
+    )}
+  </Page>;
 }
