@@ -203,9 +203,9 @@ export function CareTeamScreen() {
 
   const recipientId = state.careRecipientId;
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (clearMessage = false) => {
     setLoading(true);
-    setMessage("");
+    if (clearMessage) setMessage("");
     try {
       const [spaceRows, invitationRows] = await Promise.all([
         loadCareSpaces(),
@@ -333,11 +333,31 @@ export function CareTeamScreen() {
     return <Page><ActivityIndicator color={P}/><Txt>Loading your care team…</Txt></Page>;
   }
   return <Page>
-    <View style={{gap:5,marginBottom:2}}>
-      <Text accessibilityRole="header" style={{
-        fontFamily:"DMSans_700Bold",fontSize:23,color:INK}}>Care team & sharing</Text>
-      <Text style={{fontFamily:"DMSans_400Regular",fontSize:13.5,
-        lineHeight:20,color:MUTED}}>Care is easier when the right people can help.</Text>
+    <View style={{flexDirection:"row",alignItems:"center",gap:11,marginBottom:4}}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Back"
+        onPress={()=>n.goBack()} style={({pressed})=>({
+          height:44,width:44,borderRadius:23,justifyContent:"center",
+          alignItems:"center",backgroundColor:"#F6EDFBEA",
+          borderWidth:1,borderColor:"#FFFFFF",opacity:pressed?0.65:1
+        })}>
+        <Icon name="arrow-back-outline" size={23} color={P}/>
+      </Pressable>
+      <View style={{flex:1,gap:4}}>
+        <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit
+          style={{fontFamily:"DMSans_700Bold",fontSize:21,color:INK}}>
+          Care team & sharing
+        </Text>
+        <Text style={{fontFamily:"DMSans_400Regular",fontSize:12,
+          lineHeight:17,color:MUTED}}>Care is easier when the right people can help.</Text>
+      </View>
+      <Pressable accessibilityRole="button" accessibilityLabel="Open profile settings"
+        onPress={()=>n.navigate("Profile")} style={({pressed})=>({
+          height:43,width:43,borderRadius:22,justifyContent:"center",
+          alignItems:"center",backgroundColor:"#F7F0FB",
+          borderWidth:1,borderColor:"#FFFFFF",opacity:pressed?0.65:1
+        })}>
+        <Icon name="settings-outline" size={22} color={P}/>
+      </Pressable>
     </View>
     <Glass tint="#E7D3F7" style={{backgroundColor:"#F6EBFBDD"}}>
       <View style={{flexDirection:"row",alignItems:"center",gap:13}}>
@@ -461,7 +481,7 @@ export function CareTeamScreen() {
           <Text style={{fontSize:11.5,color:MUTED}}>Your trusted care team</Text>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Refresh members"
-          disabled={loading} onPress={()=>void refresh()}
+          disabled={loading} onPress={()=>void refresh(true)}
           style={({pressed})=>({paddingVertical:10,paddingHorizontal:11,
             borderRadius:22,backgroundColor:"#FFFFFFBA",borderWidth:1,
             borderColor:"#F0E3F6",flexDirection:"row",alignItems:"center",
