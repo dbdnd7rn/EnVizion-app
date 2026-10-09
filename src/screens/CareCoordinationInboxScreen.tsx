@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { loadCareAgendaData, type CareAgendaData } from "../careAgenda";
@@ -330,7 +331,7 @@ function WorkflowPanel({
                   minHeight: 44,
                   justifyContent: "center",
                   backgroundColor: !resolution?.assignedTo
-                    ? C.purple
+                    ? themeAction(C.purple)
                     : C.lavender,
                 },
               ]}
@@ -362,7 +363,7 @@ function WorkflowPanel({
                     {
                       minHeight: 40,
                       justifyContent: "center",
-                      backgroundColor: selected ? C.purple : C.lavender,
+                      backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                     },
                   ]}
                 >
@@ -954,7 +955,7 @@ export function CareCoordinationInboxScreen() {
                   minHeight: 40,
                   justifyContent: "center",
                   paddingHorizontal: 11,
-                  backgroundColor: selected ? C.purple : C.lavender,
+                  backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                 },
               ]}
             >

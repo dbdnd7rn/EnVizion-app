@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
@@ -1223,7 +1224,7 @@ export function CareShiftBoardScreen() {
                   style={{
                     fontFamily: "DMSans_600SemiBold",
                     fontSize: 11.5,
-                    color: "#302653",
+                    color: themeForeground("#302653"),
                   }}
                 >
                   Today, {todayLabel}
@@ -1442,7 +1443,7 @@ export function CareShiftBoardScreen() {
                   style={{
                     fontFamily: "DMSans_400Regular",
                     fontSize: 9.5,
-                    color: "#777287",
+                    color: themeForeground("#777287"),
                   }}
                 >
                   {item.label}
@@ -2428,7 +2429,7 @@ export function CareShiftBoardScreen() {
             style={{
               fontFamily: "DMSans_700Bold",
               fontSize: 13.5,
-              color: "#292442",
+              color: themeForeground("#292442"),
             }}
           >
             More shift tools

@@ -1,3 +1,4 @@
+import { themeBackground, themeShadow, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -82,7 +83,7 @@ function Picker<T extends string>({
                 minHeight: 42,
                 justifyContent: "center",
                 paddingHorizontal: 14,
-                backgroundColor: selected ? C.purple : C.lavender,
+                backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                 opacity: disabled ? 0.55 : 1,
               },
             ]}
@@ -267,7 +268,7 @@ function EmptyDirectoryArt() {
           width: 96,
           height: 60,
           borderRadius: 17,
-          backgroundColor: C.white,
+          backgroundColor: themeBackground(C.white),
           borderWidth: 4,
           borderColor: "#E5D6F0",
           flexDirection: "row",
@@ -581,7 +582,7 @@ export function CareContactsScreen() {
             padding: 22,
             backgroundColor: "#5A246F",
             borderWidth: 0,
-            shadowColor: "#542267",
+            shadowColor: themeShadow("#542267"),
             shadowOpacity: 0.18,
             shadowRadius: 18,
             shadowOffset: { width: 0, height: 9 },

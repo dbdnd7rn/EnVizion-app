@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -209,7 +210,7 @@ function VitalMetricField({
           borderRadius: 14,
           borderWidth: 1,
           borderColor: "#DED3E4",
-          backgroundColor: C.white,
+          backgroundColor: themeBackground(C.white),
           paddingHorizontal: 14,
           fontFamily: "DMSans_400Regular",
           fontSize: 14,
@@ -410,7 +411,7 @@ function BloodSugarField({
           borderRadius: 20,
           borderWidth: 1,
           borderColor: "#DED5E9",
-          backgroundColor: C.white,
+          backgroundColor: themeBackground(C.white),
           flexDirection: "row",
           alignItems: multiline ? "flex-start" : "center",
           overflow: "hidden",
@@ -947,7 +948,7 @@ export function TrackerScreen({
                 fontFamily: "DMSans_400Regular",
                 fontSize: 15.5,
                 lineHeight: 22,
-                color: "#747184",
+                color: themeForeground("#747184"),
                 maxWidth: 245,
               }}
             >
@@ -1234,7 +1235,7 @@ export function TrackerScreen({
                   borderRadius: 15,
                   borderWidth: 1,
                   borderColor: "#DED3E4",
-                  backgroundColor: C.white,
+                  backgroundColor: themeBackground(C.white),
                   paddingHorizontal: 14,
                   paddingTop: 13,
                   fontFamily: "DMSans_400Regular",
@@ -1573,7 +1574,7 @@ export function TrackerScreen({
                     fontFamily: "DMSans_400Regular",
                     fontSize: 18,
                     lineHeight: 24,
-                    color: "#747087",
+                    color: themeForeground("#747087"),
                   }}
                 >
                   Notice. Record. Share.
@@ -1673,7 +1674,7 @@ export function TrackerScreen({
               backgroundColor: "#FFFFFFCF",
               padding: 18,
               gap: 17,
-              shadowColor: "#563864",
+              shadowColor: themeShadow("#563864"),
               shadowOpacity: 0.055,
               shadowRadius: 18,
               shadowOffset: { width: 0, height: 10 },
@@ -1853,7 +1854,7 @@ export function TrackerScreen({
                   alignItems: "center",
                   justifyContent: "center",
                   padding: 20,
-                  shadowColor: "#563864",
+                  shadowColor: themeShadow("#563864"),
                   shadowOpacity: 0.045,
                   shadowRadius: 16,
                   shadowOffset: { width: 0, height: 8 },
@@ -2081,7 +2082,7 @@ export function TrackerScreen({
                 fontFamily: "DMSans_400Regular",
                 fontSize: 15.5,
                 lineHeight: 22,
-                color: "#747184",
+                color: themeForeground("#747184"),
                 maxWidth: 250,
               }}
             >
@@ -2168,7 +2169,7 @@ export function TrackerScreen({
             gap: 18,
             backgroundColor: "#FFFEFF",
             borderColor: "#EDE6F2",
-            shadowColor: "#382840",
+            shadowColor: themeShadow("#382840"),
             shadowOpacity: 0.045,
             shadowRadius: 18,
             shadowOffset: { width: 0, height: 9 },
@@ -3210,7 +3211,7 @@ export function TransitionScreen() {
             style={{
               height: 6,
               width: `${(state.transition.length / transitionSteps.length) * 100}%`,
-              backgroundColor: C.purple,
+              backgroundColor: themeAction(C.purple),
               borderRadius: 4,
             }}
           />
@@ -3287,7 +3288,7 @@ export function EmergencyScreen() {
       />
       <Card style={{ backgroundColor: C.redBg, borderColor: "#EAC9C9" }}>
         <Icon name="alert-circle" color={C.rose} size={34} />
-        <Text style={[S.h2, { color: "#963845" }]}>
+        <Text style={[S.h2, { color: themeForeground("#963845") }]}>
           Do not wait for the app.
         </Text>
         <Txt>

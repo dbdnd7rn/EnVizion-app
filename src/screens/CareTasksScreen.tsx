@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -167,7 +168,7 @@ function Picker<T extends string>({
                 minHeight: 42,
                 justifyContent: "center",
                 paddingHorizontal: 14,
-                backgroundColor: selected ? C.purple : C.lavender,
+                backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                 opacity: disabled ? 0.55 : 1,
               },
             ]}
@@ -1245,7 +1246,7 @@ export function CareTasksScreen() {
                 minHeight: 40,
                 justifyContent: "center",
                 paddingHorizontal: 13,
-                backgroundColor: filter === item ? C.purple : C.lavender,
+                backgroundColor: filter === item ? themeAction(C.purple) : C.lavender,
               },
             ]}
           >

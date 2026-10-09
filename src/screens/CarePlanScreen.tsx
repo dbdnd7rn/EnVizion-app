@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -345,7 +346,7 @@ function TopBar({ onBack }: { onBack: () => void }) {
           transform: [{ scale: pressed ? 0.96 : 1 }],
         })}
       >
-        <Icon name="chevron-back-outline" size={28} color={INK} />
+        <Icon name="chevron-back-outline" size={28} color={themeForeground(INK)} />
       </Pressable>
       <Text
         accessibilityRole="header"
@@ -354,7 +355,7 @@ function TopBar({ onBack }: { onBack: () => void }) {
           fontSize: 24,
           lineHeight: 31,
           letterSpacing: -0.5,
-          color: INK,
+          color: themeForeground(INK),
         }}
       >
         Daily care plan
@@ -388,7 +389,7 @@ function SectionHeading({
           fontSize: 25,
           lineHeight: 32,
           letterSpacing: -0.5,
-          color: INK,
+          color: themeForeground(INK),
         }}
       >
         {title}
@@ -398,7 +399,7 @@ function SectionHeading({
           style={{
             fontFamily: "DMSans_600SemiBold",
             fontSize: 12,
-            color: PURPLE,
+            color: themeForeground(PURPLE),
             paddingBottom: 4,
           }}
         >
@@ -489,14 +490,14 @@ function Shortcut({
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={20} color={PURPLE} />
+        <Icon name={icon} size={20} color={themeForeground(PURPLE)} />
       </View>
       <View style={{ flex: 1, gap: 2 }}>
         <Text
           style={{
             fontFamily: "DMSans_600SemiBold",
             fontSize: 14,
-            color: INK,
+            color: themeForeground(INK),
           }}
         >
           {title}
@@ -505,7 +506,7 @@ function Shortcut({
           style={{
             fontFamily: "DMSans_400Regular",
             fontSize: 11,
-            color: MUTED,
+            color: themeForeground(MUTED),
           }}
         >
           Open
@@ -760,12 +761,12 @@ export function CarePlanScreen() {
             paddingVertical: 30,
           }}
         >
-          <Icon name="people-outline" size={30} color={PURPLE} />
+          <Icon name="people-outline" size={30} color={themeForeground(PURPLE)} />
           <Text
             style={{
               fontFamily: "Lora_500Medium",
               fontSize: 23,
-              color: INK,
+              color: themeForeground(INK),
               textAlign: "center",
             }}
           >
@@ -800,7 +801,7 @@ export function CarePlanScreen() {
               fontSize: 34,
               lineHeight: 41,
               letterSpacing: -0.9,
-              color: INK,
+              color: themeForeground(INK),
               textAlign: "center",
               marginTop: -10,
             }}
@@ -814,7 +815,7 @@ export function CarePlanScreen() {
               fontFamily: "DMSans_400Regular",
               fontSize: 14,
               lineHeight: 21,
-              color: MUTED,
+              color: themeForeground(MUTED),
               textAlign: "center",
             }}
           >
@@ -917,7 +918,7 @@ export function CarePlanScreen() {
       {readOnly ? (
         <Card style={{ backgroundColor: "#FBF7FD", borderColor: "#E8DAEF" }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <Icon name="eye-outline" size={20} color={PURPLE} />
+            <Icon name="eye-outline" size={20} color={themeForeground(PURPLE)} />
             <Text style={[S.h3, { flex: 1 }]}>Read-only care plan</Text>
           </View>
           <Txt>
@@ -938,7 +939,7 @@ export function CarePlanScreen() {
             paddingVertical: 13,
           }}
         >
-          <Text accessibilityRole="alert" style={[S.body, { color: INK }]}>
+          <Text accessibilityRole="alert" style={[S.body, { color: themeForeground(INK) }]}>
             {message}
           </Text>
         </View>
@@ -953,7 +954,7 @@ export function CarePlanScreen() {
 
           {loading ? (
             <Card style={{ alignItems: "center", paddingVertical: 28 }}>
-              <ActivityIndicator color={PURPLE} />
+              <ActivityIndicator color={themeForeground(PURPLE)} />
               <Txt>Loading today’s care…</Txt>
             </Card>
           ) : !today.length ? (
@@ -978,13 +979,13 @@ export function CarePlanScreen() {
                   justifyContent: "center",
                 }}
               >
-                <Icon name="checkmark-done-outline" size={23} color={PURPLE} />
+                <Icon name="checkmark-done-outline" size={23} color={themeForeground(PURPLE)} />
               </View>
               <Text
                 style={{
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 16,
-                  color: INK,
+                  color: themeForeground(INK),
                   textAlign: "center",
                 }}
               >
@@ -1052,7 +1053,7 @@ export function CarePlanScreen() {
                             fontFamily: "DMSans_600SemiBold",
                             fontSize: 16,
                             lineHeight: 21,
-                            color: INK,
+                            color: themeForeground(INK),
                           }}
                         >
                           {item.title}
@@ -1062,7 +1063,7 @@ export function CarePlanScreen() {
                             fontFamily: "DMSans_400Regular",
                             fontSize: 12,
                             lineHeight: 18,
-                            color: MUTED,
+                            color: themeForeground(MUTED),
                           }}
                         >
                           {meta.label}
@@ -1083,7 +1084,7 @@ export function CarePlanScreen() {
                           fontFamily: "DMSans_400Regular",
                           fontSize: 13,
                           lineHeight: 20,
-                          color: MUTED,
+                          color: themeForeground(MUTED),
                         }}
                       >
                         {item.details}
@@ -1116,7 +1117,7 @@ export function CarePlanScreen() {
                       })}
                     >
                       {busyId === item.id ? (
-                        <ActivityIndicator color={PURPLE} />
+                        <ActivityIndicator color={themeForeground(PURPLE)} />
                       ) : (
                         <>
                           <Icon
@@ -1189,7 +1190,7 @@ export function CarePlanScreen() {
                   style={{
                     fontFamily: "Lora_500Medium",
                     fontSize: 22,
-                    color: INK,
+                    color: themeForeground(INK),
                   }}
                 >
                   {editingItemId ? "Update shared care" : "Add to the day"}
@@ -1208,7 +1209,7 @@ export function CarePlanScreen() {
                   justifyContent: "center",
                 }}
               >
-                <Icon name="close-outline" size={23} color={INK} />
+                <Icon name="close-outline" size={23} color={themeForeground(INK)} />
               </Pressable>
             </View>
 
@@ -1427,7 +1428,7 @@ export function CarePlanScreen() {
                           justifyContent: "center",
                         }}
                       >
-                        <Icon name={meta.icon} size={19} color={PURPLE} />
+                        <Icon name={meta.icon} size={19} color={themeForeground(PURPLE)} />
                       </View>
                       <View style={{ flex: 1, gap: 3 }}>
                         <Text
@@ -1435,7 +1436,7 @@ export function CarePlanScreen() {
                             fontFamily: "DMSans_600SemiBold",
                             fontSize: 15,
                             lineHeight: 20,
-                            color: INK,
+                            color: themeForeground(INK),
                           }}
                         >
                           {item.title}
@@ -1445,7 +1446,7 @@ export function CarePlanScreen() {
                             fontFamily: "DMSans_400Regular",
                             fontSize: 11,
                             lineHeight: 17,
-                            color: MUTED,
+                            color: themeForeground(MUTED),
                           }}
                         >
                           {meta.label} ·{" "}
@@ -1483,12 +1484,12 @@ export function CarePlanScreen() {
                               busyId !== null ? 0.45 : pressed ? 0.72 : 1,
                           })}
                         >
-                          <Icon name="create-outline" size={17} color={PURPLE} />
+                          <Icon name="create-outline" size={17} color={themeForeground(PURPLE)} />
                           <Text
                             style={{
                               fontFamily: "DMSans_600SemiBold",
                               fontSize: 12,
-                              color: PURPLE,
+                              color: themeForeground(PURPLE),
                             }}
                           >
                             Edit
@@ -1516,19 +1517,19 @@ export function CarePlanScreen() {
                           })}
                         >
                           {busyId === "archive-" + item.id ? (
-                            <ActivityIndicator color={PURPLE} />
+                            <ActivityIndicator color={themeForeground(PURPLE)} />
                           ) : (
                             <>
                               <Icon
                                 name="archive-outline"
                                 size={17}
-                                color={MUTED}
+                                color={themeForeground(MUTED)}
                               />
                               <Text
                                 style={{
                                   fontFamily: "DMSans_600SemiBold",
                                   fontSize: 12,
-                                  color: MUTED,
+                                  color: themeForeground(MUTED),
                                 }}
                               >
                                 Archive
@@ -1564,7 +1565,7 @@ export function CarePlanScreen() {
             fontFamily: "DMSans_400Regular",
             fontSize: 11,
             lineHeight: 17,
-            color: "#817789",
+            color: themeForeground("#817789"),
           }}
         >
           Follow the healthcare team’s instructions. This shared plan organizes
