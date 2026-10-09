@@ -327,7 +327,7 @@ function WorkflowPanel({
               style={[
                 S.pill,
                 {
-                  minHeight: 40,
+                  minHeight: 44,
                   justifyContent: "center",
                   backgroundColor: !resolution?.assignedTo
                     ? C.purple
@@ -890,34 +890,29 @@ export function CareCoordinationInboxScreen() {
         body="See what needs attention over the next seven days, who's handling it, and what's been resolved."
       />
 
-      <Card
-        style={{
-          backgroundColor: counts.timeSensitive ? C.deep : "#EAF4EF",
-          borderWidth: 0,
-        }}
-      >
-        <Text
-          style={[
-            S.eyebrow,
-            { color: counts.timeSensitive ? "#E7CFEF" : C.purple },
-          ]}
-        >
-          NEXT 7 DAYS
-        </Text>
-        <Text
-          style={[
-            S.h2,
-            { color: counts.timeSensitive ? C.white : C.deep },
-          ]}
-        >
+      <Card style={{ backgroundColor: "#F6EFFC", borderColor: "#E6D7EF", gap: 14 }}>
+        <Text style={S.eyebrow}>NEXT 7 DAYS · CARE TEAM OVERVIEW</Text>
+        <Text accessibilityRole="header" style={[S.h2, { fontSize: 22, lineHeight: 30 }]}>
           {counts.total
             ? `${counts.total} item${counts.total === 1 ? "" : "s"} need coordination`
-            : "No active coordination conflicts detected"}
+            : "Nothing needs coordination right now"}
         </Text>
-        <Txt style={{ color: counts.timeSensitive ? "#E9DDED" : C.ink }}>
-          {counts.timeSensitive} time-sensitive · {counts.review} review ·{" "}
-          {snoozed.length} snoozed
-        </Txt>
+        <View style={{ flexDirection: "row", alignItems: "stretch" }}>
+          {[
+            { label: "Time-sensitive", value: counts.timeSensitive, icon: "alert-circle-outline" },
+            { label: "To review", value: counts.review, icon: "eye-outline" },
+            { label: "Snoozed", value: snoozed.length, icon: "time-outline" },
+          ].map((item, index) => (
+            <React.Fragment key={item.label}>
+              {index > 0 && <View style={{ width: 1, backgroundColor: "#DFD0EA", marginVertical: 5 }}/>}
+              <View style={{ flex: 1, minWidth: 0, alignItems: "center", gap: 4, paddingHorizontal: 5 }}>
+                <Icon name={item.icon} size={19} color={item.label === "Time-sensitive" && item.value > 0 ? C.rose : C.purple}/>
+                <Text style={{ fontFamily: "Lora_500Medium", color: C.ink, fontSize: 25 }}>{item.value}</Text>
+                <Text style={[S.small, { textAlign: "center", fontSize: 11 }]}>{item.label}</Text>
+              </View>
+            </React.Fragment>
+          ))}
+        </View>
       </Card>
 
       {Boolean(message) && (
