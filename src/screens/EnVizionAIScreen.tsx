@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, themeShadow } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView,
@@ -20,13 +20,13 @@ import { useNav } from "./MainScreens";
 const PURPLE = "#70338F";
 const INK = "#19143F";
 const MUTED = "#79728E";
-const glass = {
+const glass = () => ({
   borderWidth: 1, borderColor: themeBorder("#E5D9ED"), borderRadius: 23,
   backgroundColor: themeBackground("#FFFDFEF0"), shadowColor: themeShadow("#5C3877"),
   shadowOpacity: 0.055, shadowRadius: 14,
   shadowOffset: { width: 0, height: 6 },
   elevation: 1,
-} as const;
+} as const);
 
 function ActionButton({ title, icon, onPress, disabled = false, secondary = false }: {
   title: string; icon?: string; onPress: () => void; disabled?: boolean; secondary?: boolean;
@@ -37,14 +37,14 @@ function ActionButton({ title, icon, onPress, disabled = false, secondary = fals
       onPress={onPress} style={({ pressed }) => ({
         minHeight: 47, borderRadius: 21, paddingHorizontal: 16,
         flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7,
-        backgroundColor: secondary ? "#F5E9FB" : PURPLE,
+        backgroundColor: secondary ? themeBackground("#F5E9FB") : themeAction(PURPLE),
         borderWidth: secondary ? 1 : 0, borderColor: themeBorder("#E7D7EF"),
         opacity: disabled ? 0.45 : pressed ? 0.76 : 1,
       })}>
-      {icon && <Icon name={icon} color={secondary ? PURPLE : "#FFFFFF"} size={18}/>}
+      {icon && <Icon name={icon} color={secondary ? themeForeground(PURPLE) : "#FFFFFF"} size={18}/>}
       <Text style={{
         fontFamily: "DMSans_600SemiBold", fontSize: 13.5,
-        color: secondary ? PURPLE : "#FFFFFF",
+        color: secondary ? themeForeground(PURPLE) : "#FFFFFF",
       }}>{title}</Text>
     </Pressable>
   );
@@ -218,7 +218,7 @@ export function EnVizionAIScreen() {
         onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
         contentContainerStyle={{ paddingHorizontal: 17, paddingVertical: 16, gap: 13 }}>
         {!messages.length && (
-          <View style={[glass, { backgroundColor: themeBackground("#F8F0FCEC"), padding: 22, gap: 15 }]}>
+          <View style={[glass(), { backgroundColor: themeBackground("#F8F0FCEC"), padding: 22, gap: 15 }]}>
             <View style={{ width: 49, height: 49, borderRadius: 20, backgroundColor: themeBackground("#E6D1F5"),
               alignItems: "center", justifyContent: "center" }}>
               <Icon name="sparkles-outline" color={themeForeground(PURPLE)} size={26}/>
@@ -250,7 +250,7 @@ export function EnVizionAIScreen() {
           </View>
         )}
 
-        <View style={[glass, { padding: 14, backgroundColor: themeBackground("#F9F3FD") }]}>
+        <View style={[glass(), { padding: 14, backgroundColor: themeBackground("#F9F3FD") }]}>
           <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
             <Icon name="shield-checkmark-outline" color={themeForeground(PURPLE)} size={23}/>
             <View style={{ flex: 1, gap: 3 }}>
@@ -288,7 +288,7 @@ export function EnVizionAIScreen() {
         </View>
 
         {messages.map(item => (
-          <View key={item.id} style={[glass, {
+          <View key={item.id} style={[glass(), {
             maxWidth: "94%", alignSelf: item.role === "user" ? "flex-end" : "flex-start",
             backgroundColor: item.role === "user" ? PURPLE : "#FFFFFF",
             borderBottomRightRadius: item.role === "user" ? 7 : 22,
@@ -315,7 +315,7 @@ export function EnVizionAIScreen() {
         </View>}
 
         {pending && (
-          <View style={[glass, { padding: 17, gap: 14, backgroundColor: themeBackground("#F8F1FC") }]}>
+          <View style={[glass(), { padding: 17, gap: 14, backgroundColor: themeBackground("#F8F1FC") }]}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
               <Icon name="create-outline" color={themeForeground(PURPLE)} size={23}/>
               <View style={{ flex: 1 }}>
@@ -382,7 +382,7 @@ export function EnVizionAIScreen() {
         )}
 
         {Boolean(problem) && (
-          <View style={[glass, { padding: 13, gap: 10, backgroundColor: themeBackground("#FFF3F5") }]}>
+          <View style={[glass(), { padding: 13, gap: 10, backgroundColor: themeBackground("#FFF3F5") }]}>
             <Text accessibilityRole="alert" style={{ fontSize: 12.5, lineHeight: 18, color: themeForeground("#A73556") }}>
               {problem}
             </Text>
