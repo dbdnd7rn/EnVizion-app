@@ -210,15 +210,6 @@ export function ProfileDashboardScreen() {
 
   return (
     <Page>
-      <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => n.goBack()}
-        style={({ pressed }) => ({
-          alignSelf: "flex-start", flexDirection: "row", gap: 9, alignItems: "center",
-          minHeight: 45, opacity: pressed ? 0.7 : 1,
-        })}>
-        <Icon name="arrow-back-outline" size={24} color={PURPLE} />
-        <Text style={{ color: PURPLE, fontFamily: "DMSans_700Bold", fontSize: 16 }}>Your profile</Text>
-      </Pressable>
-
       <HeroReveal>
         <Glass tint="#F0DFFB">
           <View style={{ padding: 18, gap: 12, backgroundColor: "#F9F3FCCD" }}>
@@ -302,21 +293,24 @@ export function ProfileDashboardScreen() {
 
       <HeroReveal delay={45}>
         <Glass>
-          <View style={{ flexDirection: "row", paddingVertical: 13, paddingHorizontal: 7 }}>
+          <View
+            accessibilityLabel={`Care overview. ${role}. ${teamCount === null ? "Care team count unavailable" : teamCount + " care team members"}. ${profileCount === null ? "Care profile count unavailable" : profileCount + " care profiles"}.`}
+            style={{ flexDirection: "row", paddingVertical: 13, paddingHorizontal: 7 }}
+          >
             {[
-              { title: role, value: "You", icon: "person-outline", route: "CareTeam" },
-              { title: "Care team", value: teamCount === null ? "—" : `${teamCount} members`, icon: "people-outline", route: "CareTeam" },
-              { title: "Care profiles", value: profileCount === null ? "—" : `${profileCount} profiles`, icon: "document-text-outline", route: "CareTeam" },
+              { title: role, value: "You", icon: "person-outline" },
+              { title: "Care team", value: teamCount === null ? "—" : `${teamCount} members`, icon: "people-outline" },
+              { title: "Care profiles", value: profileCount === null ? "—" : `${profileCount} profiles`, icon: "document-text-outline" },
             ].map((item, index) => (
               <React.Fragment key={item.title}>
-                {index > 0 && <View style={{ width: 1, marginVertical: 6, backgroundColor: "#E4D7ED" }}/>}
-                <Pressable accessibilityRole="button" accessibilityLabel={item.title}
-                  onPress={() => n.navigate("CareTeam")}
-                  style={({ pressed }) => ({
-                    flex: 1, minWidth: 0, paddingHorizontal: 6, alignItems: "center", gap: 5,
-                    opacity: pressed ? 0.7 : 1,
-                  })}>
-                  <Icon name={item.icon} size={22} color={PURPLE}/>
+                {index > 0 && (
+                  <View style={{ width: 1, marginVertical: 6, backgroundColor: "#E4D7ED" }} />
+                )}
+                <View style={{
+                  flex: 1, minWidth: 0, paddingHorizontal: 6,
+                  alignItems: "center", gap: 5, justifyContent: "center",
+                }}>
+                  <Icon name={item.icon} size={22} color={PURPLE} />
                   <Text numberOfLines={2} style={{
                     fontFamily: "DMSans_700Bold", color: INK,
                     fontSize: compact ? 10 : 11, textAlign: "center", lineHeight: 14,
@@ -325,7 +319,7 @@ export function ProfileDashboardScreen() {
                     fontFamily: "DMSans_400Regular", color: MUTED,
                     fontSize: 10, textAlign: "center",
                   }}>{item.value}</Text>
-                </Pressable>
+                </View>
               </React.Fragment>
             ))}
           </View>
@@ -338,16 +332,14 @@ export function ProfileDashboardScreen() {
         }}>Account overview</Text>
         <Glass>
           <View style={{ flexDirection: "row", alignItems: "stretch", paddingVertical: 14, paddingHorizontal: 10 }}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Your account and profile picture"
-              onPress={() => setEditOpen((value) => !value)}
-              style={({ pressed }) => ({ flex: 1.55, gap: 8, alignItems: "center", justifyContent: "center", opacity: pressed ? 0.7 : 1 })}>
+            <View style={{ flex: 1.55, gap: 8, alignItems: "center", justifyContent: "center" }}>
               <Icon name="mail-outline" size={22} color={PURPLE}/>
               <Text style={{ fontFamily: "DMSans_700Bold", color: INK, fontSize: 12 }}>Your account</Text>
               <Text numberOfLines={2} style={{
                 fontFamily: "DMSans_400Regular", color: MUTED,
                 textAlign: "center", fontSize: 10.5, lineHeight: 14,
               }}>{user?.email || "Signed in"}</Text>
-            </Pressable>
+            </View>
             <View style={{ width: 1, backgroundColor: "#E9DFEF", marginHorizontal: 6 }}/>
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 4 }}>
               <Icon name="analytics-outline" size={23} color={PURPLE}/>
