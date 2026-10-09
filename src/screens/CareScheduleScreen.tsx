@@ -1390,7 +1390,7 @@ export function CareScheduleScreen() {
             <Button title={recurringFormOpen ? "Close weekly pattern form" : "Add weekly availability pattern"}
               icon="repeat-outline" secondary onPress={() => setRecurringFormOpen(value => !value)}/>
           )}
-          {recurringFormOpen && !readOnly && (      {recurringFormOpen && !readOnly && (
+          {recurringFormOpen && !readOnly && (
         <Card>
           <Text style={S.eyebrow}>REPEATS WEEKLY</Text>
           <Text style={S.h2}>Weekly caregiver availability</Text>
