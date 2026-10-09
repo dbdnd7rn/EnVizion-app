@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
   loadPilotConsentState,
   type PilotConsentState,
@@ -57,17 +57,16 @@ export function PilotFeedbackScreen() {
   const [detail, setDetail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [consentError, setConsentError] = useState(false);
 
   useEffect(() => {
     let active = true;
     loadPilotConsentState()
       .then((next) => {
-        if (active) setConsent(next);
+        if (active) { setConsent(next); setConsentError(false); }
       })
       .catch(() => {
-        if (active) {
-          setConsent({ enrolled: false, status: null, outstanding: [] });
-        }
+        if (active) { setConsentError(true); }
       });
     return () => {
       active = false;
@@ -115,6 +114,21 @@ export function PilotFeedbackScreen() {
         body="Share a bug, your experience or a thoughtful improvement. We're listening."
       />
 
+      {!consent && !consentError && (
+        <Card style={{ backgroundColor: C.lavender }}>
+          <ActivityIndicator color={C.purple} />
+          <Txt>Checking pilot feedback access…</Txt>
+        </Card>
+      )}
+
+      {consentError && (
+        <Card style={{ backgroundColor: "#FFF3F5", borderColor: "#F0D4DB" }}>
+          <Icon name="cloud-offline-outline" color={C.rose} size={25}/>
+          <Text style={S.h3}>Feedback access could not be checked.</Text>
+          <Txt style={S.small}>Reopen this page when your connection returns. Your draft stays here while you are on this page.</Txt>
+        </Card>
+      )}
+
       {consent && !eligible && (
         <Card style={{ backgroundColor: "#FFF9F2" }}>
           <Icon name="lock-closed-outline" size={26} />
@@ -139,16 +153,21 @@ export function PilotFeedbackScreen() {
               S.card,
               {
                 borderColor: selected ? C.purple : C.line,
+                backgroundColor: selected ? "#F4E9FA" : "#FFFFFF",
                 opacity: eligible ? 1 : 0.55,
+                minHeight: 85,
+                justifyContent: "center",
               },
             ]}
           >
             <View style={S.row}>
-              <Icon
-                name={item.icon}
-                color={selected ? C.purple : C.muted}
-                size={24}
-              />
+              <View style={{
+                width: 46, height: 46, borderRadius: 16,
+                backgroundColor: selected ? "#E8D4F5" : "#F3EAF9",
+                alignItems: "center", justifyContent: "center",
+              }}>
+                <Icon name={item.icon} color={C.purple} size={23} />
+              </View>
               <View style={{ flex: 1 }}>
                 <Text style={S.h3}>{item.title}</Text>
                 <Txt style={S.small}>{item.detail}</Txt>
@@ -163,34 +182,28 @@ export function PilotFeedbackScreen() {
         );
       })}
 
-      <Section title="What happened?" />
-      <Field
-        label="Short summary"
-        value={summary}
-        onChange={setSummary}
-      />
-      <Field
-        label={
-          category === "bug"
+      <Section title="Tell us more" />
+      <Card style={{ backgroundColor: "#FFFFFFF0", gap: 16 }}>
+        <Field
+          label="Short summary"
+          value={summary}
+          onChange={setSummary}
+        />
+        <Field
+          label={category === "bug"
             ? "What did you do, and what happened instead?"
-            : "Tell us more"
-        }
-        value={detail}
-        onChange={setDetail}
-        multiline
-      />
-
-      <Button
-        title={submitting ? "Sending…" : "Send pilot feedback"}
-        icon="send-outline"
-        disabled={
-          !eligible ||
-          submitting ||
-          !summary.trim() ||
-          !detail.trim()
-        }
-        onPress={() => void submit()}
-      />
+            : "Tell us more"}
+          value={detail}
+          onChange={setDetail}
+          multiline
+        />
+        <Button
+          title={submitting ? "Sending…" : "Send pilot feedback"}
+          icon="send-outline"
+          disabled={!eligible || submitting || !summary.trim() || !detail.trim()}
+          onPress={() => void submit()}
+        />
+      </Card>
 
       {Boolean(message) && (
         <Card>
@@ -200,11 +213,19 @@ export function PilotFeedbackScreen() {
         </Card>
       )}
 
-      <Txt style={S.small}>
-        Do not use pilot feedback for emergencies or urgent clinical concerns.
-        Feedback submissions may include technical/app context but should not
-        contain unnecessary medical details.
-      </Txt>
+      <Card style={{ backgroundColor: "#FFF2F4", borderColor: "#F1D6DF" }}>
+        <View style={S.row}>
+          <Icon name="alert-circle-outline" color={C.rose} size={23} />
+          <Text style={[S.h3, { flex: 1, color: C.rose, fontSize: 14 }]}>
+            For feedback, not emergencies
+          </Text>
+        </View>
+        <Txt style={S.small}>
+          Do not use pilot feedback for emergencies or urgent clinical concerns.
+          Feedback submissions may include technical/app context but should not
+          contain unnecessary medical details.
+        </Txt>
+      </Card>
     </Page>
   );
 }
