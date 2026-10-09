@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import {
   deleteCareRecipientData,
   deleteOwnAccount,
@@ -55,6 +55,8 @@ export function PrivacyDataScreen() {
   const [deleteWord, setDeleteWord] = useState("");
   const [deleteEmail, setDeleteEmail] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
+  const [showExportDetails, setShowExportDetails] = useState(false);
+  const [showCareDeletionDetails, setShowCareDeletionDetails] = useState(false);
   const [sessionSummary, setSessionSummary] =
     useState<SessionSecuritySummary | null>(null);
 
@@ -250,24 +252,47 @@ export function PrivacyDataScreen() {
             : "No active care profile"}
         </Txt>
         <Txt style={S.small}>
-          Care-profile exports are owner-only so a collaborator cannot create a
-          portable copy of another family’s complete care record. The export
-          includes Care Vault metadata, care contacts, communication history,
-          shared care tasks and completion history, caregiver availability
-          windows and recurring weekly availability rules, recurring required-care
-          windows, weekly coverage plans and caregiver approval history, scheduled shifts,
-          check-in and attendance history, swap requests,
-          recorded coverage-gap events, open caregiver coverage requests and
-          caregiver responses, caregiver shift briefings (including
-          frozen task, medication, communication, coordination, follow-up, and
-          next-visit snapshots), caregiver takeover acknowledgements and acceptance
-          notes, active/completed caregiver shift sessions, append-only shift notes,
-          coordination assignments, family coordination
-          comments, resolution history, and
-          packet workflow history, but never permanent public file links. Weekly
-          coordination PDF content is generated on demand; only its generation
-          event is kept in the care audit history.
+          Care-profile exports are owner-only and never include permanent public file links.
         </Txt>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={showExportDetails ? "Hide care export details" : "Show care export details"}
+          accessibilityState={{ expanded: showExportDetails }}
+          onPress={() => setShowExportDetails((value) => !value)}
+          style={({ pressed }) => ({
+            minHeight: 45, flexDirection: "row", alignItems: "center",
+            justifyContent: "space-between", paddingHorizontal: 13,
+            borderRadius: 16, backgroundColor: "#F5EBFA", opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <Text style={[S.h3, { fontSize: 12.5, color: C.purple }]}>
+            {showExportDetails ? "Hide included records" : "What's included in the export?"}
+          </Text>
+          <Icon name={showExportDetails ? "chevron-up-outline" : "chevron-down-outline"} size={19} color={C.purple}/>
+        </Pressable>
+        {showExportDetails && (
+          <View style={{ paddingHorizontal: 4, gap: 6 }}>
+          <Txt style={S.small}>
+            Care-profile exports are owner-only so a collaborator cannot create a
+            portable copy of another family’s complete care record. The export
+            includes Care Vault metadata, care contacts, communication history,
+            shared care tasks and completion history, caregiver availability
+            windows and recurring weekly availability rules, recurring required-care
+            windows, weekly coverage plans and caregiver approval history, scheduled shifts,
+            check-in and attendance history, swap requests,
+            recorded coverage-gap events, open caregiver coverage requests and
+            caregiver responses, caregiver shift briefings (including
+            frozen task, medication, communication, coordination, follow-up, and
+            next-visit snapshots), caregiver takeover acknowledgements and acceptance
+            notes, active/completed caregiver shift sessions, append-only shift notes,
+            coordination assignments, family coordination
+            comments, resolution history, and
+            packet workflow history, but never permanent public file links. Weekly
+            coordination PDF content is generated on demand; only its generation
+            event is kept in the care audit history.
+          </Txt>
+          </View>
+        )}
         <Button
           title={busy === "care-export" ? "Preparing care export…" : "Download active care profile"}
           secondary
@@ -329,21 +354,45 @@ export function PrivacyDataScreen() {
       <Card style={{ borderColor: "#E7C3C7" }}>
         <Text style={[S.h3, { color: C.rose }]}>Permanent care-profile deletion</Text>
         <Txt>
-          This permanently removes the owned care profile and its care
-          observations, medications, dose history, appointments, questions,
-          transition checklist, private Care Vault files, care contacts,
-          communication history, shared care tasks and completion history,
-          caregiver availability windows and recurring weekly availability
-          rules, recurring required-care windows, weekly coverage plans and caregiver
-          approval history, scheduled shifts, check-in and attendance
-          history, swap requests, coverage-gap history, open caregiver
-          coverage requests and responses, caregiver shift briefings and their
-          frozen snapshots, caregiver takeover acknowledgements
-          and acceptance notes, caregiver shift sessions and append-only shift
-          notes, coordination assignments, family coordination comments,
-          resolution history, packet workflow history, care-sharing records and
-          care activity history.
+          Care-profile deletion is permanent and removes shared care records and related history.
+          Review the full list before confirming.
         </Txt>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={showCareDeletionDetails ? "Hide data deletion details" : "Show data deletion details"}
+          accessibilityState={{ expanded: showCareDeletionDetails }}
+          onPress={() => setShowCareDeletionDetails((value) => !value)}
+          style={({ pressed }) => ({
+            minHeight: 45, flexDirection: "row", alignItems: "center",
+            justifyContent: "space-between", paddingHorizontal: 13,
+            borderRadius: 16, backgroundColor: "#FFF0F3", opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <Text style={[S.h3, { fontSize: 12.5, color: C.rose }]}>
+            {showCareDeletionDetails ? "Hide full deletion details" : "View exactly what will be deleted"}
+          </Text>
+          <Icon name={showCareDeletionDetails ? "chevron-up-outline" : "chevron-down-outline"} size={19} color={C.rose}/>
+        </Pressable>
+        {showCareDeletionDetails && (
+          <View style={{ paddingHorizontal: 4 }}>
+          <Txt>
+            This permanently removes the owned care profile and its care
+            observations, medications, dose history, appointments, questions,
+            transition checklist, private Care Vault files, care contacts,
+            communication history, shared care tasks and completion history,
+            caregiver availability windows and recurring weekly availability
+            rules, recurring required-care windows, weekly coverage plans and caregiver
+            approval history, scheduled shifts, check-in and attendance
+            history, swap requests, coverage-gap history, open caregiver
+            coverage requests and responses, caregiver shift briefings and their
+            frozen snapshots, caregiver takeover acknowledgements
+            and acceptance notes, caregiver shift sessions and append-only shift
+            notes, coordination assignments, family coordination comments,
+            resolution history, packet workflow history, care-sharing records and
+            care activity history.
+          </Txt>
+          </View>
+        )}
         <Txt style={S.small}>
           Support and coaching requests are detached from the deleted care
           profile instead of being silently erased.
