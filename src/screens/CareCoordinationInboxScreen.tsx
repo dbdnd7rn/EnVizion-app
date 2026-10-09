@@ -50,7 +50,7 @@ import {
   S,
   Section,
   Txt,
-} from "../ui";
+} from "./ProfileLinkedUI";
 import { useNav } from "./MainScreens";
 
 function horizon(now = new Date()) {
@@ -886,8 +886,8 @@ export function CareCoordinationInboxScreen() {
     <Page>
       <Heading
         eyebrow="NEEDS COORDINATION"
-        title="Catch care-plan collisions—and make it clear who is handling them."
-        body="The inbox checks the next seven days, tracks current conflicts for escalation, and adds assignment, comments, snooze, resolution, and a durable change history."
+        title="Make every handoff a little clearer."
+        body="See what needs attention over the next seven days, who's handling it, and what's been resolved."
       />
 
       <Card
