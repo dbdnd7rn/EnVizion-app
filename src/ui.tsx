@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder } from "./themeColors";
+import { useAppearance } from "./appearance";
 import {
   AccessibilityInfo,
   Animated,
@@ -21,7 +23,7 @@ import Svg, {
   LinearGradient,
   Stop,
 } from "react-native-svg";
-export const C = {
+export const C = createPalette({
   ink: "#18163C",
   muted: "#77758B",
   purple: "#74328F",
@@ -33,8 +35,8 @@ export const C = {
   redBg: "#FFF0F1",
   green: "#24986E",
   white: "#FFFFFF",
-};
-export const S = StyleSheet.create({
+});
+export const S = themedStyles(StyleSheet.create({
   page: { paddingHorizontal: 22, paddingTop: 18, paddingBottom: 38, gap: 20 },
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   between: {
@@ -118,7 +120,7 @@ export const S = StyleSheet.create({
     paddingVertical: 7,
   },
   divider: { height: 1, backgroundColor: C.line },
-});
+}));
 export type IconName = React.ComponentProps<typeof Ionicons>["name"];
 export function Icon({
   name,
@@ -162,7 +164,7 @@ export function Button({
       onPress={onPress}
       style={({ pressed }) => ({
         minHeight: 54,
-        backgroundColor: secondary ? "#F3ECF9" : C.purple,
+        backgroundColor: secondary ? C.lavender : C.purple,
         borderRadius: 27,
         paddingHorizontal: 20,
         paddingVertical: 14,
@@ -217,6 +219,7 @@ export function Card({
   );
 }
 export function Page({ children }: { children: React.ReactNode }) {
+  useAppearance();
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: C.paper }}
@@ -322,7 +325,7 @@ export function Row({
           width: 46,
           height: 46,
           borderRadius: 16,
-          backgroundColor: "#F2EAF8",
+          backgroundColor: themeBackground("#F2EAF8"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -333,7 +336,7 @@ export function Row({
         <Text style={S.h3}>{title}</Text>
         {subtitle && <Text style={S.small}>{subtitle}</Text>}
       </View>
-      {trailing || <Icon name="chevron-forward" color="#A092A6" size={17} />}
+      {trailing || <Icon name="chevron-forward" color={themeForeground("#A092A6")} size={17} />}
     </Card>
   );
 }
@@ -364,7 +367,7 @@ export function Field({
         keyboardType={numeric ? "decimal-pad" : "default"}
         multiline={multiline}
         placeholder={numeric ? "0" : "Write here…"}
-        placeholderTextColor="#AAA0AF"
+        placeholderTextColor={themeForeground("#AAA0AF")}
       />
     </View>
   );
@@ -393,15 +396,15 @@ export function Safety({ onPress }: { onPress: () => void }) {
         alignItems: "center",
         gap: 12,
         borderWidth: 1,
-        borderColor: "#F3DADF",
+        borderColor: themeBorder("#F3DADF"),
       }}
     >
       <Icon name="alert-circle-outline" color={C.rose} />
       <View style={{ flex: 1 }}>
-        <Text style={[S.h3, { fontSize: 13, color: "#983D46" }]}>
+        <Text style={[S.h3, { fontSize: 13, color: themeForeground("#983D46") }]}>
           Emergency & warning signs
         </Text>
-        <Text style={[S.small, { color: "#995D62" }]}>
+        <Text style={[S.small, { color: themeForeground("#995D62") }]}>
           Know when to get help
         </Text>
       </View>
