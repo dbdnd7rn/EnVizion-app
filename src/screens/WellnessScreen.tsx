@@ -1,3 +1,4 @@
+import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, {
   useCallback,
@@ -132,17 +133,17 @@ function QuietTimerRing({
       >
         <Defs>
           <LinearGradient id="quietRing" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor="#DCC5EB" />
-            <Stop offset="1" stopColor="#B986D7" />
+            <Stop offset="0" stopColor={themeTint("#DCC5EB")} />
+            <Stop offset="1" stopColor={themeTint("#B986D7")} />
           </LinearGradient>
         </Defs>
         <Circle
           cx="80"
           cy="80"
           r={radius}
-          fill="#FFFFFF"
+          fill={themeTint("#FFFFFF")}
           fillOpacity="0.45"
-          stroke="#E4D5EE"
+          stroke={themeTint("#E4D5EE")}
           strokeWidth={strokeWidth}
         />
         <Circle
@@ -161,7 +162,7 @@ function QuietTimerRing({
           cx={dotX}
           cy={dotY}
           r="5.5"
-          fill="#8D43B6"
+          fill={themeTint("#8D43B6")}
         />
       </Svg>
 
@@ -170,7 +171,7 @@ function QuietTimerRing({
           fontFamily: "Lora_500Medium",
           fontSize: 37,
           lineHeight: 44,
-          color: "#12113C",
+          color: themeForeground("#12113C"),
         }}
       >
         {formatQuietMomentClock(remainingSeconds)}
@@ -182,7 +183,7 @@ function QuietTimerRing({
           fontSize: 9.5,
           lineHeight: 14,
           letterSpacing: 2.8,
-          color: "#76708C",
+          color: themeForeground("#76708C"),
           textTransform: "uppercase",
         }}
       >
@@ -220,7 +221,7 @@ function GradientButton({
         gap: 10,
         opacity: disabled ? 0.43 : pressed ? 0.82 : 1,
         transform: [{ scale: pressed && !disabled ? 0.988 : 1 }],
-        shadowColor: "#6E2E96",
+        shadowColor: themeShadow("#6E2E96"),
         shadowOpacity: disabled ? 0 : 0.15,
         shadowRadius: 14,
         shadowOffset: { width: 0, height: 7 },
@@ -361,7 +362,7 @@ export function WellnessScreen() {
           paddingBottom: 46,
           gap: 20,
           overflow: "hidden",
-          backgroundColor: "#FFFDFC",
+          backgroundColor: themeBackground("#FFFDFC"),
         }}
       >
         <Entrance reducedMotion={reducedMotion}>
@@ -381,7 +382,7 @@ export function WellnessScreen() {
                 width: 52,
                 height: 52,
                 borderRadius: 26,
-                backgroundColor: "#F8F2FA",
+                backgroundColor: themeBackground("#F8F2FA"),
                 alignItems: "center",
                 justifyContent: "center",
                 opacity: pressed ? 0.68 : 1,
@@ -414,7 +415,7 @@ export function WellnessScreen() {
                 fontSize: 40,
                 lineHeight: 47,
                 letterSpacing: -0.9,
-                color: "#12113C",
+                color: themeForeground("#12113C"),
               }}
             >
               A quiet moment,{"\n"}just for you.
@@ -424,7 +425,7 @@ export function WellnessScreen() {
                 fontFamily: "DMSans_400Regular",
                 fontSize: 18,
                 lineHeight: 25,
-                color: "#77718A",
+                color: themeForeground("#77718A"),
               }}
             >
               Space to pause. Permission to rest.
@@ -451,27 +452,27 @@ export function WellnessScreen() {
               marginHorizontal: 14,
               borderRadius: 32,
               borderWidth: 1.5,
-              borderColor: "#FFFFFF",
-              backgroundColor: "#FFFFFFE8",
+              borderColor: themeBorder("#FFFFFF"),
+              backgroundColor: themeBackground("#FFFFFFE8"),
               paddingHorizontal: 20,
               paddingTop: 23,
               paddingBottom: 20,
               alignItems: "center",
               gap: 13,
-              shadowColor: "#4B335A",
+              shadowColor: themeShadow("#4B335A"),
               shadowOpacity: 0.09,
               shadowRadius: 24,
               shadowOffset: { width: 0, height: 12 },
               elevation: 5,
             }}
           >
-            <Icon name="sparkles-outline" size={28} color="#7A329F" />
+            <Icon name="sparkles-outline" size={28} color={themeForeground("#7A329F")} />
             <Text
               style={{
                 fontFamily: "Lora_500Medium",
                 fontSize: 27,
                 lineHeight: 34,
-                color: "#15123F",
+                color: themeForeground("#15123F"),
                 textAlign: "center",
               }}
             >
@@ -484,7 +485,7 @@ export function WellnessScreen() {
                 fontFamily: "DMSans_400Regular",
                 fontSize: 15.5,
                 lineHeight: 22,
-                color: "#817A92",
+                color: themeForeground("#817A92"),
                 textAlign: "center",
               }}
             >
@@ -514,7 +515,7 @@ export function WellnessScreen() {
                   fontFamily: "DMSans_500Medium",
                   fontSize: 12.5,
                   lineHeight: 18,
-                  color: "#6F4B83",
+                  color: themeForeground("#6F4B83"),
                   textAlign: "center",
                 }}
               >
@@ -539,7 +540,7 @@ export function WellnessScreen() {
                 fontSize: 10,
                 lineHeight: 15,
                 letterSpacing: 3.1,
-                color: "#7A329F",
+                color: themeForeground("#7A329F"),
                 textTransform: "uppercase",
               }}
             >
@@ -550,7 +551,7 @@ export function WellnessScreen() {
                 fontFamily: "Lora_500Medium",
                 fontSize: 24,
                 lineHeight: 34,
-                color: "#12113C",
+                color: themeForeground("#12113C"),
                 textAlign: "center",
               }}
             >
@@ -562,7 +563,7 @@ export function WellnessScreen() {
                 fontSize: 10,
                 lineHeight: 16,
                 letterSpacing: 2.4,
-                color: "#77718A",
+                color: themeForeground("#77718A"),
                 textTransform: "uppercase",
                 textAlign: "center",
               }}
@@ -580,7 +581,7 @@ export function WellnessScreen() {
                 fontFamily: "Lora_500Medium",
                 fontSize: 27,
                 lineHeight: 34,
-                color: "#12113C",
+                color: themeForeground("#12113C"),
               }}
             >
               Your reflection
@@ -607,21 +608,21 @@ export function WellnessScreen() {
               }}
               multiline
               placeholder="Write here..."
-              placeholderTextColor="#9A93A8"
+              placeholderTextColor={themeForeground("#9A93A8")}
               textAlignVertical="top"
               style={{
                 minHeight: 118,
                 borderRadius: 20,
                 borderWidth: 1,
-                borderColor: "#D9CEE1",
-                backgroundColor: "#FFFFFF",
+                borderColor: themeBorder("#D9CEE1"),
+                backgroundColor: themeBackground("#FFFFFF"),
                 paddingHorizontal: 16,
                 paddingVertical: 15,
                 fontFamily: "DMSans_400Regular",
                 fontSize: 16,
                 lineHeight: 23,
-                color: "#211D48",
-                shadowColor: "#4A3155",
+                color: themeForeground("#211D48"),
+                shadowColor: themeShadow("#4A3155"),
                 shadowOpacity: 0.035,
                 shadowRadius: 10,
                 shadowOffset: { width: 0, height: 5 },
@@ -642,7 +643,7 @@ export function WellnessScreen() {
                 justifyContent: "center",
                 backgroundColor: reflection.trim() ? "#F0E8F6" : "#F5F0F7",
                 borderWidth: 1,
-                borderColor: "#F3ECF6",
+                borderColor: themeBorder("#F3ECF6"),
                 opacity: !reflection.trim() ? 0.5 : pressed ? 0.74 : 1,
                 transform: [{ scale: pressed && reflection.trim() ? 0.99 : 1 }],
               })}
@@ -651,7 +652,7 @@ export function WellnessScreen() {
                 style={{
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 15,
-                  color: "#8750A7",
+                  color: themeForeground("#8750A7"),
                 }}
               >
                 Keep for this visit
@@ -664,7 +665,7 @@ export function WellnessScreen() {
                 style={{
                   minHeight: 44,
                   borderRadius: 18,
-                  backgroundColor: "#F8F2FA",
+                  backgroundColor: themeBackground("#F8F2FA"),
                   paddingHorizontal: 13,
                   flexDirection: "row",
                   alignItems: "center",
@@ -677,7 +678,7 @@ export function WellnessScreen() {
                   style={{
                     fontFamily: "DMSans_500Medium",
                     fontSize: 12.5,
-                    color: "#6E627B",
+                    color: themeForeground("#6E627B"),
                   }}
                 >
                   Kept on this screen for this visit only.

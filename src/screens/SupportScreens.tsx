@@ -1,3 +1,4 @@
+import { themeBorder, themeTint } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react-native";
@@ -297,7 +298,7 @@ export function OnboardingScreen() {
             style={[
               S.pill,
               {
-                backgroundColor: "#F1E8F5",
+                backgroundColor: themeBackground("#F1E8F5"),
                 paddingHorizontal: 12,
                 paddingVertical: 8,
               },
@@ -324,31 +325,31 @@ export function OnboardingScreen() {
                 width: 58,
                 height: 58,
                 borderRadius: 20,
-                backgroundColor: "#FFFFFF18",
+                backgroundColor: themeBackground("#FFFFFF18"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name={presentation.icon} size={30} color="#F4DDFB" />
+              <Icon name={presentation.icon} size={30} color={themeForeground("#F4DDFB")} />
             </View>
             <View
               style={[
                 S.pill,
                 {
-                  backgroundColor: "#FFFFFF14",
+                  backgroundColor: themeBackground("#FFFFFF14"),
                   paddingHorizontal: 12,
                   paddingVertical: 8,
                 },
               ]}
             >
-              <Text style={[S.small, { color: "#F2E7F5" }]}>
+              <Text style={[S.small, { color: themeForeground("#F2E7F5") }]}>
                 {presentation.label}
               </Text>
             </View>
           </View>
 
           <View style={{ gap: 8 }}>
-            <Text style={[S.eyebrow, { color: "#DCC8E3" }]}>
+            <Text style={[S.eyebrow, { color: themeForeground("#DCC8E3") }]}>
               INVITED BY {pendingInvite.inviterName.toUpperCase()}
             </Text>
             <Text
@@ -363,7 +364,7 @@ export function OnboardingScreen() {
             >
               Join {pendingInvite.careRecipientName}’s care space.
             </Text>
-            <Txt style={{ color: "#E8DDEA", fontSize: 14, lineHeight: 21 }}>
+            <Txt style={{ color: themeForeground("#E8DDEA"), fontSize: 14, lineHeight: 21 }}>
               {pendingInvite.inviterName} invited you to EnVizion Life as a{" "}
               {presentation.label}. Nothing is shared with you until you accept.
             </Txt>
@@ -378,17 +379,17 @@ export function OnboardingScreen() {
               }}
             >
               {Boolean(pendingInvite.relationship) && (
-                <View style={[S.pill, { backgroundColor: "#FFFFFF12" }]}>
-                  <Icon name="heart-outline" size={14} color="#F0DEEF" />
-                  <Text style={[S.small, { color: "#F0DEEF" }]}>
+                <View style={[S.pill, { backgroundColor: themeBackground("#FFFFFF12") }]}>
+                  <Icon name="heart-outline" size={14} color={themeForeground("#F0DEEF")} />
+                  <Text style={[S.small, { color: themeForeground("#F0DEEF") }]}>
                     {pendingInvite.relationship}
                   </Text>
                 </View>
               )}
               {Boolean(invitedAt) && (
-                <View style={[S.pill, { backgroundColor: "#FFFFFF12" }]}>
-                  <Icon name="calendar-outline" size={14} color="#F0DEEF" />
-                  <Text style={[S.small, { color: "#F0DEEF" }]}>
+                <View style={[S.pill, { backgroundColor: themeBackground("#FFFFFF12") }]}>
+                  <Icon name="calendar-outline" size={14} color={themeForeground("#F0DEEF")} />
+                  <Text style={[S.small, { color: themeForeground("#F0DEEF") }]}>
                     Invited {invitedAt}
                   </Text>
                 </View>
@@ -418,7 +419,7 @@ export function OnboardingScreen() {
                   width: 40,
                   height: 40,
                   borderRadius: 14,
-                  backgroundColor: "#F4ECF8",
+                  backgroundColor: themeBackground("#F4ECF8"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -433,7 +434,7 @@ export function OnboardingScreen() {
             style={{
               marginTop: 2,
               borderRadius: 16,
-              backgroundColor: "#FBF7FC",
+              backgroundColor: themeBackground("#FBF7FC"),
               padding: 13,
               flexDirection: "row",
               gap: 10,
@@ -522,7 +523,7 @@ export function OnboardingScreen() {
                   width: 52,
                   height: 52,
                   borderRadius: 18,
-                  backgroundColor: "#EBDDF3",
+                  backgroundColor: themeBackground("#EBDDF3"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -586,12 +587,12 @@ export function OnboardingScreen() {
                   width: 52,
                   height: 52,
                   borderRadius: 18,
-                  backgroundColor: "#FCEAF1",
+                  backgroundColor: themeBackground("#FCEAF1"),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon name="person-outline" size={27} color="#B13D70" />
+                <Icon name="person-outline" size={27} color={themeForeground("#B13D70")} />
               </View>
               <View
                 style={{
@@ -704,14 +705,14 @@ export function OnboardingScreen() {
               </View>
             </>
           ) : (
-            <Card style={{ backgroundColor: "#F7F1FA" }}>
+            <Card style={{ backgroundColor: themeBackground("#F7F1FA") }}>
               <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
                 <View
                   style={{
                     width: 44,
                     height: 44,
                     borderRadius: 16,
-                    backgroundColor: "#E9DCF0",
+                    backgroundColor: themeBackground("#E9DCF0"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -972,25 +973,25 @@ function SpecialistHeroGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 420 315">
       <Defs>
         <LinearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FBF7FF" />
-          <Stop offset="1" stopColor="#EEE3FB" />
+          <Stop offset="0" stopColor={themeTint("#FBF7FF")} />
+          <Stop offset="1" stopColor={themeTint("#EEE3FB")} />
         </LinearGradient>
         <LinearGradient id="heart" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFB7D0" />
-          <Stop offset="0.55" stopColor="#DB8BDB" />
-          <Stop offset="1" stopColor="#9B64D5" />
+          <Stop offset="0" stopColor={themeTint("#FFB7D0")} />
+          <Stop offset="0.55" stopColor={themeTint("#DB8BDB")} />
+          <Stop offset="1" stopColor={themeTint("#9B64D5")} />
         </LinearGradient>
         <LinearGradient id="coat" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#FFFFFF" />
-          <Stop offset="1" stopColor="#F3EEF9" />
+          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
+          <Stop offset="1" stopColor={themeTint("#F3EEF9")} />
         </LinearGradient>
         <LinearGradient id="clipboard" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#8C65C5" />
-          <Stop offset="1" stopColor="#5D3C9A" />
+          <Stop offset="0" stopColor={themeTint("#8C65C5")} />
+          <Stop offset="1" stopColor={themeTint("#5D3C9A")} />
         </LinearGradient>
         <LinearGradient id="hair" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#51304F" />
-          <Stop offset="1" stopColor="#2D1732" />
+          <Stop offset="0" stopColor={themeTint("#51304F")} />
+          <Stop offset="1" stopColor={themeTint("#2D1732")} />
         </LinearGradient>
       </Defs>
 
@@ -999,66 +1000,66 @@ function SpecialistHeroGraphic() {
         fill="url(#bg)"
       />
 
-      <Ellipse cx="52" cy="246" rx="20" ry="72" fill="#B998E1" transform="rotate(-32 52 246)" />
-      <Ellipse cx="89" cy="250" rx="18" ry="63" fill="#D6C2F0" transform="rotate(22 89 250)" />
-      <Ellipse cx="362" cy="233" rx="20" ry="72" fill="#AF8ADC" transform="rotate(24 362 233)" />
-      <Ellipse cx="392" cy="257" rx="17" ry="61" fill="#DCC8F1" transform="rotate(32 392 257)" />
+      <Ellipse cx="52" cy="246" rx="20" ry="72" fill={themeTint("#B998E1")} transform="rotate(-32 52 246)" />
+      <Ellipse cx="89" cy="250" rx="18" ry="63" fill={themeTint("#D6C2F0")} transform="rotate(22 89 250)" />
+      <Ellipse cx="362" cy="233" rx="20" ry="72" fill={themeTint("#AF8ADC")} transform="rotate(24 362 233)" />
+      <Ellipse cx="392" cy="257" rx="17" ry="61" fill={themeTint("#DCC8F1")} transform="rotate(32 392 257)" />
 
       <G>
         <Path
           d="M104 94C104 75 119 63 136 63C152 63 162 73 167 85C172 73 183 63 198 63C216 63 230 75 230 94C230 123 202 145 167 169C133 146 104 124 104 94Z"
           fill="url(#heart)"
         />
-        <Path d="M124 111h19l8-19 11 35 10-22 8 11h25" stroke="#FFF" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M124 111h19l8-19 11 35 10-22 8 11h25" stroke={themeTint("#FFF")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
       </G>
 
       <G transform="translate(50 142)">
-        <Rect x="0" y="12" width="97" height="116" rx="15" fill="#FFF" opacity="0.95" />
-        <Rect x="34" y="0" width="38" height="22" rx="7" fill="#8E64C2" />
-        <Circle cx="53" cy="3" r="6" fill="#F4EFFB" />
-        <Path d="M18 45l9 9 17-20" stroke="#8760BE" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <Path d="M18 77l9 9 17-20" stroke="#8760BE" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <Path d="M18 109l9 9 17-20" stroke="#8760BE" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <Rect x="51" y="38" width="30" height="7" rx="3.5" fill="#C8B5E3" />
-        <Rect x="51" y="70" width="33" height="7" rx="3.5" fill="#D4C6E8" />
-        <Rect x="51" y="102" width="26" height="7" rx="3.5" fill="#D4C6E8" />
+        <Rect x="0" y="12" width="97" height="116" rx="15" fill={themeTint("#FFF")} opacity="0.95" />
+        <Rect x="34" y="0" width="38" height="22" rx="7" fill={themeTint("#8E64C2")} />
+        <Circle cx="53" cy="3" r="6" fill={themeTint("#F4EFFB")} />
+        <Path d="M18 45l9 9 17-20" stroke={themeTint("#8760BE")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M18 77l9 9 17-20" stroke={themeTint("#8760BE")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M18 109l9 9 17-20" stroke={themeTint("#8760BE")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        <Rect x="51" y="38" width="30" height="7" rx="3.5" fill={themeTint("#C8B5E3")} />
+        <Rect x="51" y="70" width="33" height="7" rx="3.5" fill={themeTint("#D4C6E8")} />
+        <Rect x="51" y="102" width="26" height="7" rx="3.5" fill={themeTint("#D4C6E8")} />
       </G>
 
       <G transform="translate(328 78)">
-        <Rect x="0" y="0" width="74" height="74" rx="20" fill="#FFF" opacity="0.88" />
-        <Path d="M31 16h13v15h15v13H44v15H31V44H16V31h15Z" fill="#9A68CE" />
+        <Rect x="0" y="0" width="74" height="74" rx="20" fill={themeTint("#FFF")} opacity="0.88" />
+        <Path d="M31 16h13v15h15v13H44v15H31V44H16V31h15Z" fill={themeTint("#9A68CE")} />
       </G>
 
       <G>
         <Path d="M179 122C174 74 205 45 248 47C293 49 322 80 319 125C317 160 303 181 282 198H194C183 179 181 153 179 122Z" fill="url(#hair)" />
-        <Path d="M218 101C224 72 249 58 278 68C296 74 308 90 309 108C294 96 281 92 266 93C249 94 236 97 218 101Z" fill="#3E2143" />
-        <Circle cx="251" cy="114" r="43" fill="#F1BDA4" />
-        <Circle cx="237" cy="114" r="3" fill="#4A324D" />
-        <Circle cx="267" cy="114" r="3" fill="#4A324D" />
-        <Path d="M242 133C249 139 257 139 266 132" stroke="#C9766D" strokeWidth="3" fill="none" strokeLinecap="round" />
+        <Path d="M218 101C224 72 249 58 278 68C296 74 308 90 309 108C294 96 281 92 266 93C249 94 236 97 218 101Z" fill={themeTint("#3E2143")} />
+        <Circle cx="251" cy="114" r="43" fill={themeTint("#F1BDA4")} />
+        <Circle cx="237" cy="114" r="3" fill={themeTint("#4A324D")} />
+        <Circle cx="267" cy="114" r="3" fill={themeTint("#4A324D")} />
+        <Path d="M242 133C249 139 257 139 266 132" stroke={themeTint("#C9766D")} strokeWidth="3" fill="none" strokeLinecap="round" />
         <Path d="M212 147C205 184 212 221 221 260H307C320 213 319 176 300 147C280 162 232 163 212 147Z" fill="url(#coat)" />
-        <Path d="M246 160L258 180L272 160V258H244Z" fill="#B89BE5" />
-        <Path d="M219 160L242 176L229 197L240 258H218C209 219 205 185 219 160Z" fill="#FFF" />
-        <Path d="M297 160L274 176L287 197L276 258H307C317 218 316 184 297 160Z" fill="#FFF" />
-        <Path d="M229 162C214 187 212 214 218 242" stroke="#3D3159" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <Path d="M286 162C301 188 302 213 295 240" stroke="#3D3159" strokeWidth="6" fill="none" strokeLinecap="round" />
-        <Circle cx="220" cy="244" r="9" fill="#2F2548" />
-        <Circle cx="294" cy="242" r="15" fill="#76719A" stroke="#39344F" strokeWidth="5" />
-        <Path d="M222 247c11 13 24 15 35 15s22-2 36-14" stroke="#5C5476" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <Path d="M246 160L258 180L272 160V258H244Z" fill={themeTint("#B89BE5")} />
+        <Path d="M219 160L242 176L229 197L240 258H218C209 219 205 185 219 160Z" fill={themeTint("#FFF")} />
+        <Path d="M297 160L274 176L287 197L276 258H307C317 218 316 184 297 160Z" fill={themeTint("#FFF")} />
+        <Path d="M229 162C214 187 212 214 218 242" stroke={themeTint("#3D3159")} strokeWidth="6" fill="none" strokeLinecap="round" />
+        <Path d="M286 162C301 188 302 213 295 240" stroke={themeTint("#3D3159")} strokeWidth="6" fill="none" strokeLinecap="round" />
+        <Circle cx="220" cy="244" r="9" fill={themeTint("#2F2548")} />
+        <Circle cx="294" cy="242" r="15" fill={themeTint("#76719A")} stroke={themeTint("#39344F")} strokeWidth="5" />
+        <Path d="M222 247c11 13 24 15 35 15s22-2 36-14" stroke={themeTint("#5C5476")} strokeWidth="4" fill="none" strokeLinecap="round" />
 
         <G transform="translate(262 201) rotate(-7 55 48)">
           <Rect x="0" y="0" width="112" height="94" rx="13" fill="url(#clipboard)" />
-          <Rect x="40" y="-4" width="42" height="12" rx="6" fill="#69469D" />
-          <Rect x="10" y="12" width="92" height="70" rx="9" fill="#7854AE" opacity="0.32" />
+          <Rect x="40" y="-4" width="42" height="12" rx="6" fill={themeTint("#69469D")} />
+          <Rect x="10" y="12" width="92" height="70" rx="9" fill={themeTint("#7854AE")} opacity="0.32" />
         </G>
-        <Path d="M269 264c-13-3-24-2-31 3-8 5-8 15 0 22 8 7 21 10 32 8" fill="#F1BDA4" />
+        <Path d="M269 264c-13-3-24-2-31 3-8 5-8 15 0 22 8 7 21 10 32 8" fill={themeTint("#F1BDA4")} />
       </G>
 
-      <Path d="M365 197c12-27 21-42 35-50-1 22-10 40-35 50Z" fill="#A98BDC" />
-      <Path d="M357 223c17-25 29-36 44-40-6 21-18 36-44 40Z" fill="#C8AFE9" />
-      <Path d="M351 248c19-22 34-31 48-31-10 19-24 31-48 31Z" fill="#E0C9F2" />
-      <Path d="M82 216c-14-24-26-34-41-38 7 19 19 33 41 38Z" fill="#CBB2EA" />
-      <Path d="M91 241c-18-21-33-29-48-28 10 18 25 28 48 28Z" fill="#B18EDC" />
+      <Path d="M365 197c12-27 21-42 35-50-1 22-10 40-35 50Z" fill={themeTint("#A98BDC")} />
+      <Path d="M357 223c17-25 29-36 44-40-6 21-18 36-44 40Z" fill={themeTint("#C8AFE9")} />
+      <Path d="M351 248c19-22 34-31 48-31-10 19-24 31-48 31Z" fill={themeTint("#E0C9F2")} />
+      <Path d="M82 216c-14-24-26-34-41-38 7 19 19 33 41 38Z" fill={themeTint("#CBB2EA")} />
+      <Path d="M91 241c-18-21-33-29-48-28 10 18 25 28 48 28Z" fill={themeTint("#B18EDC")} />
     </Svg>
   );
 }
@@ -1081,19 +1082,19 @@ export function SpecialistScreen({
       text: "What is the next step in our care plan?",
       icon: "chatbubble-ellipses-outline",
       background: "#F1E9FA",
-      color: "#74329A",
+      color: themeForeground("#74329A"),
     },
     {
       text: "What changes should prompt us to call?",
       icon: "call-outline",
       background: "#FBE7F5",
-      color: "#8C36A4",
+      color: themeForeground("#8C36A4"),
     },
     {
       text: "How will you coordinate with the rest of the care team?",
       icon: "people",
       background: "#F0E8FA",
-      color: "#74329A",
+      color: themeForeground("#74329A"),
     },
   ];
 
@@ -1122,7 +1123,7 @@ export function SpecialistScreen({
             style={[
               S.eyebrow,
               {
-                color: "#74329A",
+                color: themeForeground("#74329A"),
                 fontSize: 10.5,
                 letterSpacing: 2.55,
               },
@@ -1138,7 +1139,7 @@ export function SpecialistScreen({
               fontSize: 36,
               lineHeight: 41,
               letterSpacing: -0.85,
-              color: "#17143D",
+              color: themeForeground("#17143D"),
             }}
           >
             {item[0]}
@@ -1178,15 +1179,15 @@ export function SpecialistScreen({
           borderRadius: 28,
           paddingHorizontal: 18,
           paddingVertical: 18,
-          backgroundColor: "#F7F1FC",
+          backgroundColor: themeBackground("#F7F1FC"),
           borderWidth: 1,
-          borderColor: "#E7DCEF",
+          borderColor: themeBorder("#E7DCEF"),
           flexDirection: "row",
           alignItems: "center",
           gap: 16,
           opacity: pressed ? 0.82 : 1,
           transform: [{ scale: pressed ? 0.992 : 1 }],
-          shadowColor: "#54315F",
+          shadowColor: themeShadow("#54315F"),
           shadowOpacity: 0.065,
           shadowRadius: 18,
           shadowOffset: { width: 0, height: 8 },
@@ -1198,7 +1199,7 @@ export function SpecialistScreen({
             width: 78,
             height: 78,
             borderRadius: 24,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: themeBackground("#FFFFFF"),
             alignItems: "center",
             justifyContent: "center",
             shadowColor: themeShadow("#553066"),
@@ -1209,7 +1210,7 @@ export function SpecialistScreen({
           }}
         >
           <View style={{ position: "relative" }}>
-            <Icon name="clipboard-outline" size={39} color="#6F3E9B" />
+            <Icon name="clipboard-outline" size={39} color={themeForeground("#6F3E9B")} />
             <View
               style={{
                 position: "absolute",
@@ -1218,14 +1219,14 @@ export function SpecialistScreen({
                 width: 29,
                 height: 29,
                 borderRadius: 9,
-                backgroundColor: "#7D48AA",
+                backgroundColor: themeBackground("#7D48AA"),
                 alignItems: "center",
                 justifyContent: "center",
                 borderWidth: 3,
-                borderColor: "#FFFFFF",
+                borderColor: themeBorder("#FFFFFF"),
               }}
             >
-              <Icon name="add" size={18} color="#FFFFFF" />
+              <Icon name="add" size={18} color={themeForeground("#FFFFFF")} />
             </View>
           </View>
         </View>
@@ -1236,7 +1237,7 @@ export function SpecialistScreen({
               fontFamily: "DMSans_700Bold",
               fontSize: 22,
               lineHeight: 27,
-              color: "#17143D",
+              color: themeForeground("#17143D"),
             }}
           >
             Before your visit
@@ -1253,7 +1254,7 @@ export function SpecialistScreen({
           </Text>
         </View>
 
-        <Icon name="chevron-forward" size={27} color="#76369B" />
+        <Icon name="chevron-forward" size={27} color={themeForeground("#76369B")} />
       </Pressable>
 
       <View style={{ gap: 14 }}>
@@ -1263,7 +1264,7 @@ export function SpecialistScreen({
             fontSize: 27,
             lineHeight: 33,
             letterSpacing: -0.5,
-            color: "#17143D",
+            color: themeForeground("#17143D"),
           }}
         >
           A few questions to ask
@@ -1280,15 +1281,15 @@ export function SpecialistScreen({
               borderRadius: 25,
               paddingHorizontal: 15,
               paddingVertical: 14,
-              backgroundColor: "#FFFFFF",
+              backgroundColor: themeBackground("#FFFFFF"),
               borderWidth: 1,
-              borderColor: "#EEE8F0",
+              borderColor: themeBorder("#EEE8F0"),
               flexDirection: "row",
               alignItems: "center",
               gap: 14,
               opacity: pressed ? 0.78 : 1,
               transform: [{ scale: pressed ? 0.99 : 1 }],
-              shadowColor: "#3D2649",
+              shadowColor: themeShadow("#3D2649"),
               shadowOpacity: 0.035,
               shadowRadius: 12,
               shadowOffset: { width: 0, height: 5 },
@@ -1318,13 +1319,13 @@ export function SpecialistScreen({
                 fontFamily: "DMSans_500Medium",
                 fontSize: 15.5,
                 lineHeight: 22,
-                color: "#17143D",
+                color: themeForeground("#17143D"),
               }}
             >
               {question.text}
             </Text>
 
-            <Icon name="chevron-forward" size={24} color="#79349B" />
+            <Icon name="chevron-forward" size={24} color={themeForeground("#79349B")} />
           </Pressable>
         ))}
       </View>
@@ -1337,33 +1338,33 @@ export function SpecialistScreen({
           minHeight: 62,
           borderRadius: 31,
           paddingHorizontal: 22,
-          backgroundColor: "#7D38A0",
+          backgroundColor: themeBackground("#7D38A0"),
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
           gap: 12,
           opacity: pressed ? 0.84 : 1,
           transform: [{ scale: pressed ? 0.99 : 1 }],
-          shadowColor: "#6F2E89",
+          shadowColor: themeShadow("#6F2E89"),
           shadowOpacity: 0.2,
           shadowRadius: 18,
           shadowOffset: { width: 0, height: 8 },
           elevation: 4,
         })}
       >
-        <Icon name="document-text-outline" size={23} color="#FFFFFF" />
+        <Icon name="document-text-outline" size={23} color={themeForeground("#FFFFFF")} />
         <Text
           style={{
             flex: 1,
             textAlign: "center",
             fontFamily: "DMSans_600SemiBold",
             fontSize: 15.5,
-            color: "#FFFFFF",
+            color: themeForeground("#FFFFFF"),
           }}
         >
           Open my appointment questions
         </Text>
-        <Icon name="chevron-forward" size={22} color="#FFFFFF" />
+        <Icon name="chevron-forward" size={22} color={themeForeground("#FFFFFF")} />
       </Pressable>
 
       <View
@@ -1387,7 +1388,7 @@ export function SpecialistScreen({
             bottom: -62,
             height: 105,
             borderRadius: 70,
-            backgroundColor: "#F4ECFB",
+            backgroundColor: themeBackground("#F4ECFB"),
             transform: [{ rotate: "-3deg" }],
           }}
         />
@@ -1400,7 +1401,7 @@ export function SpecialistScreen({
             bottom: -72,
             height: 100,
             borderRadius: 70,
-            backgroundColor: "#FCECF7",
+            backgroundColor: themeBackground("#FCECF7"),
             transform: [{ rotate: "4deg" }],
           }}
         />
@@ -1410,13 +1411,13 @@ export function SpecialistScreen({
             width: 34,
             height: 34,
             borderRadius: 17,
-            backgroundColor: "#EFE4F7",
+            backgroundColor: themeBackground("#EFE4F7"),
             alignItems: "center",
             justifyContent: "center",
             marginTop: 1,
           }}
         >
-          <Icon name="information-outline" size={20} color="#7A4A94" />
+          <Icon name="information-outline" size={20} color={themeForeground("#7A4A94")} />
         </View>
 
         <Text

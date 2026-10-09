@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -662,7 +663,7 @@ export function DoctorVisitCompanionScreen() {
 
       <Card
         style={{
-          backgroundColor: "#2C1839",
+          backgroundColor: themeBackground("#2C1839"),
           borderWidth: 0,
           overflow: "hidden",
         }}
@@ -673,19 +674,19 @@ export function DoctorVisitCompanionScreen() {
               width: 58,
               height: 58,
               borderRadius: 20,
-              backgroundColor: "#FFFFFF18",
+              backgroundColor: themeBackground("#FFFFFF18"),
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Icon name="medkit-outline" size={29} color="#F2DFF7" />
+            <Icon name="medkit-outline" size={29} color={themeForeground("#F2DFF7")} />
           </View>
           <View style={{ flex: 1, gap: 3 }}>
-            <Text style={[S.eyebrow, { color: "#DDBFE8" }]}>ACTIVE CARE PROFILE</Text>
+            <Text style={[S.eyebrow, { color: themeForeground("#DDBFE8") }]}>ACTIVE CARE PROFILE</Text>
             <Text style={[S.h2, { color: C.white }]}>
               {state.careRecipientName || "Care profile"}
             </Text>
-            <Txt style={{ color: "#E6DCE9" }}>
+            <Txt style={{ color: themeForeground("#E6DCE9") }}>
               {readOnly
                 ? "Shared visit information · read-only"
                 : "Visit companion editing enabled"}
@@ -950,7 +951,7 @@ export function DoctorVisitCompanionScreen() {
             </View>
 
             {selected.visit.recordingConsentConfirmed && (
-              <Card style={{ backgroundColor: "#F2F7F4" }}>
+              <Card style={{ backgroundColor: themeBackground("#F2F7F4") }}>
                 <Icon name="shield-checkmark-outline" color={C.green} />
                 <Text style={S.h3}>Consent confirmation recorded.</Text>
                 <Txt style={S.small}>
@@ -1026,7 +1027,7 @@ export function DoctorVisitCompanionScreen() {
             )}
 
             {localRecordingUri && !readOnly && (
-              <Card style={{ backgroundColor: "#F4F7FB" }}>
+              <Card style={{ backgroundColor: themeBackground("#F4F7FB") }}>
                 <View style={S.between}>
                   <View style={{ flex: 1, gap: 3 }}>
                     <Text style={S.h3}>New recording ready</Text>
@@ -1079,7 +1080,7 @@ export function DoctorVisitCompanionScreen() {
             )}
 
             {selected.visit.audioPath && (
-              <Card style={{ backgroundColor: "#EFF6F3" }}>
+              <Card style={{ backgroundColor: themeBackground("#EFF6F3") }}>
                 <View style={S.between}>
                   <View style={{ flex: 1, gap: 3 }}>
                     <Text style={S.h3}>Secure recording saved</Text>
@@ -1096,7 +1097,7 @@ export function DoctorVisitCompanionScreen() {
                 <View
                   style={{
                     borderRadius: 16,
-                    backgroundColor: "#FFFFFFB8",
+                    backgroundColor: themeBackground("#FFFFFFB8"),
                     padding: 12,
                     gap: 3,
                   }}
@@ -1185,8 +1186,8 @@ export function DoctorVisitCompanionScreen() {
 
           <Section title="3 · Review the visit summary" />
           <Card>
-            <Card style={{ backgroundColor: "#FFF8EA" }}>
-              <Icon name="sparkles-outline" color="#A96D18" />
+            <Card style={{ backgroundColor: themeBackground("#FFF8EA") }}>
+              <Icon name="sparkles-outline" color={themeForeground("#A96D18")} />
               <Text style={S.h3}>AI creates a draft — you approve the facts.</Text>
               <Txt style={S.small}>
                 The summary tool is instructed to extract only information
@@ -1344,7 +1345,7 @@ export function DoctorVisitCompanionScreen() {
             />
 
             {selected.visit.status === "published" ? (
-              <Card style={{ backgroundColor: "#EDF5F1" }}>
+              <Card style={{ backgroundColor: themeBackground("#EDF5F1") }}>
                 <Icon name="checkmark-circle" color={C.green} />
                 <Text style={S.h3}>Shared with the care team.</Text>
               </Card>
