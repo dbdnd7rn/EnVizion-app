@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import { themeBackground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -832,11 +833,11 @@ export function WeeklyCoveragePlanScreen() {
       )}
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E0C6E8" }]}>CARE WEEK</Text>
+        <Text style={[S.eyebrow, { color: themeForeground("#E0C6E8") }]}>CARE WEEK</Text>
         <Text style={[S.h2, { color: C.white }]}>
           {weekStart} → {addLocalDateDays(weekStart, 6)}
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           {timezone} · Only real recurring-care gaps and open coverage windows
           are included. Uncovered task due-times stay in task coordination.
         </Txt>
@@ -944,7 +945,7 @@ export function WeeklyCoveragePlanScreen() {
               <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
                 <View style={S.between}>
                   <View style={{ flex: 1, gap: 4 }}>
-                    <Text style={[S.eyebrow, { color: "#E0C6E8" }]}>
+                    <Text style={[S.eyebrow, { color: themeForeground("#E0C6E8") }]}>
                       APPROVAL RISK
                     </Text>
                     <Text style={[S.h2, { color: C.white }]}>
@@ -956,7 +957,7 @@ export function WeeklyCoveragePlanScreen() {
                             ? "Reminder window active"
                             : "Approvals in progress"}
                     </Text>
-                    <Txt style={{ color: "#E9DDED" }}>
+                    <Txt style={{ color: themeForeground("#E9DDED") }}>
                       {controlSummary.pending} pending ·{" "}
                       {controlSummary.timedOut} timed out ·{" "}
                       {controlSummary.releasedEarly} released early ·{" "}
@@ -1103,7 +1104,7 @@ export function WeeklyCoveragePlanScreen() {
                 )}
 
                 {owner && slot.status === "pending" && (
-                  <Card style={{ backgroundColor: "#F7F1F8" }}>
+                  <Card style={{ backgroundColor: themeBackground("#F7F1F8") }}>
                     <View style={S.between}>
                       <View style={{ flex: 1, gap: 3 }}>
                         <Text style={S.h3}>Owner approval controls</Text>
@@ -1256,7 +1257,7 @@ export function WeeklyCoveragePlanScreen() {
                 )}
 
                 {mine && (
-                  <Card style={{ backgroundColor: "#F7F1F8" }}>
+                  <Card style={{ backgroundColor: themeBackground("#F7F1F8") }}>
                     <Text style={S.h3}>Your response</Text>
                     <Txt>
                       Accept only if you can take this entire coverage window.
@@ -1499,8 +1500,8 @@ export function WeeklyCoveragePlanScreen() {
           <Section title={owner ? "Owner review" : "Coverage preview"} />
 
           {!planningNeeds.length ? (
-            <Card style={{ backgroundColor: "#EAF4EF" }}>
-              <Icon name="shield-checkmark-outline" color="#2D7656" />
+            <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
+              <Icon name="shield-checkmark-outline" color={themeForeground("#2D7656")} />
               <Text style={S.h3}>No weekly coverage gaps need approval.</Text>
               <Txt>
                 Recurring required-care windows and open coverage needs are
@@ -1535,7 +1536,7 @@ export function WeeklyCoveragePlanScreen() {
                     onChange={(value) => setPlanNote(value.slice(0, 2000))}
                     multiline
                   />
-                  <Card style={{ backgroundColor: "#F7F1F8" }}>
+                  <Card style={{ backgroundColor: themeBackground("#F7F1F8") }}>
                     <Icon name="timer-outline" />
                     <Text style={S.h3}>Caregiver response deadline</Text>
                     <Txt>
@@ -1710,7 +1711,7 @@ export function WeeklyCoveragePlanScreen() {
                     {!need.candidates.some(
                       (candidate) => candidate.assignable,
                     ) && (
-                      <Card style={{ backgroundColor: "#FFF1E5" }}>
+                      <Card style={{ backgroundColor: themeBackground("#FFF1E5") }}>
                         <Txt>
                           No caregiver has recorded Preferred or Available time
                           for this entire slot. It can still be published to

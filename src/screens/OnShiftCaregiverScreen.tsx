@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeBorder } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { loadCareAgendaData, type CareAgendaData } from "../careAgenda";
@@ -787,29 +788,29 @@ export function OnShiftCaregiverScreen() {
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
         <View style={S.between}>
           <View style={{ flex: 1, gap: 4 }}>
-            <Text style={[S.eyebrow, { color: "#E7CFEF" }]}>ACTIVE SHIFT</Text>
+            <Text style={[S.eyebrow, { color: themeForeground("#E7CFEF") }]}>ACTIVE SHIFT</Text>
             <Text style={[S.h2, { color: C.white }]}>
               {state.careRecipientName || "Shared care"}
             </Text>
-            <Txt style={{ color: "#E9DDED" }}>
+            <Txt style={{ color: themeForeground("#E9DDED") }}>
               Started {new Date(session.startedAt).toLocaleString()} · {elapsed}
             </Txt>
           </View>
-          <Icon name="pulse-outline" color="#E6CE98" size={28} />
+          <Icon name="pulse-outline" color={themeForeground("#E6CE98")} size={28} />
         </View>
 
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-          <View style={[S.pill, { backgroundColor: "#FFFFFF18" }]}>
+          <View style={[S.pill, { backgroundColor: themeBackground("#FFFFFF18") }]}>
             <Text style={[S.small, { color: C.white }]}>
               {responsibilities.mine.length} mine
             </Text>
           </View>
-          <View style={[S.pill, { backgroundColor: "#FFFFFF18" }]}>
+          <View style={[S.pill, { backgroundColor: themeBackground("#FFFFFF18") }]}>
             <Text style={[S.small, { color: C.white }]}>
               {responsibilities.shared.length} shared
             </Text>
           </View>
-          <View style={[S.pill, { backgroundColor: "#FFFFFF18" }]}>
+          <View style={[S.pill, { backgroundColor: themeBackground("#FFFFFF18") }]}>
             <Text style={[S.small, { color: C.white }]}>
               {shiftCompletions.length} completed this shift
             </Text>
@@ -884,7 +885,7 @@ export function OnShiftCaregiverScreen() {
           {pendingMine.slice(0, 6).map((task) => {
             const assignment = latestAssignmentByTask.get(task.id)!;
             return (
-              <Card key={assignment.id} style={{ backgroundColor: "#FFF9F2" }}>
+              <Card key={assignment.id} style={{ backgroundColor: themeBackground("#FFF9F2") }}>
                 <View style={S.between}>
                   <View style={{ flex: 1, gap: 4 }}>
                     <Text style={S.h3}>{task.title}</Text>
@@ -1103,7 +1104,7 @@ export function OnShiftCaregiverScreen() {
       </View>
 
       <Section title="What happened this shift" />
-      <Card style={{ backgroundColor: "#F8F4F9" }}>
+      <Card style={{ backgroundColor: themeBackground("#F8F4F9") }}>
         <View style={S.between}>
           <View style={{ flex: 1 }}>
             <Text style={S.h3}>{activityCounts.total} recorded shift events</Text>
@@ -1214,8 +1215,8 @@ export function OnShiftCaregiverScreen() {
             {responsibilities.urgent.length > 0 && (
               <Card
                 style={{
-                  backgroundColor: "#FFF9F8",
-                  borderColor: "#E8BDC3",
+                  backgroundColor: themeBackground("#FFF9F8"),
+                  borderColor: themeBorder("#E8BDC3"),
                 }}
               >
                 <Text style={[S.h3, { color: C.rose }]}>
@@ -1257,7 +1258,7 @@ export function OnShiftCaregiverScreen() {
               </Card>
             )}
 
-            <Card style={{ backgroundColor: "#F8F4F9" }}>
+            <Card style={{ backgroundColor: themeBackground("#F8F4F9") }}>
               <Text style={S.h3}>Closeout preview</Text>
               <Txt>
                 {tasks.filter((task) => task.status === "open").length} unfinished ·{" "}

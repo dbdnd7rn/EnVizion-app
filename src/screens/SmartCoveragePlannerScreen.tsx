@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -356,11 +357,11 @@ export function SmartCoveragePlannerScreen() {
       </View>
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Icon name="sparkles-outline" color="#E5C8ED" size={28} />
+        <Icon name="sparkles-outline" color={themeForeground("#E5C8ED")} size={28} />
         <Text style={[S.h2, { color: C.white }]}>
           Suggestions, not automatic assignments.
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           Preferred and Available caregivers can be suggested. Missing
           availability is shown for review, while Unavailable time, declines,
           and overlapping shifts are treated as conflicts.
@@ -432,8 +433,8 @@ export function SmartCoveragePlannerScreen() {
           <Txt>Building coverage suggestions…</Txt>
         </Card>
       ) : !plan.length ? (
-        <Card style={{ backgroundColor: "#EAF4EF" }}>
-          <Icon name="shield-checkmark-outline" color="#2D7656" />
+        <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
+          <Icon name="shield-checkmark-outline" color={themeForeground("#2D7656")} />
           <Text style={S.h3}>No known coverage gaps need planning.</Text>
           <Txt>
             Current recurring care requirements, open coverage windows, and
@@ -625,7 +626,7 @@ export function SmartCoveragePlannerScreen() {
                         onPress={() => void confirmCoverage(need)}
                       />
                     ) : (
-                      <Card style={{ backgroundColor: "#FFF1E5" }}>
+                      <Card style={{ backgroundColor: themeBackground("#FFF1E5") }}>
                         <Txt>
                           Record or review caregiver availability before using
                           one-tap confirmation. You can still manage the window
@@ -665,7 +666,7 @@ export function SmartCoveragePlannerScreen() {
                         onPress={() => void confirmCoverage(need)}
                       />
                     ) : owner ? (
-                      <Card style={{ backgroundColor: "#FFF1E5" }}>
+                      <Card style={{ backgroundColor: themeBackground("#FFF1E5") }}>
                         <Txt>
                           No caregiver with recorded Preferred or Available time
                           currently covers this entire gap.
