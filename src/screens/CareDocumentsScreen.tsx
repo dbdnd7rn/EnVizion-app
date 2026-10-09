@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeBorder } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
@@ -500,11 +501,11 @@ export function CareDocumentsScreen() {
       </View>
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E5C8ED" }]}>ACTIVE CARE PROFILE</Text>
+        <Text style={[S.eyebrow, { color: themeForeground("#E5C8ED") }]}>ACTIVE CARE PROFILE</Text>
         <Text style={[S.h2, { color: C.white }]}>
           {state.careRecipientName || "Care profile"}
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           {state.accessRole === "owner"
             ? "Owner · manage all documents"
             : state.accessRole === "caregiver"
@@ -613,7 +614,7 @@ export function CareDocumentsScreen() {
                 onPress={() => setUploadKey((value) => !value)}
               />
 
-              <Card style={{ backgroundColor: "#F4EFF8" }}>
+              <Card style={{ backgroundColor: themeBackground("#F4EFF8") }}>
                 <View style={S.between}>
                   <View style={{ flex: 1, gap: 4, paddingRight: 10 }}>
                     <Text style={S.h3}>Biometric document lock</Text>
@@ -782,7 +783,7 @@ export function CareDocumentsScreen() {
       {deleting && (
         <>
           <Section title="Confirm permanent deletion" />
-          <Card style={{ borderColor: "#E7C3C7" }}>
+          <Card style={{ borderColor: themeBorder("#E7C3C7") }}>
             <Text style={[S.h3, { color: C.rose }]}>
               Delete {deleting.displayName}?
             </Text>
@@ -883,18 +884,18 @@ export function CareDocumentsScreen() {
                           </Text>
                         </View>
                         {document.isKeyDocument && (
-                          <View style={[S.pill, { backgroundColor: "#FFF1E5" }]}>
+                          <View style={[S.pill, { backgroundColor: themeBackground("#FFF1E5") }]}>
                             <Text style={S.small}>Key document</Text>
                           </View>
                         )}
                         {document.requiresBiometric && (
-                          <View style={[S.pill, { backgroundColor: "#F0E9F6" }]}>
+                          <View style={[S.pill, { backgroundColor: themeBackground("#F0E9F6") }]}>
                             <Icon name="finger-print-outline" size={13} color={C.purple} />
                             <Text style={S.small}>Biometric lock</Text>
                           </View>
                         )}
                         {document.archivedAt && (
-                          <View style={[S.pill, { backgroundColor: "#EFECEF" }]}>
+                          <View style={[S.pill, { backgroundColor: themeBackground("#EFECEF") }]}>
                             <Text style={S.small}>Archived</Text>
                           </View>
                         )}
@@ -959,7 +960,7 @@ export function CareDocumentsScreen() {
                     />
                   )}
                   {document.requiresBiometric && (
-                    <Card style={{ backgroundColor: "#F7F1FA" }}>
+                    <Card style={{ backgroundColor: themeBackground("#F7F1FA") }}>
                       <Icon name="finger-print-outline" color={C.purple} />
                       <Text style={S.h3}>Sensitive legal document</Text>
                       <Txt style={S.small}>

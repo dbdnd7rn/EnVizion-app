@@ -1,3 +1,4 @@
+import { themeForeground, themeBorder } from "../themeColors";
 import { themeBackground, themeShadow, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -146,13 +147,13 @@ const categoryVisuals: Record<
   CareContactCategory,
   { icon: string; background: string; color: string }
 > = {
-  primary_care: { icon: "medkit-outline", background: "#F2EAFB", color: "#74328F" },
-  specialist: { icon: "person-outline", background: "#F2EAFB", color: "#74328F" },
-  pharmacy: { icon: "medical-outline", background: "#E6F7EF", color: "#16885A" },
-  home_health: { icon: "home-outline", background: "#FFF2D9", color: "#E27A00" },
-  insurance: { icon: "shield-checkmark-outline", background: "#EAF2FF", color: "#2D71C7" },
-  hospital_department: { icon: "business-outline", background: "#FFE7EF", color: "#D94C78" },
-  other: { icon: "ellipsis-horizontal", background: "#F2EAFB", color: "#74328F" },
+  primary_care: { icon: "medkit-outline", background: "#F2EAFB", color: themeForeground("#74328F") },
+  specialist: { icon: "person-outline", background: "#F2EAFB", color: themeForeground("#74328F") },
+  pharmacy: { icon: "medical-outline", background: "#E6F7EF", color: themeForeground("#16885A") },
+  home_health: { icon: "home-outline", background: "#FFF2D9", color: themeForeground("#E27A00") },
+  insurance: { icon: "shield-checkmark-outline", background: "#EAF2FF", color: themeForeground("#2D71C7") },
+  hospital_department: { icon: "business-outline", background: "#FFE7EF", color: themeForeground("#D94C78") },
+  other: { icon: "ellipsis-horizontal", background: "#F2EAFB", color: themeForeground("#74328F") },
 };
 
 function DirectoryCategoryTile({
@@ -192,7 +193,7 @@ function DirectoryCategoryTile({
         gap: 10,
         opacity: pressed ? 0.76 : 1,
         transform: [{ scale: pressed ? 0.985 : 1 }],
-        shadowColor: "#3A2544",
+        shadowColor: themeShadow("#3A2544"),
         shadowOpacity: selected ? 0.05 : 0.025,
         shadowRadius: 10,
         shadowOffset: { width: 0, height: 5 },
@@ -227,7 +228,7 @@ function DirectoryCategoryTile({
         <Text style={[S.small, { fontSize: 12 }]}>{count}</Text>
       </View>
 
-      <Icon name="chevron-forward" color="#7B5890" size={16} />
+      <Icon name="chevron-forward" color={themeForeground("#7B5890")} size={16} />
     </Pressable>
   );
 }
@@ -249,7 +250,7 @@ function EmptyDirectoryArt() {
           width: 112,
           height: 92,
           borderRadius: 46,
-          backgroundColor: "#F2E9FA",
+          backgroundColor: themeBackground("#F2E9FA"),
         }}
       />
       <View
@@ -260,7 +261,7 @@ function EmptyDirectoryArt() {
           borderRadius: 36,
           right: 0,
           top: 17,
-          backgroundColor: "#F7F0FC",
+          backgroundColor: themeBackground("#F7F0FC"),
         }}
       />
       <View
@@ -270,13 +271,13 @@ function EmptyDirectoryArt() {
           borderRadius: 17,
           backgroundColor: themeBackground(C.white),
           borderWidth: 4,
-          borderColor: "#E5D6F0",
+          borderColor: themeBorder("#E5D6F0"),
           flexDirection: "row",
           alignItems: "center",
           paddingHorizontal: 12,
           gap: 10,
           transform: [{ rotate: "-4deg" }],
-          shadowColor: "#4C2B61",
+          shadowColor: themeShadow("#4C2B61"),
           shadowOpacity: 0.09,
           shadowRadius: 10,
           shadowOffset: { width: 0, height: 5 },
@@ -288,7 +289,7 @@ function EmptyDirectoryArt() {
             width: 27,
             height: 27,
             borderRadius: 14,
-            backgroundColor: "#F2E9FA",
+            backgroundColor: themeBackground("#F2E9FA"),
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -296,8 +297,8 @@ function EmptyDirectoryArt() {
           <Icon name="person" size={16} />
         </View>
         <View style={{ flex: 1, gap: 5 }}>
-          <View style={{ height: 4, borderRadius: 2, backgroundColor: "#A768BE" }} />
-          <View style={{ height: 4, width: "76%", borderRadius: 2, backgroundColor: "#D2BCE0" }} />
+          <View style={{ height: 4, borderRadius: 2, backgroundColor: themeBackground("#A768BE") }} />
+          <View style={{ height: 4, width: "76%", borderRadius: 2, backgroundColor: themeBackground("#D2BCE0") }} />
         </View>
       </View>
 
@@ -309,7 +310,7 @@ function EmptyDirectoryArt() {
           width: 43,
           height: 43,
           borderRadius: 22,
-          backgroundColor: "#7D36A1",
+          backgroundColor: themeBackground("#7D36A1"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -325,12 +326,12 @@ function EmptyDirectoryArt() {
           width: 42,
           height: 42,
           borderRadius: 21,
-          backgroundColor: "#FFC75A",
+          backgroundColor: themeBackground("#FFC75A"),
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name="location" color="#B96700" size={21} />
+        <Icon name="location" color={themeForeground("#B96700")} size={21} />
       </View>
 
       <View
@@ -341,7 +342,7 @@ function EmptyDirectoryArt() {
           width: 38,
           height: 38,
           borderRadius: 19,
-          backgroundColor: "#F36B91",
+          backgroundColor: themeBackground("#F36B91"),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -542,7 +543,7 @@ export function CareContactsScreen() {
           <Text
             style={[
               S.eyebrow,
-              { color: "#74328F", fontSize: 10.5, letterSpacing: 2.45 },
+              { color: themeForeground("#74328F"), fontSize: 10.5, letterSpacing: 2.45 },
             ]}
           >
             CARE CONTACTS + PROVIDER DIRECTORY
@@ -554,7 +555,7 @@ export function CareContactsScreen() {
               fontSize: 34,
               lineHeight: 40,
               letterSpacing: -0.9,
-              color: "#15133A",
+              color: themeForeground("#15133A"),
             }}
           >
             Find the right care team fast.
@@ -564,7 +565,7 @@ export function CareContactsScreen() {
               fontFamily: "DMSans_400Regular",
               fontSize: 15,
               lineHeight: 22,
-              color: "#7A748A",
+              color: themeForeground("#7A748A"),
               maxWidth: 390,
             }}
           >
@@ -580,7 +581,7 @@ export function CareContactsScreen() {
             minHeight: 214,
             borderRadius: 28,
             padding: 22,
-            backgroundColor: "#5A246F",
+            backgroundColor: themeBackground("#5A246F"),
             borderWidth: 0,
             shadowColor: themeShadow("#542267"),
             shadowOpacity: 0.18,
@@ -598,7 +599,7 @@ export function CareContactsScreen() {
               borderRadius: 110,
               right: -66,
               top: -92,
-              backgroundColor: "#FFFFFF0C",
+              backgroundColor: themeBackground("#FFFFFF0C"),
             }}
           />
           <View
@@ -610,7 +611,7 @@ export function CareContactsScreen() {
               borderRadius: 90,
               right: -100,
               bottom: -68,
-              backgroundColor: "#A95CC21A",
+              backgroundColor: themeBackground("#A95CC21A"),
             }}
           />
 
@@ -619,7 +620,7 @@ export function CareContactsScreen() {
               <Text
                 style={[
                   S.eyebrow,
-                  { color: "#EEDDF5", fontSize: 10.5, letterSpacing: 2.5 },
+                  { color: themeForeground("#EEDDF5"), fontSize: 10.5, letterSpacing: 2.5 },
                 ]}
               >
                 ACTIVE CARE PROFILE
@@ -640,7 +641,7 @@ export function CareContactsScreen() {
                   paddingHorizontal: 11,
                   paddingVertical: 6,
                   borderRadius: 999,
-                  backgroundColor: "#A95CC252",
+                  backgroundColor: themeBackground("#A95CC252"),
                 }}
               >
                 <Text
@@ -664,12 +665,12 @@ export function CareContactsScreen() {
                 width: 70,
                 height: 70,
                 borderRadius: 35,
-                backgroundColor: "#EBDDF4",
+                backgroundColor: themeBackground("#EBDDF4"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Icon name="person" color="#7D36A1" size={34} />
+              <Icon name="person" color={themeForeground("#7D36A1")} size={34} />
             </View>
           </View>
 
@@ -693,13 +694,13 @@ export function CareContactsScreen() {
                 >
                   {contacts.length}
                 </Text>
-                <Text style={[S.small, { color: "#EEDFF3" }]}>
+                <Text style={[S.small, { color: themeForeground("#EEDFF3") }]}>
                   {contacts.length === 1 ? "contact" : "contacts"}
                 </Text>
               </View>
             </View>
 
-            <View style={{ width: 1, height: 48, backgroundColor: "#FFFFFF38" }} />
+            <View style={{ width: 1, height: 48, backgroundColor: themeBackground("#FFFFFF38") }} />
 
             <View style={{ flex: 1.2, flexDirection: "row", alignItems: "center", gap: 10 }}>
               <Icon
@@ -717,7 +718,7 @@ export function CareContactsScreen() {
                 >
                   {viewer ? "Read-only" : "Can edit"}
                 </Text>
-                <Text style={[S.small, { color: "#EEDFF3" }]}>access</Text>
+                <Text style={[S.small, { color: themeForeground("#EEDFF3") }]}>access</Text>
               </View>
             </View>
           </View>
@@ -744,8 +745,8 @@ export function CareContactsScreen() {
             style={{
               borderRadius: 22,
               padding: 16,
-              backgroundColor: "#F3ECF9",
-              borderColor: "#E7DCEF",
+              backgroundColor: themeBackground("#F3ECF9"),
+              borderColor: themeBorder("#E7DCEF"),
               flexDirection: "row",
               alignItems: "center",
               gap: 14,
@@ -756,7 +757,7 @@ export function CareContactsScreen() {
                 width: 48,
                 height: 48,
                 borderRadius: 16,
-                backgroundColor: "#E7D8F2",
+                backgroundColor: themeBackground("#E7D8F2"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -794,7 +795,7 @@ export function CareContactsScreen() {
           <TextInput
             accessibilityLabel="Search care contacts"
             placeholder="Search name, specialty, pharmacy, phone..."
-            placeholderTextColor="#B1A5B8"
+            placeholderTextColor={themeForeground("#B1A5B8")}
             value={query}
             onChangeText={setQuery}
             style={{
@@ -1029,7 +1030,7 @@ export function CareContactsScreen() {
                           width: 42,
                           height: 42,
                           borderRadius: 15,
-                          backgroundColor: "#F3ECF9",
+                          backgroundColor: themeBackground("#F3ECF9"),
                           alignItems: "center",
                           justifyContent: "center",
                         }}
@@ -1113,7 +1114,7 @@ export function CareContactsScreen() {
                     minHeight: 42,
                     paddingHorizontal: 14,
                     borderRadius: 21,
-                    backgroundColor: "#F0E5F8",
+                    backgroundColor: themeBackground("#F0E5F8"),
                     flexDirection: "row",
                     alignItems: "center",
                     gap: 7,
@@ -1140,8 +1141,8 @@ export function CareContactsScreen() {
           style={{
             borderRadius: 22,
             padding: 16,
-            backgroundColor: "#F6F0FA",
-            borderColor: "#E9DEF0",
+            backgroundColor: themeBackground("#F6F0FA"),
+            borderColor: themeBorder("#E9DEF0"),
             flexDirection: "row",
             alignItems: "center",
             gap: 13,
@@ -1152,7 +1153,7 @@ export function CareContactsScreen() {
               width: 46,
               height: 46,
               borderRadius: 16,
-              backgroundColor: "#E9DDF4",
+              backgroundColor: themeBackground("#E9DDF4"),
               alignItems: "center",
               justifyContent: "center",
             }}

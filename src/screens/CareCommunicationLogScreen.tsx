@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -411,11 +412,11 @@ export function CareCommunicationLogScreen() {
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E7CFEF" }]}>ACTIVE CARE PROFILE</Text>
+        <Text style={[S.eyebrow, { color: themeForeground("#E7CFEF") }]}>ACTIVE CARE PROFILE</Text>
         <Text style={[S.h2, { color: C.white }]}>
           {state.careRecipientName || "Care profile"}
         </Text>
-        <Txt style={{ color: "#E9DDED" }}>
+        <Txt style={{ color: themeForeground("#E9DDED") }}>
           {state.accessRole === "owner"
             ? "Owner"
             : state.accessRole === "caregiver"
@@ -727,7 +728,7 @@ export function CareCommunicationLogScreen() {
         <TextInput
           accessibilityLabel="Search communication log"
           placeholder="Search provider, outcome, insurance, notes…"
-          placeholderTextColor="#AAA0AF"
+          placeholderTextColor={themeForeground("#AAA0AF")}
           value={query}
           onChangeText={setQuery}
           style={{
@@ -892,7 +893,7 @@ export function CareCommunicationLogScreen() {
               </View>
 
               {linked && (
-                <Card style={{ backgroundColor: "#F8F4F9", padding: 14 }}>
+                <Card style={{ backgroundColor: themeBackground("#F8F4F9"), padding: 14 }}>
                   <Text style={S.eyebrow}>LINKED CARE CONTACT</Text>
                   <Text style={S.h3}>{linked.providerName}</Text>
                   <Txt style={S.small}>
@@ -921,7 +922,7 @@ export function CareCommunicationLogScreen() {
               )}
 
               {item.followUpNeeded && (
-                <Card style={{ backgroundColor: "#FFF7EC", padding: 14 }}>
+                <Card style={{ backgroundColor: themeBackground("#FFF7EC"), padding: 14 }}>
                   <View style={S.row}>
                     <Icon name="alarm-outline" />
                     <View style={{ flex: 1, gap: 2 }}>
