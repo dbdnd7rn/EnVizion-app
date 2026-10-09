@@ -22,10 +22,22 @@ const PURPLE = "#7139A9";
 const INK = "#19163E";
 const MUTED = "#7C7795";
 function Page({ children }: { children: React.ReactNode }) {
+  const n = useNav();
   return <ScrollView style={{ flex: 1, backgroundColor: "#FCFAFF" }}
     contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 18, paddingBottom: 54 }}
     keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View style={{ width: "100%", maxWidth: 480, alignSelf: "center", gap: 18 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 11, marginBottom: 4 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Go back"
+          onPress={() => n.canGoBack() ? n.goBack() : n.navigate("CareTeam")}
+          style={({pressed})=>({width:45,height:45,borderRadius:24,justifyContent:"center",
+            alignItems:"center",backgroundColor:"#F1EAFB",borderWidth:1,
+            borderColor:"#FFFFFF",opacity:pressed?0.75:1})}>
+          <Icon name="arrow-back-outline" color={PURPLE} size={22}/>
+        </Pressable>
+        <Text accessibilityRole="header" style={{flex:1,color:INK,fontSize:18,
+          fontFamily:"DMSans_700Bold"}}>90-day access review</Text>
+      </View>
       {children}
     </View>
   </ScrollView>;
@@ -339,36 +351,27 @@ export function CareAccessRecertificationScreen() {
         body="Every 90 days, active Co-Caregiver and Family Member access is reviewed again. Keep it, change the role, or revoke access with a recorded Primary Advocate sign-off."
       />
 
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0, gap: 11 }}>
-        <View style={S.between}>
-          <View style={{ flex: 1, gap: 4 }}>
-            <Text style={[S.eyebrow, { color: "#DECBE5" }]}>
-              PERIODIC ACCESS GOVERNANCE
-            </Text>
-            <Text style={[S.h2, { color: C.white }]}>
-              {overview?.dueCount ?? 0} review
-              {(overview?.dueCount ?? 0) === 1 ? "" : "s"} due
-            </Text>
+      {overview && (
+        <Card style={{ backgroundColor: "#F3EBFCEA", borderColor: "#DBC8F4" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
+            <View style={{ width: 115, alignItems: "center" }}><GlassCalendar/></View>
+            <View style={{ flex: 1, gap: 8 }}>
+              <Text style={{ color: PURPLE, fontFamily: "DMSans_700Bold",
+                letterSpacing: 1.2, fontSize: 10 }}>PERIODIC ACCESS GOVERNANCE</Text>
+              <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 23,
+                lineHeight: 29, color: INK }}>
+                {overview.dueCount} review{overview.dueCount === 1 ? "" : "s"} due
+              </Text>
+              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5,
+                lineHeight: 18, color: MUTED }}>
+                EnVizion reviews access every {overview.cadenceDays} days.
+                Primary Advocate ownership and Care Recipient access are
+                not part of caregiver/family recertification.
+              </Text>
+            </View>
           </View>
-          <View
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 17,
-              backgroundColor: "#FFFFFF14",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Icon name="calendar-outline" size={24} color="#F2E4F6" />
-          </View>
-        </View>
-        <Txt style={{ color: "#EADFED" }}>
-          EnVizion reviews access on a {overview?.cadenceDays ?? 90}-day cadence.
-          Primary Advocate ownership and Care Recipient patient access are not
-          part of this periodic caregiver/family recertification.
-        </Txt>
-      </Card>
+        </Card>
+      )}
 
       {Boolean(message) && (
         <Card>
@@ -380,21 +383,20 @@ export function CareAccessRecertificationScreen() {
 
       <Section title="Due now" />
       {!due.length ? (
-        <Card
-          style={{
-            alignItems: "center",
-            gap: 9,
-            paddingVertical: 23,
-            backgroundColor: "#F4FAF6",
-          }}
-        >
-          <Icon name="shield-checkmark-outline" size={32} color={C.green} />
-          <Text style={S.h3}>No access reviews are due</Text>
-          <Txt style={[S.small, { textAlign: "center" }]}>
-            Upcoming reviews stay scheduled automatically.
-          </Txt>
-        </Card>
-      ) : (
+        <Card style={{backgroundColor:"#F9FCFA",borderColor:"#D9EDE3"}}>
+          <View style={{flexDirection:"row",alignItems:"center",gap:13}}>
+            <IconTile icon="shield-checkmark-outline" green/>
+            <View style={{flex:1,gap:4}}>
+              <Text style={{fontFamily:"DMSans_700Bold",fontSize:14,color:INK}}>
+                No access reviews are due
+              </Text>
+              <Text style={{fontFamily:"DMSans_400Regular",fontSize:12.5,
+                lineHeight:18,color:MUTED}}>
+                Upcoming reviews stay scheduled automatically.
+              </Text>
+            </View>
+          </View>
+        </Card>      ) : (
         due.map((item) => (
           <Card
             key={item.id}
@@ -594,9 +596,11 @@ export function CareAccessRecertificationScreen() {
 
       <Section title="Upcoming reviews" />
       {!upcoming.length ? (
-        <Card>
-          <Txt>No upcoming access reviews are scheduled yet.</Txt>
-        </Card>
+        <Card><View style={{flexDirection:"row",alignItems:"center",gap:12}}>
+          <IconTile icon="calendar-outline"/>
+          <Text style={{flex:1,fontFamily:"DMSans_400Regular",fontSize:13,
+            lineHeight:19,color:MUTED}}>No upcoming access reviews are scheduled yet.</Text>
+        </View></Card>
       ) : (
         upcoming.slice(0, 12).map((item) => (
           <Card key={item.id}>
@@ -617,9 +621,13 @@ export function CareAccessRecertificationScreen() {
 
       <Section title="Sign-off history" />
       {!history.length ? (
-        <Card>
-          <Txt>No completed 90-day access reviews have been recorded yet.</Txt>
-        </Card>
+        <Card><View style={{flexDirection:"row",alignItems:"center",gap:12}}>
+          <IconTile icon="document-text-outline"/>
+          <Text style={{flex:1,fontFamily:"DMSans_400Regular",fontSize:13,
+            lineHeight:19,color:MUTED}}>
+            No completed 90-day access reviews have been recorded yet.
+          </Text>
+        </View></Card>
       ) : (
         history.slice(0, 20).map((item) => (
           <Card key={item.id} style={{ gap: 7 }}>
@@ -642,9 +650,9 @@ export function CareAccessRecertificationScreen() {
         ))
       )}
 
-      <Card style={{ backgroundColor: "#FAF7FB", gap: 8 }}>
+      <Card style={{ backgroundColor: "#F8F2FCEB", gap: 8 }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
-          <Icon name="information-circle-outline" size={21} color={C.purple} />
+          <IconTile icon="information-circle-outline"/>
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={S.h3}>Recorded access governance</Text>
             <Txt style={S.small}>
@@ -665,7 +673,6 @@ export function CareAccessRecertificationScreen() {
       />
       <Button
         title="Back to Care Team"
-        secondary
         icon="people-outline"
         onPress={() => n.navigate("CareTeam")}
       />
