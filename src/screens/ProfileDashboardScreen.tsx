@@ -311,7 +311,7 @@ export function ProfileDashboardScreen() {
               <React.Fragment key={item.title}>
                 {index > 0 && <View style={{ width: 1, marginVertical: 6, backgroundColor: "#E4D7ED" }}/>}
                 <Pressable accessibilityRole="button" accessibilityLabel={item.title}
-                  onPress={() => n.navigate(item.route)}
+                  onPress={() => n.navigate("CareTeam")}
                   style={({ pressed }) => ({
                     flex: 1, minWidth: 0, paddingHorizontal: 6, alignItems: "center", gap: 5,
                     opacity: pressed ? 0.7 : 1,
