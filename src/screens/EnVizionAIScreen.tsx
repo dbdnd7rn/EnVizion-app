@@ -266,13 +266,23 @@ export function EnVizionAIScreen() {
             <Switch value={careDataAllowed}
               disabled={!state.careRecipientId || busy}
               accessibilityLabel="Share authorized care profile data with the AI for this conversation"
-              onValueChange={(v) => { setCareDataAllowed(v); setPending(null); }}
+              onValueChange={(v) => {
+                // The old chat can contain private record excerpts. Do not send it
+                // to the provider under a different privacy preference.
+                requestId.current += 1;
+                setBusy(false);
+                dispatch({ type: "conversation-clear" });
+                setCareDataAllowed(v);
+                setPending(null);
+                setProblem("");
+              }}
               trackColor={{ false: "#D9D4DE", true: "#D2AAE5" }} thumbColor={PURPLE}/>
           </View>
           <Text style={{ fontFamily: "DMSans_400Regular", color: MUTED,
             fontSize: 10.8, lineHeight: 16 }}>
-            When enabled, relevant authorized care records and your messages are processed by the AI provider.
-            Otherwise, only your chat messages are sent. Nothing is saved to care records without confirmation.
+            AI processes your messages through a third-party provider. When enabled, relevant authorized
+            care records also go to the provider for that chat. Switching modes starts a fresh
+            conversation. Nothing is saved to care records without your confirmation.
           </Text>
         </View>
 
