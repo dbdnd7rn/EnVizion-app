@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, Easing, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
+import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
@@ -16,6 +16,8 @@ import {
 } from "../careTeam";
 import { loadPublishedGuides, type ClinicalContentRecord } from "../clinicalContent";
 import { NotificationBell } from "../notifications";
+import { findCareTools, type CareToolScope, type CareToolSort } from "../careToolSearch";
+import { CareToolFilters } from "./CareToolFilters";
 import {
   loadToolPreferences,
   rankToolTitles,
@@ -1891,6 +1893,9 @@ export function ToolkitScreen() {
   const n = useNav();
   const { state } = useCare();
   const [query, setQuery] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [scope, setScope] = useState<CareToolScope>("all");
+  const [sort, setSort] = useState<CareToolSort>("relevance");
   const [preferences, setPreferences] = useState<ToolPreferences>({
     pinned: [],
     recent: [],
@@ -2181,9 +2186,22 @@ export function ToolkitScreen() {
     },
   ];
 
-  const allItems = groups.flatMap((group) => group.items);
+  // Index real registered destinations with their category for discovery.
+  // No patient data or fabricated search results are included.
+  const allItems = groups.flatMap((group) =>
+    group.items.map((item) => ({
+      ...item,
+      category: group.title,
+      groupSubtitle: group.subtitle,
+    })),
+  );
+  const categoryOptions = groups.map((group) => ({
+    title: group.title,
+    count: group.items.length,
+  }));
 
   function openTool(item: ToolItem) {
+    Keyboard.dismiss();
     const next = withRecordedUse(preferences, item.title);
     setPreferences(next);
     void recordToolUse(preferences, item.title);
@@ -2232,14 +2250,10 @@ export function ToolkitScreen() {
   const hasLearnedPreferences =
     preferences.pinned.length > 0 || preferences.recent.length > 0;
 
-  const normalizedQuery = query.trim().toLowerCase();
-  const matches = groups.flatMap((group) =>
-    group.items.filter((item) =>
-      `${item.title} ${item.subtitle} ${item.keywords || ""}`
-        .toLowerCase()
-        .includes(normalizedQuery),
-    ),
-  );
+  const normalizedQuery = query.trim();
+  const hasActiveResults =
+    Boolean(normalizedQuery) || scope !== "all" || sort !== "relevance";
+  const matches = findCareTools(allItems, normalizedQuery, scope, sort, preferences);
 
   return (
     <Page>
@@ -2328,6 +2342,10 @@ export function ToolkitScreen() {
             placeholderTextColor="#AAA0B2"
             value={query}
             onChangeText={setQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+            onSubmitEditing={() => Keyboard.dismiss()}
             style={{
               flex: 1,
               minHeight: 58,
@@ -2337,10 +2355,30 @@ export function ToolkitScreen() {
               color: C.ink,
             }}
           />
+          {Boolean(query) && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Clear care tool search"
+              onPress={() => setQuery("")}
+              style={({ pressed }) => ({
+                width: 43,
+                minHeight: 58,
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: pressed ? 0.6 : 1,
+              })}
+            >
+              <Icon name="close-circle-outline" size={22} color="#897C9B" />
+            </Pressable>
+          )}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={query ? "Clear tool search" : "Show all care tools"}
-            onPress={() => setQuery("")}
+            accessibilityLabel={filtersOpen ? "Close care tool filters" : "Open care tool filters"}
+            accessibilityState={{ expanded: filtersOpen }}
+            onPress={() => {
+              Keyboard.dismiss();
+              setFiltersOpen((value) => !value);
+            }}
             style={({ pressed }) => ({
               width: 56,
               minHeight: 58,
@@ -2348,13 +2386,50 @@ export function ToolkitScreen() {
               borderLeftColor: "#EEE6F2",
               alignItems: "center",
               justifyContent: "center",
+              backgroundColor: filtersOpen || scope !== "all" || sort !== "relevance"
+                ? "#F5ECFB" : "transparent",
+              borderTopRightRadius: 23,
+              borderBottomRightRadius: 23,
               opacity: pressed ? 0.6 : 1,
             })}
           >
             <Icon name="options-outline" size={24} color="#7F2FA1" />
+            {(scope !== "all" || sort !== "relevance") && (
+              <View
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: 10,
+                  width: 7,
+                  height: 7,
+                  borderRadius: 4,
+                  backgroundColor: "#70338F",
+                }}
+              />
+            )}
           </Pressable>
         </View>
 
+        {filtersOpen && (
+          <Fade>
+            <CareToolFilters
+              scope={scope}
+              sort={sort}
+              categoryOptions={categoryOptions}
+              pinnedCount={preferences.pinned.length}
+              recentCount={preferences.recent.length}
+              onScopeChange={setScope}
+              onSortChange={setSort}
+              onClose={() => setFiltersOpen(false)}
+              onReset={() => {
+                setScope("all");
+                setSort("relevance");
+              }}
+            />
+          </Fade>
+        )}
+
+        {!hasActiveResults && (
         <HomeReveal delay={70}>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <QuickCard
@@ -2448,8 +2523,9 @@ export function ToolkitScreen() {
             </View>
           </Pressable>
         </HomeReveal>
+        )}
 
-        {normalizedQuery ? (
+        {hasActiveResults ? (
           <View style={{ gap: 12 }}>
             <View style={{ gap: 4, marginTop: 5 }}>
               <Text
@@ -2459,10 +2535,12 @@ export function ToolkitScreen() {
                   color: "#15153D",
                 }}
               >
-                Search results
+                {normalizedQuery ? "Search results" : "Filtered care tools"}
               </Text>
               <Text style={[S.small, { fontSize: 12.5 }]}>
                 {matches.length} matching {matches.length === 1 ? "tool" : "tools"}
+                {scope.startsWith("category:") ? ` · ${scope.slice("category:".length)}` : ""}
+                {scope === "pinned" ? " · Pinned" : scope === "recent" ? " · Recently used" : ""}
               </Text>
             </View>
 
@@ -2488,12 +2566,45 @@ export function ToolkitScreen() {
                   gap: 10,
                 }}
               >
-                <Icon name="search-outline" size={27} />
-                <Text style={S.h3}>No tool matched that search.</Text>
+                <Icon name="search-outline" size={27} color="#70338F" />
+                <Text style={S.h3}>
+                  {scope === "pinned" && !normalizedQuery
+                    ? "No pinned tools yet."
+                    : scope === "recent" && !normalizedQuery
+                      ? "No recent tools yet."
+                      : "No tools match those options."}
+                </Text>
                 <Txt>
-                  Try medication, documents, coverage, calendar, family,
-                  appointment, or emergency.
+                  {scope === "pinned" && !normalizedQuery
+                    ? "Tap the star beside any tool to pin it here."
+                    : scope === "recent" && !normalizedQuery
+                      ? "Tools you open will appear here for quick access."
+                      : "Try a different phrase or broaden your filters. You can search for medications, appointments, documents, or coverage."}
                 </Txt>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear search and filters"
+                  onPress={() => {
+                    setQuery("");
+                    setScope("all");
+                    setSort("relevance");
+                    setFiltersOpen(false);
+                  }}
+                  style={({ pressed }) => ({
+                    alignSelf: "flex-start",
+                    minHeight: 44,
+                    paddingHorizontal: 17,
+                    borderRadius: 18,
+                    backgroundColor: "#70338F",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: pressed ? 0.8 : 1,
+                  })}
+                >
+                  <Text style={{ fontFamily: "DMSans_600SemiBold", color: "#FFFFFF", fontSize: 13 }}>
+                    Show all tools
+                  </Text>
+                </Pressable>
               </View>
             )}
           </View>
