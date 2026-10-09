@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import Constants from "expo-constants";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -424,7 +425,7 @@ export function LaunchValidationScreen() {
                     minHeight: 44,
                     justifyContent: "center",
                     backgroundColor:
-                      wave.id === selectedWaveId ? C.purple : C.lavender,
+                      wave.id === selectedWaveId ? themeAction(C.purple) : C.lavender,
                   },
                 ]}
               >

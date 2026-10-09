@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import {
@@ -144,7 +145,7 @@ export function PilotIntelligenceScreen() {
                       height: 8,
                       width: `${Math.min(100, rate)}%` as `${number}%`,
                       maxWidth: "100%",
-                      backgroundColor: C.purple,
+                      backgroundColor: themeAction(C.purple),
                     }}
                   />
                 </View>

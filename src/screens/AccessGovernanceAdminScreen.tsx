@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import { themeBackground, themeForeground } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -421,7 +422,7 @@ export function AccessGovernanceAdminScreen() {
                     minHeight: 40,
                     justifyContent: "center",
                     paddingHorizontal: 13,
-                    backgroundColor: selected ? C.purple : C.lavender,
+                    backgroundColor: selected ? themeAction(C.purple) : C.lavender,
                   },
                 ]}
               >

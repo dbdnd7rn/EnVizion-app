@@ -1,3 +1,4 @@
+import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -65,7 +66,7 @@ function Choice({
           justifyContent: "center",
           paddingHorizontal: 14,
           opacity: disabled ? 0.55 : 1,
-          backgroundColor: selected ? C.purple : C.lavender,
+          backgroundColor: selected ? themeAction(C.purple) : C.lavender,
         },
       ]}
     >

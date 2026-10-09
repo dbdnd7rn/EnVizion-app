@@ -1,3 +1,4 @@
+import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -254,7 +255,7 @@ export function PilotAdminScreen() {
       />
 
       {Boolean(message) && (
-        <Card style={{ backgroundColor: C.white }}>
+        <Card style={{ backgroundColor: themeBackground(C.white) }}>
           <Text accessibilityRole="alert" style={S.body}>
             {message}
           </Text>
@@ -579,7 +580,7 @@ export function PilotAdminScreen() {
           >
             <Icon name="shield-checkmark-outline" size={24} color={C.purple} />
           </View>
-          <View style={[S.pill, { backgroundColor: C.white }]}>
+          <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
             <Text style={[S.small, { color: C.purple }]}>ADMIN ONLY</Text>
           </View>
         </View>
@@ -914,7 +915,7 @@ export function PilotAdminScreen() {
                           opacity: disabled ? 0.55 : 1,
                           backgroundColor:
                             participant.status === status
-                              ? C.purple
+                              ? themeAction(C.purple)
                               : C.lavender,
                         },
                       ]}
@@ -1199,7 +1200,7 @@ export function PilotAdminScreen() {
                   paddingHorizontal: 12,
                   opacity: documentId ? 0.7 : 1,
                   backgroundColor:
-                    documentType === type ? C.purple : C.lavender,
+                    documentType === type ? themeAction(C.purple) : C.lavender,
                 },
               ]}
             >
