@@ -1364,9 +1364,21 @@ Deno.serve(async (req: Request) => {
       }
 
       const members = [...merged.values()];
-      const userMap = await getUsersById(
-        admin,
-        members.map((row) => row.user_id),
+      const memberIds = members.map((row) => row.user_id);
+      const userMap = await getUsersById(admin, memberIds);
+
+      // Account profile names are editable and are the canonical names shown
+      // elsewhere in the app. Signup metadata or invitation labels may be stale.
+      const { data: savedProfiles, error: savedProfilesError } =
+        memberIds.length
+          ? await admin.from("profiles").select("id, full_name").in("id", memberIds)
+          : { data: [], error: null };
+      if (savedProfilesError) throw savedProfilesError;
+
+      const savedNames = new Map(
+        (savedProfiles ?? []).map((profile) => [
+          profile.id, String(profile.full_name ?? "").trim(),
+        ]),
       );
 
       return json({
@@ -1374,12 +1386,19 @@ Deno.serve(async (req: Request) => {
         currentRole,
         members: members.map((row) => {
           const account = userMap.get(row.user_id);
+          const savedName = savedNames.get(row.user_id) ?? "";
+          const signupName =
+            String(account?.user_metadata?.full_name ?? "").trim();
+          const invitedName = String(row.invited_name ?? "").trim();
+          const fallbackName =
+            row.role === "owner" ? "Primary Advocate" : "Care team member";
           return {
             userId: row.user_id,
-            displayName:
-              row.invited_name ||
-              String(account?.user_metadata?.full_name ?? "") ||
-              (row.role === "owner" ? "Primary Advocate" : "Care team member"),
+            // Pending invites show the invited person's provided name; active
+            // accounts show the latest name saved in their actual profile.
+            displayName: row.status === "invited"
+              ? invitedName || savedName || signupName || fallbackName
+              : savedName || signupName || invitedName || fallbackName,
             email:
               canManage || row.user_id === user.id
                 ? account?.email ?? row.invited_email ?? ""
