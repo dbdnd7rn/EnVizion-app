@@ -125,6 +125,14 @@ export function findCareTools<T extends SearchableCareTool>(
   filtered.sort((a, b) => {
     if (sort === "alphabetical")
       return a.item.title.localeCompare(b.item.title);
+    if (!searchActive && sort === "relevance" && scope === "pinned") {
+      return history.pinned.indexOf(a.item.title) -
+        history.pinned.indexOf(b.item.title);
+    }
+    if (!searchActive && sort === "relevance" && scope === "recent") {
+      return history.recent.indexOf(a.item.title) -
+        history.recent.indexOf(b.item.title);
+    }
     if (sort === "recent") {
       const aRecent = history.recent.indexOf(a.item.title);
       const bRecent = history.recent.indexOf(b.item.title);
