@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -173,7 +174,7 @@ export function StaffWorkspaceScreen() {
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E5C8ED" }]}>
+        <Text style={[S.eyebrow, { color: themeForeground("#E5C8ED") }]}>
           {member.role.toUpperCase()} ACCESS
         </Text>
         <View style={{ flexDirection: "row", gap: 14 }}>
@@ -181,14 +182,14 @@ export function StaffWorkspaceScreen() {
             <Text style={[S.title, { color: C.white, fontSize: 30 }]}>
               {openSupport}
             </Text>
-            <Txt style={{ color: "#E9DDED" }}>open support requests</Txt>
+            <Txt style={{ color: themeForeground("#E9DDED") }}>open support requests</Txt>
           </View>
           {member.role !== "support" && (
             <View style={{ flex: 1 }}>
               <Text style={[S.title, { color: C.white, fontSize: 30 }]}>
                 {openCoaching}
               </Text>
-              <Txt style={{ color: "#E9DDED" }}>active coaching requests</Txt>
+              <Txt style={{ color: themeForeground("#E9DDED") }}>active coaching requests</Txt>
             </View>
           )}
         </View>
@@ -215,7 +216,7 @@ export function StaffWorkspaceScreen() {
           <Text style={S.h3}>Notification preferences</Text>
           <Txt>Push updates, quiet hours, and staff alert categories.</Txt>
         </View>
-        <Icon name="chevron-forward" color="#A092A6" size={17} />
+        <Icon name="chevron-forward" color={themeForeground("#A092A6")} size={17} />
       </Card>
 
       {member.role === "admin" && (
@@ -240,7 +241,7 @@ export function StaffWorkspaceScreen() {
             <Text style={S.h3}>Manage staff access</Text>
             <Txt>Invite staff, assign roles, and review admin activity.</Txt>
           </View>
-          <Icon name="chevron-forward" color="#A092A6" size={17} />
+          <Icon name="chevron-forward" color={themeForeground("#A092A6")} size={17} />
         </Card>
       )}
 
@@ -268,7 +269,7 @@ export function StaffWorkspaceScreen() {
               Manage participant status, consent versions, and pilot readiness.
             </Txt>
           </View>
-          <Icon name="chevron-forward" color="#A092A6" size={17} />
+          <Icon name="chevron-forward" color={themeForeground("#A092A6")} size={17} />
         </Card>
       )}
 
@@ -298,7 +299,7 @@ export function StaffWorkspaceScreen() {
               education.
             </Txt>
           </View>
-          <Icon name="chevron-forward" color="#A092A6" size={17} />
+          <Icon name="chevron-forward" color={themeForeground("#A092A6")} size={17} />
         </Card>
       )}
       <View style={{ flexDirection: "row", gap: 10 }}>

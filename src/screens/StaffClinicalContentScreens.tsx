@@ -1,3 +1,4 @@
+import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -113,7 +114,7 @@ export function StaffClinicalContentScreen() {
       />
 
       <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
-        <Text style={[S.eyebrow, { color: "#E5C8ED" }]}>
+        <Text style={[S.eyebrow, { color: themeForeground("#E5C8ED") }]}>
           {role ? role.toUpperCase() : "STAFF"} ACCESS
         </Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 14 }}>
@@ -127,7 +128,7 @@ export function StaffClinicalContentScreen() {
               <Text style={[S.title, { color: C.white, fontSize: 26 }]}>
                 {value}
               </Text>
-              <Txt style={{ color: "#E9DDED" }}>{label}</Txt>
+              <Txt style={{ color: themeForeground("#E9DDED") }}>{label}</Txt>
             </View>
           ))}
         </View>

@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -264,14 +265,14 @@ export function PilotIntelligenceScreen() {
 
           <Section title="Unresolved launch dependencies" />
           {!data.launchGaps.length ? (
-            <Card style={{ backgroundColor: "#E8F1ED" }}>
+            <Card style={{ backgroundColor: themeBackground("#E8F1ED") }}>
               <Icon name="checkmark-circle-outline" color={C.green} size={28} />
               <Text style={S.h3}>
                 No system-reported pilot launch gaps remain.
               </Text>
             </Card>
           ) : (
-            <Card style={{ backgroundColor: "#FFF9F2" }}>
+            <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
               {data.launchGaps.map((gap) => (
                 <Txt key={gap}>• {gap}</Txt>
               ))}
@@ -282,7 +283,7 @@ export function PilotIntelligenceScreen() {
             <Text style={[S.h2, { color: C.white }]}>
               Final pilot outcome report
             </Text>
-            <Txt style={{ color: "#E3D5E9" }}>
+            <Txt style={{ color: themeForeground("#E3D5E9") }}>
               Generate a printable/PDF operational report from the same live
               evidence shown above. No medication names, observations, family
               messages or document contents are included.

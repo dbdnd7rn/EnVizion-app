@@ -1,3 +1,4 @@
+import { themeForeground, themeBorder } from "../themeColors";
 import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -288,7 +289,7 @@ export function PilotAdminScreen() {
             </View>
           </Card>
 
-          <Card style={{ backgroundColor: "#FFF9F2" }}>
+          <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
             <Text style={S.eyebrow}>ONBOARDING COMMAND CENTER</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
               <Metric
@@ -548,7 +549,7 @@ export function PilotAdminScreen() {
       <Card style={{ backgroundColor: C.deep }}>
         <Icon name="analytics-outline" color={C.white} size={28} />
         <Text style={[S.h2, { color: C.white }]}>Final pilot intelligence</Text>
-        <Txt style={{ color: "#E3D5E9" }}>
+        <Txt style={{ color: themeForeground("#E3D5E9") }}>
           Compare the live onboarding funnel, device and platform results,
           feedback trends, launch waves, outcomes and clinical-content readiness.
         </Txt>
@@ -562,8 +563,8 @@ export function PilotAdminScreen() {
       <Section title="Access governance" />
       <Card
         style={{
-          backgroundColor: "#FAF7FB",
-          borderColor: "#E4D9E8",
+          backgroundColor: themeBackground("#FAF7FB"),
+          borderColor: themeBorder("#E4D9E8"),
           gap: 11,
         }}
       >
@@ -573,7 +574,7 @@ export function PilotAdminScreen() {
               width: 48,
               height: 48,
               borderRadius: 17,
-              backgroundColor: "#F1E7F5",
+              backgroundColor: themeBackground("#F1E7F5"),
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -661,7 +662,7 @@ export function PilotAdminScreen() {
 
       <Section title="Stalled onboarding follow-up" />
       {!participants.some((participant) => participant.stalled) ? (
-        <Card style={{ backgroundColor: "#E8F1ED" }}>
+        <Card style={{ backgroundColor: themeBackground("#E8F1ED") }}>
           <Icon name="checkmark-circle-outline" color={C.green} size={26} />
           <Text style={S.h3}>No participant is stalled over 72 hours.</Text>
           <Txt style={S.small}>
@@ -675,7 +676,7 @@ export function PilotAdminScreen() {
           .map((participant) => (
             <Card
               key={"stalled-" + participant.userId}
-              style={{ backgroundColor: "#FFF9F2" }}
+              style={{ backgroundColor: themeBackground("#FFF9F2") }}
             >
               <View style={S.between}>
                 <View style={{ flex: 1 }}>
@@ -708,7 +709,7 @@ export function PilotAdminScreen() {
         readyToActivate.map((participant) => (
           <Card
             key={"ready-" + participant.userId}
-            style={{ backgroundColor: "#E8F1ED" }}
+            style={{ backgroundColor: themeBackground("#E8F1ED") }}
           >
             <View style={S.between}>
               <View style={{ flex: 1 }}>
@@ -852,7 +853,7 @@ export function PilotAdminScreen() {
               </View>
 
               {participant.documents.outstanding.length > 0 && (
-                <Card style={{ backgroundColor: "#FFF9F2" }}>
+                <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
                   <Text style={S.h3}>Outstanding documents</Text>
                   {participant.documents.outstanding.map((document) => (
                     <Txt key={document.id} style={S.small}>
@@ -864,7 +865,7 @@ export function PilotAdminScreen() {
 
               {participant.activationBlockers.length > 0 &&
                 participant.status !== "exited" && (
-                  <Card style={{ backgroundColor: "#FFF9F2" }}>
+                  <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
                     <Text style={S.h3}>Activation blockers</Text>
                     {participant.activationBlockers.map((blocker) => (
                       <Txt key={blocker} style={S.small}>
