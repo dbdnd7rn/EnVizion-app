@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 
 const main = readFileSync(new URL("../src/screens/MainScreens.tsx", import.meta.url), "utf8");
 const profile = readFileSync(new URL("../src/screens/ProfileDashboardScreen.tsx", import.meta.url), "utf8");
+const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
+const careTeam = readFileSync(new URL("../src/screens/CareTeamScreen.tsx", import.meta.url), "utf8");
 
 function section(start: string, end: string) {
   const from = main.indexOf(start);
@@ -67,4 +69,9 @@ test("Home has contextual shortcuts without re-listing care and support", () => 
   assert.match(home, /\{logged && \(/);
   assert.match(home, /\{!logged && \(/);
   assert.match(home, /n\.navigate\("Main", \{ screen: "Toolkit" \}\)/);
+});
+
+test("custom Care Plan header and Care Team expose a single back/profile route", () => {
+  assert.match(app, /options=\{\{ title: "Daily care plan", headerShown: false \}\}/);
+  assert.equal((careTeam.match(/n\.navigate\("Profile"\)/g) ?? []).length, 1);
 });
