@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import {
@@ -158,7 +159,7 @@ function MemberFace({member}:{member:CareTeamMember}){
  if(member.isCurrentUser)return <ProfileAvatar name={member.displayName} size={47}/>;
  return <View style={{height:47,width:47,borderRadius:24,alignItems:"center",
    justifyContent:"center",backgroundColor:"#EFE4F9",borderWidth:2,borderColor:"#FFFFFF"}}>
-   <Text style={{color:P,fontSize:17,fontFamily:"DMSans_700Bold"}}>
+   <Text style={{color:themeForeground(P),fontSize:17,fontFamily:"DMSans_700Bold"}}>
      {(member.displayName.trim()[0]||"?").toUpperCase()}
    </Text></View>;
 }
@@ -171,13 +172,13 @@ function ToolLink({title,detail,icon,onPress,tint="#F1E6FB"}:{
      <View style={{flexDirection:"row",alignItems:"center",gap:12}}>
        <View style={{width:44,height:44,borderRadius:16,alignItems:"center",
        justifyContent:"center",backgroundColor:tint}}>
-       <Icon name={icon} size={22} color={P}/></View>
+       <Icon name={icon} size={22} color={themeForeground(P)}/></View>
        <View style={{flex:1,gap:3}}>
-         <Text style={{fontFamily:"DMSans_700Bold",fontSize:15,color:INK}}>{title}</Text>
-         <Text style={{fontFamily:"DMSans_400Regular",fontSize:12,color:MUTED,
+         <Text style={{fontFamily:"DMSans_700Bold",fontSize:15,color:themeForeground(INK)}}>{title}</Text>
+         <Text style={{fontFamily:"DMSans_400Regular",fontSize:12,color:themeForeground(MUTED),
            lineHeight:18}}>{detail}</Text>
        </View>
-       <Icon name="chevron-forward" size={19} color={P}/>
+       <Icon name="chevron-forward" size={19} color={themeForeground(P)}/>
      </View>
    </Glass>
  </Pressable>;
@@ -330,7 +331,7 @@ export function CareTeamScreen() {
 
 
   if (loading && !spaces.length && !pending.length) {
-    return <Page><ActivityIndicator color={P}/><Txt>Loading your care team…</Txt></Page>;
+    return <Page><ActivityIndicator color={themeForeground(P)}/><Txt>Loading your care team…</Txt></Page>;
   }
   return <Page>
     <View style={{flexDirection:"row",alignItems:"center",gap:11,marginBottom:4}}>
@@ -340,15 +341,15 @@ export function CareTeamScreen() {
           alignItems:"center",backgroundColor:"#F6EDFBEA",
           borderWidth:1,borderColor:"#FFFFFF",opacity:pressed?0.65:1
         })}>
-        <Icon name="arrow-back-outline" size={23} color={P}/>
+        <Icon name="arrow-back-outline" size={23} color={themeForeground(P)}/>
       </Pressable>
       <View style={{flex:1,gap:4}}>
         <Text accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit
-          style={{fontFamily:"DMSans_700Bold",fontSize:21,color:INK}}>
+          style={{fontFamily:"DMSans_700Bold",fontSize:21,color:themeForeground(INK)}}>
           Care team & sharing
         </Text>
         <Text style={{fontFamily:"DMSans_400Regular",fontSize:12,
-          lineHeight:17,color:MUTED}}>Care is easier when the right people can help.</Text>
+          lineHeight:17,color:themeForeground(MUTED)}}>Care is easier when the right people can help.</Text>
       </View>
       <Pressable accessibilityRole="button" accessibilityLabel="Open profile settings"
         onPress={()=>n.navigate("Profile")} style={({pressed})=>({
@@ -356,7 +357,7 @@ export function CareTeamScreen() {
           alignItems:"center",backgroundColor:"#F7F0FB",
           borderWidth:1,borderColor:"#FFFFFF",opacity:pressed?0.65:1
         })}>
-        <Icon name="settings-outline" size={22} color={P}/>
+        <Icon name="settings-outline" size={22} color={themeForeground(P)}/>
       </Pressable>
     </View>
     <Glass tint="#E7D3F7" style={{backgroundColor:"#F6EBFBDD"}}>
@@ -367,21 +368,21 @@ export function CareTeamScreen() {
           <View style={{height:84,width:84,borderRadius:42,borderWidth:4,
             borderColor:"#FFFFFF",backgroundColor:"#E9DAF7",alignItems:"center",
             justifyContent:"center"}}>
-            <Text style={{fontFamily:"DMSans_700Bold",fontSize:29,color:P}}>
+            <Text style={{fontFamily:"DMSans_700Bold",fontSize:29,color:themeForeground(P)}}>
               {(state.careRecipientName.trim()[0]||"C").toUpperCase()}
             </Text>
           </View>
         )}
         <View style={{flex:1,gap:5}}>
-          <Text style={[S.eyebrow,{color:P,letterSpacing:1.5}]}>ACTIVE CARE PROFILE</Text>
+          <Text style={[S.eyebrow,{color:themeForeground(P),letterSpacing:1.5}]}>ACTIVE CARE PROFILE</Text>
           <Text numberOfLines={2} style={{fontFamily:"DMSans_700Bold",fontSize:23,
-            color:INK}}>{state.careRecipientName||"Care profile"}</Text>
+            color:themeForeground(INK)}}>{state.careRecipientName||"Care profile"}</Text>
           <Text style={{fontFamily:"DMSans_600SemiBold",fontSize:12.5,
-            color:"#615477"}}>{roleLabel(state.accessRole)} access</Text>
+            color:themeForeground("#615477")}}>{roleLabel(state.accessRole)} access</Text>
           <View style={{alignSelf:"flex-start"}}><Chip text="Active" active/></View>
         </View>
       </View>
-      <Text style={{fontSize:12.5,lineHeight:19,color:MUTED,
+      <Text style={{fontSize:12.5,lineHeight:19,color:themeForeground(MUTED),
         fontFamily:"DMSans_400Regular"}}>
         {state.accessRole==="viewer"||state.accessRole==="patient"?
           "View your shared care records in one secure space.":
@@ -391,7 +392,7 @@ export function CareTeamScreen() {
     {Boolean(message)&&(
       <View style={{backgroundColor:"#F9F1FC",padding:13,borderRadius:17,
         borderWidth:1,borderColor:"#E7D4EE"}}>
-        <Text accessibilityRole="alert" style={{fontSize:12.5,color:INK}}>{message}</Text>
+        <Text accessibilityRole="alert" style={{fontSize:12.5,color:themeForeground(INK)}}>{message}</Text>
       </View>
     )}
       {pending.length > 0 && (
@@ -411,7 +412,7 @@ export function CareTeamScreen() {
                   <Text style={S.eyebrow}>CARE TEAM INVITATION</Text>
                   <Text style={S.h2}>{invitation.careRecipientName}</Text>
                 </View>
-                <View style={[S.pill, { backgroundColor: C.white }]}>
+                <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
                   <Text style={[S.small, { color: C.purple }]}>
                     {roleLabel(invitation.role)}
                   </Text>
@@ -462,12 +463,12 @@ export function CareTeamScreen() {
       <View style={{flexDirection:"row",alignItems:"center",gap:9}}>
         <View style={{height:42,width:42,borderRadius:16,backgroundColor:"#F1E7FC",
           justifyContent:"center",alignItems:"center"}}>
-          <Icon name="people-outline" size={23} color={P}/>
+          <Icon name="people-outline" size={23} color={themeForeground(P)}/>
         </View>
         <View style={{flex:1,gap:3}}>
           <Text accessibilityRole="header" style={{fontFamily:"DMSans_700Bold",
-            fontSize:18,color:INK}}>People with access</Text>
-          <Text style={{fontSize:11.5,color:MUTED}}>Your trusted care team</Text>
+            fontSize:18,color:themeForeground(INK)}}>People with access</Text>
+          <Text style={{fontSize:11.5,color:themeForeground(MUTED)}}>Your trusted care team</Text>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Refresh members"
           disabled={loading} onPress={()=>void refresh(true)}
@@ -475,11 +476,11 @@ export function CareTeamScreen() {
             borderRadius:22,backgroundColor:"#FFFFFFBA",borderWidth:1,
             borderColor:"#F0E3F6",flexDirection:"row",alignItems:"center",
             gap:5,opacity:pressed||loading?0.6:1})}>
-          <Icon name="refresh-outline" size={15} color={P}/>
-          <Text style={{color:P,fontSize:11,fontFamily:"DMSans_600SemiBold"}}>Refresh</Text>
+          <Icon name="refresh-outline" size={15} color={themeForeground(P)}/>
+          <Text style={{color:themeForeground(P),fontSize:11,fontFamily:"DMSans_600SemiBold"}}>Refresh</Text>
         </Pressable>
       </View>
-      {!members.length&&<Text style={{color:MUTED,fontSize:12.5,lineHeight:19}}>
+      {!members.length&&<Text style={{color:themeForeground(MUTED),fontSize:12.5,lineHeight:19}}>
         No members are listed for this care profile yet.
       </Text>}
       {members.map(member=>(
@@ -494,9 +495,9 @@ export function CareTeamScreen() {
             <MemberFace member={member}/>
             <View style={{flex:1,gap:4}}>
               <Text numberOfLines={1} style={{fontFamily:"DMSans_700Bold",
-                fontSize:14.5,color:INK}}>{member.displayName}</Text>
+                fontSize:14.5,color:themeForeground(INK)}}>{member.displayName}</Text>
               <Text numberOfLines={1} style={{fontFamily:"DMSans_400Regular",
-                fontSize:12,color:MUTED}}>{roleLabel(member.role)}</Text>
+                fontSize:12,color:themeForeground(MUTED)}}>{roleLabel(member.role)}</Text>
             </View>
             <Chip text={invitationStatusLabel(member)} active={member.status==="active"}/>
             <Icon name={expandedMember===member.userId?"chevron-up":"chevron-forward"}
@@ -504,7 +505,7 @@ export function CareTeamScreen() {
           </Pressable>
           {expandedMember===member.userId&&(
             <View style={{gap:12,borderTopWidth:1,borderColor:"#F0E7F5",paddingTop:10}}>
-              {Boolean(member.email)&&<Text selectable style={{fontSize:12,color:MUTED}}>
+              {Boolean(member.email)&&<Text selectable style={{fontSize:12,color:themeForeground(MUTED)}}>
                 {member.email}
               </Text>}
           {member.status === "invited" && (
@@ -691,12 +692,12 @@ export function CareTeamScreen() {
         <View style={{flexDirection:"row",gap:11,alignItems:"center"}}>
           <View style={{width:43,height:43,borderRadius:16,
             backgroundColor:"#F0E4FB",justifyContent:"center",alignItems:"center"}}>
-            <Icon name="person-add-outline" size={23} color={P}/>
+            <Icon name="person-add-outline" size={23} color={themeForeground(P)}/>
           </View>
           <View style={{flex:1,gap:3}}>
             <Text accessibilityRole="header" style={{fontFamily:"DMSans_700Bold",
-              fontSize:18,color:INK}}>Invite someone you trust</Text>
-            <Text style={{fontSize:12,color:MUTED}}>Add a family member or caregiver.</Text>
+              fontSize:18,color:themeForeground(INK)}}>Invite someone you trust</Text>
+            <Text style={{fontSize:12,color:themeForeground(MUTED)}}>Add a family member or caregiver.</Text>
           </View>
         </View>
         <View style={{flexDirection:"row",alignItems:"center",gap:10,
@@ -706,7 +707,7 @@ export function CareTeamScreen() {
           <TextInput accessibilityLabel="Full name" placeholder="Full name"
             placeholderTextColor="#9A8EA6" autoCapitalize="words"
             value={inviteName} onChangeText={setInviteName} editable={busyId===null}
-            style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:INK,
+            style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:themeForeground(INK),
               fontFamily:"DMSans_400Regular"}}/>
         </View>
         <View style={{flexDirection:"row",alignItems:"center",gap:10,
@@ -717,13 +718,13 @@ export function CareTeamScreen() {
             placeholderTextColor="#9A8EA6" autoCapitalize="none" autoCorrect={false}
             keyboardType="email-address" value={inviteEmail} onChangeText={setInviteEmail}
             editable={busyId===null}
-            style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:INK,
+            style={{flex:1,minWidth:0,minHeight:52,fontSize:14,color:themeForeground(INK),
               fontFamily:"DMSans_400Regular"}}/>
         </View>
-        <Text style={{fontFamily:"DMSans_700Bold",fontSize:13,color:INK}}>Access level</Text>
+        <Text style={{fontFamily:"DMSans_700Bold",fontSize:13,color:themeForeground(INK)}}>Access level</Text>
         <RolePicker value={inviteRole} disabled={busyId!==null} onChange={setInviteRole}/>
         <Text style={{fontFamily:"DMSans_400Regular",fontSize:11.5,
-          lineHeight:18,color:MUTED}}>
+          lineHeight:18,color:themeForeground(MUTED)}}>
           {inviteRole==="caregiver"?"Can view and update shared records.":
            inviteRole==="patient"?"Can view their shared care record.":
            "Can read shared updates, without changing medical data."}
@@ -740,16 +741,16 @@ export function CareTeamScreen() {
         <View style={{flexDirection:"row",alignItems:"center",gap:11}}>
           <View style={{width:44,height:44,borderRadius:16,
             backgroundColor:"#FAECEF",justifyContent:"center",alignItems:"center"}}>
-            <Icon name="swap-horizontal-outline" size={24} color={P}/>
+            <Icon name="swap-horizontal-outline" size={24} color={themeForeground(P)}/>
           </View>
           <View style={{flex:1,gap:4}}>
             <Text accessibilityRole="header" style={{fontSize:17,
-              color:INK,fontFamily:"DMSans_700Bold"}}>Primary Advocate handover</Text>
-            <Text style={{fontSize:12,color:MUTED,lineHeight:18}}>
+              color:themeForeground(INK),fontFamily:"DMSans_700Bold"}}>Primary Advocate handover</Text>
+            <Text style={{fontSize:12,color:themeForeground(MUTED),lineHeight:18}}>
               Transfer responsibility with a clear permissions review.
             </Text>
           </View>
-          <Icon name="chevron-forward" color={P} size={19}/>
+          <Icon name="chevron-forward" color={themeForeground(P)} size={19}/>
         </View>
         <Button title="Review handover" secondary
           onPress={()=>n.navigate("AdvocateHandover")}/>
@@ -762,16 +763,16 @@ export function CareTeamScreen() {
         borderRadius:21,backgroundColor:"#F2E9F8",
         borderWidth:1,borderColor:"#E6D8EE",padding:15,
         opacity:pressed?0.75:1})}>
-      <Icon name="settings-outline" size={21} color={P}/>
-      <Text style={{flex:1,fontFamily:"DMSans_700Bold",fontSize:14.5,color:P}}>
+      <Icon name="settings-outline" size={21} color={themeForeground(P)}/>
+      <Text style={{flex:1,fontFamily:"DMSans_700Bold",fontSize:14.5,color:themeForeground(P)}}>
         More sharing tools
       </Text>
-      <Icon name={showTools?"chevron-up":"chevron-down"} size={19} color={P}/>
+      <Icon name={showTools?"chevron-up":"chevron-down"} size={19} color={themeForeground(P)}/>
     </Pressable>
     {showTools&&(
       <View style={{gap:13}}>
         <Glass>
-          <Text accessibilityRole="header" style={[S.h3,{color:INK}]}>Your care spaces</Text>
+          <Text accessibilityRole="header" style={[S.h3,{color:themeForeground(INK)}]}>Your care spaces</Text>
           {!spaces.length&&<Txt>No care spaces yet.</Txt>}
           {spaces.map(space=>(
             <Pressable key={space.careRecipientId} accessibilityRole="button"
@@ -793,7 +794,7 @@ export function CareTeamScreen() {
         </Glass>
         {canManage&&recipientId&&(
           <Glass>
-            <Text accessibilityRole="header" style={[S.h3,{color:INK}]}>
+            <Text accessibilityRole="header" style={[S.h3,{color:themeForeground(INK)}]}>
               Invitation management
             </Text>
             <View style={{flexDirection:"row",flexWrap:"wrap",gap:7}}>
@@ -810,7 +811,7 @@ export function CareTeamScreen() {
                 </View>
               ))}
             </View>
-            <Text style={{fontSize:11.5,lineHeight:18,color:MUTED}}>
+            <Text style={{fontSize:11.5,lineHeight:18,color:themeForeground(MUTED)}}>
               Invitations last 14 days. Reminders can be sent once every 24 hours.
               “Email requested” means EnVizion handed the invite to the email provider;
               it does not claim that the message was delivered or opened.

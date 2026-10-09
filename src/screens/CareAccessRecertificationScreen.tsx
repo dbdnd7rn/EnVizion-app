@@ -1,3 +1,4 @@
+import { themeShadow } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import Svg, { Defs, LinearGradient, Stop, Rect, Circle, Path } from "react-native-svg";
@@ -36,7 +37,7 @@ function Page({ children }: { children: React.ReactNode }) {
             borderColor:"#FFFFFF",opacity:pressed?0.75:1})}>
           <Icon name="arrow-back-outline" color={themeForeground(PURPLE)} size={22}/>
         </Pressable>
-        <Text accessibilityRole="header" style={{flex:1,color:INK,fontSize:18,
+        <Text accessibilityRole="header" style={{flex:1,color:themeForeground(INK),fontSize:18,
           fontFamily:"DMSans_700Bold"}}>90-day access review</Text>
       </View>
       {children}
@@ -46,7 +47,7 @@ function Page({ children }: { children: React.ReactNode }) {
 function Card({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[{ padding: 16, borderRadius: 25, borderWidth: 1,
     borderColor: themeBorder("#E7DDF2"), backgroundColor: themeBackground("#FFFDFFED"), gap: 12,
-    shadowColor: "#603982", shadowOpacity: 0.07,
+    shadowColor: themeShadow("#603982"), shadowOpacity: 0.07,
     shadowOffset: { width: 0, height: 7 }, shadowRadius: 16,
     elevation: 2, overflow: "hidden" }, style]}>
     <View pointerEvents="none" style={{ position: "absolute",
@@ -419,11 +420,11 @@ export function CareAccessRecertificationScreen() {
           <View style={{flexDirection:"row",alignItems:"center",gap:13}}>
             <IconTile icon="shield-checkmark-outline" green/>
             <View style={{flex:1,gap:4}}>
-              <Text style={{fontFamily:"DMSans_700Bold",fontSize:14,color:INK}}>
+              <Text style={{fontFamily:"DMSans_700Bold",fontSize:14,color:themeForeground(INK)}}>
                 No access reviews are due
               </Text>
               <Text style={{fontFamily:"DMSans_400Regular",fontSize:12.5,
-                lineHeight:18,color:MUTED}}>
+                lineHeight:18,color:themeForeground(MUTED)}}>
                 Upcoming reviews stay scheduled automatically.
               </Text>
             </View>
@@ -631,7 +632,7 @@ export function CareAccessRecertificationScreen() {
         <Card><View style={{flexDirection:"row",alignItems:"center",gap:12}}>
           <IconTile icon="calendar-outline"/>
           <Text style={{flex:1,fontFamily:"DMSans_400Regular",fontSize:13,
-            lineHeight:19,color:MUTED}}>No upcoming access reviews are scheduled yet.</Text>
+            lineHeight:19,color:themeForeground(MUTED)}}>No upcoming access reviews are scheduled yet.</Text>
         </View></Card>
       ) : (
         upcoming.slice(0, 12).map((item) => (
@@ -656,7 +657,7 @@ export function CareAccessRecertificationScreen() {
         <Card><View style={{flexDirection:"row",alignItems:"center",gap:12}}>
           <IconTile icon="document-text-outline"/>
           <Text style={{flex:1,fontFamily:"DMSans_400Regular",fontSize:13,
-            lineHeight:19,color:MUTED}}>
+            lineHeight:19,color:themeForeground(MUTED)}}>
             No completed 90-day access reviews have been recorded yet.
           </Text>
         </View></Card>

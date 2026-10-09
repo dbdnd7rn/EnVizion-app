@@ -1,3 +1,4 @@
+import { themeBackground } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import {
@@ -108,7 +109,7 @@ export function PrivacyDataScreen() {
       />
 
       {Boolean(message) && (
-        <Card style={{ backgroundColor: C.white }}>
+        <Card style={{ backgroundColor: themeBackground(C.white) }}>
           <Text
             accessibilityRole="alert"
             style={[

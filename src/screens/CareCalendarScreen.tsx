@@ -1,3 +1,4 @@
+import { themeBackground, themeForeground, themeShadow } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Svg, { Circle, Defs, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
@@ -1204,11 +1205,11 @@ const categoryCounts = useMemo(
           borderRadius: 24,
           borderWidth: 1,
           borderColor: "#EAE4EF",
-          backgroundColor: C.white,
+          backgroundColor: themeBackground(C.white),
           paddingHorizontal: 14,
           flexDirection: "row",
           alignItems: "center",
-          shadowColor: "#382840",
+          shadowColor: themeShadow("#382840"),
           shadowOpacity: 0.04,
           shadowRadius: 14,
           shadowOffset: { width: 0, height: 7 },
@@ -1371,7 +1372,7 @@ const categoryCounts = useMemo(
               borderRadius: 26,
               borderWidth: 1,
               borderColor: "#EAE4EF",
-              backgroundColor: C.white,
+              backgroundColor: themeBackground(C.white),
               alignItems: "center",
               justifyContent: "center",
               gap: 12,
@@ -1388,12 +1389,12 @@ const categoryCounts = useMemo(
               borderRadius: 26,
               borderWidth: 1,
               borderColor: "#EAE4EF",
-              backgroundColor: C.white,
+              backgroundColor: themeBackground(C.white),
               alignItems: "center",
               justifyContent: "center",
               paddingHorizontal: 26,
               paddingVertical: 28,
-              shadowColor: "#382840",
+              shadowColor: themeShadow("#382840"),
               shadowOpacity: 0.035,
               shadowRadius: 15,
               shadowOffset: { width: 0, height: 8 },
@@ -1588,7 +1589,7 @@ const categoryCounts = useMemo(
               accessibilityRole="button"
               accessibilityLabel="Close reminder form"
               onPress={resetForm}
-              style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: C.white }}
+              style={{ width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: themeBackground(C.white) }}
             >
               <Icon name="close-outline" size={22} />
             </Pressable>
@@ -1664,10 +1665,10 @@ const categoryCounts = useMemo(
                   justifyContent: "center",
                 }}
               >
-                <Icon name={agendaIcons[nextEvent.category]} size={23} color="#268468" />
+                <Icon name={agendaIcons[nextEvent.category]} size={23} color={themeForeground("#268468")} />
               </View>
               <View style={{ flex: 1, gap: 3 }}>
-                <Text style={[S.eyebrow, { color: "#268468" }]}>
+                <Text style={[S.eyebrow, { color: themeForeground("#268468") }]}>
                   {nextEvent.sourceLabel.toUpperCase()}
                 </Text>
                 <Text style={S.h3}>{nextEvent.title}</Text>
