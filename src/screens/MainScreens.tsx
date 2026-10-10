@@ -7,6 +7,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStack } from "../navigation";
 import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
+import { HomeJourneyArtwork } from "../components/HomeJourneyArtwork";
 import {
   loadCareAccessRecertificationAttention,
   loadCareInvitationAttention,
@@ -164,10 +165,7 @@ export function HomeScreen() {
   const { width: windowWidth } = useWindowDimensions();
   const compact = windowWidth < 430;
   const contentWidth = Math.min(Math.max(windowWidth - 40, 280), 440);
-  const heroTextWidth = Math.min(compact ? 215 : 255, contentWidth * 0.62);
-  const heroArtLeft = Math.max(contentWidth * 0.50, compact ? 178 : 205);
-
-  const logged = state.entries.length > 0;
+   const logged = state.entries.length > 0;
   const doseRecorded = state.medicationRecords.some(
     (record) => !record.correctedAt,
   );
@@ -250,8 +248,8 @@ export function HomeScreen() {
   }
 
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greetingDaypart =
+    hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
 
   const priority =
     !state.careRecipientId
@@ -304,23 +302,86 @@ export function HomeScreen() {
           </View>
         </HomeReveal>
 
-        {state.careRecipientId && (
-          <HomeReveal delay={35}>
-            <View style={{ gap: 8 }}>
+        <HomeReveal delay={65}>
+          <View
+            style={{
+              position: "relative",
+              marginHorizontal: -20,
+              minHeight: windowWidth < 365 ? 369 : compact ? 392 : 416,
+              overflow: "hidden",
+              backgroundColor: themeBackground("#FFFDFC"),
+            }}
+          >
+            <View
+              pointerEvents="none"
+              style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
+            >
+              <HomeJourneyArtwork height={windowWidth < 365 ? 369 : compact ? 392 : 416} />
+            </View>
+
+            <View
+              style={{
+                paddingTop: compact ? 28 : 33,
+                paddingHorizontal: 23,
+                alignItems: "flex-start",
+              }}
+            >
               <Text
                 style={[
                   S.eyebrow,
                   {
-                    color: themeForeground("#8C8290"),
-                    fontSize: 10,
-                    letterSpacing: 2.2,
-                    marginLeft: 2,
+                    color: themeForeground("#77718D"),
+                    fontSize: 10.5,
+                    letterSpacing: 2.8,
+                    marginBottom: 18,
                   },
                 ]}
               >
-                {state.careMode === "self" ? "MY CARE PROFILE" : "CARING FOR"}
+                YOUR CARE JOURNEY
               </Text>
+              <Text
+                accessibilityRole="header"
+                style={{
+                  fontFamily: "Lora_500Medium",
+                  fontSize: windowWidth < 365 ? 45 : compact ? 53 : 57,
+                  lineHeight: windowWidth < 365 ? 53 : compact ? 61 : 66,
+                  letterSpacing: -2.4,
+                  maxWidth: contentWidth - 4,
+                  color: themeForeground("#101338"),
+                }}
+              >
+                Good{"\n"}{greetingDaypart},{"\n"}{displayName}.
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: windowWidth < 365 ? 14.5 : 16,
+                  lineHeight: windowWidth < 365 ? 21 : 24,
+                  color: themeForeground("#77738A"),
+                  maxWidth: compact ? 282 : 312,
+                  marginTop: 19,
+                }}
+              >
+                {state.careMode === "self"
+                  ? "Your health, appointments, and next steps — all in one peaceful place."
+                  : "Care plans, appointments, and next steps — all in one peaceful place."}
+              </Text>
+              <View
+                style={{
+                  width: 36,
+                  height: 3,
+                  borderRadius: 2,
+                  backgroundColor: themeBackground("#C47CDB"),
+                  marginTop: 17,
+                }}
+              />
+            </View>
+          </View>
+        </HomeReveal>
 
+        {state.careRecipientId && (
+          <HomeReveal delay={35}>
+            <View style={{ gap: 8, marginTop: -5 }}>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={
@@ -336,13 +397,18 @@ export function HomeScreen() {
                   }
                 }}
                 style={({ pressed }) => ({
-                  minHeight: 68,
-                  borderRadius: 22,
-                  borderWidth: 1,
-                  borderColor: switcherOpen ? "#CAB1D6" : "#E9E1EB",
-                  backgroundColor: switcherOpen ? "#F8F2FA" : C.white,
-                  paddingHorizontal: 15,
-                  paddingVertical: 12,
+                  minHeight: 82,
+                  borderRadius: 26,
+                  borderWidth: 1.5,
+                  borderColor: themeBorder(switcherOpen ? "#E7D7EF" : "#FFFFFF"),
+                  backgroundColor: themeBackground(switcherOpen ? "#F9F1FDEB" : "#FFFFFFDA"),
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  shadowColor: themeShadow("#745287"),
+                  shadowOpacity: 0.12,
+                  shadowRadius: 18,
+                  shadowOffset: { width: 0, height: 9 },
+                  elevation: 3,
                   flexDirection: "row",
                   alignItems: "center",
                   gap: 12,
@@ -351,19 +417,18 @@ export function HomeScreen() {
               >
                 <View
                   style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: 16,
-                    backgroundColor:
-                      state.careMode === "self" ? "#FCEAF1" : "#EEE3F4",
+                    width: 48,
+                    height: 48,
+                    borderRadius: 19,
+                    backgroundColor: themeBackground("#F6E9F7"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
                   <Icon
                     name={state.careMode === "self" ? "person-outline" : "heart-outline"}
-                    size={23}
-                    color={state.careMode === "self" ? "#B13D70" : C.purple}
+                    size={25}
+                    color={themeForeground("#74328F")}
                   />
                 </View>
 
@@ -373,7 +438,7 @@ export function HomeScreen() {
                     style={{
                       fontFamily: "DMSans_700Bold",
                       fontSize: 17,
-                      color: themeForeground("#211B2C"),
+                      color: themeForeground("#17153A"),
                     }}
                   >
                     {state.careRecipientName || "Care profile"}
@@ -383,7 +448,7 @@ export function HomeScreen() {
                     style={{
                       fontFamily: "DMSans_400Regular",
                       fontSize: 12.5,
-                      color: themeForeground("#817789"),
+                      color: themeForeground("#77718B"),
                     }}
                   >
                     {state.careMode === "self"
@@ -394,26 +459,21 @@ export function HomeScreen() {
 
                 <View
                   style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: 13,
-                    backgroundColor: themeBackground("#F4EDF7"),
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: themeBackground("#F9F4FBEF"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Icon
-                    name={
-                      careSpaces.length > 1
-                        ? switcherOpen
-                          ? "chevron-up"
-                          : "chevron-down"
-                        : "people-outline"
-                    }
-                    size={18}
-                    color={C.purple}
-                  />
+                  <Icon name="people-outline" size={20} color={C.purple} />
                 </View>
+                <Icon
+                  name={careSpaces.length > 1 && switcherOpen ? "chevron-up" : "chevron-forward"}
+                  size={19}
+                  color={themeForeground("#94849E")}
+                />
               </Pressable>
 
               {switcherOpen && careSpaces.length > 1 && (
@@ -689,210 +749,118 @@ export function HomeScreen() {
             </HomeReveal>
           )}
 
-        <HomeReveal delay={65}>
-          <View
-            style={{
-              position: "relative",
-              minHeight: 224,
-              borderRadius: 30,
-              overflow: "hidden",
-              backgroundColor: themeBackground("#FFFDFC"),
-              marginHorizontal: -2,
-            }}
-          >
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                left: heroArtLeft,
-                right: -20,
-                bottom: -4,
-                opacity: 0.94,
-              }}
-            >
-              <HomeFloat distance={4} duration={3300}>
-                <HomeLandscape height={190} />
-              </HomeFloat>
-            </View>
-
-            <View
-              style={{
-                gap: 8,
-                paddingTop: 7,
-                paddingHorizontal: 4,
-                maxWidth: heroTextWidth,
-              }}
-            >
-              <Text
-                style={[
-                  S.eyebrow,
-                  { color: themeForeground("#7A3F96"), fontSize: 11, letterSpacing: 2.8 },
-                ]}
-              >
-                {state.careMode === "self" ? "YOUR CARE DASHBOARD" : "YOUR CARE COMPANION"}
-              </Text>
-              <Text
-                accessibilityRole="header"
-                style={{
-                  fontFamily: "DMSans_700Bold",
-                  fontSize: compact ? 36 : 40,
-                  lineHeight: compact ? 42 : 47,
-                  letterSpacing: -1.15,
-                  color: themeForeground("#17153A"),
-                }}
-              >
-                {greeting},{"\n"}{displayName}.
-              </Text>
-              <Text
-                style={{
-                  fontFamily: "DMSans_400Regular",
-                  fontSize: 18,
-                  lineHeight: 25,
-                  color: themeForeground("#77758B"),
-                  maxWidth: heroTextWidth,
-                }}
-              >
-                {state.careMode === "self"
-                  ? "Your health, appointments, and next steps in one calm place."
-                  : "Here for a calmer, more confident day of care."}
-              </Text>
-            </View>
-          </View>
-        </HomeReveal>
-
         <HomeReveal delay={120}>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={priority.title}
+            accessibilityHint={priority.body}
             onPress={priority.onPress}
             style={({ pressed }) => ({
               position: "relative",
               overflow: "hidden",
               borderRadius: 28,
-              backgroundColor: themeBackground("#63307D"),
-              paddingHorizontal: 23,
-              paddingVertical: 22,
-              minHeight: 205,
-              opacity: pressed ? 0.9 : 1,
+              borderWidth: 1,
+              borderColor: themeBorder("#8F5AA9"),
+              backgroundColor: themeAction("#602B7E"),
+              paddingHorizontal: 21,
+              paddingVertical: 20,
+              minHeight: 167,
+              opacity: pressed ? 0.91 : 1,
               transform: [{ scale: pressed ? 0.988 : 1 }],
               shadowColor: themeShadow("#5A246C"),
-              shadowOpacity: 0.2,
-              shadowRadius: 20,
-              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.23,
+              shadowRadius: 17,
+              shadowOffset: { width: 0, height: 9 },
               elevation: 5,
             })}
           >
-            <View
+            <Svg
               pointerEvents="none"
-              style={{
-                position: "absolute",
-                width: 240,
-                height: 240,
-                borderRadius: 120,
-                right: -104,
-                top: -124,
-                backgroundColor: themeBackground("#FFFFFF0C"),
-              }}
-            />
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                width: 154,
-                height: 154,
-                borderRadius: 77,
-                right: 52,
-                bottom: -105,
-                backgroundColor: themeBackground("#FFFFFF0A"),
-              }}
-            />
-            <View
-              pointerEvents="none"
-              style={{
-                position: "absolute",
-                width: 78,
-                height: 78,
-                borderRadius: 39,
-                left: -22,
-                bottom: -28,
-                backgroundColor: themeBackground("#B277CA17"),
-              }}
-            />
+              width="100%"
+              height="100%"
+              viewBox="0 0 430 177"
+              preserveAspectRatio="xMidYMid slice"
+              style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0 }}
+            >
+              <Defs>
+                <LinearGradient id="homeNextStepPurple" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <Stop offset="0%" stopColor="#522075" />
+                  <Stop offset="54%" stopColor="#663583" />
+                  <Stop offset="100%" stopColor="#A47ABE" />
+                </LinearGradient>
+                <LinearGradient id="homeNextStepRibbon" x1="5%" y1="0%" x2="100%" y2="100%">
+                  <Stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.02" />
+                  <Stop offset="100%" stopColor="#E5BFF3" stopOpacity="0.32" />
+                </LinearGradient>
+              </Defs>
+              <Rect width="430" height="177" fill="url(#homeNextStepPurple)" />
+              <Circle cx="393" cy="-21" r="152" fill="#DFB5F2" opacity="0.12" />
+              <Path d="M0 178 C106 122 169 182 277 116 C345 73 374 106 430 57 L430 177 Z" fill="url(#homeNextStepRibbon)" />
+              <Path d="M141 177 Q248 172 299 116 Q349 62 430 89" stroke="#F7E8FF" strokeWidth="1.5" fill="none" opacity="0.32" />
+            </Svg>
 
             <Text
               style={[
                 S.eyebrow,
                 {
-                  color: themeForeground("#F1DAF7"),
-                  fontSize: 11,
-                  letterSpacing: 2.8,
-                  marginBottom: 14,
+                  color: "#F6E5FE",
+                  fontSize: 10.5,
+                  letterSpacing: 2.7,
+                  marginBottom: 13,
                 },
               ]}
             >
               YOUR NEXT STEP
             </Text>
-
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-              <View style={{ flex: 1, gap: 8 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View style={{ flex: 1 }}>
                 <Text
                   style={{
                     fontFamily: "DMSans_700Bold",
-                    fontSize: 31,
-                    lineHeight: 37,
-                    letterSpacing: -0.65,
-                    color: C.white,
-                    maxWidth: 240,
+                    fontSize: windowWidth < 365 ? 23 : 27,
+                    lineHeight: windowWidth < 365 ? 29 : 33,
+                    letterSpacing: -0.7,
+                    color: "#FFFFFF",
+                    maxWidth: 250,
                   }}
                 >
                   {priority.title}
                 </Text>
-                <Text
-                  style={{
-                    fontFamily: "DMSans_400Regular",
-                    fontSize: 15,
-                    lineHeight: 22,
-                    color: themeForeground("#EEE2F2"),
-                    maxWidth: 258,
-                  }}
-                >
-                  {priority.body}
-                </Text>
               </View>
-
-              <View style={{ width: 76, alignItems: "center", gap: 17 }}>
-                <HomeFloat distance={6} duration={1550}>
-                  <View
-                    style={{
-                      width: 72,
-                      height: 72,
-                      borderRadius: 23,
-                      backgroundColor: themeBackground("#F7EDFB"),
-                      alignItems: "center",
-                      justifyContent: "center",
-                      transform: [{ rotate: "4deg" }],
-                    }}
-                  >
-                    <Icon name={priority.icon} size={35} color={themeForeground("#9B58B3")} />
-                  </View>
-                </HomeFloat>
+              <HomeFloat distance={3} duration={2400}>
                 <View
                   style={{
-                    width: 53,
-                    height: 53,
-                    borderRadius: 27,
-                    backgroundColor: themeBackground(C.white),
+                    width: 60,
+                    height: 67,
+                    borderRadius: 21,
+                    borderWidth: 1,
+                    borderColor: "#FFFFFF92",
+                    backgroundColor: "#FFFFFFD4",
                     alignItems: "center",
                     justifyContent: "center",
-                    shadowColor: themeShadow("#2A1831"),
-                    shadowOpacity: 0.08,
-                    shadowRadius: 10,
-                    shadowOffset: { width: 0, height: 4 },
-                    elevation: 2,
+                    shadowColor: "#FFFFFF",
+                    shadowOpacity: 0.28,
+                    shadowRadius: 11,
+                    shadowOffset: { width: 0, height: 3 },
                   }}
                 >
-                  <Icon name="arrow-forward" size={25} color={themeForeground("#6E3288")} />
+                  <Icon name={priority.icon} size={31} color="#813D9D" />
                 </View>
+              </HomeFloat>
+              <View
+                style={{
+                  width: 43,
+                  height: 43,
+                  borderRadius: 22,
+                  backgroundColor: "#FCF4FF",
+                  borderWidth: 1,
+                  borderColor: "#FFFFFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginLeft: 1,
+                }}
+              >
+                <Icon name="arrow-forward" size={23} color="#632A85" />
               </View>
             </View>
           </Pressable>
