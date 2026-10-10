@@ -20,12 +20,11 @@ test("spiritual reflection remains screen-local and non-persistent", () => {
   );
 });
 
-test("spiritual wellness keeps the exact requested scripture and natural-breathing wording", () => {
-  assert.match(
-    screen,
-    /“God is our refuge and strength, a very present help in trouble\.”/,
-  );
-  assert.match(screen, /Psalm 46:1 · King James Version/);
+test("spiritual wellness displays the scheduled scripture and keeps natural-breathing wording", () => {
+  assert.match(screen, /faithVerse\.text/);
+  assert.match(screen, /faithVerse\.reference/);
+  assert.match(screen, /King James Version/);
+  assert.match(screen, /Updates every 12 hours/);
   assert.match(screen, /Breathe naturally\. Nothing to achieve\./);
 });
 

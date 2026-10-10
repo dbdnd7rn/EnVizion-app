@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import {
   AccessibilityInfo,
+  AppState,
   Animated,
   Easing,
   Platform,
@@ -23,6 +24,8 @@ import type { RootStack } from "../navigation";
 import { SpiritualLandscapeArt } from "../components/SpiritualLandscapeArt";
 import {
   QUIET_MOMENT_MS,
+  faithVerseAt,
+  faithVerseNextUpdateMs,
   formatQuietMomentClock,
   quietMomentElapsedMs,
   quietMomentProgress,
@@ -272,6 +275,39 @@ export function WellnessScreen() {
   // Privacy boundary: reflection text intentionally remains component state only.
   const [reflection, setReflection] = useState("");
   const [keptForVisit, setKeptForVisit] = useState(false);
+  const [faithVerse, setFaithVerse] = useState(() => faithVerseAt());
+
+  useFocusEffect(
+    useCallback(() => {
+      let updateTimer: ReturnType<typeof setTimeout> | null = null;
+      const refreshVerse = () => {
+        if (updateTimer !== null) clearTimeout(updateTimer);
+        const now = Date.now();
+        setFaithVerse(faithVerseAt(now));
+        updateTimer = setTimeout(refreshVerse, faithVerseNextUpdateMs(now) - now);
+      };
+      refreshVerse();
+      const subscription = AppState.addEventListener("change", (state) => {
+        if (state === "active") refreshVerse();
+      });
+      // Browsers can suspend timers while a tab is hidden or a phone is asleep.
+      const onVisible = () => {
+        if (document.visibilityState === "visible") refreshVerse();
+      };
+      if (Platform.OS === "web" && typeof document !== "undefined") {
+        document.addEventListener("visibilitychange", onVisible);
+        window.addEventListener("focus", refreshVerse);
+      }
+      return () => {
+        if (updateTimer !== null) clearTimeout(updateTimer);
+        subscription.remove();
+        if (Platform.OS === "web" && typeof document !== "undefined") {
+          document.removeEventListener("visibilitychange", onVisible);
+          window.removeEventListener("focus", refreshVerse);
+        }
+      };
+    }, []),
+  );
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef<number | null>(null);
@@ -555,7 +591,7 @@ export function WellnessScreen() {
                 textAlign: "center",
               }}
             >
-              “God is our refuge and strength, a very present help in trouble.”
+              {`“${faithVerse.text}”`}
             </Text>
             <Text
               style={{
@@ -568,7 +604,18 @@ export function WellnessScreen() {
                 textAlign: "center",
               }}
             >
-              Psalm 46:1 · King James Version
+              {faithVerse.reference} · King James Version
+            </Text>
+            <Text
+              style={{
+                fontFamily: "DMSans_400Regular",
+                fontSize: 11,
+                lineHeight: 17,
+                color: themeForeground("#77718A"),
+                textAlign: "center",
+              }}
+            >
+              Updates every 12 hours
             </Text>
           </View>
         </Entrance>

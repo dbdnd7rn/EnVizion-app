@@ -2,6 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   QUIET_MOMENT_MS,
+  FAITH_VERSE_INTERVAL_MS,
+  FAITH_VERSES,
+  faithVerseAt,
+  faithVerseNextUpdateMs,
   formatQuietMomentClock,
   quietMomentElapsedMs,
   quietMomentProgress,
@@ -34,4 +38,31 @@ test("quiet moment clock formats a one-minute countdown", () => {
   assert.equal(formatQuietMomentClock(60), "1:00");
   assert.equal(formatQuietMomentClock(9), "0:09");
   assert.equal(formatQuietMomentClock(0), "0:00");
+});
+
+test("verse stays stable during a window and changes exactly at each 12-hour boundary", () => {
+  const start = Date.UTC(2026, 9, 10);
+  assert.equal(FAITH_VERSE_INTERVAL_MS, 43_200_000);
+  assert.deepEqual(faithVerseAt(start), faithVerseAt(start + FAITH_VERSE_INTERVAL_MS - 1));
+  assert.notDeepEqual(faithVerseAt(start), faithVerseAt(start + FAITH_VERSE_INTERVAL_MS));
+  assert.notDeepEqual(faithVerseAt(start + FAITH_VERSE_INTERVAL_MS), faithVerseAt(start + 2 * FAITH_VERSE_INTERVAL_MS));
+  assert.equal(faithVerseNextUpdateMs(start), start + FAITH_VERSE_INTERVAL_MS);
+  assert.equal(faithVerseNextUpdateMs(start + FAITH_VERSE_INTERVAL_MS - 1), start + FAITH_VERSE_INTERVAL_MS);
+  assert.equal(faithVerseNextUpdateMs(start + FAITH_VERSE_INTERVAL_MS), start + 2 * FAITH_VERSE_INTERVAL_MS);
+});
+
+test("reopening and resuming after missed windows selects the current verse without replaying stale ones", () => {
+  const start = Date.UTC(2026, 9, 10);
+  assert.deepEqual(faithVerseAt(start + 1000), faithVerseAt(start + 600_000));
+  const resumed = start + 7 * FAITH_VERSE_INTERVAL_MS + 1234;
+  assert.deepEqual(faithVerseAt(resumed), faithVerseAt(start + 7 * FAITH_VERSE_INTERVAL_MS));
+  assert.equal(faithVerseNextUpdateMs(resumed), start + 8 * FAITH_VERSE_INTERVAL_MS);
+});
+
+test("scripture rotation has no adjacent duplicates, even when the collection wraps", () => {
+  assert.equal(new Set(FAITH_VERSES.map((verse) => verse.reference)).size, FAITH_VERSES.length);
+  for (let slot = 0; slot < FAITH_VERSES.length; slot += 1) {
+    assert.notDeepEqual(faithVerseAt(slot * FAITH_VERSE_INTERVAL_MS), faithVerseAt((slot + 1) * FAITH_VERSE_INTERVAL_MS));
+  }
+  assert.deepEqual(faithVerseAt(0), faithVerseAt(FAITH_VERSES.length * FAITH_VERSE_INTERVAL_MS));
 });
