@@ -8,6 +8,7 @@ import type { RootStack } from "../navigation";
 import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
 import { HomeJourneyArtwork } from "../components/HomeJourneyArtwork";
+import { HomeGlassOrb, HomeGlassSheen } from "../components/HomeGlassMotion";
 import {
   loadCareAccessRecertificationAttention,
   loadCareInvitationAttention,
@@ -316,8 +317,23 @@ export function HomeScreen() {
               pointerEvents="none"
               style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
             >
-              <HomeJourneyArtwork height={windowWidth < 365 ? 369 : compact ? 392 : 416} />
+              <HomeFloat distance={2} duration={6500}>
+                <HomeJourneyArtwork height={windowWidth < 365 ? 369 : compact ? 392 : 416} />
+              </HomeFloat>
             </View>
+
+            <HomeGlassOrb
+              id="a"
+              size={37}
+              delay={320}
+              style={{ right: 58, top: 70 }}
+            />
+            <HomeGlassOrb
+              id="b"
+              size={24}
+              delay={1750}
+              style={{ right: 18, bottom: 81 }}
+            />
 
             <View
               style={{
@@ -399,6 +415,7 @@ export function HomeScreen() {
                 style={({ pressed }) => ({
                   minHeight: 82,
                   borderRadius: 26,
+                  overflow: "hidden",
                   borderWidth: 1.5,
                   borderColor: themeBorder(switcherOpen ? "#E7D7EF" : "#FFFFFF"),
                   backgroundColor: themeBackground(switcherOpen ? "#F9F1FDEB" : "#FFFFFFDA"),
@@ -415,6 +432,7 @@ export function HomeScreen() {
                   opacity: pressed ? 0.82 : 1,
                 })}
               >
+                <HomeGlassSheen variant="profile" />
                 <View
                   style={{
                     width: 48,
@@ -798,6 +816,7 @@ export function HomeScreen() {
               <Path d="M0 178 C106 122 169 182 277 116 C345 73 374 106 430 57 L430 177 Z" fill="url(#homeNextStepRibbon)" />
               <Path d="M141 177 Q248 172 299 116 Q349 62 430 89" stroke="#F7E8FF" strokeWidth="1.5" fill="none" opacity="0.32" />
             </Svg>
+            <HomeGlassSheen variant="nextStep" />
 
             <Text
               style={[
