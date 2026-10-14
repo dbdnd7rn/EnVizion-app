@@ -69,10 +69,12 @@ export function StaffVolumeSparkline({
   values,
   id,
   dark,
+  width = 148,
 }: {
   values: number[];
   id: "support" | "coaching";
   dark: boolean;
+  width?: number;
 }) {
   const counts = Array.from({ length: 7 }, (_, i) => Math.max(0, values[i] ?? 0));
   const peak = Math.max(1, ...counts);
@@ -85,7 +87,7 @@ export function StaffVolumeSparkline({
   const color = dark ? "#D8B3F5" : "#8D3CCD";
   const gradientId = `staffSpark-${id}`;
   return (
-    <Svg width={148} height={72} viewBox="0 0 148 70" accessibilityLabel={`New requests over the past seven days: ${counts.join(", ")}`}>
+    <Svg width={width} height={72} viewBox="0 0 148 70" accessibilityLabel={`New requests over the past seven days: ${counts.join(", ")}`}>
       <Defs>
         <LinearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
           <Stop offset="0%" stopColor={color} stopOpacity=".30" />

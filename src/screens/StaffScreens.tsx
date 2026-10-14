@@ -118,12 +118,15 @@ function StaffMetricCard({
   const ink = dark ? "#F5EEFF" : "#17143D";
   const muted = dark ? "#C7B7D5" : "#77718F";
   const recent = series.reduce((sum, value) => sum + value, 0);
+  const { width } = useWindowDimensions();
+  const compact = width < 690;
+  const chartWidth = compact ? Math.max(74, Math.min(120, (width - 132) / 2)) : 148;
   return (
     <View
       style={{
         flex: 1,
         minWidth: 0,
-        minHeight: 188,
+        minHeight: compact ? 235 : 188,
         borderRadius: 23,
         borderWidth: 1,
         borderColor: dark ? "#59476C" : "#EDE6F3",
@@ -155,7 +158,11 @@ function StaffMetricCard({
           {label}
         </Text>
       </View>
-      <View style={{ flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between" }}>
+      <View style={{
+        flexDirection: compact ? "column" : "row",
+        alignItems: compact ? "flex-start" : "flex-end",
+        justifyContent: "space-between",
+      }}>
         <View style={{ minWidth: 55, paddingBottom: 5 }}>
           <Text style={{
             fontFamily: "DMSans_700Bold", fontSize: 37, lineHeight: 44, color: ink,
@@ -168,7 +175,9 @@ function StaffMetricCard({
             {active} of {all} active
           </Text>
         </View>
-        <StaffVolumeSparkline values={series} id={id} dark={dark} />
+        <View style={{ alignSelf: "flex-end" }}>
+          <StaffVolumeSparkline values={series} id={id} dark={dark} width={chartWidth} />
+        </View>
       </View>
       <Text style={{
         fontFamily: "DMSans_400Regular", fontSize: 11, color: muted,
