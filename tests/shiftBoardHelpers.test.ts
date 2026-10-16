@@ -6,23 +6,27 @@ import {
   shiftTaskBucket,
 } from "../src/shiftBoardHelpers.ts";
 
-const now = new Date("2026-09-22T12:00:00.000Z");
+// These helpers compare local calendar days, so fixtures must use local times.
+const localTimestamp = (date: string, time: string) =>
+  new Date(`${date}T${time}`).toISOString();
+
+const now = new Date(localTimestamp("2026-09-22", "12:00:00"));
 
 test("shift buckets separate overdue, due-soon, today, and future work", () => {
   assert.equal(
-    shiftTaskBucket({ status: "open", dueAt: "2026-09-22T11:30:00.000Z" }, now),
+    shiftTaskBucket({ status: "open", dueAt: localTimestamp("2026-09-22", "11:30:00") }, now),
     "overdue",
   );
   assert.equal(
-    shiftTaskBucket({ status: "open", dueAt: "2026-09-22T12:45:00.000Z" }, now),
+    shiftTaskBucket({ status: "open", dueAt: localTimestamp("2026-09-22", "12:45:00") }, now),
     "due_soon",
   );
   assert.equal(
-    shiftTaskBucket({ status: "open", dueAt: "2026-09-22T18:00:00.000Z" }, now),
+    shiftTaskBucket({ status: "open", dueAt: localTimestamp("2026-09-22", "18:00:00") }, now),
     "later_today",
   );
   assert.equal(
-    shiftTaskBucket({ status: "open", dueAt: "2026-09-23T08:00:00.000Z" }, now),
+    shiftTaskBucket({ status: "open", dueAt: localTimestamp("2026-09-23", "08:00:00") }, now),
     "future",
   );
 });
@@ -30,14 +34,14 @@ test("shift buckets separate overdue, due-soon, today, and future work", () => {
 test("shift board counts responsibility and completion activity", () => {
   const counts = shiftBoardCounts(
     [
-      { status: "open", dueAt: "2026-09-22T11:00:00.000Z", assignedTo: "u1" },
-      { status: "open", dueAt: "2026-09-22T12:30:00.000Z", assignedTo: "u1" },
-      { status: "open", dueAt: "2026-09-22T18:00:00.000Z", assignedTo: "u2" },
-      { status: "completed", dueAt: "2026-09-22T08:00:00.000Z", assignedTo: "u1" },
+      { status: "open", dueAt: localTimestamp("2026-09-22", "11:00:00"), assignedTo: "u1" },
+      { status: "open", dueAt: localTimestamp("2026-09-22", "12:30:00"), assignedTo: "u1" },
+      { status: "open", dueAt: localTimestamp("2026-09-22", "18:00:00"), assignedTo: "u2" },
+      { status: "completed", dueAt: localTimestamp("2026-09-22", "08:00:00"), assignedTo: "u1" },
     ] as any,
     [
-      { completedAt: "2026-09-22T09:00:00.000Z" },
-      { completedAt: "2026-09-21T20:00:00.000Z" },
+      { completedAt: localTimestamp("2026-09-22", "09:00:00") },
+      { completedAt: localTimestamp("2026-09-21", "20:00:00") },
     ] as any,
     "u1",
     now,
@@ -54,6 +58,6 @@ test("shift board counts responsibility and completion activity", () => {
 });
 
 test("sameLocalDay only matches the local calendar date", () => {
-  assert.equal(sameLocalDay("2026-09-22T18:00:00.000Z", now), true);
-  assert.equal(sameLocalDay("2026-09-23T00:00:00.000Z", now), false);
+  assert.equal(sameLocalDay(localTimestamp("2026-09-22", "18:00:00"), now), true);
+  assert.equal(sameLocalDay(localTimestamp("2026-09-23", "00:00:00"), now), false);
 });

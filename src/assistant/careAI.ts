@@ -1,6 +1,6 @@
 import { supabase } from "../supabase";
 import { detectedTimezone } from "../reminders";
-import { validateAssistantDraft, type AssistantHistory, type CareAIAnswer } from "./validateAssistantDraft";
+import { validateAssistantDraft, validateToolkitResource, validateCareTrends, type AssistantHistory, type CareAIAnswer } from "./validateAssistantDraft";
 export { validateAssistantDraft } from "./validateAssistantDraft";
 export type { ReminderDraft, NoteDraft, AssistantDraft, AssistantHistory, CareAIAnswer } from "./validateAssistantDraft";
 
@@ -41,6 +41,9 @@ export async function askCareAI(input: {
   if (!reply) throw new Error("The assistant returned no answer. Please retry.");
   return {
     reply,
+    trends: input.includeCareData ? validateCareTrends(data?.trends) : undefined,
+    suggestions: Array.isArray(data?.suggestions) ? data.suggestions.filter((s: unknown) => typeof s === "string" && s.length <= 80).slice(0, 3) : [],
+    resource: validateToolkitResource(data?.resource),
     // No AI draft is executable. The UI always requires explicit confirmation.
     action: input.includeCareData ? validateAssistantDraft(data?.action) : null,
   };

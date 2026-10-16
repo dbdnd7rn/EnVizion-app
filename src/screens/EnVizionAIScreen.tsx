@@ -15,15 +15,18 @@ import {
 } from "../reminders";
 import { createCareCommunication } from "../careCommunications";
 import { Icon } from "../ui";
+import { AIAtmosphere, AIGlassOrb, AIIconBubble, useAIMotionPreference } from "../components/EnVizionAIArtwork";
+import { AICareTrends } from "../components/AICareTrends";
 import { useNav } from "./MainScreens";
 
 const PURPLE = "#70338F";
 const INK = "#19143F";
-const MUTED = "#79728E";
+const MUTED = "#69617E";
 const glass = () => ({
+  ...(Platform.OS === "web" ? { backdropFilter: "blur(18px)" } : {}),
   borderWidth: 1, borderColor: themeBorder("#E5D9ED"), borderRadius: 23,
   backgroundColor: themeBackground("#FFFDFEF0"), shadowColor: themeShadow("#5C3877"),
-  shadowOpacity: 0.055, shadowRadius: 14,
+  shadowOpacity: 0.075, shadowRadius: 18,
   shadowOffset: { width: 0, height: 6 },
   elevation: 1,
 } as const);
@@ -72,14 +75,15 @@ function Editable({ label, value, onChange, multiline = false }: {
 }
 
 const starters = [
-  { icon: "heart-outline", title: "Check in with me", prompt: "Hi! How are you? I'd like to chat for a bit." },
-  { icon: "people-outline", title: "Care updates", prompt: "What should I know about our current care plan and tasks?" },
+  { icon: "heart-outline", title: "Check in with me", prompt: "Check in with me" },
+  { icon: "stats-chart-outline", title: "My care rhythm", prompt: "Show care trends" },
   { icon: "calendar-outline", title: "Set a reminder", prompt: "Help me create a reminder. Ask me for its date, time and description." },
-  { icon: "document-text-outline", title: "Write a care note", prompt: "Help me put an update into a clear care communication note to review and save." },
+  { icon: "document-text-outline", title: "Write a care note", prompt: "Write a care note" },
 ] as const;
 
 export function EnVizionAIScreen() {
   const n = useNav();
+  const reducedMotion = useAIMotionPreference();
   const { state, dispatch } = useCare();
   const scroll = useRef<ScrollView>(null);
   const [draftText, setDraftText] = useState("");
@@ -106,16 +110,19 @@ export function EnVizionAIScreen() {
     setBusy(false);
   }, [dispatch, state.careRecipientId]);
 
-  const send = useCallback(async (message: string) => {
+  const send = useCallback(async (message: string, retry = false) => {
     const value = message.trim().slice(0, 1800);
     if (!value || busy) return;
     setProblem("");
-    setPending(null);
+    // Typing confirmation never saves, and leaves the editable draft available.
+    const keepDraft = Boolean(pending) && /^(?:yes|ok(?:ay)?|confirm|save(?: it)?)[.!\s]*$/i.test(value);
+    if (!keepDraft) setPending(null);
     const id = ++requestId.current;
-    const history: AssistantHistory[] = messages.slice(-12)
+    const priorMessages = retry && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages;
+    const history: AssistantHistory[] = priorMessages.slice(-12)
       .filter(m => m.role === "user" || m.role === "assistant")
       .map(m => ({ role: m.role as "user" | "assistant", content: m.text }));
-    dispatch({ type: "conversation-turn", messages: [makeMessage("user", value)] });
+    if (!retry) dispatch({ type: "conversation-turn", messages: [makeMessage("user", value)] });
     setDraftText("");
     setBusy(true);
     try {
@@ -125,7 +132,7 @@ export function EnVizionAIScreen() {
         includeCareData: careDataAllowed,
       });
       if (id !== requestId.current) return;
-      dispatch({ type: "conversation-turn", messages: [makeMessage("assistant", response.reply)] });
+      dispatch({ type: "conversation-turn", messages: [{ ...makeMessage("assistant", response.reply), resource: response.resource, trends: response.trends, suggestions: response.suggestions }] });
       if (response.action) setPending(response.action);
     } catch (error) {
       if (id !== requestId.current) return;
@@ -133,7 +140,7 @@ export function EnVizionAIScreen() {
     } finally {
       if (id === requestId.current) setBusy(false);
     }
-  }, [busy, careDataAllowed, dispatch, messages, state.careRecipientId]);
+  }, [busy, careDataAllowed, dispatch, messages, pending, state.careRecipientId]);
 
   const editPending = (changes: Partial<Record<string,string>>) => {
     if (!pending) return;
@@ -186,6 +193,7 @@ export function EnVizionAIScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: themeBackground("#FFFCFB") }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <AIAtmosphere/>
       <View style={{ padding: 16, flexDirection: "row", alignItems: "center", gap: 10,
         borderBottomWidth: 1, borderBottomColor: themeBorder("#ECE2F1") }}>
         <Pressable accessibilityRole="button" accessibilityLabel="Go back"
@@ -197,7 +205,7 @@ export function EnVizionAIScreen() {
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 18, color: themeForeground(INK) }}>EnVizion AI</Text>
           <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11.5, color: themeForeground(MUTED) }}>
-            Chat, understand, prepare and organize
+            Your care toolkit companion
           </Text>
         </View>
         <Pressable accessibilityRole="button" accessibilityLabel="Start a new AI conversation"
@@ -217,30 +225,41 @@ export function EnVizionAIScreen() {
         keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive"
         onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
         contentContainerStyle={{ paddingHorizontal: 17, paddingVertical: 16, gap: 13 }}>
+        {Boolean(messages.length) && (
+          <View style={[glass(), { paddingHorizontal: 18, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 10 }]}>
+            <AIAtmosphere variant="corner"/>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={{ fontFamily: "Lora_500Medium", fontSize: 21, color: themeForeground(INK) }}>A little support, anytime.</Text>
+              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12, color: themeForeground(MUTED) }}>Built-in toolkit guidance. No external AI.</Text>
+            </View>
+            <AIGlassOrb reducedMotion={reducedMotion} compact/>
+          </View>
+        )}
         {!messages.length && (
           <View style={[glass(), { backgroundColor: themeBackground("#F8F0FCEC"), padding: 22, gap: 15 }]}>
-            <View style={{ width: 49, height: 49, borderRadius: 20, backgroundColor: themeBackground("#E6D1F5"),
-              alignItems: "center", justifyContent: "center" }}>
-              <Icon name="sparkles-outline" color={themeForeground(PURPLE)} size={26}/>
-            </View>
-            <Text style={{ fontFamily: "Lora_500Medium", color: themeForeground(INK), fontSize: 27, lineHeight: 35 }}>
+            <AIAtmosphere/>
+            <AIGlassOrb reducedMotion={reducedMotion}/>
+            <Text style={{ fontFamily: "Lora_500Medium", color: themeForeground(INK), fontSize: 29, lineHeight: 38 }}>
               Hello, {firstName}.
             </Text>
             <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
               fontSize: 14, lineHeight: 22 }}>
-              I'm here to talk, answer questions, and help prepare your care tasks. What’s on your mind?
+              I can help you find your way, check saved care updates, and prepare reminders or notes. What would help today?
             </Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
               {starters.map(item => (
                 <Pressable key={item.title} accessibilityRole="button" accessibilityLabel={item.title}
                   onPress={() => void send(item.prompt)}
                   style={({ pressed }) => ({
-                    width: "47.5%", minHeight: 93, padding: 12, borderRadius: 18,
+                    flexBasis: "46%", flexGrow: 1, minHeight: 116, padding: 14, borderRadius: 20, overflow: "hidden",
                     borderWidth: 1, borderColor: themeBorder("#E5D6ED"),
                     backgroundColor: themeBackground("#FFFFFFD9"), gap: 8,
-                    opacity: pressed ? 0.72 : 1,
+                    opacity: pressed ? 0.82 : 1,
+                    transform: [{ scale: pressed && !reducedMotion ? 0.97 : 1 }],
+                    shadowColor: themeShadow("#653B82"), shadowOpacity: 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 4 },
                   })}>
-                  <Icon name={item.icon} color={themeForeground(PURPLE)} size={21}/>
+                  <AIAtmosphere variant="corner"/>
+                  <AIIconBubble><Icon name={item.icon} color={themeForeground(PURPLE)} size={21}/></AIIconBubble>
                   <Text style={{ fontFamily: "DMSans_600SemiBold", color: themeForeground(INK), fontSize: 12.3, lineHeight: 17 }}>
                     {item.title}
                   </Text>
@@ -250,9 +269,10 @@ export function EnVizionAIScreen() {
           </View>
         )}
 
-        <View style={[glass(), { padding: 14, backgroundColor: themeBackground("#F9F3FD") }]}>
-          <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-            <Icon name="shield-checkmark-outline" color={themeForeground(PURPLE)} size={23}/>
+        <View style={[glass(), { padding: 17, gap: 12, backgroundColor: themeBackground("#FBF7FDEB") }]}>
+          <AIAtmosphere variant="corner"/>
+          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            <AIIconBubble><Icon name="shield-checkmark-outline" color={themeForeground(PURPLE)} size={22}/></AIIconBubble>
             <View style={{ flex: 1, gap: 3 }}>
               <Text style={{ color: themeForeground(INK), fontFamily: "DMSans_600SemiBold", fontSize: 13 }}>
                 Use this care profile's information
@@ -281,8 +301,8 @@ export function EnVizionAIScreen() {
           </View>
           <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
             fontSize: 10.8, lineHeight: 16 }}>
-            AI processes your messages through a third-party provider. When enabled, relevant authorized
-            care records also go to the provider for that chat. Switching modes starts a fresh
+            This assistant uses built-in toolkit guidance. Your chat is not sent to an external AI provider.
+            Enable this to use authorized records for the selected profile. Switching modes starts a fresh
             conversation. Nothing is saved to care records without your confirmation.
           </Text>
         </View>
@@ -290,34 +310,48 @@ export function EnVizionAIScreen() {
         {messages.map(item => (
           <View key={item.id} style={[glass(), {
             maxWidth: "94%", alignSelf: item.role === "user" ? "flex-end" : "flex-start",
-            backgroundColor: item.role === "user" ? PURPLE : "#FFFFFF",
+            backgroundColor: item.role === "user" ? themeAction(PURPLE) : themeBackground("#FFFDFFF0"),
             borderBottomRightRadius: item.role === "user" ? 7 : 22,
             borderBottomLeftRadius: item.role === "user" ? 22 : 7,
-            padding: 14, gap: 9,
+            padding: 16, gap: 9,
           }]}>
             <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 10,
-              letterSpacing: 1.2, color: item.role === "user" ? "#E9D5F5" : PURPLE }}>
+              letterSpacing: 1.2, color: item.role === "user" ? "#F0E3F8" : themeForeground(PURPLE) }}>
               {item.role === "user" ? "YOU" : "ENVIZION AI"}
             </Text>
             <Text selectable style={{ fontFamily: "DMSans_400Regular", fontSize: 14,
-              lineHeight: 22, color: item.role === "user" ? "#FFFFFF" : INK }}>
+              lineHeight: 22, color: item.role === "user" ? "#FFFFFF" : themeForeground(INK) }}>
               {item.text}
             </Text>
-            <Text style={{ fontSize: 10.5, color: item.role === "user" ? "#E9D5F5" : MUTED }}>
+            {item.trends && careDataAllowed && previousProfile.current === state.careRecipientId && state.careRecipientId &&
+              item.id === [...messages].reverse().find(m => m.trends)?.id && (
+              <AICareTrends key={state.careRecipientId + item.id} initial={item.trends} careRecipientId={state.careRecipientId}/>
+            )}
+            {item.id === messages.at(-1)?.id && item.suggestions && !pending && !busy && (
+              <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
+                {item.suggestions.map(suggestion => <ActionButton key={suggestion} title={suggestion} secondary onPress={()=>void send(suggestion)}/>)}
+              </View>
+            )}
+            {item.role === "assistant" && item.resource && (
+              <ActionButton title={item.resource.label} icon="arrow-forward-outline" secondary
+                onPress={() => n.navigate(item.resource!.destination)}/>
+            )}
+            <Text style={{ fontSize: 10.5, color: item.role === "user" ? "#F0E3F8" : themeForeground(MUTED) }}>
               {new Date(item.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </Text>
           </View>
         ))}
-        {busy && <View accessibilityLabel="AI is composing a reply" style={{ flexDirection: "row",
+        {busy && <View accessibilityLabel="Toolkit assistant is preparing a reply" style={{ flexDirection: "row",
           alignItems: "center", gap: 10, padding: 15, borderRadius: 18, backgroundColor: themeBackground("#F6EDFB") }}>
           <ActivityIndicator color={themeForeground(PURPLE)}/>
-          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED) }}>Thinking about your question…</Text>
+          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED) }}>Checking the toolkit…</Text>
         </View>}
 
         {pending && (
-          <View style={[glass(), { padding: 17, gap: 14, backgroundColor: themeBackground("#F8F1FC") }]}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
-              <Icon name="create-outline" color={themeForeground(PURPLE)} size={23}/>
+          <View style={[glass(), { padding: 20, gap: 16, backgroundColor: themeBackground("#FBF7FDEF"), borderColor: themeBorder("#D9C1EA") }]}>
+            <AIAtmosphere variant="corner"/>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: themeBorder("#E8DDED") }}>
+              <AIIconBubble><Icon name="create-outline" color={themeForeground(PURPLE)} size={22}/></AIIconBubble>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontFamily: "DMSans_700Bold", color: themeForeground(INK), fontSize: 16 }}>Review before saving</Text>
                 <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), fontSize: 12 }}>
@@ -344,12 +378,12 @@ export function EnVizionAIScreen() {
                       accessibilityState={{ selected: pending.recurrence === recurrence }}
                       onPress={() => editPending({ recurrence })}
                       style={{
-                        borderRadius: 17, minHeight: 43, paddingHorizontal: 14,
+                        borderRadius: 17, minHeight: 44, paddingHorizontal: 14,
                         justifyContent: "center",
-                        backgroundColor: pending.recurrence === recurrence ? PURPLE : "#FFFFFF",
+                        backgroundColor: pending.recurrence === recurrence ? themeAction(PURPLE) : themeBackground("#FFFFFF"),
                         borderWidth: 1, borderColor: themeBorder("#E1D0EB"),
                       }}>
-                      <Text style={{ fontSize: 12.5, color: pending.recurrence === recurrence ? "#FFFFFF" : PURPLE }}>
+                      <Text style={{ fontSize: 12.5, color: pending.recurrence === recurrence ? "#FFFFFF" : themeForeground(PURPLE) }}>
                         {recurrence === "none" ? "Once" : recurrence === "daily" ? "Daily" : "Weekly"}
                       </Text>
                     </Pressable>
@@ -390,7 +424,7 @@ export function EnVizionAIScreen() {
               secondary icon="refresh-outline" onPress={() => {
                 if (pending) { void confirm(); return; }
                 const last = [...messages].reverse().find(m => m.role === "user");
-                if (last) void send(last.text);
+                if (last) void send(last.text, true);
                 else setProblem("");
               }}/>}
           </View>
@@ -402,7 +436,7 @@ export function EnVizionAIScreen() {
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 9 }}>
           <TextInput value={draftText} onChangeText={setDraftText} multiline
             accessibilityLabel="Message EnVizion AI"
-            placeholder="Ask me anything, or request a reminder…"
+            placeholder="Ask about your toolkit, or set a reminder…"
             placeholderTextColor={themeForeground("#958DA4")} maxLength={1800}
             style={{
               flex: 1, minHeight: 50, maxHeight: 125,
@@ -417,15 +451,15 @@ export function EnVizionAIScreen() {
             style={({ pressed }) => ({
               width: 51, height: 51, borderRadius: 25,
               alignItems: "center", justifyContent: "center",
-              backgroundColor: themeBackground(PURPLE),
+              backgroundColor: themeAction(PURPLE),
               opacity: busy || !draftText.trim() ? 0.42 : pressed ? 0.7 : 1,
             })}>
-            <Icon name="send-outline" color={themeForeground("#FFFFFF")} size={23}/>
+            <Icon name="send-outline" color="#FFFFFF" size={23}/>
           </Pressable>
         </View>
         <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), textAlign: "center",
           fontSize: 10.3, lineHeight: 15 }}>
-          AI can make mistakes. Not for emergencies, prescriptions or clinical decisions.
+          Toolkit guidance only. Not for emergencies, prescriptions or clinical decisions.
         </Text>
       </View>
     </KeyboardAvoidingView>

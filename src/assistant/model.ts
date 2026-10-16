@@ -1,15 +1,14 @@
-export type Destination =
-  | "Appointments"
-  | "Transition"
-  | "Medications"
-  | "Wellness"
-  | "Resources"
-  | "Summary";
+import type { CareTrends } from "./validateAssistantDraft";
+import type { ToolkitDestination } from "../../supabase/functions/care-ai/contracts.ts";
+
+export type Destination = ToolkitDestination;
 export type Message = {
   id: string;
   role: "user" | "assistant" | "staff";
   text: string;
   at: string;
+  trends?: CareTrends;
+  suggestions?: string[];
   resource?: { label: string; destination: Destination };
   suggestTeam?: boolean;
 };
