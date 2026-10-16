@@ -1,5 +1,5 @@
-import { toolkitReply, requestedToolkitRecords, validTimezone, localDayUTCWindow, type RecordKind, type RecordSection } from "./toolkit.ts";
-import type { AssistantHistory } from "./contracts.ts";
+import { toolkitReply, requestedToolkitRecords, wantsTrends, localParts, validTimezone, localDayUTCWindow, type RecordKind, type RecordSection } from "./toolkit.ts";
+import type { AssistantHistory, CareTrends } from "./contracts.ts";
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -60,6 +60,33 @@ async function loadSection(client: CareReadClient, careId: string, kind: RecordK
   };
 }
 
+export async function loadTrends(client: CareReadClient, careId: string, now: Date, timezone: string): Promise<CareTrends | undefined> {
+  const today = localParts(now, timezone).date;
+  const days = Array.from({length:7}, (_, i) => {
+    const day = new Date(today + "T12:00:00Z"); day.setUTCDate(day.getUTCDate() - 6 + i);
+    return {date: day.toISOString().slice(0,10), notes:0, completedReminders:0};
+  });
+  // An anchor at the start of today minus six calendar days, corrected for the local zone.
+  const [todayStart] = localDayUTCWindow(now, timezone);
+  const anchor = new Date(Date.parse(todayStart) - 6 * 86400000 + 12 * 3600000);
+  const [start] = localDayUTCWindow(anchor, timezone);
+  const specs = [
+    {table:"care_communications", date:"occurred_at", key:"notes" as const},
+    {table:"care_reminders", date:"completed_at", key:"completedReminders" as const},
+  ];
+  const results = await Promise.all(specs.map(spec => client.from(spec.table).select(spec.date)
+    .eq("care_recipient_id", careId).gte(spec.date,start).lt(spec.date,now.toISOString()).order(spec.date).limit(1000)));
+  // Never render a capped or failed query as a complete trend.
+  if (results.some(r => r.error || !Array.isArray(r.data) || r.data.length >= 1000)) return undefined;
+  results.forEach((result, i) => result.data.forEach((row: Record<string, unknown>) => {
+    const stamp = row[specs[i].date];
+    if (typeof stamp !== "string" || !Number.isFinite(Date.parse(stamp))) return;
+    const day = days.find(d => d.date === localParts(new Date(stamp), timezone).date);
+    if (day) day[specs[i].key]++;
+  }));
+  return {updatedAt:now.toISOString(), timezone, days};
+}
+
 export function createToolkitHandler(makeClient: (auth: string) => CareReadClient, now: () => Date = () => new Date()) {
   return async (req: Request): Promise<Response> => {
     if (req.method === "OPTIONS") return new Response("ok", { headers });
@@ -89,6 +116,7 @@ export function createToolkitHandler(makeClient: (auth: string) => CareReadClien
       const timezone = validTimezone(body.timezone);
       const careId = safe(body.careRecipientId, 64);
       const records: Partial<Record<RecordKind, RecordSection>> = {};
+      let trends: CareTrends | undefined;
       let profileName = "", role = "", canDraft = false;
       const current = now();
       if (includeCareData) {
@@ -100,12 +128,13 @@ export function createToolkitHandler(makeClient: (auth: string) => CareReadClien
         profileName = safe(person.data.display_name, 120);
         role = safe(membership.data.role, 40);
         canDraft = ["owner", "caregiver", "primary_advocate", "co_caregiver"].includes(role);
+        if (wantsTrends(message)) trends = await loadTrends(client, careId, current, timezone);
         await Promise.all(requestedToolkitRecords(message).map(async kind => {
           records[kind] = await loadSection(client, careId, kind, current, /\btoday\b/i.test(message), timezone);
         }));
       }
       // No model, external fetch, service-role key, or database write is involved.
-      const response = toolkitReply(message, history, { includeCareData, canDraft, profileName, role, timezone, now: current, records });
+      const response = toolkitReply(message, history, { includeCareData, canDraft, profileName, role, timezone, now: current, records, trends });
       return json({ ...response, engine: "toolkit" });
     } catch {
       return json({ error: "The toolkit assistant couldn't load your information. Please try again." }, 500);

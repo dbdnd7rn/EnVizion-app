@@ -1,3 +1,4 @@
+import type { CareTrends } from "./validateAssistantDraft";
 import type { ToolkitDestination } from "../../supabase/functions/care-ai/contracts.ts";
 
 export type Destination = ToolkitDestination;
@@ -6,6 +7,8 @@ export type Message = {
   role: "user" | "assistant" | "staff";
   text: string;
   at: string;
+  trends?: CareTrends;
+  suggestions?: string[];
   resource?: { label: string; destination: Destination };
   suggestTeam?: boolean;
 };

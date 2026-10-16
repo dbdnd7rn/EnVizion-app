@@ -16,6 +16,7 @@ import {
 import { createCareCommunication } from "../careCommunications";
 import { Icon } from "../ui";
 import { AIAtmosphere, AIGlassOrb, AIIconBubble, useAIMotionPreference } from "../components/EnVizionAIArtwork";
+import { AICareTrends } from "../components/AICareTrends";
 import { useNav } from "./MainScreens";
 
 const PURPLE = "#70338F";
@@ -75,7 +76,7 @@ function Editable({ label, value, onChange, multiline = false }: {
 
 const starters = [
   { icon: "heart-outline", title: "Check in with me", prompt: "Check in with me" },
-  { icon: "people-outline", title: "Care updates", prompt: "What should I know about our current care plan and tasks?" },
+  { icon: "stats-chart-outline", title: "My care rhythm", prompt: "Show care trends" },
   { icon: "calendar-outline", title: "Set a reminder", prompt: "Help me create a reminder. Ask me for its date, time and description." },
   { icon: "document-text-outline", title: "Write a care note", prompt: "Write a care note" },
 ] as const;
@@ -131,7 +132,7 @@ export function EnVizionAIScreen() {
         includeCareData: careDataAllowed,
       });
       if (id !== requestId.current) return;
-      dispatch({ type: "conversation-turn", messages: [{ ...makeMessage("assistant", response.reply), resource: response.resource }] });
+      dispatch({ type: "conversation-turn", messages: [{ ...makeMessage("assistant", response.reply), resource: response.resource, trends: response.trends, suggestions: response.suggestions }] });
       if (response.action) setPending(response.action);
     } catch (error) {
       if (id !== requestId.current) return;
@@ -322,6 +323,15 @@ export function EnVizionAIScreen() {
               lineHeight: 22, color: item.role === "user" ? "#FFFFFF" : themeForeground(INK) }}>
               {item.text}
             </Text>
+            {item.trends && careDataAllowed && previousProfile.current === state.careRecipientId && state.careRecipientId &&
+              item.id === [...messages].reverse().find(m => m.trends)?.id && (
+              <AICareTrends key={state.careRecipientId + item.id} initial={item.trends} careRecipientId={state.careRecipientId}/>
+            )}
+            {item.id === messages.at(-1)?.id && item.suggestions && !pending && !busy && (
+              <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
+                {item.suggestions.map(suggestion => <ActionButton key={suggestion} title={suggestion} secondary onPress={()=>void send(suggestion)}/>)}
+              </View>
+            )}
             {item.role === "assistant" && item.resource && (
               <ActionButton title={item.resource.label} icon="arrow-forward-outline" secondary
                 onPress={() => n.navigate(item.resource!.destination)}/>

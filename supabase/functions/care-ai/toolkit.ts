@@ -1,6 +1,6 @@
 import {
   isCalendarDate, validateAssistantDraft,
-  type AssistantHistory, type CareAIAnswer, type ToolkitResource,
+  type AssistantHistory, type CareAIAnswer, type ToolkitResource, type CareTrends,
 } from "./contracts.ts";
 
 export type RecordKind = "appointments" | "tasks" | "reminders" | "plan" | "notes";
@@ -11,6 +11,7 @@ export type ToolkitContext = {
   canDraft: boolean;
   profileName?: string;
   role?: string;
+  trends?: CareTrends;
   timezone: string;
   now?: Date;
   records?: Partial<Record<RecordKind, RecordSection>>;
@@ -24,9 +25,9 @@ const REMINDER_TIME = "What time is the reminder for? Use HH:MM in 24-hour time,
 const NOTE_CONTENT = "What would you like to record in the care note? Write the facts in your own words.";
 const permissionReply = () => answer("Select a care profile and enable ‘Use this care profile’s information’ to prepare a reminder or note. Only an authorized caregiver can save it.");
 const wantsReminder = (s: string) => /\bremind me\b|\b(?:set|add|create|make|schedule|prepare|draft)\b.{0,35}\breminder\b|^reminder$/i.test(s);
-const wantsNote = (s: string) => /\bput\b.{0,60}\bcare communication note\b|\b(?:write|add|create|make|prepare|draft|record|save)\b.{0,65}\b(?:care |communication )?note\b|^care note$/i.test(s);
+const wantsNote = (s: string) => /\bput\b.{0,60}\bcare communication note\b|\b(?:write|add|create|make|prepare|draft|record|save)\b.{0,65}\b(?:care |communication )?notes?\b|^care notes?$/i.test(s);
 
-function localParts(now: Date, timezone: string) {
+export function localParts(now: Date, timezone: string) {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(now);
   const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
   return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
@@ -164,7 +165,7 @@ function noteFlow(message: string, history: AssistantHistory[], context: Toolkit
   const awaitingNote = previous?.role === "assistant" && previous.content.startsWith(NOTE_CONTENT);
   if (!wantsNote(message) && !awaitingNote) return null;
   if (!context.includeCareData || !context.canDraft) return permissionReply();
-  const text = awaitingNote ? clean(message) : clean(message.match(/\bnote\s*:\s*([\s\S]+)/i)?.[1] || "");
+  const text = awaitingNote ? clean(message) : clean(message.match(/\bnotes?\s*:\s*([\s\S]+)/i)?.[1] || "");
   if (!text) return answer(NOTE_CONTENT);
   if (text.length > 1400) return answer(`${NOTE_CONTENT}\nPlease keep it to 1,400 characters so the full note can be preserved.`);
   if (/^(yes|ok(?:ay)?|save|confirm|thanks?|no)$/i.test(text)) return answer(`${NOTE_CONTENT}\nI need the note's actual content first.`);
@@ -187,7 +188,7 @@ const guides: Array<{ match: RegExp; reply: string; resource: ToolkitResource }>
   { match: /\b(hospital to home|discharge|transition)\b/i, reply: "Hospital to Home helps organize the recorded discharge and follow-up information. Use it to keep instructions and next steps together, and ask the care team to clarify anything uncertain.", resource: resource("Open hospital to home", "Transition") },
 ];
 
-export function toolkitReply(message: string, history: AssistantHistory[], context: ToolkitContext): CareAIAnswer {
+function coreToolkitReply(message: string, history: AssistantHistory[], context: ToolkitContext): CareAIAnswer {
   const text = clean(message);
   if (!text) return answer("Type a toolkit question, or ask me to prepare a reminder or care note.");
   // These are conservative boundaries, not a diagnostic or symptom-detection service.
@@ -198,7 +199,27 @@ export function toolkitReply(message: string, history: AssistantHistory[], conte
   if (/^(?:yes|ok(?:ay)?|confirm|save(?: it)?)[.!\s]*$/i.test(text) && history.at(-1)?.role === "assistant" && /draft.*ready|care-note draft/.test(history.at(-1)!.content)) return answer("Please use the draft's Confirm & save button after reviewing its fields. A chat message cannot save a care record.");
   // Explicit help and a new intent can interrupt a guided conversation.
   if (/^(?:help|what can you do|what do you do)[?!.\s]*$/i.test(text)) return helpReply();
-  if (wantsNote(text)) return noteFlow(text, [], context)!;
+  if (wantsNote(text) || /\b(?:turn|make|save|record|note)\b.*\b(?:this|that|it)\b/i.test(text)) {
+    if (!/\bnotes?\s*:/i.test(text) && /\b(?:this|that|it)\b/i.test(text)) {
+      if (!context.includeCareData || !context.canDraft) return permissionReply();
+      const previous = [...history].reverse().find(t => t.role === "user");
+      // Only quote the user's own immediately preceding statement. Never turn an assistant
+      // summary into an attributed observation or silently attach to a specific record.
+      if (previous && isObservation(previous.content) && !/\b(?:appointment|task|reminder|document)\b/i.test(text))
+        return noteFlow("Write a care note: " + previous.content, [], context)!;
+      return answer("What should the note say, and is it a general care note or a note for a particular appointment or task? I won't guess what ‘this’ refers to. For a general care note, type ‘Write a care note:’ followed by your words.");
+    }
+    if (/\b(?:to|for|on)\b.{0,30}\b(?:appointment|task|document)\b/i.test(text)) {
+      const appointment = /\bappointment\b/i.test(text);
+      return answer("To add a note to that specific record, open it and use its note field. Chat can prepare a general care-log note, but it cannot attach notes to individual records yet. You can say ‘Write a care note:’ followed by the facts.", resource(appointment ? "Open appointments" : "Open care tasks", appointment ? "Appointments" : "CareTasks"));
+    }
+    return noteFlow(text, [], context)!;
+  }
+  if (wantsTrends(text)) {
+    if (!context.includeCareData) return answer("Enable ‘Use this care profile’s information’ to see activity trends for the selected profile.");
+    if (!context.trends) return answer("I couldn't load a complete activity chart. Please retry; missing records won't be shown as zero.");
+    return { reply: "Here's the last seven calendar days of recorded care activity. Today is still in progress. These counts describe documentation and completed reminders, not health improvement or quality of care.", action: null, trends: context.trends };
+  }
   if (wantsReminder(text)) return reminderFlow(text, [], context)!;
   const kinds = requestedToolkitRecords(text);
   if (kinds.length) return summarize(kinds, context, text);
@@ -211,10 +232,33 @@ export function toolkitReply(message: string, history: AssistantHistory[], conte
   if (/\b(how are you|how.*doing|chat for a bit)\b/i.test(text)) return answer("I'm here to help you with the toolkit. How are you feeling today? You can tell me you're tired or stressed, ask about your care tasks, or prepare a reminder.");
   if (/^(hi|hey|hello|hey bro|hi bro|hello bro|good morning|good afternoon|good evening|yooo?)[!.\s]*$/i.test(text)) return answer("Hello! I'm your EnVizion toolkit assistant. I can help you find pages, show authorized care updates, and prepare reminders or care notes. What would you like help with?");
   if (/^(thanks?|thank you|thank you bro|thanks bro)[!.\s]*$/i.test(text)) return answer("You're welcome. I'm here whenever you need help with the toolkit.");
+  if (/^(?:i(?:'m| am) |it(?:'s| is) |feeling )?(?:doing well|good|great|okay|ok|fine|better|chilling|happy)[.!\s]*$/i.test(text)) return answer("Glad to hear it. We can keep things easy. Want to look at the week, get one small task organized, or just check in? ");
+  if (/\b(?:rough|hard|bad|busy) day\b|\bnot (?:great|okay|good)\b/i.test(text)) return answer("Sounds like a lot today. What's been the hardest part: the practical tasks, finding time for yourself, or something else?");
+  if (/\b(?:practical tasks|too much to do|where (?:do|should) i start)\b/i.test(text)) return answer("Let's take one thing at a time. We can look at your saved tasks, choose something you want to handle, and prepare a reminder. What would help first?", resource("Open care tasks", "CareTasks"));
+  if (/^(?:because|mostly|just|it is|it's)\b/i.test(text) && /hardest part|caregiving can|feeling today/i.test(history.at(-1)?.content || "")) return answer("I hear you. We can stay with that for a moment, or make one practical thing easier. Would you like to tell me more, look at your tasks, or make a note of what happened?");
+  if (isObservation(text)) return answer("Thanks for sharing that. Would you like to keep it in the care log? Say ‘Turn that into a note’ and I'll prepare your exact words for review. Or tell me more.");
   const guide = guides.find(g => g.match.test(text));
   if (guide) return answer(guide.reply, guide.resource);
   return helpReply("I don't understand that request yet. I'm a focused toolkit assistant, so I can't answer every topic.");
 }
 function helpReply(intro = "I help with EnVizion toolkit tasks using built-in guidance and authorized records.") {
   return answer(`${intro}\n\nTry:\n• Show my appointments\n• Show my care tasks\n• Set a reminder\n• Write a care note\n• Where are my care contacts?\n• I'm feeling tired\n\nReminders and notes always need your review and confirmation. I cannot diagnose, change medication, or save records just because you type ‘yes’.`);
+}
+
+export const wantsTrends = (text: string) => /\b(trends?|graphs?|charts?|care activity|activity (?:this week|over time))\b/i.test(text);
+function isObservation(text: string) {
+  return text.length > 12 && !text.includes("?") && !wantsNote(text) && !wantsReminder(text) &&
+    !requestedToolkitRecords(text).length && !wantsTrends(text) &&
+    /\b(?:ate|slept|drank|walked|called|spoke|visited|noticed|reported|said|felt|feeling|booked|finished|helped|today|yesterday)\b/i.test(text);
+}
+export function toolkitReply(message: string, history: AssistantHistory[], context: ToolkitContext): CareAIAnswer {
+  const result = coreToolkitReply(message, history, context);
+  if (result.action || /What should the reminder say|What date is the reminder|What time is the reminder|What would you like to record|What should the note say/.test(result.reply)) return result;
+  if (/emergency|crisis care|cannot diagnose/.test(result.reply)) return result;
+  const suggestions = result.trends ? ["Show my care tasks", "Write a care note"] :
+    /keep it in the care log/.test(result.reply) ? ["Turn that into a note", "Show care trends"] :
+    /hardest part/.test(result.reply) ? ["Too much to do", "I'm feeling tired"] :
+    /feeling today/.test(result.reply) ? ["I'm doing well", "I'm feeling overwhelmed"] :
+    ["Show care trends", "Show my care tasks", "Write a care note"];
+  return {...result, suggestions};
 }

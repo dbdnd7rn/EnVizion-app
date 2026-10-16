@@ -10,7 +10,7 @@ export type ReminderDraft = {
 export type NoteDraft = { type: "add_care_note"; summary: string; notes: string };
 export type AssistantDraft = ReminderDraft | NoteDraft;
 export type AssistantHistory = { role: "user" | "assistant"; content: string };
-export type CareAIAnswer = { reply: string; action: AssistantDraft | null; resource?: ToolkitResource };
+export type CareAIAnswer = { reply: string; action: AssistantDraft | null; resource?: ToolkitResource; suggestions?: string[]; trends?: CareTrends };
 
 const trimmed = (value: unknown, limit: number) =>
   typeof value === "string" ? value.trim().slice(0, limit) : "";
@@ -59,4 +59,18 @@ export function isCalendarDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const d = new Date(value + "T12:00:00Z");
   return Number.isFinite(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
+export type CareTrends = {
+  updatedAt: string; timezone: string;
+  days: { date: string; notes: number; completedReminders: number }[];
+};
+export function validateCareTrends(value: unknown): CareTrends | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const v = value as CareTrends;
+  if (!Array.isArray(v.days) || v.days.length !== 7 || !Number.isFinite(Date.parse(v.updatedAt)) || typeof v.timezone !== "string") return undefined;
+  try { new Intl.DateTimeFormat("en", {timeZone: v.timezone}); } catch { return undefined; }
+  if (!v.days.every((d, i) => d && typeof d === "object" && typeof d.date === "string" && isCalendarDate(d.date) && (!i || d.date > v.days[i-1].date) &&
+    [d.notes, d.completedReminders].every(n => Number.isSafeInteger(n) && n >= 0))) return undefined;
+  return { updatedAt: v.updatedAt, timezone: v.timezone, days: v.days.map(d => ({date:d.date, notes:d.notes, completedReminders:d.completedReminders})) };
 }

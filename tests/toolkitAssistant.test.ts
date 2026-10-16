@@ -162,3 +162,36 @@ test("legacy starter prompts remain compatible and long notes are not silently c
   assert.equal(chat(["Write a care note", "a".repeat(1401)]).action, null);
   assert.equal(chat(["Set a reminder", "a".repeat(141), "tomorrow", "9 AM"]).action, null);
 });
+
+test("contextual notes use only the user's last factual statement and preserve confirmation", () => {
+  const result = chat(["Mum ate lunch and walked in the garden today.", "Add notes to this"]);
+  assert.equal(result.action?.type,"add_care_note");
+  assert.equal(chat(["Write a care note: She said it was a good day."]).action?.type,"add_care_note");
+  if (result.action?.type === "add_care_note") assert.equal(result.action.notes,"Mum ate lunch and walked in the garden today.");
+  assert.match(result.reply,/Nothing has been saved/);
+  assert.equal(chat(["Mum ate lunch today.","Turn that into a note"],{...ctx,includeCareData:false}).action,null);
+  assert.equal(chat(["Mum ate lunch today.","Turn that into a note"],{...ctx,canDraft:false}).action,null);
+  assert.equal(chat(["Show my appointments","Add a note to this"]).action,null);
+  assert.equal(chat(["Write a note for my appointment: arrived late"]).resource?.destination,"Appointments");
+  assert.equal(chat(["Write a note for my appointment: arrived late"]).action,null);
+});
+
+test("conversation offers relevant follow-ups without interrupting guided drafts", () => {
+  assert.match(chat(["how are you", "I'm doing well"]).reply,/Glad to hear/);
+  const rough = chat(["I've had a rough day"]);
+  assert.ok(rough.suggestions?.includes("Too much to do"));
+  assert.match(chat(["I've had a rough day","because there is a lot to organize"]).reply,/one practical thing/);
+  assert.equal(chat(["Set a reminder"]).suggestions,undefined);
+  assert.equal(chat(["Write a care note"]).suggestions,undefined);
+});
+
+test("trends require fresh consent and membership before accessing activity", async () => {
+  const off=mockClient(); const result=await createToolkitHandler(()=>off.client,()=>now)(request({message:"Show care trends",includeCareData:false}));
+  assert.equal((await result.json()).trends,undefined); assert.equal(off.reads.length,0);
+  const revoked=mockClient({revoked:true});
+  assert.equal((await createToolkitHandler(()=>revoked.client,()=>now)(request({message:"Show care trends",includeCareData:true,careRecipientId:profile}))).status,403);
+  assert.equal(revoked.reads.some(r=>r.table==="care_communications"),false);
+  const failed=mockClient({failRecords:true});
+  const failure=await createToolkitHandler(()=>failed.client,()=>now)(request({message:"Show care trends",includeCareData:true,careRecipientId:profile}));
+  const body=await failure.json(); assert.equal(body.trends,undefined);assert.match(body.reply,/couldn't load/);
+});

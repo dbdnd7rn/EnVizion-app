@@ -21,7 +21,7 @@ No transcript, care information, or credential is sent to a model provider by th
 
 ## Boundaries
 
-This is a command/FAQ assistant, not a general reasoning model, symptom triage system, emergency monitor or clinical decision tool. It cannot prescribe, choose doses, change medications, invite users, upload documents, complete tasks or make other unsupported changes through chat. Supportive check-ins are fixed guidance, not therapy. Urgent or self-harm-related messages receive a conservative direction to appropriate human/emergency support, without inventing emergency numbers.
+This is a bounded conversational toolkit assistant, not a general reasoning model, symptom triage system, emergency monitor or clinical decision tool. It cannot prescribe, choose doses, change medications, invite users, upload documents, complete tasks or make other unsupported changes through chat. Supportive check-ins are fixed guidance, not therapy. Urgent or self-harm-related messages receive a conservative direction to appropriate human/emergency support, without inventing emergency numbers.
 
 Reminder parsing deliberately supports a limited grammar. The editable draft is the source of truth for the user's confirmation. Recurring reminder summaries display their stored schedule and do not calculate the next firing time.
 
@@ -36,3 +36,13 @@ This change includes both the current source for `supabase/functions/care-ai` an
 - Signed-in acceptance: greet with profile access off; enable the intended profile; show appointments/tasks; prepare a future reminder; edit/discard it; prepare a factual note; save only after explicit confirmation; verify its real record; switch profiles and confirm that the conversation and draft clear.
 
 Tests use isolated synthetic fixtures. Production summaries only use saved records returned under the authenticated account's RLS permissions.
+
+
+## Conversation and care rhythm
+
+- Follow-up suggestion buttons respond to check-ins, observations, and activity charts. Guided draft questions keep their own flow without unrelated suggestion buttons.
+- A factual user message such as “Mum ate lunch and walked in the garden today” can be followed by “Turn that into a note” or “Add notes to this”. The assistant uses only the most recent user statement, verbatim, in a general care-log draft. It never substitutes assistant-generated content as an observation. Unclear references ask for clarification. Attaching notes to a specific appointment/task still uses the corresponding page; chat does not claim to make that attachment.
+- “Show care trends” returns a seven-day chart of care-note occurrence counts and reminder completion counts. These are recorded activity counts, not clinical trends, medication adherence, recurring occurrence counts or care quality scores. Today is partial. Dates use the user's timezone, including DST boundaries.
+- The latest chart subscribes to existing profile-filtered Realtime changes for `care_communications` and `care_reminders`, re-fetching via the authenticated function. It also refreshes every 30 seconds while foregrounded, on foreground return, and on manual refresh. Realtime disconnection falls back to polling. Deletes missed by filtered subscriptions are reconciled by polling. Unmount/profile/consent changes remove subscriptions; out-of-date requests cannot update the component. Every fetch rechecks active membership.
+- Charts show the last successful fetch time. Failed, unauthorized, or capped queries remove the chart instead of showing incomplete data as zero. A query reaching 1,000 rows per metric is conservatively treated as unavailable. Only timestamp fields are loaded for aggregation.
+- No new packages, schemas, permissions, secrets, or model provider are required. Both activity tables were verified as present in the existing Realtime publication. Signed-in verification of websocket delivery and mobile visual layout remains a release acceptance step.
