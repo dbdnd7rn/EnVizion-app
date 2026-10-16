@@ -1,4 +1,6 @@
 import { themeBackground } from "../themeColors";
+import { useAppearance } from "../appearance";
+import { AdminGlassHero, AdminGlassCard, AdminGlassSection, AdminGlassMetric, AdminGlassTabs } from "../components/AdminGlassUi";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Platform, Switch, Text, View } from "react-native";
 import {
@@ -20,13 +22,11 @@ import {
 import {
   Button,
   C,
-  Card,
   Field,
   Heading,
   Icon,
   Page,
   S,
-  Section,
   Txt,
 } from "../ui";
 
@@ -43,12 +43,20 @@ function PreferenceSwitch({
   disabled?: boolean;
   onChange: (value: boolean) => void;
 }) {
+  const { dark } = useAppearance();
   return (
-    <Card>
-      <View style={S.between}>
+    <AdminGlassCard>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <View style={{
+          width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center",
+          backgroundColor: dark ? "#49355F" : "#F4EAF9",
+        }}>
+          <Icon name={title.toLowerCase().includes("quiet") ? "moon-outline" : "notifications-outline"}
+            color={dark ? "#DEBEF5" : "#8240A5"} size={20} />
+        </View>
         <View style={{ flex: 1, gap: 4 }}>
-          <Text style={S.h3}>{title}</Text>
-          <Txt style={S.small}>{body}</Txt>
+          <Text style={[S.h3, { fontSize: 13.5 }]}>{title}</Text>
+          <Text style={[S.small, { lineHeight: 17 }]}>{body}</Text>
         </View>
         <Switch
           accessibilityLabel={title}
@@ -58,7 +66,7 @@ function PreferenceSwitch({
           trackColor={{ true: C.purple }}
         />
       </View>
-    </Card>
+    </AdminGlassCard>
   );
 }
 
@@ -67,6 +75,8 @@ export function NotificationSettingsScreen() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const [tab, setTab] = useState<"delivery" | "forecast" | "quiet">("delivery");
 
   useEffect(() => {
     let active = true;
@@ -91,7 +101,7 @@ export function NotificationSettingsScreen() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   async function persist(
     next: NotificationPreferences,
@@ -178,20 +188,29 @@ export function NotificationSettingsScreen() {
     }
   }
 
-  if (loading || !prefs) {
+  if (loading) {
     return (
       <Page>
         <Heading
           eyebrow="NOTIFICATION PREFERENCES"
           title="Choose how EnVizion gets your attention."
         />
-        <Card>
+        <AdminGlassCard>
           <ActivityIndicator color={C.purple} />
           <Txt>Loading notification preferences…</Txt>
-        </Card>
+        </AdminGlassCard>
         {Boolean(message) && <Txt>{message}</Txt>}
       </Page>
     );
+  }
+
+  if (!prefs) {
+    return <Page>
+      <AdminGlassHero variant="notifications" eyebrow="NOTIFICATION SETTINGS"
+        title="Stay informed, your way" description="We couldn't load your saved preferences." />
+      {Boolean(message) && <Text accessibilityRole="alert" style={S.body}>{message}</Text>}
+      <Button title="Try again" onPress={() => { setLoading(true); setReloadKey((v) => v + 1); }} />
+    </Page>;
   }
 
   const quietTimesValid =
@@ -199,21 +218,40 @@ export function NotificationSettingsScreen() {
 
   return (
     <Page>
-      <Heading
+      <AdminGlassHero
+        variant="notifications"
         eyebrow="NOTIFICATION PREFERENCES"
-        title="Useful updates, on your terms."
-        body="Choose which updates can reach your device and when EnVizion should stay quiet."
+        title="Updates, your way."
+        description="Choose the care updates that matter, and the moments when EnVizion stays quiet."
+        footer={<Text style={[S.small, { color: C.purple, fontFamily: "DMSans_600SemiBold" }]}>
+          {Platform.OS === "web" ? "In-app notifications available" : prefs.pushEnabled ? "Device push enabled" : "Device push disabled"}
+        </Text>}
+      />
+      <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10 }}>
+        <AdminGlassMetric icon="notifications-outline"
+          value={[prefs.reminderPush, prefs.supportPush, prefs.coachingPush, prefs.careTeamPush, prefs.taskPush, prefs.coordinationPush].filter(Boolean).length}
+          label="Enabled alert categories" />
+        <AdminGlassMetric icon="moon-outline" value={prefs.quietHoursEnabled ? "On" : "Off"} label="Quiet hours" />
+      </View>
+      <AdminGlassTabs
+        options={[
+          { key: "delivery", label: "Delivery", icon: "notifications-outline" },
+          { key: "forecast", label: "Care alerts", icon: "pulse-outline" },
+          { key: "quiet", label: "Quiet time", icon: "moon-outline" },
+        ]}
+        value={tab} onChange={setTab}
       />
 
       {Boolean(message) && (
-        <Card style={{ backgroundColor: themeBackground(C.white) }}>
+        <AdminGlassCard style={{ backgroundColor: themeBackground(C.white) }}>
           <Text accessibilityRole="alert" style={S.body}>
             {message}
           </Text>
-        </Card>
+        </AdminGlassCard>
       )}
 
-      <Section title="Native push" />
+      {tab === "delivery" && (<>
+      <AdminGlassSection title="Native push" />
       <PreferenceSwitch
         title="Push notifications"
         body={
@@ -236,7 +274,7 @@ export function NotificationSettingsScreen() {
         />
       )}
 
-      <Section title="What can be pushed?" />
+      <AdminGlassSection title="What can be pushed?" />
       <PreferenceSwitch
         title="Care reminders"
         body="Due reminders from your shared Care Calendar."
@@ -292,7 +330,10 @@ export function NotificationSettingsScreen() {
         }
       />
 
-      <Section title="Coverage forecast alerts" />
+      </>)}
+
+      {tab === "forecast" && (<>
+      <AdminGlassSection title="Coverage forecast alerts" />
       <PreferenceSwitch
         title="Forecast alerts"
         body="Create proactive Owner alerts when an upcoming recurring-care window becomes High Attention or Elevated. Device delivery still follows your main Push notifications and quiet-hours settings."
@@ -313,7 +354,7 @@ export function NotificationSettingsScreen() {
 
       {prefs.coverageForecastAlertsEnabled && (
         <>
-          <Card>
+          <AdminGlassCard>
             <Text style={S.h3}>Alert severity</Text>
             <Txt style={S.small}>
               Choose which forecast risk levels should create a notification.
@@ -340,9 +381,9 @@ export function NotificationSettingsScreen() {
                 </View>
               ))}
             </View>
-          </Card>
+          </AdminGlassCard>
 
-          <Card>
+          <AdminGlassCard>
             <Text style={S.h3}>Warning horizon</Text>
             <Txt style={S.small}>
               EnVizion will evaluate recurring-care coverage this far into the
@@ -370,11 +411,11 @@ export function NotificationSettingsScreen() {
                 </View>
               ))}
             </View>
-          </Card>
+          </AdminGlassCard>
         </>
       )}
 
-      <Section title="Coordination digest" />
+      <AdminGlassSection title="Coordination digest" />
       <PreferenceSwitch
         title="Daily coordination digest"
         body="Create one quiet in-app digest around 8:00 AM in your notification timezone when active coordination work exists. Push delivery follows your Coordination alerts and quiet-hours settings."
@@ -394,7 +435,10 @@ export function NotificationSettingsScreen() {
         }
       />
 
-      <Section title="Quiet hours" />
+      </>)}
+
+      {tab === "quiet" && (<>
+      <AdminGlassSection title="Quiet hours" />
       <PreferenceSwitch
         title="Pause push during quiet hours"
         body="Notifications remain in EnVizion Life and can be pushed after quiet hours end."
@@ -410,7 +454,7 @@ export function NotificationSettingsScreen() {
       />
 
       {prefs.quietHoursEnabled && (
-        <Card>
+        <AdminGlassCard>
           <Field
             label="Quiet starts (HH:MM, 24-hour)"
             value={prefs.quietStart}
@@ -440,10 +484,12 @@ export function NotificationSettingsScreen() {
               Use a valid 24-hour time such as 22:00 or 07:30.
             </Text>
           )}
-        </Card>
+        </AdminGlassCard>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      </>)}
+
+      <AdminGlassCard style={{ backgroundColor: C.lavender }}>
         <Icon name="shield-checkmark-outline" />
         <Text style={S.h3}>Important</Text>
         <Txt>
@@ -451,7 +497,7 @@ export function NotificationSettingsScreen() {
           A delayed, muted, or unavailable push notification must never be used
           as confirmation that urgent care is or is not needed.
         </Txt>
-      </Card>
+      </AdminGlassCard>
     </Page>
   );
 }

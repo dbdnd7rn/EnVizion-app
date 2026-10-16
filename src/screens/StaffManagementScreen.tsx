@@ -1,6 +1,8 @@
 import { themeAction } from "../themeColors";
+import { useAppearance } from "../appearance";
+import { AdminGlassHero, AdminGlassCard, AdminGlassSection, AdminGlassMetric, AdminGlassTabs } from "../components/AdminGlassUi";
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import {
   inviteStaffMember,
   loadManagedStaff,
@@ -11,16 +13,12 @@ import {
   type StaffRole,
 } from "../staff";
 import {
-  Brand,
   Button,
   C,
-  Card,
   Field,
-  Heading,
   Icon,
   Page,
   S,
-  Section,
   Txt,
 } from "../ui";
 
@@ -77,6 +75,7 @@ function RolePicker({
 }
 
 export function StaffManagementScreen() {
+  const { dark } = useAppearance();
   const [staff, setStaff] = useState<ManagedStaffMember[]>([]);
   const [audit, setAudit] = useState<StaffAdminAuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +84,9 @@ export function StaffManagementScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<StaffRole>("support");
+  const [tab, setTab] = useState<"people" | "invite" | "activity">("people");
+  const [search, setSearch] = useState("");
+  const [confirmAccess, setConfirmAccess] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -128,12 +130,12 @@ export function StaffManagementScreen() {
       setName("");
       setEmail("");
       setRole("support");
+      await refresh();
       setMessage(
         result.invited
           ? "Staff invitation sent and access prepared."
           : "Existing EnVizion account activated as staff.",
       );
-      await refresh();
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -174,24 +176,31 @@ export function StaffManagementScreen() {
 
   return (
     <Page>
-      <Brand />
-      <Heading
-        eyebrow="ADMINISTRATION"
-        title="Manage EnVizion staff"
-        body="Invite staff, assign workspace roles, and deactivate access when responsibilities change."
+      <AdminGlassHero variant="staff" eyebrow="TEAM ADMINISTRATION"
+        title="Your care support team"
+        description="Invite trusted staff, manage workspace roles and keep access secure."
+        footer={<Text style={[S.small, { color: C.purple, fontFamily: "DMSans_600SemiBold" }]}>
+          Staff access is managed securely
+        </Text>}
       />
-
-      <Card style={{ backgroundColor: C.lavender }}>
-        <Icon name="shield-checkmark-outline" size={30} />
-        <Text style={S.h3}>Admin-only controls</Text>
-        <Txt>
-          Invitations and role changes are processed server-side. Privileged
-          Supabase credentials are never sent to this app.
-        </Txt>
-      </Card>
-
-      <Section title="Invite or activate staff" />
-      <Card>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10 }}>
+        <AdminGlassMetric value={staff.length} icon="people-outline" label="Staff members" />
+        <AdminGlassMetric value={staff.filter((entry) => entry.active).length} icon="checkmark-circle-outline" label="Active access" />
+        <AdminGlassMetric value={staff.filter((entry) => entry.role === "admin" && entry.active).length} icon="shield-checkmark-outline" label="Active admins" />
+        <AdminGlassMetric value={audit.length} icon="time-outline" label="Recorded admin actions" />
+      </View>
+      <AdminGlassTabs
+        value={tab}
+        onChange={setTab}
+        options={[
+          { key: "people", label: "Team", icon: "people-outline" },
+          { key: "invite", label: "Invite", icon: "person-add-outline" },
+          { key: "activity", label: "Activity", icon: "time-outline" },
+        ]}
+      />
+      {tab === "invite" && (<>
+      <AdminGlassSection title="Invite or activate staff" />
+      <AdminGlassCard>
         <Field label="Staff member name" value={name} onChange={setName} />
         <Field
           label="Email address"
@@ -210,10 +219,12 @@ export function StaffManagementScreen() {
           icon="person-add-outline"
           onPress={() => void invite()}
         />
-      </Card>
+      </AdminGlassCard>
+
+      </>)}
 
       {Boolean(message) && (
-        <Card style={{ backgroundColor: message.toLowerCase().includes("could not") ? C.redBg : C.white }}>
+        <AdminGlassCard style={{ backgroundColor: message.toLowerCase().includes("could not") ? C.redBg : C.white }}>
           <Text
             accessibilityRole="alert"
             style={[
@@ -227,27 +238,43 @@ export function StaffManagementScreen() {
           >
             {message}
           </Text>
-        </Card>
+        </AdminGlassCard>
       )}
 
-      <Section title="Current staff" action="Refresh" onPress={() => void refresh()} />
+      {tab === "people" && (<>
+      <AdminGlassSection title="Current staff" action="Refresh" onPress={() => void refresh()} />
+      <View style={{
+        flexDirection: "row", alignItems: "center", gap: 9,
+        paddingHorizontal: 14, minHeight: 48, borderRadius: 17,
+        borderWidth: 1, borderColor: dark ? "#57466D" : "#E9DEF0",
+        backgroundColor: dark ? "#31263F" : "#FFFFFF",
+      }}>
+        <Icon name="search-outline" size={19} color={C.purple} />
+        <TextInput accessibilityLabel="Search staff" value={search} onChangeText={setSearch}
+          autoCapitalize="none" placeholder="Search by name, email, or role"
+          placeholderTextColor={dark ? "#A798B8" : "#95889D"}
+          style={{
+            flex: 1, minHeight: 45, fontSize: 13, fontFamily: "DMSans_400Regular",
+            color: dark ? "#FAF2FF" : "#1B163F",
+          }} />
+      </View>
       {loading ? (
-        <Card>
+        <AdminGlassCard>
           <ActivityIndicator color={C.purple} />
           <Txt>Loading staff accounts…</Txt>
-        </Card>
+        </AdminGlassCard>
       ) : !staff.length ? (
-        <Card>
+        <AdminGlassCard>
           <Icon name="people-outline" />
           <Text style={S.h3}>No active staff accounts have been created yet.</Text>
           <Txt>
             The first administrator must be activated after creating a normal
             EnVizion account.
           </Txt>
-        </Card>
+        </AdminGlassCard>
       ) : (
-        staff.map((item) => (
-          <Card key={item.userId}>
+        staff.filter((item) => !search.trim() || [item.displayName, item.email, item.role].some((value) => value.toLowerCase().includes(search.trim().toLowerCase()))).map((item) => (
+          <AdminGlassCard key={item.userId}>
             <View style={S.between}>
               <View style={{ flex: 1 }}>
                 <Text style={S.h3}>{item.displayName}</Text>
@@ -297,23 +324,43 @@ export function StaffManagementScreen() {
                 }
                 secondary
                 disabled={busyId !== null}
-                onPress={() =>
-                  void changeStaff(item, { active: !item.active })
-                }
+                onPress={() => setConfirmAccess(item.userId)}
               />
             )}
-          </Card>
+              {confirmAccess === item.userId && (
+                <View style={{
+                  borderRadius: 18, padding: 13, gap: 12,
+                  backgroundColor: dark ? "#422D41" : "#FFF2F7",
+                }}>
+                  <Text style={[S.small, { color: dark ? "#F6D7E5" : "#873953" }]}>
+                    {item.active ? "Disable this staff member’s workspace access?" : "Reactivate workspace access for this staff member?"}
+                  </Text>
+                  <View style={{ flexDirection: "row", gap: 9 }}>
+                    <View style={{ flex: 1 }}>
+                      <Button title="Cancel" secondary onPress={() => setConfirmAccess(null)} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Button title="Confirm" disabled={busyId !== null}
+                        onPress={() => { setConfirmAccess(null); void changeStaff(item, { active: !item.active }); }} />
+                    </View>
+                  </View>
+                </View>
+              )}
+          </AdminGlassCard>
         ))
       )}
 
-      <Section title="Recent admin activity" />
+      </>)}
+
+      {tab === "activity" && (<>
+      <AdminGlassSection title="Recent admin activity" />
       {!audit.length ? (
-        <Card>
+        <AdminGlassCard>
           <Txt>No staff-management activity has been recorded yet.</Txt>
-        </Card>
+        </AdminGlassCard>
       ) : (
         audit.map((item) => (
-          <Card key={item.id}>
+          <AdminGlassCard key={item.id}>
             <View style={S.between}>
               <Text style={S.eyebrow}>
                 {item.action.replaceAll("_", " ")}
@@ -329,9 +376,11 @@ export function StaffManagementScreen() {
                   ? item.details.display_name
                   : "Staff access change"}
             </Txt>
-          </Card>
+          </AdminGlassCard>
         ))
       )}
+
+      </>)}
 
       <Txt style={S.small}>
         Access changes are logged for accountability. Staff roles control access

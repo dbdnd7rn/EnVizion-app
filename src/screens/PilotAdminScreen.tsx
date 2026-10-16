@@ -1,4 +1,6 @@
 import { themeForeground, themeBorder } from "../themeColors";
+import { useAppearance } from "../appearance";
+import { AdminGlassHero, AdminGlassCard, AdminGlassSection, AdminGlassMetric, AdminGlassTabs } from "../components/AdminGlassUi";
 import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -39,13 +41,10 @@ import { useNav } from "./MainScreens";
 import {
   Button,
   C,
-  Card,
   Field,
-  Heading,
   Icon,
   Page,
   S,
-  Section,
   Txt,
 } from "../ui";
 
@@ -62,19 +61,13 @@ const statusLabels: Record<PilotStatus, string> = {
   exited: "Exited",
 };
 
-function Metric({
-  value,
-  label,
-}: {
-  value: number;
-  label: string;
-}) {
-  return (
-    <View style={{ flex: 1, minWidth: 110 }}>
-      <Text style={[S.title, { fontSize: 28, color: C.deep }]}>{value}</Text>
-      <Txt style={S.small}>{label}</Txt>
-    </View>
-  );
+function Metric({ value, label }: { value: number; label: string }) {
+  const icon = label.includes("document") || label.includes("consent") ? "document-text-outline" :
+    label.includes("support") || label.includes("coaching") ? "chatbubbles-outline" :
+    label.includes("blocked") || label.includes("error") || label.includes("failed") ? "alert-circle-outline" :
+    label.includes("ready") || label.includes("complete") || label.includes("validation") ? "checkmark-circle-outline" :
+    "people-outline";
+  return <AdminGlassMetric value={value} label={label} icon={icon} />;
 }
 
 function StatusPill({ status }: { status: string }) {
@@ -102,6 +95,7 @@ function StatusPill({ status }: { status: string }) {
 }
 
 export function PilotAdminScreen() {
+  const { dark } = useAppearance();
   const n = useNav();
   const [summary, setSummary] = useState<PilotSummary | null>(null);
   const [operations, setOperations] =
@@ -114,6 +108,7 @@ export function PilotAdminScreen() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [tab, setTab] = useState<"overview" | "participants" | "governance">("overview");
 
   const [inviteName, setInviteName] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
@@ -249,34 +244,53 @@ export function PilotAdminScreen() {
 
   return (
     <Page>
-      <Heading
-        eyebrow="PILOT ADMINISTRATION"
-        title="Run the pilot without opening clinical records."
-        body="Manage enrollment, required participation documents and operational readiness from one privacy-minimized workspace."
+      <AdminGlassHero
+        variant="pilot" eyebrow="PILOT ADMINISTRATION"
+        title="A clearer view of your pilot."
+        description="Track onboarding, consent, operational readiness and participant progress without accessing clinical records."
+        footer={<Text style={[S.small, { color: C.purple, fontFamily: "DMSans_600SemiBold" }]}>
+          Secure, role-based administration
+        </Text>}
       />
-
+      {summary && (
+        <View style={{ flexDirection: "row", flexWrap: "wrap", rowGap: 10, justifyContent: "space-between" }}>
+          <AdminGlassMetric icon="people-outline" value={summary.activePilot} label="Active participants" />
+          <AdminGlassMetric icon="person-add-outline" value={summary.invitedPilot} label="Invited participants" />
+          <AdminGlassMetric icon="checkmark-circle-outline" value={summary.readyForActivation} label="Ready for activation" />
+          <AdminGlassMetric icon="shield-checkmark-outline" value={summary.currentRequiredDocuments} label="Published documents" />
+        </View>
+      )}
+      <AdminGlassTabs
+        options={[
+          { key: "overview", label: "Overview", icon: "grid-outline" },
+          { key: "participants", label: "Participants", icon: "people-outline" },
+          { key: "governance", label: "Governance", icon: "shield-checkmark-outline" },
+        ]}
+        value={tab} onChange={setTab}
+      />
       {Boolean(message) && (
-        <Card style={{ backgroundColor: themeBackground(C.white) }}>
+        <AdminGlassCard style={{ backgroundColor: themeBackground(C.white) }}>
           <Text accessibilityRole="alert" style={S.body}>
             {message}
           </Text>
-        </Card>
+        </AdminGlassCard>
       )}
 
+      {tab === "overview" && (<>
       {summary && (
         <>
-          <Section title="Pilot overview" action="Refresh" onPress={() => void refresh()} />
-          <Card>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+          <AdminGlassSection title="Pilot overview" action="Refresh" onPress={() => void refresh()} />
+          <AdminGlassCard>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric value={summary.activePilot} label="active pilot users" />
               <Metric value={summary.invitedPilot} label="invited" />
               <Metric value={summary.pausedPilot} label="paused" />
               <Metric value={summary.exitedPilot} label="exited" />
             </View>
-          </Card>
+          </AdminGlassCard>
 
-          <Card style={{ backgroundColor: C.lavender }}>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+          <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric
                 value={summary.activeConsentComplete}
                 label="active users current on required documents"
@@ -287,11 +301,11 @@ export function PilotAdminScreen() {
               />
               <Metric value={summary.careProfiles} label="care profiles" />
             </View>
-          </Card>
+          </AdminGlassCard>
 
-          <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
+          <AdminGlassCard style={{ backgroundColor: themeBackground("#FFF9F2") }}>
             <Text style={S.eyebrow}>ONBOARDING COMMAND CENTER</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric
                 value={summary.readyForActivation}
                 label="ready for activation"
@@ -305,10 +319,10 @@ export function PilotAdminScreen() {
                 label="onboarding blocked"
               />
             </View>
-          </Card>
+          </AdminGlassCard>
 
-          <Card style={{ backgroundColor: C.lavender }}>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+          <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric
                 value={summary.stalledParticipants}
                 label="stalled over 72h"
@@ -322,26 +336,26 @@ export function PilotAdminScreen() {
                 label="pilot journeys completed"
               />
             </View>
-          </Card>
+          </AdminGlassCard>
 
-          <Card>
-            <View style={{ flexDirection: "row", gap: 18 }}>
+          <AdminGlassCard>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric value={summary.openSupport} label="open support" />
               <Metric value={summary.activeCoaching} label="active coaching" />
               <Metric value={summary.totalAccounts} label="total Auth accounts" />
             </View>
-          </Card>
+          </AdminGlassCard>
         </>
       )}
 
-      <Section title="Cohort progress" />
+      <AdminGlassSection title="Cohort progress" />
       {!cohorts.length ? (
-        <Card>
+        <AdminGlassCard>
           <Txt>No pilot cohorts exist yet.</Txt>
-        </Card>
+        </AdminGlassCard>
       ) : (
         cohorts.map((cohort) => (
-          <Card key={cohort.cohort}>
+          <AdminGlassCard key={cohort.cohort}>
             <View style={S.between}>
               <View style={{ flex: 1 }}>
                 <Text style={S.h2}>{cohort.cohort}</Text>
@@ -387,14 +401,14 @@ export function PilotAdminScreen() {
               />
               <Metric value={cohort.completed} label="completed" />
             </View>
-          </Card>
+          </AdminGlassCard>
         ))
       )}
 
       {operations && (
         <>
-          <Section title="Launch readiness" />
-          <Card
+          <AdminGlassSection title="Launch readiness" />
+          <AdminGlassCard
             style={{
               backgroundColor:
                 readiness.level === "ready"
@@ -449,11 +463,11 @@ export function PilotAdminScreen() {
               This is an operational checklist, not a clinical-safety,
               regulatory, legal, or compliance certification.
             </Txt>
-          </Card>
+          </AdminGlassCard>
 
-          <Section title="Production operations" />
-          <Card style={{ backgroundColor: C.lavender }}>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 18 }}>
+          <AdminGlassSection title="Production operations" />
+          <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric
                 value={operations.openDiagnostics}
                 label="open diagnostics"
@@ -471,9 +485,9 @@ export function PilotAdminScreen() {
                 label="push delivery errors · 24h"
               />
             </View>
-          </Card>
+          </AdminGlassCard>
 
-          <Card>
+          <AdminGlassCard>
             <View style={S.row}>
               <Icon name="shield-checkmark-outline" size={24} />
               <View style={{ flex: 1 }}>
@@ -486,16 +500,16 @@ export function PilotAdminScreen() {
                 </Txt>
               </View>
             </View>
-          </Card>
+          </AdminGlassCard>
 
-          <Section title="Recent technical diagnostics" />
+          <AdminGlassSection title="Recent technical diagnostics" />
           {!operations.recentDiagnostics.length ? (
-            <Card>
+            <AdminGlassCard>
               <Txt>No client diagnostics have been submitted.</Txt>
-            </Card>
+            </AdminGlassCard>
           ) : (
             operations.recentDiagnostics.slice(0, 10).map((report) => (
-              <Card key={report.id}>
+              <AdminGlassCard key={report.id}>
                 <View style={S.between}>
                   <View style={{ flex: 1 }}>
                     <Text style={S.h3}>{report.summary}</Text>
@@ -539,14 +553,17 @@ export function PilotAdminScreen() {
                     }
                   />
                 )}
-              </Card>
+              </AdminGlassCard>
             ))
           )}
         </>
       )}
 
-      <Section title="Pilot metrics & launch intelligence" />
-      <Card style={{ backgroundColor: C.deep }}>
+      </>)}
+
+      {tab === "governance" && (<>
+      <AdminGlassSection title="Pilot metrics & launch intelligence" />
+      <AdminGlassCard style={{ backgroundColor: C.deep }}>
         <Icon name="analytics-outline" color={C.white} size={28} />
         <Text style={[S.h2, { color: C.white }]}>Final pilot intelligence</Text>
         <Txt style={{ color: themeForeground("#E3D5E9") }}>
@@ -558,10 +575,10 @@ export function PilotAdminScreen() {
           icon="bar-chart-outline"
           onPress={() => n.navigate("PilotIntelligence")}
         />
-      </Card>
+      </AdminGlassCard>
 
-      <Section title="Access governance" />
-      <Card
+      <AdminGlassSection title="Access governance" />
+      <AdminGlassCard
         style={{
           backgroundColor: themeBackground("#FAF7FB"),
           borderColor: themeBorder("#E4D9E8"),
@@ -596,10 +613,10 @@ export function PilotAdminScreen() {
           icon="shield-outline"
           onPress={() => n.navigate("AccessGovernanceAdmin")}
         />
-      </Card>
+      </AdminGlassCard>
 
-      <Section title="Launch validation" />
-      <Card style={{ backgroundColor: C.lavender }}>
+      <AdminGlassSection title="Launch validation" />
+      <AdminGlassCard style={{ backgroundColor: C.lavender }}>
         <Icon name="flag-outline" size={28} />
         <Text style={S.h3}>Final launch evidence & sign-off</Text>
         <Txt>
@@ -612,449 +629,24 @@ export function PilotAdminScreen() {
           icon="rocket-outline"
           onPress={() => n.navigate("LaunchCenter")}
         />
-      </Card>
+      </AdminGlassCard>
 
-      <Section title="Invite pilot participant" />
-      <Card>
-        <Field
-          label="Participant name"
-          value={inviteName}
-          onChange={setInviteName}
-        />
-        <Field
-          label="Email address"
-          value={inviteEmail}
-          onChange={setInviteEmail}
-        />
-        <Field
-          label="Cohort"
-          value={inviteCohort}
-          onChange={setInviteCohort}
-        />
-        <Button
-          title={busy === "invite" ? "Sending invitation…" : "Invite to pilot"}
-          icon="person-add-outline"
-          disabled={busy !== null || !inviteEmail.trim()}
-          onPress={() =>
-            void run(
-              "invite",
-              async () => {
-                const result = await invitePilotParticipant({
-                  email: inviteEmail.trim(),
-                  displayName: inviteName.trim(),
-                  cohort: inviteCohort.trim(),
-                });
-                setInviteName("");
-                setInviteEmail("");
-                return result.invitationEmailSent
-                  ? "Pilot invitation email sent."
-                  : "Pilot enrollment added to the existing EnVizion account.";
-              },
-            )
-          }
-        />
-        <Txt style={S.small}>
-          Invitation enrolls the account as “Invited.” Activation remains an
-          explicit admin action. Required published documents are presented to
-          the participant in-app.
-        </Txt>
-      </Card>
-
-      <Section title="Stalled onboarding follow-up" />
-      {!participants.some((participant) => participant.stalled) ? (
-        <Card style={{ backgroundColor: themeBackground("#E8F1ED") }}>
-          <Icon name="checkmark-circle-outline" color={C.green} size={26} />
-          <Text style={S.h3}>No participant is stalled over 72 hours.</Text>
-          <Txt style={S.small}>
-            The scheduled reminder sweep runs every 6 hours and deduplicates
-            the same onboarding stage for 72 hours.
-          </Txt>
-        </Card>
-      ) : (
-        participants
-          .filter((participant) => participant.stalled)
-          .map((participant) => (
-            <Card
-              key={"stalled-" + participant.userId}
-              style={{ backgroundColor: themeBackground("#FFF9F2") }}
-            >
-              <View style={S.between}>
-                <View style={{ flex: 1 }}>
-                  <Text style={S.eyebrow}>STALLED ONBOARDING</Text>
-                  <Text style={S.h3}>{participant.displayName}</Text>
-                  <Txt style={S.small}>
-                    {pilotOnboardingStageLabel(participant.onboardingStage)} ·{" "}
-                    {participant.stalledHours}h in current stage
-                  </Txt>
-                </View>
-                <Icon name="time-outline" color={C.rose} size={25} />
-              </View>
-              <Txt>{participant.nextAction}</Txt>
-            </Card>
-          ))
-      )}
-
-      <Section title="Activation command center" />
-      {!readyToActivate.length ? (
-        <Card style={{ backgroundColor: C.lavender }}>
-          <Icon name="lock-closed-outline" size={26} />
-          <Text style={S.h3}>No participant is ready for activation yet.</Text>
-          <Txt style={S.small}>
-            Activation unlocks automatically after invitation acceptance,
-            first sign-in, all current participation documents, and a real
-            Primary Advocate/Co-Caregiver/Care Recipient/Family Member care-profile role are complete.
-          </Txt>
-        </Card>
-      ) : (
-        readyToActivate.map((participant) => (
-          <Card
-            key={"ready-" + participant.userId}
-            style={{ backgroundColor: themeBackground("#E8F1ED") }}
-          >
-            <View style={S.between}>
-              <View style={{ flex: 1 }}>
-                <Text style={S.eyebrow}>READY FOR ACTIVATION</Text>
-                <Text style={S.h3}>{participant.displayName}</Text>
-                <Txt style={S.small}>
-                  {participant.cohort || "No cohort"} · all prerequisites complete
-                </Txt>
-              </View>
-              <Icon
-                name="checkmark-circle-outline"
-                color={C.green}
-                size={28}
-              />
-            </View>
-            <Button
-              title={
-                busy === `participant-${participant.userId}`
-                  ? "Activating…"
-                  : "Activate for pilot testing"
-              }
-              icon="play-circle-outline"
-              disabled={busy !== null}
-              onPress={() =>
-                void run(
-                  `participant-${participant.userId}`,
-                  () =>
-                    updatePilotParticipant({
-                      userId: participant.userId,
-                      status: "active",
-                      cohort: participant.cohort,
-                    }),
-                  "Participant activated and ready for pilot launch validation.",
-                )
-              }
-            />
-          </Card>
-        ))
-      )}
-
-      <Section title="Pilot participants" />
-      {!participants.length ? (
-        <Card>
-          <Txt>No pilot participants have been enrolled yet.</Txt>
-        </Card>
-      ) : (
-        participants.map((participant) => {
-          const progress = pilotOnboardingProgress(participant);
-          const steps = pilotOnboardingSteps(participant);
-          const stageLabel = pilotOnboardingStageLabel(
-            participant.onboardingStage,
-          );
-
-          return (
-            <Card key={participant.userId}>
-              <View style={S.between}>
-                <View style={{ flex: 1 }}>
-                  <Text style={S.h3}>{participant.displayName}</Text>
-                  <Txt style={S.small}>{participant.email}</Txt>
-                  <Txt style={S.small}>
-                    {participant.cohort || "No cohort"} · {progress.complete}/
-                    {progress.total} onboarding stages complete
-                  </Txt>
-                </View>
-                <View
-                  style={[
-                    S.pill,
-                    {
-                      backgroundColor: participant.launchTestingReady
-                        ? "#E8F1ED"
-                        : participant.readyForActivation
-                          ? C.lavender
-                          : "#FFF1E5",
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      S.small,
-                      {
-                        color: participant.launchTestingReady
-                          ? C.green
-                          : participant.readyForActivation
-                            ? C.purple
-                            : C.rose,
-                      },
-                    ]}
-                  >
-                    {stageLabel}
-                  </Text>
-                </View>
-              </View>
-
-              <Card style={{ backgroundColor: C.paper }}>
-                <Text style={S.h3}>Onboarding evidence</Text>
-                {steps.map((step) => (
-                  <View
-                    key={step.id}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "flex-start",
-                      gap: 9,
-                    }}
-                  >
-                    <Icon
-                      name={
-                        step.complete
-                          ? "checkmark-circle-outline"
-                          : "ellipse-outline"
-                      }
-                      color={step.complete ? C.green : C.muted}
-                      size={19}
-                    />
-                    <View style={{ flex: 1 }}>
-                      <Text style={[S.h3, { fontSize: 13 }]}>
-                        {step.title}
-                      </Text>
-                      <Txt style={S.small}>{step.detail}</Txt>
-                    </View>
-                  </View>
-                ))}
-              </Card>
-
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-                <View style={{ flex: 1, minWidth: 130 }}>
-                  <Text style={S.h3}>Documents</Text>
-                  <Txt style={S.small}>
-                    {participant.documents.accepted}/
-                    {participant.documents.required} accepted
-                  </Txt>
-                </View>
-                <View style={{ flex: 1, minWidth: 130 }}>
-                  <Text style={S.h3}>Care roles</Text>
-                  <Txt style={S.small}>
-                    Primary Advocate {participant.roles.owner} · Co-Caregiver{" "}
-                    {participant.roles.caregiver} · Care Recipient{" "}
-                    {participant.roles.patient} · Family Member{" "}
-                    {participant.roles.viewer}
-                  </Txt>
-                </View>
-              </View>
-
-              {participant.documents.outstanding.length > 0 && (
-                <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
-                  <Text style={S.h3}>Outstanding documents</Text>
-                  {participant.documents.outstanding.map((document) => (
-                    <Txt key={document.id} style={S.small}>
-                      • {document.title} · v{document.version}
-                    </Txt>
-                  ))}
-                </Card>
-              )}
-
-              {participant.activationBlockers.length > 0 &&
-                participant.status !== "exited" && (
-                  <Card style={{ backgroundColor: themeBackground("#FFF9F2") }}>
-                    <Text style={S.h3}>Activation blockers</Text>
-                    {participant.activationBlockers.map((blocker) => (
-                      <Txt key={blocker} style={S.small}>
-                        • {blocker}
-                      </Txt>
-                    ))}
-                  </Card>
-                )}
-
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                {(["active", "paused"] as const).map((status) => {
-                  const activationLocked =
-                    status === "active" && !participant.readyForActivation;
-                  const disabled =
-                    busy !== null ||
-                    participant.status === status ||
-                    activationLocked;
-
-                  return (
-                    <Pressable
-                      key={status}
-                      accessibilityRole="button"
-                      accessibilityState={{
-                        selected: participant.status === status,
-                        disabled,
-                      }}
-                      disabled={disabled}
-                      onPress={() =>
-                        void run(
-                          `participant-${participant.userId}`,
-                          () =>
-                            updatePilotParticipant({
-                              userId: participant.userId,
-                              status,
-                              cohort: participant.cohort,
-                            }),
-                          `Participant moved to ${statusLabels[
-                            status
-                          ].toLowerCase()}.`,
-                        )
-                      }
-                      style={[
-                        S.pill,
-                        {
-                          minHeight: 42,
-                          justifyContent: "center",
-                          paddingHorizontal: 13,
-                          opacity: disabled ? 0.55 : 1,
-                          backgroundColor:
-                            participant.status === status
-                              ? themeAction(C.purple)
-                              : C.lavender,
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          S.h3,
-                          {
-                            fontSize: 12,
-                            color:
-                              participant.status === status
-                                ? C.white
-                                : C.deep,
-                          },
-                        ]}
-                      >
-                        {status === "active" && activationLocked
-                          ? "Active · locked"
-                          : statusLabels[status]}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-
-              {!participant.roles.ready &&
-                participant.status !== "exited" && (
-                  <Txt style={S.small}>
-                    Care-role access is intentionally not assigned from Pilot
-                    Admin. A Primary Advocate must grant it through the normal
-                    care-team invitation and consent workflow.
-                  </Txt>
-                )}
-
-              {participant.status !== "exited" && (
-                <Card style={{ backgroundColor: C.paper }}>
-                  <Text style={S.h3}>Pilot closeout</Text>
-                  <Txt style={S.small}>
-                    Passed validation runs: {participant.validation.passedRuns}
-                  </Txt>
-                  <Field
-                    label="Closeout note (optional)"
-                    value={closeoutNotes[participant.userId] ?? ""}
-                    onChange={(value) =>
-                      setCloseoutNotes((current) => ({
-                        ...current,
-                        [participant.userId]: value,
-                      }))
-                    }
-                    multiline
-                  />
-                  <Button
-                    title={
-                      participant.validation.canCompletePilot
-                        ? "Mark pilot journey completed"
-                        : "Completion locked · validation required"
-                    }
-                    icon="checkmark-done-outline"
-                    disabled={
-                      busy !== null || !participant.validation.canCompletePilot
-                    }
-                    onPress={() =>
-                      void run(
-                        `complete-${participant.userId}`,
-                        () =>
-                          closeoutPilotParticipant({
-                            userId: participant.userId,
-                            outcome: "completed",
-                            note: closeoutNotes[participant.userId] ?? "",
-                          }),
-                        "Pilot journey completed with validation evidence.",
-                      )
-                    }
-                  />
-                  <Button
-                    title="Withdraw / exit pilot"
-                    secondary
-                    icon="exit-outline"
-                    disabled={busy !== null}
-                    onPress={() =>
-                      void run(
-                        `withdraw-${participant.userId}`,
-                        () =>
-                          closeoutPilotParticipant({
-                            userId: participant.userId,
-                            outcome: "withdrawn",
-                            note: closeoutNotes[participant.userId] ?? "",
-                          }),
-                        "Participant exited the pilot as withdrawn.",
-                      )
-                    }
-                  />
-                </Card>
-              )}
-
-              {participant.status === "exited" && participant.completion && (
-                <Card
-                  style={{
-                    backgroundColor:
-                      participant.completion.outcome === "completed"
-                        ? "#E8F1ED"
-                        : "#FFF9F2",
-                  }}
-                >
-                  <Text style={S.h3}>
-                    Pilot {participant.completion.outcome}
-                  </Text>
-                  <Txt style={S.small}>
-                    {new Date(participant.completion.createdAt).toLocaleString()} ·{" "}
-                    {participant.completion.passedValidationRuns} passed validation
-                    run(s)
-                  </Txt>
-                  {Boolean(participant.completion.note) && (
-                    <Txt>{participant.completion.note}</Txt>
-                  )}
-                </Card>
-              )}
-            </Card>
-          );
-        })
-      )}
-
-      <Section title="Pilot feedback triage" />
+      <AdminGlassSection title="Pilot feedback triage" />
       {!feedback.length ? (
-        <Card>
+        <AdminGlassCard>
           <Icon name="chatbubble-ellipses-outline" size={26} />
           <Text style={S.h3}>No pilot feedback has been submitted yet.</Text>
           <Txt style={S.small}>
             Tester bugs, experience notes and suggestions will appear here.
           </Txt>
-        </Card>
+        </AdminGlassCard>
       ) : (
         feedback.slice(0, 30).map((item) => {
           const isBug = item.source === "diagnostic";
           const done =
             item.status === "closed" || item.status === "resolved";
           return (
-            <Card key={item.source + "-" + item.id}>
+            <AdminGlassCard key={item.source + "-" + item.id}>
               <View style={S.between}>
                 <View style={{ flex: 1 }}>
                   <Text style={S.eyebrow}>
@@ -1108,22 +700,22 @@ export function PilotAdminScreen() {
                   />
                 </View>
               )}
-            </Card>
+            </AdminGlassCard>
           );
         })
       )}
 
-      <Section title="Required participation documents" />
+      <AdminGlassSection title="Required participation documents" />
       {!documents.length ? (
-        <Card>
+        <AdminGlassCard>
           <Txt>
             No program documents exist yet. Caregivers are not blocked by a
             consent gate until an administrator publishes a document.
           </Txt>
-        </Card>
+        </AdminGlassCard>
       ) : (
         documents.map((item) => (
-          <Card key={item.id}>
+          <AdminGlassCard key={item.id}>
             <View style={S.between}>
               <View style={{ flex: 1 }}>
                 <Text style={S.eyebrow}>
@@ -1178,12 +770,12 @@ export function PilotAdminScreen() {
                 }
               />
             )}
-          </Card>
+          </AdminGlassCard>
         ))
       )}
 
-      <Section title={documentId ? "Edit draft" : "Create document draft"} />
-      <Card>
+      <AdminGlassSection title={documentId ? "Edit draft" : "Create document draft"} />
+      <AdminGlassCard>
         <Text style={S.h3}>Document type</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
           {(Object.keys(documentLabels) as ProgramDocumentType[]).map((type) => (
@@ -1269,16 +861,16 @@ export function PilotAdminScreen() {
           language should be reviewed by the appropriate EnVizion clinical,
           privacy and legal stakeholders before release.
         </Txt>
-      </Card>
+      </AdminGlassCard>
 
-      <Section title="Admin activity" />
+      <AdminGlassSection title="Admin activity" />
       {!audit.length ? (
-        <Card>
+        <AdminGlassCard>
           <Txt>No pilot admin actions have been recorded yet.</Txt>
-        </Card>
+        </AdminGlassCard>
       ) : (
         audit.slice(0, 20).map((entry) => (
-          <Card key={entry.id}>
+          <AdminGlassCard key={entry.id}>
             <View style={S.between}>
               <Text style={S.eyebrow}>
                 {entry.action.replaceAll("_", " ")}
@@ -1294,18 +886,448 @@ export function PilotAdminScreen() {
                 .map(([key, value]) => `${key.replaceAll("_", " ")}: ${String(value)}`)
                 .join(" · ") || "Recorded admin action"}
             </Txt>
-          </Card>
+          </AdminGlassCard>
         ))
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      </>)}
+
+      {tab === "participants" && (<>
+      <AdminGlassSection title="Invite pilot participant" />
+      <AdminGlassCard>
+        <Field
+          label="Participant name"
+          value={inviteName}
+          onChange={setInviteName}
+        />
+        <Field
+          label="Email address"
+          value={inviteEmail}
+          onChange={setInviteEmail}
+        />
+        <Field
+          label="Cohort"
+          value={inviteCohort}
+          onChange={setInviteCohort}
+        />
+        <Button
+          title={busy === "invite" ? "Sending invitation…" : "Invite to pilot"}
+          icon="person-add-outline"
+          disabled={busy !== null || !inviteEmail.trim()}
+          onPress={() =>
+            void run(
+              "invite",
+              async () => {
+                const result = await invitePilotParticipant({
+                  email: inviteEmail.trim(),
+                  displayName: inviteName.trim(),
+                  cohort: inviteCohort.trim(),
+                });
+                setInviteName("");
+                setInviteEmail("");
+                return result.invitationEmailSent
+                  ? "Pilot invitation email sent."
+                  : "Pilot enrollment added to the existing EnVizion account.";
+              },
+            )
+          }
+        />
+        <Txt style={S.small}>
+          Invitation enrolls the account as “Invited.” Activation remains an
+          explicit admin action. Required published documents are presented to
+          the participant in-app.
+        </Txt>
+      </AdminGlassCard>
+
+      <AdminGlassSection title="Stalled onboarding follow-up" />
+      {!participants.some((participant) => participant.stalled) ? (
+        <AdminGlassCard style={{ backgroundColor: themeBackground("#E8F1ED") }}>
+          <Icon name="checkmark-circle-outline" color={C.green} size={26} />
+          <Text style={S.h3}>No participant is stalled over 72 hours.</Text>
+          <Txt style={S.small}>
+            The scheduled reminder sweep runs every 6 hours and deduplicates
+            the same onboarding stage for 72 hours.
+          </Txt>
+        </AdminGlassCard>
+      ) : (
+        participants
+          .filter((participant) => participant.stalled)
+          .map((participant) => (
+            <AdminGlassCard
+              key={"stalled-" + participant.userId}
+              style={{ backgroundColor: themeBackground("#FFF9F2") }}
+            >
+              <View style={S.between}>
+                <View style={{ flex: 1 }}>
+                  <Text style={S.eyebrow}>STALLED ONBOARDING</Text>
+                  <Text style={S.h3}>{participant.displayName}</Text>
+                  <Txt style={S.small}>
+                    {pilotOnboardingStageLabel(participant.onboardingStage)} ·{" "}
+                    {participant.stalledHours}h in current stage
+                  </Txt>
+                </View>
+                <Icon name="time-outline" color={C.rose} size={25} />
+              </View>
+              <Txt>{participant.nextAction}</Txt>
+            </AdminGlassCard>
+          ))
+      )}
+
+      <AdminGlassSection title="Activation command center" />
+      {!readyToActivate.length ? (
+        <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+          <Icon name="lock-closed-outline" size={26} />
+          <Text style={S.h3}>No participant is ready for activation yet.</Text>
+          <Txt style={S.small}>
+            Activation unlocks automatically after invitation acceptance,
+            first sign-in, all current participation documents, and a real
+            Primary Advocate/Co-Caregiver/Care Recipient/Family Member care-profile role are complete.
+          </Txt>
+        </AdminGlassCard>
+      ) : (
+        readyToActivate.map((participant) => (
+          <AdminGlassCard
+            key={"ready-" + participant.userId}
+            style={{ backgroundColor: themeBackground("#E8F1ED") }}
+          >
+            <View style={S.between}>
+              <View style={{ flex: 1 }}>
+                <Text style={S.eyebrow}>READY FOR ACTIVATION</Text>
+                <Text style={S.h3}>{participant.displayName}</Text>
+                <Txt style={S.small}>
+                  {participant.cohort || "No cohort"} · all prerequisites complete
+                </Txt>
+              </View>
+              <Icon
+                name="checkmark-circle-outline"
+                color={C.green}
+                size={28}
+              />
+            </View>
+            <Button
+              title={
+                busy === `participant-${participant.userId}`
+                  ? "Activating…"
+                  : "Activate for pilot testing"
+              }
+              icon="play-circle-outline"
+              disabled={busy !== null}
+              onPress={() =>
+                void run(
+                  `participant-${participant.userId}`,
+                  () =>
+                    updatePilotParticipant({
+                      userId: participant.userId,
+                      status: "active",
+                      cohort: participant.cohort,
+                    }),
+                  "Participant activated and ready for pilot launch validation.",
+                )
+              }
+            />
+          </AdminGlassCard>
+        ))
+      )}
+
+      <AdminGlassSection title="Pilot participants" />
+      {!participants.length ? (
+        <AdminGlassCard>
+          <Txt>No pilot participants have been enrolled yet.</Txt>
+        </AdminGlassCard>
+      ) : (
+        participants.map((participant) => {
+          const progress = pilotOnboardingProgress(participant);
+          const steps = pilotOnboardingSteps(participant);
+          const stageLabel = pilotOnboardingStageLabel(
+            participant.onboardingStage,
+          );
+
+          return (
+            <AdminGlassCard key={participant.userId}>
+              <View style={S.between}>
+                <View style={{ flex: 1 }}>
+                  <Text style={S.h3}>{participant.displayName}</Text>
+                  <Txt style={S.small}>{participant.email}</Txt>
+                  <Txt style={S.small}>
+                    {participant.cohort || "No cohort"} · {progress.complete}/
+                    {progress.total} onboarding stages complete
+                  </Txt>
+                </View>
+                <View
+                  style={[
+                    S.pill,
+                    {
+                      backgroundColor: participant.launchTestingReady
+                        ? "#E8F1ED"
+                        : participant.readyForActivation
+                          ? C.lavender
+                          : "#FFF1E5",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      S.small,
+                      {
+                        color: participant.launchTestingReady
+                          ? C.green
+                          : participant.readyForActivation
+                            ? C.purple
+                            : C.rose,
+                      },
+                    ]}
+                  >
+                    {stageLabel}
+                  </Text>
+                </View>
+              </View>
+
+              <AdminGlassCard style={{ backgroundColor: C.paper }}>
+                <Text style={S.h3}>Onboarding evidence</Text>
+                {steps.map((step) => (
+                  <View
+                    key={step.id}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      gap: 9,
+                    }}
+                  >
+                    <Icon
+                      name={
+                        step.complete
+                          ? "checkmark-circle-outline"
+                          : "ellipse-outline"
+                      }
+                      color={step.complete ? C.green : C.muted}
+                      size={19}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[S.h3, { fontSize: 13 }]}>
+                        {step.title}
+                      </Text>
+                      <Txt style={S.small}>{step.detail}</Txt>
+                    </View>
+                  </View>
+                ))}
+              </AdminGlassCard>
+
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+                <View style={{ flex: 1, minWidth: 130 }}>
+                  <Text style={S.h3}>Documents</Text>
+                  <Txt style={S.small}>
+                    {participant.documents.accepted}/
+                    {participant.documents.required} accepted
+                  </Txt>
+                </View>
+                <View style={{ flex: 1, minWidth: 130 }}>
+                  <Text style={S.h3}>Care roles</Text>
+                  <Txt style={S.small}>
+                    Primary Advocate {participant.roles.owner} · Co-Caregiver{" "}
+                    {participant.roles.caregiver} · Care Recipient{" "}
+                    {participant.roles.patient} · Family Member{" "}
+                    {participant.roles.viewer}
+                  </Txt>
+                </View>
+              </View>
+
+              {participant.documents.outstanding.length > 0 && (
+                <AdminGlassCard style={{ backgroundColor: themeBackground("#FFF9F2") }}>
+                  <Text style={S.h3}>Outstanding documents</Text>
+                  {participant.documents.outstanding.map((document) => (
+                    <Txt key={document.id} style={S.small}>
+                      • {document.title} · v{document.version}
+                    </Txt>
+                  ))}
+                </AdminGlassCard>
+              )}
+
+              {participant.activationBlockers.length > 0 &&
+                participant.status !== "exited" && (
+                  <AdminGlassCard style={{ backgroundColor: themeBackground("#FFF9F2") }}>
+                    <Text style={S.h3}>Activation blockers</Text>
+                    {participant.activationBlockers.map((blocker) => (
+                      <Txt key={blocker} style={S.small}>
+                        • {blocker}
+                      </Txt>
+                    ))}
+                  </AdminGlassCard>
+                )}
+
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                {(["active", "paused"] as const).map((status) => {
+                  const activationLocked =
+                    status === "active" && !participant.readyForActivation;
+                  const disabled =
+                    busy !== null ||
+                    participant.status === status ||
+                    activationLocked;
+
+                  return (
+                    <Pressable
+                      key={status}
+                      accessibilityRole="button"
+                      accessibilityState={{
+                        selected: participant.status === status,
+                        disabled,
+                      }}
+                      disabled={disabled}
+                      onPress={() =>
+                        void run(
+                          `participant-${participant.userId}`,
+                          () =>
+                            updatePilotParticipant({
+                              userId: participant.userId,
+                              status,
+                              cohort: participant.cohort,
+                            }),
+                          `Participant moved to ${statusLabels[
+                            status
+                          ].toLowerCase()}.`,
+                        )
+                      }
+                      style={[
+                        S.pill,
+                        {
+                          minHeight: 42,
+                          justifyContent: "center",
+                          paddingHorizontal: 13,
+                          opacity: disabled ? 0.55 : 1,
+                          backgroundColor:
+                            participant.status === status
+                              ? themeAction(C.purple)
+                              : C.lavender,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          S.h3,
+                          {
+                            fontSize: 12,
+                            color:
+                              participant.status === status
+                                ? C.white
+                                : C.deep,
+                          },
+                        ]}
+                      >
+                        {status === "active" && activationLocked
+                          ? "Active · locked"
+                          : statusLabels[status]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {!participant.roles.ready &&
+                participant.status !== "exited" && (
+                  <Txt style={S.small}>
+                    Care-role access is intentionally not assigned from Pilot
+                    Admin. A Primary Advocate must grant it through the normal
+                    care-team invitation and consent workflow.
+                  </Txt>
+                )}
+
+              {participant.status !== "exited" && (
+                <AdminGlassCard style={{ backgroundColor: C.paper }}>
+                  <Text style={S.h3}>Pilot closeout</Text>
+                  <Txt style={S.small}>
+                    Passed validation runs: {participant.validation.passedRuns}
+                  </Txt>
+                  <Field
+                    label="Closeout note (optional)"
+                    value={closeoutNotes[participant.userId] ?? ""}
+                    onChange={(value) =>
+                      setCloseoutNotes((current) => ({
+                        ...current,
+                        [participant.userId]: value,
+                      }))
+                    }
+                    multiline
+                  />
+                  <Button
+                    title={
+                      participant.validation.canCompletePilot
+                        ? "Mark pilot journey completed"
+                        : "Completion locked · validation required"
+                    }
+                    icon="checkmark-done-outline"
+                    disabled={
+                      busy !== null || !participant.validation.canCompletePilot
+                    }
+                    onPress={() =>
+                      void run(
+                        `complete-${participant.userId}`,
+                        () =>
+                          closeoutPilotParticipant({
+                            userId: participant.userId,
+                            outcome: "completed",
+                            note: closeoutNotes[participant.userId] ?? "",
+                          }),
+                        "Pilot journey completed with validation evidence.",
+                      )
+                    }
+                  />
+                  <Button
+                    title="Withdraw / exit pilot"
+                    secondary
+                    icon="exit-outline"
+                    disabled={busy !== null}
+                    onPress={() =>
+                      void run(
+                        `withdraw-${participant.userId}`,
+                        () =>
+                          closeoutPilotParticipant({
+                            userId: participant.userId,
+                            outcome: "withdrawn",
+                            note: closeoutNotes[participant.userId] ?? "",
+                          }),
+                        "Participant exited the pilot as withdrawn.",
+                      )
+                    }
+                  />
+                </AdminGlassCard>
+              )}
+
+              {participant.status === "exited" && participant.completion && (
+                <AdminGlassCard
+                  style={{
+                    backgroundColor:
+                      participant.completion.outcome === "completed"
+                        ? "#E8F1ED"
+                        : "#FFF9F2",
+                  }}
+                >
+                  <Text style={S.h3}>
+                    Pilot {participant.completion.outcome}
+                  </Text>
+                  <Txt style={S.small}>
+                    {new Date(participant.completion.createdAt).toLocaleString()} ·{" "}
+                    {participant.completion.passedValidationRuns} passed validation
+                    run(s)
+                  </Txt>
+                  {Boolean(participant.completion.note) && (
+                    <Txt>{participant.completion.note}</Txt>
+                  )}
+                </AdminGlassCard>
+              )}
+            </AdminGlassCard>
+          );
+        })
+      )}
+
+      </>)}
+
+      <AdminGlassCard style={{ backgroundColor: C.lavender }}>
         <Text style={S.h3}>Privacy boundary</Text>
         <Txt>
           This dashboard shows pilot operations, consent completion and support
           workload. It intentionally does not expose medications, observations,
           appointment notes or other clinical care details.
         </Txt>
-      </Card>
+      </AdminGlassCard>
 
       {currentDocuments.length === 0 && (
         <Txt style={S.small}>
