@@ -639,10 +639,79 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
   );
 }
 
+class StaffWorkspaceErrorBoundary extends React.Component<
+  { children: React.ReactNode; onSignOut: () => void },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (!this.state.failed) return this.props.children;
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          paddingHorizontal: 25,
+          justifyContent: "center",
+          gap: 15,
+          backgroundColor: C.paper,
+        }}
+      >
+        <Icon name="alert-circle-outline" size={32} color={C.purple} />
+        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 25, color: C.ink }}>
+          The staff workspace couldn't open
+        </Text>
+        <Text style={{
+          fontFamily: "DMSans_400Regular",
+          fontSize: 14, lineHeight: 22, color: C.muted,
+        }}>
+          The dashboard encountered an unexpected display error. Your account and care records
+          have not been changed. Try reopening the workspace, or sign out safely.
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Try reopening the staff workspace"
+          onPress={() => this.setState({ failed: false })}
+          style={({ pressed }) => ({
+            borderRadius: 23,
+            minHeight: 50,
+            backgroundColor: themeAction(C.purple),
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: pressed ? 0.8 : 1,
+          })}
+        >
+          <Text style={{ fontFamily: "DMSans_700Bold", color: "#FFFFFF", fontSize: 14 }}>
+            Try opening again
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Sign out of staff workspace"
+          onPress={this.props.onSignOut}
+          style={{ minHeight: 46, alignItems: "center", justifyContent: "center" }}
+        >
+          <Text style={{ fontFamily: "DMSans_600SemiBold", color: C.purple }}>
+            Sign out
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
+}
+
 function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
   const { dark } = useAppearance();
+  const { signOut } = useAuth();
   return (
-    <NotificationsProvider>
+    <StaffWorkspaceErrorBoundary onSignOut={() => void signOut()}>
+      <ProfileAvatarProvider>
+        <NotificationsProvider>
       <NavigationContainer
       theme={{
           ...(dark ? DarkTheme : DefaultTheme),
@@ -723,7 +792,9 @@ function StaffSignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
         />
       </StaffStack.Navigator>
     </NavigationContainer>
-    </NotificationsProvider>
+        </NotificationsProvider>
+      </ProfileAvatarProvider>
+    </StaffWorkspaceErrorBoundary>
   );
 }
 
