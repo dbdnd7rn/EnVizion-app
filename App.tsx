@@ -189,13 +189,13 @@ function MainTabs() {
         },
         tabBarIcon: ({ color, focused }) => (
           <Icon
-            name={
+            name={( 
               {
                 Home: focused ? "home" : "home-outline",
                 Toolkit: focused ? "grid" : "grid-outline",
                 Library: focused ? "book" : "book-outline",
                 Support: focused ? "heart" : "heart-outline",
-              }[route.name]
+              } as Record<string, string>)[route.name] || "ellipse-outline"
             }
             color={color}
             size={23}
