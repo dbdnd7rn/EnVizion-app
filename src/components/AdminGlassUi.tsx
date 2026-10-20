@@ -100,12 +100,12 @@ export function AdminGlassHero({
       <Text accessibilityRole="header" style={{
         fontFamily: "DMSans_700Bold", fontSize: 29,
         lineHeight: 35, letterSpacing: -.95,
-        maxWidth: 275, color: dark ? "#F7F1FF" : "#17143C",
+        maxWidth: 275, color: dark ? "#E0D9E8" : "#17143C",
       }}>{title}</Text>
       <Text style={{
         fontFamily: "DMSans_400Regular", fontSize: 13.2,
         lineHeight: 20, maxWidth: 273,
-        color: dark ? "#D2C0DF" : "#79708B",
+        color: dark ? "#ACA3BB" : "#79708B",
       }}>{description}</Text>
       {footer ? <View style={{ marginTop: 7 }}>{footer}</View> : null}
     </View>
@@ -139,7 +139,7 @@ export function AdminGlassSection({
       flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10,
     }}>
       <Text accessibilityRole="header" style={{
-        flex: 1, color: dark ? "#F8F0FF" : "#17143C",
+        flex: 1, color: dark ? "#E0D9E8" : "#17143C",
         fontFamily: "DMSans_700Bold", fontSize: 21.5, lineHeight: 28,
       }}>{title}</Text>
       {action && onPress && (
@@ -177,7 +177,7 @@ export function AdminGlassMetric({
     }}>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <Icon name={icon} color={dark ? "#D6B0F4" : "#833DAC"} size={20} />
-        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 26, lineHeight: 30, color: dark ? "#FAF2FF" : "#19153B" }}>{value}</Text>
+        <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 26, lineHeight: 30, color: dark ? "#E0D9E8" : "#19153B" }}>{value}</Text>
       </View>
       <Text style={{
         fontFamily: "DMSans_600SemiBold", fontSize: 11.8, lineHeight: 16.5,
@@ -215,7 +215,7 @@ export function AdminGlassTabs<T extends string>({
           {tab.icon && <Icon name={tab.icon} size={16} color={tab.key === value ? "#FFFFFF" : (dark ? "#D8BEEC" : "#783396")} />}
           <Text numberOfLines={1} style={{
             fontFamily: "DMSans_600SemiBold", fontSize: 11,
-            color: tab.key === value ? "#FFFFFF" : (dark ? "#E5CFF4" : "#794296"),
+            color: tab.key === value ? (dark ? "#EFE9F4" : "#FFFFFF") : (dark ? "#E5CFF4" : "#794296"),
           }}>{tab.label}</Text>
         </Pressable>
       ))}
