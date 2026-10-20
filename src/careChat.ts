@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { chatSearchTerm } from "./careChatHelpers";
 import { loadCareSpaces } from "./careTeam";
 
 export type ChatPerson = { user_id: string; full_name: string | null; avatar_url: string | null };
@@ -66,7 +67,7 @@ export async function chatPage(conversationId: string, before?: string): Promise
 }
 
 export async function chatSearch(conversationId: string, query: string): Promise<ChatMessage[]> {
-  const term = query.trim().slice(0, 100).replace(/[%,_]/g, " ");
+  const term = chatSearchTerm(query);
   if (!term) return [];
   const { data, error } = await supabase.from("chat_messages")
     .select("id,conversation_id,sender_id,body,reply_to,client_nonce,created_at,edited_at,deleted_at")
@@ -144,9 +145,4 @@ export function chatSubscribe(conversationId: string, onMessages: () => void, on
   return () => { void supabase.removeChannel(channel); };
 }
 
-export function mergeChatMessages(older: ChatMessage[], latest: ChatMessage[]): ChatMessage[] {
-  const rows = new Map<string, ChatMessage>();
-  for (const row of older) rows.set(row.id, row);
-  for (const row of latest) rows.set(row.id, row);
-  return Array.from(rows.values()).sort((a,b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)).slice(-300);
-}
+export { mergeChatMessages } from "./careChatHelpers";\n
