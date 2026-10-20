@@ -853,17 +853,17 @@ export function HomeScreen() {
                     height: 67,
                     borderRadius: 21,
                     borderWidth: 1,
-                    borderColor: "#FFFFFF92",
-                    backgroundColor: "#FFFFFFD4",
+                    borderColor: themeBorder("#FFFFFF92"),
+                    backgroundColor: themeBackground("#FFFFFFD4"),
                     alignItems: "center",
                     justifyContent: "center",
-                    shadowColor: "#FFFFFF",
+                    shadowColor: themeShadow("#FFFFFF"),
                     shadowOpacity: 0.28,
                     shadowRadius: 11,
                     shadowOffset: { width: 0, height: 3 },
                   }}
                 >
-                  <Icon name={priority.icon} size={31} color="#813D9D" />
+                  <Icon name={priority.icon} size={31} color={themeForeground("#813D9D")} />
                 </View>
               </HomeFloat>
               <View
@@ -871,15 +871,15 @@ export function HomeScreen() {
                   width: 43,
                   height: 43,
                   borderRadius: 22,
-                  backgroundColor: "#FCF4FF",
+                  backgroundColor: themeBackground("#FCF4FF"),
                   borderWidth: 1,
-                  borderColor: "#FFFFFF",
+                  borderColor: themeBorder("#FFFFFF"),
                   alignItems: "center",
                   justifyContent: "center",
                   marginLeft: 1,
                 }}
               >
-                <Icon name="arrow-forward" size={23} color="#632A85" />
+                <Icon name="arrow-forward" size={23} color={themeForeground("#632A85")} />
               </View>
             </View>
           </Pressable>
