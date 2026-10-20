@@ -27,7 +27,13 @@ export async function chatCurrentUser() { return checkedUser(); }
 export async function chatPeople(careRecipientId: string): Promise<ChatPerson[]> {
   const { data, error } = await supabase.rpc("chat_team_people", { p_recipient: careRecipientId });
   if (error) throw error;
-  return (data ?? []) as ChatPerson[];
+  return Promise.all(((data ?? []) as ChatPerson[]).map(async (person) => {
+    const raw = person.avatar_url;
+    if (!raw || /^https:\/\//i.test(raw)) return person;
+    // Storage SELECT is scoped to currently shared active care-team memberships.
+    const result = await supabase.storage.from("caregiver-avatars").createSignedUrl(raw, 3600);
+    return { ...person, avatar_url: result.error ? null : (result.data?.signedUrl ?? null) };
+  }));
 }
 
 export async function chatOpen(careRecipientId: string, peerId: string | null = null): Promise<string> {
