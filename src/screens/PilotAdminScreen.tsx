@@ -565,7 +565,7 @@ export function PilotAdminScreen() {
       <AdminGlassSection title="Pilot metrics & launch intelligence" />
       <AdminGlassCard style={{ backgroundColor: C.deep }}>
         <Icon name="analytics-outline" color={C.white} size={28} />
-        <Text style={[S.h2, { color: C.white }]}>Final pilot intelligence</Text>
+        <Text style={[S.h2, { color: themeForeground("#FFFFFF") }]}>Final pilot intelligence</Text>
         <Txt style={{ color: themeForeground("#E3D5E9") }}>
           Compare the live onboarding funnel, device and platform results,
           feedback trends, launch waves, outcomes and clinical-content readiness.
