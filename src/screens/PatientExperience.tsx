@@ -342,20 +342,30 @@ export function PatientAppointmentsScreen() {
     return () => { active = false; };
   }, [state.careRecipientId]));
   const sorted = [...items].sort((a, b) =>
-    String(a.appointment_date || a.starts_at || "").localeCompare(String(b.appointment_date || b.starts_at || "")));
+    String(a.appointment_date || a.starts_at || "9999").localeCompare(String(b.appointment_date || b.starts_at || "9999")));
+  const upcoming = sorted.filter(item => !item.appointment_date && !item.starts_at ||
+    String(item.appointment_date || item.starts_at).slice(0, 10) >= dayKey(new Date()));
+  const past = sorted.filter(item => item.appointment_date || item.starts_at)
+    .filter(item => String(item.appointment_date || item.starts_at).slice(0, 10) < dayKey(new Date()));
+  const appointmentCard = (item: PatientAppointment) => <PatientGlass key={item.id} tint="#E9F0FD">
+    <Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>{item.title}</Text>
+    <PatientText>{readableDate(item.appointment_date || item.starts_at)} · {timeLabel(item.appointment_time || (item.starts_at ? item.starts_at.slice(11, 16) : null))}</PatientText>
+    <PatientText muted>{item.location || "Location to be confirmed"}</PatientText>
+    {item.notes ? <PatientText muted size={13}>{item.notes}</PatientText> : null}
+  </PatientGlass>;
   return <Page>
     <PatientHeading eyebrow="MY APPOINTMENTS" title="Looking ahead"
       subtitle="Visit details and preparation notes recorded by your care team."/>
     {loading ? <ActivityIndicator color={C.purple}/> : error ?
       <PatientEmpty icon="cloud-offline-outline" title="Appointments are unavailable" detail={error}/> :
-      sorted.length ? sorted.map(item => <PatientGlass key={item.id} tint="#E9F0FD">
-        <Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>{item.title}</Text>
-        <PatientText>{readableDate(item.appointment_date || item.starts_at)} · {timeLabel(item.appointment_time || (item.starts_at ? item.starts_at.slice(11, 16) : null))}</PatientText>
-        <PatientText muted>{item.location || "Location to be confirmed"}</PatientText>
-        {item.notes ? <PatientText muted size={13}>{item.notes}</PatientText> : null}
-      </PatientGlass>) :
-      <PatientEmpty icon="calendar-outline" title="No visits recorded"
+      upcoming.length ? upcoming.map(appointmentCard) :
+      <PatientEmpty icon="calendar-outline" title="No upcoming visits"
         detail="Future appointments will appear when your care team adds them."/>}
+    {!loading && !error && past.length ? <>
+      <PatientHeading eyebrow="PREVIOUS VISITS" title="Earlier appointments"
+        subtitle="Past appointments recorded by your care team."/>
+      {past.slice(-10).reverse().map(appointmentCard)}
+    </> : null}
   </Page>;
 }
 function Trend({ values }: { values: number[] }) {
@@ -481,7 +491,7 @@ export function PatientHistoryScreen() {
 export function PatientProfileScreen() {
   const n = useNav();
   const { state } = useCare();
-  const { signOut } = useAuth();
+  const { signOut, session } = useAuth();
   const avatar = useProfileAvatar();
   const { dark, setMode, saveError } = useAppearance();
   return <Page>
@@ -493,6 +503,7 @@ export function PatientProfileScreen() {
         <Text style={{ fontFamily: "Lora_500Medium", fontSize: 23,
           color: themeForeground(INK) }}>{state.name || "Your account"}</Text>
         <PatientText muted size={13}>{state.careRecipientName || "Care Recipient"}</PatientText>
+        {session?.user.email ? <PatientText muted size={13}>{session.user.email}</PatientText> : null}
         <Pressable accessibilityRole="button" accessibilityLabel="Change profile picture"
           disabled={avatar.busy} onPress={() => void avatar.pickAndUpload()}
           style={{ minHeight: 48, paddingHorizontal: 19, borderRadius: 24,
