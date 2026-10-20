@@ -64,6 +64,7 @@ export type RootStack = {
   PilotFeedback: undefined;
   LaunchCenter: undefined;
   CareTeam: undefined;
+  CareTeamChat: { conversationId?: string; careRecipientId?: string } | undefined;
   CareTeamActivity: undefined;
   CareTeamAccessReport: undefined;
   CareTeamSecurityReview: undefined;
