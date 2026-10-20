@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  AccessibilityInfo, ActivityIndicator, Animated, Image, Pressable, Text, View,
+  AccessibilityInfo, ActivityIndicator, Animated, Image, Platform, Pressable, Text, View,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
@@ -116,8 +116,8 @@ function PatientReveal({ children }: { children: React.ReactNode }) {
       opacity.setValue(0);
       slide.setValue(11);
       animation = Animated.parallel([
-        Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-        Animated.timing(slide, { toValue: 0, duration: 350, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: Platform.OS !== "web" }),
+        Animated.timing(slide, { toValue: 0, duration: 350, useNativeDriver: Platform.OS !== "web" }),
       ]);
       animation.start();
     }).catch(() => {});
@@ -360,9 +360,10 @@ export function PatientAppointmentsScreen() {
 }
 function Trend({ values }: { values: number[] }) {
   if (values.length < 2) return <PatientText muted size={13}>A trend appears after at least two measurements.</PatientText>;
-  const min = Math.min(...values); const max = Math.max(...values);
+  const recent = values.slice(-12);
+  const min = Math.min(...recent); const max = Math.max(...recent);
   const span = Math.max(1, max - min);
-  const points = values.slice(-12).map((value, i, arr) => {
+  const points = recent.map((value, i, arr) => {
     const x = 16 + i * 272 / Math.max(1, arr.length - 1);
     const y = 99 - (value - min) / span * 74;
     return [x, y];
