@@ -3,18 +3,20 @@ import { createClient } from "@supabase/supabase-js";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import "react-native-url-polyfill/auto";
+import { secureStoreKey } from "./secureStoreKey";
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL ?? "";
 const publishableKey =
   process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
 
 const nativeStorage = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
+  getItem: (key: string) => SecureStore.getItemAsync(secureStoreKey(key)),
   setItem: (key: string, value: string) =>
-    SecureStore.setItemAsync(key, value, {
+    SecureStore.setItemAsync(secureStoreKey(key), value, {
       keychainAccessible: SecureStore.WHEN_UNLOCKED,
     }),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+  removeItem: (key: string) =>
+    SecureStore.deleteItemAsync(secureStoreKey(key)),
 };
 
 const webStorage = {
