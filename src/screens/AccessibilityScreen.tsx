@@ -79,12 +79,12 @@ export function AccessibilityScreen() {
 
 
       <Section title="Appearance" />
-      <Card style={{ padding: 16, gap: 14, backgroundColor: dark ? "#211B30" : "#FFFFFF" }}>
+      <Card style={{ padding: 16, gap: 14, backgroundColor: dark ? "#25212E" : "#FFFFFF" }}>
         <View style={{ flexDirection: "row", gap: 11, alignItems: "center" }}>
           <View style={{
             width: 44, height: 44, borderRadius: 16,
             alignItems: "center", justifyContent: "center",
-            backgroundColor: dark ? "#39294F" : "#F2E5FC",
+            backgroundColor: dark ? "#342B43" : "#F2E5FC",
           }}>
             <Icon name={dark ? "moon" : "sunny-outline"} color={C.purple} size={23} />
           </View>
@@ -154,7 +154,7 @@ export function AccessibilityScreen() {
                   />
                   <Text style={{
                     fontFamily: "DMSans_700Bold", fontSize: 13,
-                    color: isDarkPreview ? "#F7F2FF" : "#201537",
+                    color: isDarkPreview ? "#E0D9E8" : "#201537",
                   }}>
                     {isDarkPreview ? "Dark" : "Light"}
                   </Text>
