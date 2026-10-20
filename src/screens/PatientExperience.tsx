@@ -303,10 +303,10 @@ export function PatientAppointmentsScreen() {
   useFocusEffect(useCallback(() => {
     let active = true; setItems([]); setError(""); setLoading(true);
     if (!state.careRecipientId) { setLoading(false); return () => { active = false; }; }
-    supabase.from("appointments")
+    Promise.resolve(supabase.from("appointments")
       .select("id,title,starts_at,appointment_date,appointment_time,location,notes")
       .eq("care_recipient_id", state.careRecipientId)
-      .order("created_at", { ascending: false }).limit(50)
+      .order("created_at", { ascending: false }).limit(50))
       .then(({ data, error: problem }) => {
         if (!active) return;
         if (problem) setError(problem.message);
