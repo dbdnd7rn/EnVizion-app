@@ -2108,8 +2108,26 @@ export function TrackerScreen({
 
   if (kind === "Blood sugar") {
     const setBloodSugar = (key: string, value: string) => {
-      setValues((old) => ({ ...old, [key]: value }));
+      const next=key==="notes"?value.slice(0,300):value;
+      setValues(old=>({...old,[key]:next}));
+      if(key==="glucose"){
+        const v=Number(next);
+        glucoseCanonical.current=/^\d+(?:\.\d+)?$/.test(next)&&v>0?glucoseToMgDl(v,glucoseUnit):null;
+      }
       setSuccess(false);
+    };
+    const switchGlucoseUnit=(next:GlucoseUnit)=>{
+      if(next===glucoseUnit)return;
+      if(values.glucose?.trim()&&glucoseCanonical.current!==null)
+        setValues(old=>({...old,glucose:glucoseDisplay(glucoseCanonical.current!,next)}));
+      setGlucoseUnit(next);
+    };
+    const visibleGlucoseHistory=glucoseHistoryEntries(history,glucoseHistoryExpanded?glucosePeriod:null)
+      .slice(0,glucoseHistoryExpanded?undefined:3);
+    const openGlucoseHistory=()=>{
+      if(glucoseHistoryExpanded){setGlucoseHistoryExpanded(false);return;}
+      setGlucoseHistoryExpanded(true);setGlucoseHistoryLoading(true);
+      void refresh().catch(e=>setGlucoseHistoryError(String(e))).finally(()=>setGlucoseHistoryLoading(false));
     };
 
     const todayLabel = new Date().toLocaleDateString(undefined, {
@@ -2328,38 +2346,34 @@ export function TrackerScreen({
             </View>
           </View>
 
+          <View style={{gap:8}}>
+            <Text style={[S.small,{fontFamily:"DMSans_600SemiBold"}]}>Glucose unit</Text>
+            <View style={{flexDirection:"row",gap:8}}>
+              {(["mg/dL","mmol/L"] as GlucoseUnit[]).map(unit=><Pressable key={unit}
+                accessibilityRole="button" accessibilityLabel={`Use ${unit}`}
+                accessibilityState={{selected:unit===glucoseUnit,disabled:saving}}
+                disabled={saving} onPress={()=>switchGlucoseUnit(unit)}
+                style={{borderRadius:20,paddingHorizontal:17,minHeight:38,
+                  backgroundColor:themeBackground(unit===glucoseUnit?"#E7D4F7":"#F6F0FC"),
+                  justifyContent:"center"}}>
+                <Text style={{color:themeForeground("#72349D"),fontFamily:"DMSans_600SemiBold"}}>{unit}</Text>
+              </Pressable>)}
+            </View>
+          </View>
           <BloodSugarField
-            label="Blood glucose (mg/dL) *"
+            label={`Blood glucose (${glucoseUnit}) *`}
             value={values.glucose || ""}
             onChange={(value) => setBloodSugar("glucose", value)}
             icon="water-outline"
             placeholder="Enter reading"
             numeric
-            unit="mg/dL"
+            unit={glucoseUnit}
             editable={!readOnly && !saving}
           />
 
-          <BloodSugarField
-            label="Timing, such as before breakfast *"
-            value={values.timing || ""}
-            onChange={(value) => setBloodSugar("timing", value)}
-            icon="alarm-outline"
-            placeholder="Select timing"
-            editable={!readOnly && !saving}
-            trailing={
-              <View
-                pointerEvents="none"
-                style={{
-                  width: 48,
-                  height: 58,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="chevron-down-outline" size={19} color={themeForeground("#2D2852")} />
-              </View>
-            }
-          />
+          <BloodSugarTimingPicker value={values.timing || ""}
+            onChange={value=>setBloodSugar("timing",value)}
+            editable={!readOnly && !saving} />
 
           <BloodSugarField
             label="Additional notes (optional)"
@@ -2475,7 +2489,7 @@ export function TrackerScreen({
               color: themeForeground("#77758B"),
             }}
           >
-            * Required. Readings are stored with your account and are not interpreted as a diagnosis.
+            * Required. Readings are linked to the selected care profile and the person who recorded them. They are not a diagnosis.
           </Text>
         </Card>
 
@@ -2494,7 +2508,7 @@ export function TrackerScreen({
 
           <Pressable
             accessibilityRole="button"
-            onPress={() => n.navigate("Insights")}
+            onPress={openGlucoseHistory}
             style={({ pressed }) => ({
               minHeight: 42,
               paddingHorizontal: 5,
@@ -2511,12 +2525,35 @@ export function TrackerScreen({
                 color: themeForeground("#7D36B5"),
               }}
             >
-              View all
+              {glucoseHistoryExpanded ? "Show recent" : "View all"}
             </Text>
             <Icon name="arrow-forward-outline" size={17} color={themeForeground("#7D36B5")} />
           </Pressable>
         </View>
 
+        {glucoseHistoryExpanded&&<View style={{gap:12}}>
+          <Text style={[S.h3,{fontSize:15}]}>Filter history</Text>
+          <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
+            {([{label:"7 days",days:7},{label:"30 days",days:30},{label:"90 days",days:90},{label:"All",days:null}] as Array<{label:string;days:GlucosePeriod}>).map(opt=><Pressable
+              key={opt.label} accessibilityRole="button" accessibilityState={{selected:glucosePeriod===opt.days}}
+              onPress={()=>setGlucosePeriod(opt.days)}
+              style={{minHeight:38,borderRadius:20,paddingHorizontal:14,justifyContent:"center",
+                backgroundColor:themeBackground(glucosePeriod===opt.days?"#EAD9F7":"#F6F0FC")}}>
+              <Text style={[S.small,{color:C.ink}]}>{opt.label}</Text>
+            </Pressable>)}
+          </View>
+          <Pressable accessibilityRole="button" onPress={()=>{
+            setGlucoseHistoryLoading(true);setGlucoseHistoryError("");
+            void refresh().catch(e=>setGlucoseHistoryError(String(e))).finally(()=>setGlucoseHistoryLoading(false));
+          }}>
+            <Text style={{color:themeForeground("#7D36B5"),fontFamily:"DMSans_600SemiBold"}}>
+              {glucoseHistoryLoading?"Refreshing…":"Refresh saved readings"}
+            </Text>
+          </Pressable>
+          {Boolean(glucoseHistoryError)&&<Text accessibilityRole="alert" style={{color:C.rose}}>{glucoseHistoryError}</Text>}
+          {visibleGlucoseHistory.length>0&&<BloodSugarHistoryChart entries={visibleGlucoseHistory} unit={glucoseUnit}/>}
+          {!visibleGlucoseHistory.length&&Boolean(history.length)&&<Txt>No readings in this period. Choose All to see older records.</Txt>}
+        </View>}
         {!history.length ? (
           <View
             style={{
@@ -2559,7 +2596,7 @@ export function TrackerScreen({
             </View>
           </View>
         ) : (
-          history.map((entry) => (
+          visibleGlucoseHistory.map((entry) => (
             <Card key={entry.id} style={{ borderRadius: 22, gap: 11 }}>
               <Text style={S.eyebrow}>
                 {new Date(entry.recordedAt).toLocaleString()}
@@ -2576,7 +2613,9 @@ export function TrackerScreen({
                     }}
                   >
                     <Text style={S.small}>{field.label}</Text>
-                    <Text style={[S.h3, { marginTop: 3 }]}>{entry.values[field.key]}</Text>
+                    <Text style={[S.h3,{marginTop:3}]}>{field.key==="glucose"&&storedGlucoseMgDl(entry.values)!==null ?
+                      `${glucoseDisplay(storedGlucoseMgDl(entry.values)!,glucoseUnit)} ${glucoseUnit}` :
+                      entry.values[field.key]}</Text>
                   </View>
                 ))}
               {Boolean(entry.values.notes) && <Txt>{entry.values.notes}</Txt>}
