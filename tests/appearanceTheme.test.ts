@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  activeAppearance, darkPalette, setActiveAppearance,
+  activeAppearance, appearanceColor, darkPalette, setActiveAppearance,
   themeAction, themeBackground, themeForeground, themedStyles,
 } from "../src/themeColors.ts";
 
@@ -24,14 +24,17 @@ test("light mode leaves the original care colors untouched", () => {
   assert.equal(themeAction("#74328F"), "#74328F");
 });
 
-test("dark mode has readable primary copy, muted copy and white action labels", () => {
+test("dark mode has readable low-glare copy and soft ivory action labels", () => {
   try {
     setActiveAppearance("dark");
     assert.ok(contrast(darkPalette.ink, darkPalette.paper) >= 7);
     assert.ok(contrast(darkPalette.muted, darkPalette.paper) >= 4.5);
-    assert.ok(contrast("#FFFFFF", themeAction("#74328F")) >= 4.5);
+    assert.ok(contrast(themeForeground("#FFFFFF"), themeAction("#74328F")) >= 4.5);
     assert.notEqual(themeBackground("#FFFFFF"), "#FFFFFF");
-    assert.equal(themeForeground("#FFFFFF"), "#FFFFFF");
+    assert.notEqual(themeForeground("#FFFFFF"), "#FFFFFF");
+    assert.ok(contrast(themeForeground("#FFFFFF"), themeBackground("#FFFFFF")) >= 7);
+    assert.equal(appearanceColor("rgba(255, 255, 255, 0.85)", "background"), "rgba(37, 33, 46, 0.85)");
+    assert.equal(appearanceColor("rgba(0, 0, 0, 0.45)", "background"), "rgba(0, 0, 0, 0.45)");
   } finally {
     setActiveAppearance("light");
   }
