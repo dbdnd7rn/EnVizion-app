@@ -10,7 +10,7 @@ export const darkPalette: Record<string, string> = {
   ink: "#E0D9E8", muted: "#ACA3BB", purple: "#CBA6E7",
   deep: "#C5A4DF", lavender: "#30293C", paper: "#191720",
   line: "#403749", rose: "#F0A5B7", redBg: "#35242E",
-  green: "#86D6B4", white: "#FFFFFF",
+  green: "#86D6B4", white: "#EFE9F4",
 };
 
 function parseHex(source: string) {
