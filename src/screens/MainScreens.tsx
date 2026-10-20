@@ -839,7 +839,7 @@ export function HomeScreen() {
                     fontSize: windowWidth < 365 ? 23 : 27,
                     lineHeight: windowWidth < 365 ? 29 : 33,
                     letterSpacing: -0.7,
-                    color: "#FFFFFF",
+                    color: themeForeground("#FFFFFF"),
                     maxWidth: 250,
                   }}
                 >
@@ -2812,7 +2812,7 @@ export function LibraryScreen() {
                   style={{
                     fontFamily: "DMSans_600SemiBold",
                     fontSize: 13,
-                    color: C.white,
+                    color: themeForeground("#FFFFFF"),
                   }}
                 >
                   Explore guides
