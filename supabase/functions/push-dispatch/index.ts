@@ -105,6 +105,7 @@ function screenFor(notification: NotificationRow) {
     notification.entity_type === "care_shift" ||
     notification.entity_type === "care_shift_swap"
   ) return "CareSchedule";
+  if (notification.entity_type === "care_chat") return "CareTeamChat";
   if (notification.entity_type === "support_request") return "TeamConversation";
   if (notification.entity_type === "coaching_request") return "Coaching";
   if (notification.entity_type === "care_recipient") return "CareTeam";

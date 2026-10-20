@@ -1868,6 +1868,13 @@ export function ToolkitScreen() {
           onPress: () => n.navigate("CareTeam"),
         },
         {
+          title: "Care Team Chat",
+          subtitle: "Private group and one-to-one conversations with authorized caregivers",
+          icon: "chatbubbles-outline",
+          keywords: "chat message caregiver family group private conversation",
+          onPress: () => n.navigate("CareTeamChat"),
+        },
+        {
           title: "Today & caregiver shift board",
           subtitle: "Coverage, due work, reassignment, and shift handoffs",
           icon: "people-outline",

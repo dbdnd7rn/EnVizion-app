@@ -16,6 +16,7 @@ export type NotificationDestination = {
     | "Coaching"
     | "AdvocateHandover"
     | "CareTeam"
+    | "CareTeamChat"
     | "CareCalendar"
     | "CareTasks"
     | "CareShiftBoard"
@@ -26,7 +27,7 @@ export type NotificationDestination = {
     | "CareCoordinationInbox"
     | "FamilyCommunication"
     | "CareDocuments";
-  params?: { requestId: string };
+  params?: { requestId: string } | { conversationId: string };
   activateCareRecipientId?: string;
 };
 
@@ -51,6 +52,7 @@ export function notificationDestination(
     return { route: "StaffWorkspace" };
   }
 
+  if (item.entityType === "care_chat" && item.entityId) return { route: "CareTeamChat", params: { conversationId: item.entityId } };
   if (item.entityType === "support_request") return { route: "TeamConversation" };
   if (item.entityType === "coaching_request") return { route: "Coaching" };
 
