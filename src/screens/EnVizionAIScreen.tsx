@@ -1,7 +1,7 @@
 import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView,
+  ActivityIndicator, Dimensions, Keyboard, Platform, Pressable, ScrollView,
   Switch, Text, TextInput, View,
 } from "react-native";
 import { useCare } from "../store";
@@ -86,6 +86,7 @@ export function EnVizionAIScreen() {
   const reducedMotion = useAIMotionPreference();
   const { state, dispatch } = useCare();
   const scroll = useRef<ScrollView>(null);
+  const [keyboardInset, setKeyboardInset] = useState(0);
   const [draftText, setDraftText] = useState("");
   const [careDataAllowed, setCareDataAllowed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -98,6 +99,29 @@ export function EnVizionAIScreen() {
   const canEdit = (state.accessRole === "owner" || state.accessRole === "caregiver") &&
     Boolean(state.careRecipientId);
   const messages = state.conversation.messages;
+
+  // Native iOS screens sometimes do not resize when the system keyboard opens,
+  // leaving a fixed chat composer underneath it. Move the entire flex layout
+  // above the actual keyboard frame instead of depending on KeyboardAvoidingView
+  // (and disable overlapping automatic ScrollView keyboard insets).
+  useEffect(() => {
+    if (Platform.OS !== "ios") return;
+    const updateFrame = (event: { endCoordinates: { height: number; screenY: number } }) => {
+      const { height, screenY } = event.endCoordinates;
+      const overlap = Dimensions.get("screen").height - screenY;
+      setKeyboardInset(Math.max(0, Math.min(height, overlap)));
+      requestAnimationFrame(() => scroll.current?.scrollToEnd({ animated: true }));
+    };
+    const frame = Keyboard.addListener("keyboardWillChangeFrame", updateFrame);
+    const show = Keyboard.addListener("keyboardWillShow", updateFrame);
+    const didShow = Keyboard.addListener("keyboardDidShow", updateFrame);
+    const hide = Keyboard.addListener("keyboardWillHide", () => setKeyboardInset(0));
+    const didHide = Keyboard.addListener("keyboardDidHide", () => setKeyboardInset(0));
+    return () => {
+      frame.remove(); show.remove(); didShow.remove();
+      hide.remove(); didHide.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (previousProfile.current === state.careRecipientId) return;
@@ -191,8 +215,11 @@ export function EnVizionAIScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: themeBackground("#FFFCFB") }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <View style={{
+      flex: 1,
+      backgroundColor: themeBackground("#FFFCFB"),
+      paddingBottom: Platform.OS === "ios" ? keyboardInset : 0,
+    }}>
       <AIAtmosphere/>
       <View style={{ padding: 16, flexDirection: "row", alignItems: "center", gap: 10,
         borderBottomWidth: 1, borderBottomColor: themeBorder("#ECE2F1") }}>
@@ -221,7 +248,7 @@ export function EnVizionAIScreen() {
         </Pressable>
       </View>
 
-      <ScrollView ref={scroll} style={{ flex: 1 }} automaticallyAdjustKeyboardInsets
+      <ScrollView ref={scroll} style={{ flex: 1 }} automaticallyAdjustKeyboardInsets={Platform.OS !== "ios"}
         keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive"
         onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
         contentContainerStyle={{ paddingHorizontal: 17, paddingVertical: 16, gap: 13 }}>
@@ -435,6 +462,7 @@ export function EnVizionAIScreen() {
         gap: 7, backgroundColor: themeBackground("#FFFCFB") }}>
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 9 }}>
           <TextInput value={draftText} onChangeText={setDraftText} multiline
+            onFocus={() => requestAnimationFrame(() => scroll.current?.scrollToEnd({ animated: true }))}
             accessibilityLabel="Message EnVizion AI"
             placeholder="Ask about your toolkit, or set a reminder…"
             placeholderTextColor={themeForeground("#958DA4")} maxLength={1800}
@@ -457,11 +485,11 @@ export function EnVizionAIScreen() {
             <Icon name="send-outline" color="#FFFFFF" size={23}/>
           </Pressable>
         </View>
-        <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), textAlign: "center",
+        {keyboardInset === 0 && <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), textAlign: "center",
           fontSize: 10.3, lineHeight: 15 }}>
           Toolkit guidance only. Not for emergencies, prescriptions or clinical decisions.
-        </Text>
+        </Text>}
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
