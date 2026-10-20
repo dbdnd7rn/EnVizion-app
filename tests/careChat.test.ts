@@ -41,8 +41,8 @@ test("Support conversations are not overwritten by Care Team Chat", () => {
 
 test("A refreshed or searched conversation rechecks membership before exposing cached messages", () => {
   const source=readFileSync(new URL("../src/careChat.ts", import.meta.url),"utf8");
-  assert.match(source,/async function requireChatAccess[\\s\\S]*?from\\("chat_conversations"\\)[\\s\\S]*?maybeSingle\\(\\)/);
-  assert.match(source,/if \\(!data\\) throw new Error\\("This conversation is no longer available/);
-  assert.match(source,/export async function chatPage[\\s\\S]*?await requireChatAccess\\(conversationId\\)/);
-  assert.match(source,/export async function chatSearch[\\s\\S]*?await requireChatAccess\\(conversationId\\)/);
+  assert.match(source,/async function requireChatAccess[\s\S]*?from\("chat_conversations"\)[\s\S]*?maybeSingle\(\)/);
+  assert.match(source,/if \(!data\) throw new Error\("This conversation is no longer available/);
+  assert.match(source,/export async function chatPage[\s\S]*?await requireChatAccess\(conversationId\)/);
+  assert.match(source,/export async function chatSearch[\s\S]*?await requireChatAccess\(conversationId\)/);
 });
