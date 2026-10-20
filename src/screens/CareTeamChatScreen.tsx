@@ -128,6 +128,17 @@ export function CareTeamChatScreen() {
     if (recipientId && userId) void loadRooms(recipientId);
   }, [recipientId,userId,loadRooms]);
 
+  // Keep list badges current across devices even when no conversation is open.
+  const listedRoomsKey = conversations.map(c=>c.id).join(",");
+  useEffect(() => {
+    if (selected || !recipientId || !listedRoomsKey) return;
+    const rooms = listedRoomsKey.split(",");
+    const unsubscribers = rooms.map(id => chatSubscribe(id,
+      () => { void loadRooms(recipientId); },
+      () => { void loadRooms(recipientId); }));
+    return () => { unsubscribers.forEach(unsubscribe=>unsubscribe()); };
+  }, [selected?.id, listedRoomsKey, recipientId, loadRooms]);
+
   const updateStatus = useCallback(async (id: string) => {
     try {
       const [nextReads,nextTyping] = await Promise.all([chatReadStates(id),chatTypingStates(id)]);
@@ -167,10 +178,13 @@ export function CareTeamChatScreen() {
     const unsubscribe = chatSubscribe(activeId,
       () => { if (alive) void refreshMessages(activeId,true); },
       () => { if (alive) void updateStatus(activeId); });
+    const heartbeat = setInterval(() => {
+      if (alive && AppState.currentState==="active") void refreshMessages(activeId,false);
+    }, 30000);
     const foreground = AppState.addEventListener("change", status => {
       if (alive && status==="active") void refreshMessages(activeId,true);
     });
-    return () => { alive=false; unsubscribe(); foreground.remove(); };
+    return () => { alive=false; unsubscribe(); foreground.remove(); clearInterval(heartbeat); };
   }, [activeId,refreshMessages,updateStatus]);
 
   useEffect(() => {
