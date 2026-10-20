@@ -72,10 +72,10 @@ export function CareTeamChatScreen() {
   const nonceRef = useRef<string | null>(null);
   const lastTyping = useRef(0);
   const scrollRef = useRef<ScrollView>(null);
+  const lastVisibleMessageId = useRef<string | null>(null);
   const activeId = selected?.id ?? null;
 
   const personName = useCallback((id: string) => people.find(p=>p.user_id===id)?.full_name?.trim() || (id===userId ? "You" : "Care teammate"), [people,userId]);
-  const myPerson = people.find(p => p.user_id === userId);
   const recipientName = spaces.find(p=>p.careRecipientId===recipientId)?.careRecipientName || state.careRecipientName || "Care profile";
 
   useEffect(() => {
@@ -180,6 +180,7 @@ export function CareTeamChatScreen() {
   }, [activeId]);
 
   const openRoom = (room: ChatConversation) => {
+    lastVisibleMessageId.current = null;
     setError(""); setSelected(room); setDraft(""); setReplyTo(null); setEditing(null);
     setSearch(""); nonceRef.current=null;
     setUnread(prev=>({ ...prev,[room.id]:0 }));
@@ -197,6 +198,15 @@ export function CareTeamChatScreen() {
     } catch { setError("That caregiver may no longer be authorized to chat."); }
     finally { setBusy(false); }
   };
+
+  useEffect(() => {
+    if (!selected || searchResults) return;
+    const newest = messages[messages.length-1]?.id;
+    if (!newest || newest === lastVisibleMessageId.current) return;
+    lastVisibleMessageId.current = newest;
+    const timer = setTimeout(() => scrollRef.current?.scrollToEnd({animated: true}), 60);
+    return () => clearTimeout(timer);
+  }, [messages,selected?.id,searchResults]);
 
   const send = async () => {
     if (!selected || !draft.trim() || busy) return;
@@ -329,7 +339,7 @@ export function CareTeamChatScreen() {
           {loadingMessages && <ActivityIndicator color={palette.mine}/>}
           <ScrollView ref={scrollRef} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets={Platform.OS==="ios"} style={{flex:1}}
             contentContainerStyle={{paddingHorizontal:16,paddingVertical:15,flexGrow:1,justifyContent:"flex-end",gap:11}}
-            onContentSizeChange={()=>{if(!searchResults && !hasEarlier) scrollRef.current?.scrollToEnd({animated:false});}}>
+            onContentSizeChange={()=>{if(!searchResults && messages.length && !lastVisibleMessageId.current) scrollRef.current?.scrollToEnd({animated:false});}}>
             {hasEarlier && !searchResults && <Pressable onPress={()=>void loadEarlier()} disabled={busy} style={{alignSelf:"center",padding:12}}>
               <Text style={{color:palette.mine,fontWeight:"600"}}>Load earlier messages</Text>
             </Pressable>}
