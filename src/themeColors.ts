@@ -7,10 +7,10 @@ export function setActiveAppearance(mode: AppearanceMode) { activeMode = mode; }
 export function activeAppearance() { return activeMode; }
 
 export const darkPalette: Record<string, string> = {
-  ink: "#F6F0FF", muted: "#BFB5D0", purple: "#CFA6F8",
-  deep: "#C2A0EB", lavender: "#30273F", paper: "#14121F",
-  line: "#44384F", rose: "#FFA4B9", redBg: "#39232F",
-  green: "#74DDB2", white: "#FFFFFF",
+  ink: "#E0D9E8", muted: "#ACA3BB", purple: "#CBA6E7",
+  deep: "#C5A4DF", lavender: "#30293C", paper: "#191720",
+  line: "#403749", rose: "#F0A5B7", redBg: "#35242E",
+  green: "#86D6B4", white: "#FFFFFF",
 };
 
 function parseHex(source: string) {
@@ -32,35 +32,49 @@ function isPurple(r: number, g: number, b: number) { return b > g * 1.09 && r > 
 /** Semantic mapping for existing legacy inline colors. No colors change in light mode. */
 export function appearanceColor(source: string, role: ColorRole = "foreground") {
   if (activeMode !== "dark") return source;
+  // Legacy translucent white glass surfaces used rgba() rather than hex.
+  // Recolor the bright ones as well; keep dark overlays and shadow rgba intact.
+  const rgba = source.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(0(?:\.\d+)?|1(?:\.0+)?|\.\d+))?\s*\)$/i);
+  if (rgba) {
+    const channels = rgba.slice(1, 4).map(Number);
+    if (channels.some((c) => c > 255)) return source;
+    const brightness = (channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722) / 255;
+    if (brightness < 0.7 || role === "shadow") return source;
+    const hex = "#" + channels.map((c) => c.toString(16).padStart(2, "0")).join("");
+    const mapped = appearanceColor(hex, role);
+    const changed = parseHex(mapped);
+    if (!changed) return source;
+    return `rgba(${changed.r}, ${changed.g}, ${changed.b}, ${rgba[4] ?? "1"})`;
+  }
   const p = parseHex(source);
   if (!p) return source;
   const { r, g, b, alpha, brightness: v } = p;
   const result = (() => {
     if (role === "shadow") return "#000000";
     if (role === "border") {
-      if (isRose(r, g, b) && v < 0.8) return "#815067";
-      return v > 0.70 ? "#463A55" : "#66517C";
+      if (isRose(r, g, b) && v < 0.8) return "#704457";
+      return v > 0.70 ? "#44394D" : "#584769";
     }
     if (role === "foreground") {
-      // Keep original white labels on filled actions white, not charcoal.
-      if (v > 0.86) return "#FFFFFF";
-      if (isRose(r, g, b) && v < 0.70) return "#FF9DB8";
-      if (isGreen(r, g, b) && v < 0.70) return "#79E0B6";
-      if (isPurple(r, g, b) && v < 0.73) return "#CDA5F6";
-      return v < 0.34 ? "#F5F0FF" : "#C4B9D2";
+      // Soft ivory on actions prevents pure-white glare but still meets AA.
+      if (v > 0.86) return "#EFE9F4";
+      if (isRose(r, g, b) && v < 0.70) return "#EFA6B8";
+      if (isGreen(r, g, b) && v < 0.70) return "#89D6B5";
+      if (isPurple(r, g, b) && v < 0.73) return "#CBA6E7";
+      return v < 0.34 ? "#E0D9E8" : v < 0.60 ? "#B9B1C6" : "#ACA4BB";
     }
-    if (role === "tint" && v > 0.90) return "#332943";
-    if (v > 0.96) return "#25202F";
+    if (role === "tint" && v > 0.90) return "#302839";
+    if (v > 0.96) return "#25212E";
     if (v > 0.84) {
-      if (isRose(r, g, b)) return "#402734";
-      if (isGreen(r, g, b)) return "#21382F";
-      return "#30273E";
+      if (isRose(r, g, b)) return "#35262F";
+      if (isGreen(r, g, b)) return "#25372F";
+      return "#2D2739";
     }
-    if (v > 0.65) return "#383047";
-    if (isRose(r, g, b)) return "#803F59";
-    if (isGreen(r, g, b)) return "#2D775D";
-    if (isPurple(r, g, b)) return "#6C4391";
-    return v < 0.27 ? "#302842" : "#493654";
+    if (v > 0.65) return "#332C40";
+    if (isRose(r, g, b)) return "#6C3D53";
+    if (isGreen(r, g, b)) return "#2C6F58";
+    if (isPurple(r, g, b)) return "#65418A";
+    return v < 0.27 ? "#292334" : "#3B3049";
   })();
   return withAlpha(result, alpha);
 }
