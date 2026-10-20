@@ -1012,7 +1012,7 @@ export function TrackerScreen({
                 style={{
                   fontFamily: "DMSans_700Bold",
                   fontSize: 22,
-                  color: C.white,
+                  color: themeForeground("#FFFFFF"),
                 }}
               >
                 !
@@ -1308,7 +1308,7 @@ export function TrackerScreen({
               style={{
                 fontFamily: "DMSans_600SemiBold",
                 fontSize: 15,
-                color: C.white,
+                color: themeForeground("#FFFFFF"),
               }}
             >
               {saving ? "Saving observation…" : "Save observation"}
@@ -1810,7 +1810,7 @@ export function TrackerScreen({
                 style={{
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 15.5,
-                  color: C.white,
+                  color: themeForeground("#FFFFFF"),
                 }}
               >
                 {saving ? "Saving observation…" : "Save observation"}
@@ -2350,7 +2350,7 @@ export function TrackerScreen({
               style={{
                 fontFamily: "DMSans_600SemiBold",
                 fontSize: 15,
-                color: C.white,
+                color: themeForeground("#FFFFFF"),
               }}
             >
               {saving ? "Saving observation…" : "Save observation"}
