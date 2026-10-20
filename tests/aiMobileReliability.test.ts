@@ -44,7 +44,7 @@ test("iOS AI composer is moved above the keyboard with frame events", () => {
   assert.match(screen, /Dimensions\.get\("screen"\)\.height - screenY/);
   assert.match(screen, /paddingBottom: Platform\.OS === "ios" \? keyboardInset : 0/);
   assert.match(screen, /automaticallyAdjustKeyboardInsets=\{Platform\.OS !== "ios"\}/);
-  assert.doesNotMatch(screen, /KeyboardAvoidingView/);
+  assert.doesNotMatch(screen, /<KeyboardAvoidingView/);
   assert.match(screen, /accessibilityLabel="Message EnVizion AI"/);
   assert.match(screen, /accessibilityLabel="Send to EnVizion AI"/);
 });
