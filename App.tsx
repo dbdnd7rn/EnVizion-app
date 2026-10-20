@@ -25,9 +25,14 @@ import {
 import { Lora_500Medium } from "@expo-google-fonts/lora";
 import { AuthProvider, AuthScreen, PasswordRecoveryScreen, useAuth } from "./src/auth";
 import { withStartupTimeout } from "./src/startupTimeout";
-import { CareProvider } from "./src/store";
+import { CareProvider, useCare } from "./src/store";
 import { ProfileAvatarProvider } from "./src/profileAvatar";
 import { ProfileDashboardScreen } from "./src/screens/ProfileDashboardScreen";
+import {
+  PatientHomeScreen, PatientCareHubScreen, PatientDayScreen, PatientMedicationsScreen,
+  PatientAppointmentsScreen, PatientHealthScreen, PatientTeamScreen,
+  PatientHistoryScreen, PatientProfileScreen,
+} from "./src/screens/PatientExperience";
 import { CarePresenceProvider } from "./src/CarePresenceProvider";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
@@ -116,8 +121,44 @@ const Stack = createNativeStackNavigator<RootStack>();
 const StaffStack = createNativeStackNavigator<RootStack>();
 const Tab = createBottomTabNavigator<Tabs>();
 
+function PatientTabs() {
+  const { dark } = useAppearance();
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarHideOnKeyboard: true,
+        tabBarActiveTintColor: C.purple,
+        tabBarInactiveTintColor: dark ? "#B7A9C0" : "#80768D",
+        tabBarStyle: {
+          backgroundColor: dark ? "#282230" : "#FFFCFF",
+          borderTopColor: dark ? "#45384F" : "#F0E7F3",
+          borderTopWidth: 1, height: 80, paddingTop: 8, paddingBottom: 12,
+        },
+        tabBarLabelStyle: { fontFamily: "DMSans_600SemiBold", fontSize: 10 },
+        tabBarIcon: ({ color, focused }) => <Icon
+          name={({
+            PatientHome: focused ? "home" : "home-outline",
+            PatientCare: focused ? "heart" : "heart-outline",
+            PatientTeam: focused ? "people" : "people-outline",
+            PatientAI: focused ? "sparkles" : "sparkles-outline",
+            PatientProfile: focused ? "person-circle" : "person-circle-outline",
+          } as Record<string, string>)[route.name] || "ellipse-outline"}
+          color={color} size={23}/>,
+      })}>
+      <Tab.Screen name="PatientHome" component={themedScreen(PatientHomeScreen)} options={{ tabBarLabel: "Home" }}/>
+      <Tab.Screen name="PatientCare" component={themedScreen(PatientCareHubScreen)} options={{ tabBarLabel: "My Care" }}/>
+      <Tab.Screen name="PatientTeam" component={themedScreen(PatientTeamScreen)} options={{ tabBarLabel: "Care Team" }}/>
+      <Tab.Screen name="PatientAI" component={themedScreen(EnVizionAIScreen)} options={{ tabBarLabel: "AI Companion" }}/>
+      <Tab.Screen name="PatientProfile" component={themedScreen(PatientProfileScreen)} options={{ tabBarLabel: "Profile" }}/>
+    </Tab.Navigator>
+  );
+}
+
 function MainTabs() {
   const { dark } = useAppearance();
+  const { state } = useCare();
+  if (state.accessRole === "patient") return <PatientTabs />;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -333,12 +374,22 @@ function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
-  const { dark } = useAppearance();
   return (
     <NotificationsProvider>
       <CareProvider>
         <CarePresenceProvider>
-        <NavigationContainer
+          <SignedInNavigation reducedMotion={reducedMotion} />
+        </CarePresenceProvider>
+      </CareProvider>
+    </NotificationsProvider>
+  );
+}
+
+function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
+  const { dark } = useAppearance();
+  const { state } = useCare();
+  return (
+    <NavigationContainer
         theme={{
           ...(dark ? DarkTheme : DefaultTheme),
           colors: {
@@ -376,6 +427,8 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             component={themedScreen(MainTabs)}
             options={{ headerShown: false }}
           />
+          {state.accessRole !== "patient" ? (
+            <>
           <Stack.Screen
             name="Tracker"
             component={themedScreen(TrackerScreen)}
@@ -637,11 +690,24 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             component={themedScreen(NotificationSettingsScreen)}
             options={{ title: "Notification preferences" }}
           />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="PatientDay" component={themedScreen(PatientDayScreen)} options={{ title: "My Day" }}/>
+              <Stack.Screen name="PatientMedications" component={themedScreen(PatientMedicationsScreen)} options={{ title: "My Medications" }}/>
+              <Stack.Screen name="PatientAppointments" component={themedScreen(PatientAppointmentsScreen)} options={{ title: "My Appointments" }}/>
+              <Stack.Screen name="PatientHealth" component={themedScreen(PatientHealthScreen)} options={{ title: "My Health" }}/>
+              <Stack.Screen name="PatientHistory" component={themedScreen(PatientHistoryScreen)} options={{ title: "My Care History" }}/>
+              <Stack.Screen name="CareTeamChat" component={themedScreen(CareTeamChatScreen)} options={{ headerShown: false }}/>
+              <Stack.Screen name="Assistant" component={themedScreen(EnVizionAIScreen)} options={{ title: "AI Care Companion" }}/>
+              <Stack.Screen name="PrivacyData" component={themedScreen(PrivacyDataScreen)} options={{ title: "Privacy & care sharing" }}/>
+              <Stack.Screen name="Accessibility" component={themedScreen(AccessibilityScreen)} options={{ title: "Accessibility & display" }}/>
+              <Stack.Screen name="Notifications" component={themedScreen(NotificationsScreen)} options={{ title: "Notifications", headerShown: false }}/>
+              <Stack.Screen name="NotificationSettings" component={themedScreen(NotificationSettingsScreen)} options={{ title: "Notification preferences" }}/>
+            </>
+          )}
         </Stack.Navigator>
       </NavigationContainer>
-        </CarePresenceProvider>
-      </CareProvider>
-    </NotificationsProvider>
   );
 }
 
