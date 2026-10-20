@@ -8,6 +8,7 @@ import { useCare } from "../store";
 import { useAuth } from "../auth";
 import { useAppearance } from "../appearance";
 import { loadCarePlan, type CarePlanItem, type CarePlanCompletion } from "../carePlan";
+import { loadMedicationManagement, type ManagedMedication, type ManagedMedicationRecord } from "../medicationManagement";
 import { loadCareTeam, type CareTeamMember } from "../careTeam";
 import { chatPeople, type ChatPerson } from "../careChat";
 import { supabase } from "../supabase";
@@ -271,24 +272,50 @@ export function PatientDayScreen() {
 }
 export function PatientMedicationsScreen() {
   const { state } = useCare();
+  const [medications, setMedications] = useState<ManagedMedication[]>([]);
+  const [records, setRecords] = useState<ManagedMedicationRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    setLoading(true); setError(""); setMedications([]); setRecords([]);
+    if (!state.careRecipientId) { setLoading(false); return () => { active = false; }; }
+    loadMedicationManagement(state.careRecipientId).then(data => {
+      if (active) {
+        setMedications(data.medications.filter(m => m.active));
+        setRecords(data.records);
+      }
+    }).catch(reason => {
+      if (active) setError(reason instanceof Error ? reason.message : "Medication list unavailable.");
+    }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [state.careRecipientId]));
   return <Page>
     <PatientHeading eyebrow="MY MEDICATIONS" title="A clearer medication list"
-      subtitle="Directions recorded by your care team. Check with your clinician before changing any medicine."/>
-    {state.medications.length ? state.medications.map(med => (
-      <PatientGlass key={med.id} tint="#F6E9F5">
-        <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
-          <Icon name="medical-outline" size={30} color={themeForeground(PURPLE)}/>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>{med.name}</Text>
-            <PatientText muted size={13}>{med.time || "No schedule recorded"}</PatientText>
+      subtitle="The schedules and directions your care team has recorded. Always consult a clinician before changing medication."/>
+    {loading ? <ActivityIndicator color={C.purple} accessibilityLabel="Loading medications"/> : error ?
+      <PatientEmpty icon="cloud-offline-outline" title="Medication list unavailable" detail={error}/> :
+      medications.length ? medications.map(med => {
+        const logged = records.filter(record => record.medicationId === med.id && !record.correctedAt);
+        return <PatientGlass key={med.id} tint="#F6E9F5">
+          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            <Icon name="medical-outline" size={30} color={themeForeground(PURPLE)}/>
+            <View style={{ flex: 1, gap: 3 }}>
+              <Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>{med.name}</Text>
+              <PatientText muted size={13}>{med.isPrn ? "As needed (PRN)" : med.time || "No schedule recorded"}</PatientText>
+            </View>
           </View>
-        </View>
-        <PatientText>{med.instructions || "No additional instructions recorded."}</PatientText>
-        <PatientText muted size={13}>Recorded doses: {state.medicationRecords.filter(r => r.medication.id === med.id && !r.correctedAt).length}</PatientText>
-      </PatientGlass>
-    )) : <PatientEmpty icon="medkit-outline" title="No medications listed"
-      detail="When your care team records a medication, its schedule and instructions will appear here."/>}
-    <PatientGlass><PatientText muted size={13}>This list is a shared caregiver record, not a prescription. Only your authorized care team can change medication instructions. Refill details appear when they are available in the shared record.</PatientText></PatientGlass>
+          {med.dose || med.route ? <PatientText>{[med.dose, med.route].filter(Boolean).join(" · ")}</PatientText> : null}
+          <PatientText>{med.instructions || "No additional instructions recorded."}</PatientText>
+          {med.purpose ? <PatientText muted size={13}>Purpose: {med.purpose}</PatientText> : null}
+          {med.prescriber ? <PatientText muted size={13}>Recorded prescriber: {med.prescriber}</PatientText> : null}
+          {med.pharmacy ? <PatientText muted size={13}>Pharmacy: {med.pharmacy}</PatientText> : null}
+          {med.refillDueOn ? <PatientText muted size={13}>Refill date on record: {readableDate(med.refillDueOn)}</PatientText> : null}
+          <PatientText muted size={13}>Medication activity: {logged.length} recorded event{logged.length === 1 ? "" : "s"}</PatientText>
+        </PatientGlass>;
+      }) : <PatientEmpty icon="medkit-outline" title="No medications listed"
+        detail="When your care team records a medication, its schedule and instructions will appear here."/>}
+    <PatientGlass><PatientText muted size={13}>This shared medication list is not a prescription or dosing recommendation. Patients cannot change clinician instructions or medication records from this page.</PatientText></PatientGlass>
   </Page>;
 }
 type PatientAppointment = {
