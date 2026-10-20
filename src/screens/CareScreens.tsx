@@ -891,7 +891,8 @@ export function TrackerScreen({
   const recentVitals = vitalsEntries(history).filter(entry => {
     if (recentFilter === "all") return true;
     const { start, end } = localDayBounds();
-    return entry.recordedAt >= start && entry.recordedAt < end;
+    const timestamp = new Date(entry.recordedAt).getTime();
+    return Number.isFinite(timestamp) && timestamp >= Date.parse(start) && timestamp < Date.parse(end);
   });
 
   useEffect(() => {
@@ -1433,8 +1434,7 @@ export function TrackerScreen({
                   color: C.muted,
                 }}
               >
-                Your saved observations will appear here. No readings have been
-                added yet.
+                No observations were recorded for this date range. Switch to All dates to review earlier measurements.
               </Text>
             </View>
           </Card>
