@@ -889,7 +889,7 @@ export function MedicationManagementScreen() {
             <Rect x="0" y="0" width="440" height="60" rx="30" fill="url(#addMedicationGradient)" />
           </Svg>
           <Icon name="add-outline" size={24} color={C.white} />
-          <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 16, color: C.white }}>
+          <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 16, color: themeForeground("#FFFFFF") }}>
             Add medication
           </Text>
         </Pressable>
@@ -1275,7 +1275,7 @@ export function MedicationManagementScreen() {
                 </Defs>
                 <Rect x="0" y="0" width="420" height="58" rx="29" fill="url(#reviewGradient)" />
               </Svg>
-              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 15.5, color: C.white }}>
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 15.5, color: themeForeground("#FFFFFF") }}>
                 {busyId === "reconcile" ? "Saving review…" : "Confirm list review"}
               </Text>
             </Pressable>
