@@ -21,7 +21,7 @@ const PAGE_SIZE = 40;
 function MeasureChart({
   entries, metric, temperatureUnit,
 }: { entries: Entry[]; metric: Metric; temperatureUnit: TemperatureUnit }) {
-  const selected = [...entries].reverse().flatMap((entry) => {
+  const selected: Array<{ entry: Entry; a: number; b: number | null }> = [...entries].reverse().flatMap((entry): Array<{ entry: Entry; a: number; b: number | null }> => {
     const value = (key: string) => {
       const raw = entry.values[key];
       return raw && /^\d+(?:\.\d+)?$/.test(raw) ? Number(raw) : null;
