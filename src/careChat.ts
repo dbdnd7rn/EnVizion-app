@@ -125,7 +125,7 @@ export async function chatTypingStates(conversationId: string): Promise<ChatTypi
 }
 export async function chatUnreadCount(conversationId: string, lastRead: string | null, userId: string): Promise<number> {
   let query = supabase.from("chat_messages")
-    .select("id", { head: true, count: "exact" }).eq("conversation_id", conversationId).neq("sender_id", userId);
+    .select("id", { head: true, count: "exact" }).eq("conversation_id", conversationId).neq("sender_id", userId).is("deleted_at", null);
   if (lastRead) query = query.gt("created_at", lastRead);
   const { count, error } = await query;
   if (error) throw error;
@@ -145,4 +145,4 @@ export function chatSubscribe(conversationId: string, onMessages: () => void, on
   return () => { void supabase.removeChannel(channel); };
 }
 
-export { mergeChatMessages } from "./careChatHelpers";\n
+export { mergeChatMessages } from "./careChatHelpers";
