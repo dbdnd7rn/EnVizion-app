@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-10-03",
+  "reviewedAt": "2026-10-20",
   "exceptions": [
     {
       "id": "GHSA-vfj7-8cjw-p6xm",
@@ -15,6 +15,13 @@
       "severity": "high",
       "expiresOn": "2026-10-31",
       "reason": "Upstream advisory currently has no known patched version. Exposure is through Expo code-signing tooling; keep monitoring and remove this exception immediately when upstream ships a compatible fix."
+    },
+    {
+      "id": "GHSA-hp3w-g68c-fv3c",
+      "package": "sprintf-js",
+      "severity": "moderate",
+      "expiresOn": "2026-10-31",
+      "reason": "No patched npm release as of 2026-10-20 (GHSA-hp3w-g68c-fv3c). Reached through Babel/Jest code-coverage instrumentation -> @istanbuljs/load-nyc-config -> js-yaml v3 -> argparse -> sprintf-js. The mobile/web app never passes attacker-supplied format strings to this dev-tool chain. This limited exception covers only this exact advisory; continue failing on all new findings, and remove it as soon as upstream publishes a compatible fix or the development dependency chain can be replaced."
     }
   ]
 }
