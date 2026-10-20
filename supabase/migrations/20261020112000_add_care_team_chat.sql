@@ -54,7 +54,7 @@ create index chat_typing_state_conversation on public.chat_typing_state(conversa
 
 create table private.chat_message_audit (
  id bigint generated always as identity primary key,
- message_id uuid not null,
+ message_id uuid not null references public.chat_messages(id) on delete cascade,
  actor_id uuid not null,
  event_type text not null check (event_type in ('edited','deleted')),
  occurred_at timestamptz not null default now()
