@@ -23,7 +23,7 @@ test("Search input limits length and strips wildcard operators", () => {
 });
 
 test("Migration denies anonymous access and enforces current participant membership", () => {
-  const sql=readFileSync(new URL("../supabase/migrations/20261020112000_add_care_team_chat.sql", import.meta.url),"utf8");
+  const sql=readFileSync(new URL("../supabase/migrations/20261020094740_add_care_team_chat.sql", import.meta.url),"utf8");
   assert.match(sql,/create policy chat_messages_read/i);
   assert.match(sql,/private\.chat_can_access\(conversation_id\)/);
   assert.match(sql,/private\.can_view_care_recipient\(c.care_recipient_id\)/);
