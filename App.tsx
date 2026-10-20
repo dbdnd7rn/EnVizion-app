@@ -66,6 +66,7 @@ import { NotificationsProvider } from "./src/notifications";
 import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsScreen";
 import { CareTeamScreen } from "./src/screens/CareTeamScreen";
+import { CareTeamChatScreen } from "./src/screens/CareTeamChatScreen";
 import { CareTeamActivityScreen } from "./src/screens/CareTeamActivityScreen";
 import { CareTeamAccessReportScreen } from "./src/screens/CareTeamAccessReportScreen";
 import { CareTeamSecurityReviewScreen } from "./src/screens/CareTeamSecurityReviewScreen";
@@ -589,6 +590,11 @@ function SignedInApp({ reducedMotion }: { reducedMotion: boolean }) {
             name="LaunchCenter"
             component={themedScreen(LaunchCenterScreen)}
             options={{ title: "Launch Center" }}
+          />
+          <Stack.Screen
+            name="CareTeamChat"
+            component={themedScreen(CareTeamChatScreen)}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="CareTeam"
