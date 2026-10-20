@@ -40,6 +40,7 @@ const glassShadow =
     : undefined;
 
 function iconFor(item: NotificationRecord) {
+  if (item.kind === "care_chat_message") return "chatbubbles-outline";
   if (item.kind.includes("reply")) return "chatbubble-ellipses-outline";
   if (item.kind.includes("coaching")) return "people-outline";
   if (item.kind.includes("support")) return "heart-outline";
