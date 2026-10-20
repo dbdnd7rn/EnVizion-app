@@ -566,6 +566,45 @@ export async function loadCareData(): Promise<CareSnapshot | null> {
   };
 }
 
+/** Load real observation history with pagination. RLS enforces recipient-level read access. */
+export async function loadVitalsHistory(input: {
+  careRecipientId: string;
+  start?: string;
+  end?: string;
+  offset?: number;
+  pageSize?: number;
+}): Promise<{ entries: Entry[]; hasMore: boolean }> {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error("Sign in to view vital observations.");
+  if (!input.careRecipientId) throw new Error("Select a care profile first.");
+  const pageSize = Math.max(1, Math.min(100, input.pageSize ?? 30));
+  const offset = Math.max(0, input.offset ?? 0);
+  let query = supabase.from("care_observations")
+    .select("id, kind, data, notes, observed_at")
+    .eq("care_recipient_id", input.careRecipientId)
+    .eq("kind", "Vitals");
+  if (input.start) query = query.gte("observed_at", input.start);
+  if (input.end) query = query.lt("observed_at", input.end);
+  const { data, error } = await query
+    .order("observed_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range(offset, offset + pageSize);
+  if (error) throw error;
+  const rows = data ?? [];
+  return {
+    entries: rows.slice(0, pageSize).map((row) => ({
+      id: row.id,
+      kind: "Vitals" as const,
+      recordedAt: row.observed_at,
+      values: {
+        ...((row.data ?? {}) as Record<string, string>),
+        ...(row.notes ? { notes: row.notes } : {}),
+      },
+    })),
+    hasMore: rows.length > pageSize,
+  };
+}
+
 export async function saveObservation(
   kind: TrackerKind,
   values: Record<string, string>,

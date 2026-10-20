@@ -3,6 +3,9 @@ import { themeBackground, themeForeground, themeShadow, themeAction } from "../t
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+import { type TemperatureUnit, toFahrenheit, displayedTemperature, canonicalVitals, validateVitals, temperatureForDisplay, loadTemperaturePreference, saveTemperaturePreference, vitalsEntries, localDayBounds } from "../vitals";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop, Text as SvgText } from "react-native-svg";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
@@ -871,28 +874,72 @@ export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
   const { kind } = route.params;
-  const { state, dispatch } = useCare();
+  const { state, dispatch, refresh } = useCare();
   const n = useNav();
   const [values, setValues] = useState<Record<string, string>>({});
+  const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>("F");
+  const temperatureF = useRef<number | null>(null);
+  const savingLock = useRef(false);
+  const [recentFilter, setRecentFilter] = useState<"today" | "all">("today");
+  const [recentLimit, setRecentLimit] = useState(6);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const readOnly =
     state.accessRole === "viewer" || state.accessRole === "patient";
   const history = state.entries.filter((e) => e.kind === kind);
+  const recentVitals = vitalsEntries(history).filter(entry => {
+    if (recentFilter === "all") return true;
+    const { start, end } = localDayBounds();
+    return entry.recordedAt >= start && entry.recordedAt < end;
+  });
+
+  useEffect(() => {
+    if (kind !== "Vitals") return;
+    let active = true;
+    void loadTemperaturePreference().then(unit => { if (active) setTemperatureUnit(unit); });
+    return () => { active = false; };
+  }, [kind]);
+  useFocusEffect(useCallback(() => {
+    if (kind === "Vitals") void refresh();
+  }, [kind, refresh, state.careRecipientId]));
+
+  function switchUnit(unit: TemperatureUnit) {
+    if (unit === temperatureUnit) return;
+    const raw = values.temperature?.trim();
+    let preciseF = temperatureF.current;
+    if (raw && preciseF === null && /^\d+(?:\.\d+)?$/.test(raw)) preciseF = toFahrenheit(Number(raw), temperatureUnit);
+    if (raw && preciseF !== null) {
+      setValues(old => ({ ...old, temperature: displayedTemperature(preciseF!, unit) }));
+      temperatureF.current = preciseF;
+    }
+    setTemperatureUnit(unit);
+    setSuccess(false);
+    void saveTemperaturePreference(unit).catch(() => {});
+  }
 
   async function save() {
-    const validationMessage = validateEntry(kind, values);
+    if (savingLock.current) return;
+    savingLock.current = true;
+    const validationMessage = kind === "Vitals"
+      ? validateVitals(values, temperatureUnit)
+      : validateEntry(kind, values);
     if (validationMessage) {
       setError(validationMessage);
+      savingLock.current = false;
       return;
     }
 
     setSaving(true);
     setError("");
     try {
-      const entry = await saveObservation(kind, values);
+      const submitted = kind === "Vitals" ? canonicalVitals(values, temperatureUnit) : values;
+      if (kind === "Vitals" && values.temperature?.trim() && temperatureF.current !== null) {
+        submitted.temperature = String(Number(temperatureF.current.toFixed(3)));
+      }
+      const entry = await saveObservation(kind, submitted);
       dispatch({ type: "entry", entry });
+      temperatureF.current = null;
       setValues({});
       setSuccess(true);
     } catch (saveError) {
@@ -903,13 +950,16 @@ export function TrackerScreen({
       );
     } finally {
       setSaving(false);
+      savingLock.current = false;
     }
   }
 
   if (kind === "Vitals") {
     const setVital = (key: string, value: string) => {
       setValues((old) => ({ ...old, [key]: value }));
+      if (key === "temperature") temperatureF.current = /^\d+(?:\.\d+)?$/.test(value.trim()) ? toFahrenheit(Number(value), temperatureUnit) : null;
       setSuccess(false);
+      if (error) setError("");
     };
 
     return (
@@ -1118,7 +1168,7 @@ export function TrackerScreen({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Track progress"
-              onPress={() => n.navigate("Insights")}
+              onPress={() => n.navigate("VitalsProgress")}
               style={({ pressed }) => ({
                 minHeight: 40,
                 borderRadius: 20,
@@ -1187,17 +1237,34 @@ export function TrackerScreen({
             />
             <VitalMetricField
               label="Temperature"
-              unit="°F"
+              unit={`°${temperatureUnit}`}
               icon="thermometer-outline"
               iconBackground="#EAF2FF"
               iconColor="#3578C7"
-              placeholder="e.g. 98.6"
+              placeholder={temperatureUnit === "F" ? "e.g. 98.6" : "e.g. 37.0"}
               value={values.temperature || ""}
               onChange={(value) => setVital("temperature", value)}
               editable={!readOnly && !saving}
             />
           </View>
-
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 9 }}>
+            <Text style={[S.small, { flex: 1, color: themeForeground("#82738F") }]}>Temperature unit</Text>
+            <View style={{ flexDirection: "row", backgroundColor: themeBackground("#F3ECFA"), borderRadius: 19, padding: 3, gap: 3 }}>
+              {(["C", "F"] as TemperatureUnit[]).map(unit => (
+                <Pressable key={unit} accessibilityRole="button"
+                  accessibilityLabel={unit === "C" ? "Celsius" : "Fahrenheit"}
+                  accessibilityState={{ selected: temperatureUnit === unit, disabled: saving || readOnly }}
+                  disabled={saving || readOnly} onPress={() => switchUnit(unit)}
+                  style={({ pressed }) => ({
+                    borderRadius: 16, paddingHorizontal: 19, paddingVertical: 10,
+                    backgroundColor: temperatureUnit === unit ? "#753895" : themeBackground("#F3ECFA"),
+                    opacity: pressed ? .75 : 1,
+                  })}>
+                  <Text style={{ fontFamily: "DMSans_700Bold", fontSize: 13, color: temperatureUnit === unit ? "#FFFFFF" : themeForeground("#723597") }}>°{unit}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
           <View style={{ height: 1, backgroundColor: themeBackground("#EEE8F0") }} />
 
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
@@ -1317,46 +1384,21 @@ export function TrackerScreen({
         </Card>
 
         <View style={S.between}>
-          <Text
+          <Text style={[S.h2, { fontSize: 23, color: C.ink }]}>Recent observations</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={recentFilter === "today" ? "Show all observations" : "Show today's observations"}
+            onPress={() => { setRecentFilter(old => old === "today" ? "all" : "today"); setRecentLimit(6); }}
             style={{
-              fontFamily: "DMSans_700Bold",
-              fontSize: 25,
-              lineHeight: 31,
-              letterSpacing: -0.45,
-              color: C.ink,
-            }}
-          >
-            Recent observations
-          </Text>
-
-          <View
-            style={{
-              minHeight: 44,
-              borderRadius: 22,
-              paddingHorizontal: 14,
-              backgroundColor: themeBackground("#F6F1F9"),
-              borderWidth: 1,
-              borderColor: themeBorder("#E8E0ED"),
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
+              borderRadius: 22, paddingHorizontal: 13, paddingVertical: 11,
+              backgroundColor: themeBackground("#F6F1F9"), borderWidth: 1,
+              borderColor: themeBorder("#E8E0ED"), flexDirection: "row", alignItems: "center", gap: 7,
+            }}>
             <Icon name="calendar-outline" size={18} color={themeForeground("#5C2E72")} />
-            <Text
-              style={{
-                fontFamily: "DMSans_600SemiBold",
-                fontSize: 12.5,
-                color: C.ink,
-              }}
-            >
-              Today
-            </Text>
+            <Text style={[S.small, { color: themeForeground("#5C2E72") }]}>{recentFilter === "today" ? "Today" : "All dates"}</Text>
             <Icon name="chevron-down" size={15} color={themeForeground("#5C2E72")} />
-          </View>
+          </Pressable>
         </View>
 
-        {!history.length ? (
+        {!recentVitals.length ? (
           <Card
             style={{
               minHeight: 154,
@@ -1397,7 +1439,7 @@ export function TrackerScreen({
             </View>
           </Card>
         ) : (
-          history.map((entry) => (
+          recentVitals.slice(0, recentLimit).map((entry) => (
             <Card key={entry.id} style={{ borderRadius: 22, gap: 11 }}>
               <Text style={S.eyebrow}>
                 {new Date(entry.recordedAt).toLocaleString()}
@@ -1424,7 +1466,7 @@ export function TrackerScreen({
                     >
                       <Text style={S.small}>{field.label}</Text>
                       <Text style={[S.h3, { marginTop: 3 }]}>
-                        {entry.values[field.key]}
+                        {field.key === "temperature" ? temperatureForDisplay(entry.values, temperatureUnit) : entry.values[field.key]}
                       </Text>
                     </View>
                   ))}
@@ -1432,6 +1474,9 @@ export function TrackerScreen({
               {Boolean(entry.values.notes) && <Txt>{entry.values.notes}</Txt>}
             </Card>
           ))
+        )}
+        {recentVitals.length > recentLimit && (
+          <Button title="Load more observations" secondary onPress={() => setRecentLimit(old => old + 6)} />
         )}
       </Page>
     );

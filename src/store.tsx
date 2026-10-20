@@ -162,7 +162,7 @@ function reducer(state: State, action: Action): State {
         careMode: action.careMode ?? state.careMode,
       };
     case "entry":
-      return { ...state, entries: [action.entry, ...state.entries] };
+      return { ...state, entries: [action.entry, ...state.entries.filter(item => item.id !== action.entry.id)] };
     case "record-med":
       return {
         ...state,

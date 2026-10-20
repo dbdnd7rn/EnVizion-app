@@ -36,6 +36,7 @@ import {
 import { CarePresenceProvider } from "./src/CarePresenceProvider";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
+import { VitalsProgressScreen } from "./src/screens/VitalsProgressScreen";
 import { CareCalendarScreen } from "./src/screens/CareCalendarScreen";
 import { CareDocumentsScreen } from "./src/screens/CareDocumentsScreen";
 import { CareContactsScreen } from "./src/screens/CareContactsScreen";
@@ -434,6 +435,7 @@ function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
             component={themedScreen(TrackerScreen)}
             options={{ headerShown: false }}
           />
+          <Stack.Screen name="VitalsProgress" component={themedScreen(VitalsProgressScreen)} options={{ headerShown: false }} />
           <Stack.Screen
             name="Insights"
             component={themedScreen(CareInsightsScreen)}

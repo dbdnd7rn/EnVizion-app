@@ -71,7 +71,7 @@ export const trackerFields: Record<TrackerKind, Field[]> = {
       required: true,
     },
     { key: "pulse", label: "Pulse (bpm)", numeric: true },
-    { key: "temperature", label: "Temperature (°F)", numeric: true },
+    { key: "temperature", label: "Temperature", numeric: true },
   ],
   "Blood sugar": [
     {
