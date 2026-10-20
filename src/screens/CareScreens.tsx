@@ -1,4 +1,5 @@
 import { themeBorder, themeTint } from "../themeColors";
+import { useAppearance } from "../appearance";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
@@ -766,6 +767,7 @@ function CHFObservationField({
   required?: boolean;
 }) {
   const focus = useRef(new Animated.Value(0)).current;
+  const { dark } = useAppearance();
 
   const setFocused = (focused: boolean) => {
     Animated.timing(focus, {
@@ -793,11 +795,11 @@ function CHFObservationField({
           }),
           borderColor: focus.interpolate({
             inputRange: [0, 1],
-            outputRange: ["#DDD3E6", "#9E58CF"],
+            outputRange: dark ? ["#584761", "#A77DC5"] : ["#DDD3E6", "#9E58CF"],
           }),
           backgroundColor: focus.interpolate({
             inputRange: [0, 1],
-            outputRange: ["#FFFFFFF2", "#FFFDFEFF"],
+            outputRange: dark ? ["#292331", "#342A41"] : ["#FFFFFFF2", "#FFFDFEFF"],
           }),
           flexDirection: "row",
           alignItems: multiline ? "flex-start" : "center",
@@ -814,7 +816,7 @@ function CHFObservationField({
             paddingTop: multiline ? 17 : 0,
             backgroundColor: focus.interpolate({
               inputRange: [0, 1],
-              outputRange: ["#F8F3FC", "#F0E4FB"],
+              outputRange: dark ? ["#352A42", "#453152"] : ["#F8F3FC", "#F0E4FB"],
             }),
           }}
         >
