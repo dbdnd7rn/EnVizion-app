@@ -304,7 +304,7 @@ export function NotificationSettingsScreen() {
       />
       <PreferenceSwitch
         title="Care-team updates"
-        body="Care invitations, access changes, and shared-care updates."
+        body="Care invitations, access changes, private chat message alerts, and shared-care updates."
         value={prefs.careTeamPush}
         disabled={busy}
         onChange={(value) =>
