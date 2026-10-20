@@ -282,12 +282,12 @@ export function Button({
         transform: [{ scale: pressed && !disabled ? 0.987 : 1 }],
       })}
     >
-      {icon && <Icon name={icon} color={secondary ? tone : "#FFFFFF"} size={19} />}
+      {icon && <Icon name={icon} color={secondary ? tone : themeForeground("#FFFFFF")} size={19} />}
       <Text style={{
         fontFamily: "DMSans_600SemiBold",
         fontSize: 14,
         textAlign: "center",
-        color: secondary ? tone : "#FFFFFF",
+        color: secondary ? tone : themeForeground("#FFFFFF"),
         flexShrink: 1,
       }}>{title}</Text>
     </Pressable>
