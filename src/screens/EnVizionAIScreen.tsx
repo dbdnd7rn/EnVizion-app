@@ -44,10 +44,10 @@ function ActionButton({ title, icon, onPress, disabled = false, secondary = fals
         borderWidth: secondary ? 1 : 0, borderColor: themeBorder("#E7D7EF"),
         opacity: disabled ? 0.45 : pressed ? 0.76 : 1,
       })}>
-      {icon && <Icon name={icon} color={secondary ? themeForeground(PURPLE) : "#FFFFFF"} size={18}/>}
+      {icon && <Icon name={icon} color={secondary ? themeForeground(PURPLE) : themeForeground("#FFFFFF")} size={18}/>}
       <Text style={{
         fontFamily: "DMSans_600SemiBold", fontSize: 13.5,
-        color: secondary ? themeForeground(PURPLE) : "#FFFFFF",
+        color: secondary ? themeForeground(PURPLE) : themeForeground("#FFFFFF"),
       }}>{title}</Text>
     </Pressable>
   );
