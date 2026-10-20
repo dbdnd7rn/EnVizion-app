@@ -5,9 +5,19 @@ export type Tabs = {
   Toolkit: undefined;
   Library: undefined;
   Support: undefined;
+  PatientHome: undefined;
+  PatientCare: undefined;
+  PatientTeam: undefined;
+  PatientAI: undefined;
+  PatientProfile: undefined;
 };
 export type RootStack = {
   Onboarding: undefined;
+  PatientDay: undefined;
+  PatientMedications: undefined;
+  PatientAppointments: undefined;
+  PatientHealth: undefined;
+  PatientHistory: undefined;
   Main: NavigatorScreenParams<Tabs> | undefined;
   Tracker: {
     kind: TrackerKind;
