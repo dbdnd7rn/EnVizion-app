@@ -177,12 +177,12 @@ export function Button({
       })}
     >
       {icon && (
-        <Icon name={icon} color={secondary ? C.deep : C.white} size={19} />
+        <Icon name={icon} color={secondary ? C.deep : themeForeground("#FFFFFF")} size={19} />
       )}
       <Text
         style={[
           S.h3,
-          { fontSize: 14, color: secondary ? C.purple : C.white },
+          { fontSize: 14, color: secondary ? C.purple : themeForeground("#FFFFFF") },
         ]}
       >
         {title}
