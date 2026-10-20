@@ -61,7 +61,17 @@ export async function chatConversationById(id: string): Promise<ChatConversation
   return data as ChatConversation | null;
 }
 
+/** Recheck live RLS permissions before refreshing cached history or search results.
+ * A revoked participant must not keep seeing a previous in-memory message list. */
+async function requireChatAccess(conversationId: string): Promise<void> {
+  const { data, error } = await supabase.from("chat_conversations")
+    .select("id").eq("id", conversationId).maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("This conversation is no longer available to your account.");
+}
+
 export async function chatPage(conversationId: string, before?: string): Promise<ChatMessage[]> {
+  await requireChatAccess(conversationId);
   let query = supabase.from("chat_messages")
     .select("id,conversation_id,sender_id,body,reply_to,client_nonce,created_at,edited_at,deleted_at")
     .eq("conversation_id", conversationId)
@@ -75,6 +85,7 @@ export async function chatPage(conversationId: string, before?: string): Promise
 export async function chatSearch(conversationId: string, query: string): Promise<ChatMessage[]> {
   const term = chatSearchTerm(query);
   if (!term) return [];
+  await requireChatAccess(conversationId);
   const { data, error } = await supabase.from("chat_messages")
     .select("id,conversation_id,sender_id,body,reply_to,client_nonce,created_at,edited_at,deleted_at")
     .eq("conversation_id", conversationId).is("deleted_at", null)
