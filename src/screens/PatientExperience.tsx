@@ -467,12 +467,29 @@ export function PatientTeamScreen() {
 export function PatientHistoryScreen() {
   const { state } = useCare();
   const { completions } = usePatientPlan(state.careRecipientId);
+  const [visits, setVisits] = useState<PatientAppointment[]>([]);
+  useFocusEffect(useCallback(() => {
+    let active = true; setVisits([]);
+    if (state.careRecipientId) {
+      Promise.resolve(supabase.from("appointments")
+        .select("id,title,starts_at,appointment_date,appointment_time,location,notes")
+        .eq("care_recipient_id", state.careRecipientId).limit(100))
+        .then(({ data }) => { if (active) setVisits((data ?? []) as PatientAppointment[]); })
+        .catch(() => { if (active) setVisits([]); });
+    }
+    return () => { active = false; };
+  }, [state.careRecipientId]));
   const events = useMemo(() => [
     ...state.entries.map(entry => ({ id: "v" + entry.id, date: entry.recordedAt, title: entry.kind + " recorded", info: "Health observation" })),
     ...state.medicationRecords.filter(item => !item.correctedAt).map(item =>
       ({ id: "m" + item.id, date: item.recordedAt, title: item.medication.name, info: "Medication recorded" })),
     ...completions.map(item => ({ id: "c" + item.id, date: item.completedAt, title: "Care activity completed", info: item.note || "Daily care plan" })),
-  ].sort((a, b) => b.date.localeCompare(a.date)), [state.entries, state.medicationRecords, completions]);
+    ...visits.filter(visit => visit.appointment_date || visit.starts_at)
+      .filter(visit => String(visit.appointment_date || visit.starts_at).slice(0, 10) < dayKey(new Date()))
+      .map(visit => ({ id: "a" + visit.id, date: visit.starts_at ||
+        String(visit.appointment_date) + "T" + (visit.appointment_time || "12:00:00"),
+        title: visit.title, info: "Appointment (scheduled, not attendance-confirmed)" })),
+  ].sort((a, b) => b.date.localeCompare(a.date)), [state.entries, state.medicationRecords, completions, visits]);
   return <Page>
     <PatientHeading eyebrow="MY CARE HISTORY" title="The story of your care"
       subtitle="A timeline of activities and observations already recorded."/>
