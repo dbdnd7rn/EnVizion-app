@@ -116,10 +116,11 @@ if (unapproved.length) {
   console.error("\nUnapproved npm audit vulnerabilities remain:");
   for (const name of unapproved) {
     const vulnerability = vulnerabilities[name];
+    const ids = [...collectAdvisoryIds(name)];
     console.error(
       `- ${name}: ${vulnerability.severity ?? "unknown"} · ${String(
         vulnerability.range ?? "",
-      )}`,
+      )} · advisory IDs: ${ids.join(", ") || "unidentified"}`,
     );
   }
   process.exit(1);
