@@ -176,9 +176,9 @@ function todayItems(items: CarePlanItem[]) {
   const weekday = today.getDay() || 7;
   return items.filter(item => item.daysOfWeek.includes(weekday));
 }
-function PatientPlanList({ limit }: { limit?: number }) {
-  const { state } = useCare();
-  const { items, completions, error, loading } = usePatientPlan(state.careRecipientId);
+type PatientPlanData = ReturnType<typeof usePatientPlan>;
+function PatientPlanContent({ plan, limit }: { plan: PatientPlanData; limit?: number }) {
+  const { items, completions, error, loading } = plan;
   const today = todayItems(items);
   const completeIds = new Set(completions.filter(c => c.completedOn === dayKey(new Date())).map(c => c.itemId));
   if (loading) return <ActivityIndicator accessibilityLabel="Loading today's care plan" color={C.purple}/>;
@@ -201,13 +201,19 @@ function PatientPlanList({ limit }: { limit?: number }) {
     </PatientGlass>
   ))}</View>;
 }
+function PatientPlanList({ limit }: { limit?: number }) {
+  const { state } = useCare();
+  const plan = usePatientPlan(state.careRecipientId);
+  return <PatientPlanContent plan={plan} limit={limit}/>;
+}
 export function PatientHomeScreen() {
   const n = useNav();
   const { state, refresh, syncError } = useCare();
   const first = state.name.trim().split(/\s+/)[0] || "there";
-  const { items, completions } = usePatientPlan(state.careRecipientId);
-  const today = todayItems(items);
-  const done = completions.filter(c => c.completedOn === dayKey(new Date()) && today.some(item => item.id === c.itemId)).length;
+  const plan = usePatientPlan(state.careRecipientId);
+  const today = todayItems(plan.items);
+  const done = plan.completions.filter(c => c.completedOn === dayKey(new Date()) &&
+    today.some(item => item.id === c.itemId)).length;
   return <Page>
     <PatientReveal>
       <View style={{ borderRadius: 32, overflow: "hidden", backgroundColor: themeBackground("#F1E3FA"),
@@ -221,13 +227,15 @@ export function PatientHomeScreen() {
       </View>
     </PatientReveal>
     <PatientHeading eyebrow="TODAY AT A GLANCE" title="My day" subtitle="The care plan shared with you."/>
-    <View style={{ flexDirection: "row", gap: 11 }}>
-      <View style={{ flex: 1 }}><PatientGlass><Text style={{ fontFamily: BOLD, fontSize: 28,
-        color: themeForeground(PURPLE) }}>{today.length}</Text><PatientText muted size={13}>Planned activities</PatientText></PatientGlass></View>
-      <View style={{ flex: 1 }}><PatientGlass><Text style={{ fontFamily: BOLD, fontSize: 28,
-        color: themeForeground("#248969") }}>{done}</Text><PatientText muted size={13}>Completed today</PatientText></PatientGlass></View>
-    </View>
-    <PatientPlanList limit={3}/>
+    {!plan.loading && !plan.error && state.careRecipientId ? (
+      <View style={{ flexDirection: "row", gap: 11 }}>
+        <View style={{ flex: 1 }}><PatientGlass><Text style={{ fontFamily: BOLD, fontSize: 28,
+          color: themeForeground(PURPLE) }}>{today.length}</Text><PatientText muted size={13}>Planned activities</PatientText></PatientGlass></View>
+        <View style={{ flex: 1 }}><PatientGlass><Text style={{ fontFamily: BOLD, fontSize: 28,
+          color: themeForeground("#248969") }}>{done}</Text><PatientText muted size={13}>Completed today</PatientText></PatientGlass></View>
+      </View>
+    ) : null}
+    <PatientPlanContent plan={plan} limit={3}/>
     <PatientAction icon="medical-outline" title="My medications"
       detail={state.medications.length ? state.medications.length + " recorded medications" : "View your care team's medication list"}
       onPress={() => n.navigate("PatientMedications")}/>
