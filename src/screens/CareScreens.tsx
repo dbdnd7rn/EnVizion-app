@@ -9,6 +9,7 @@ import { type TemperatureUnit, toFahrenheit, displayedTemperature, canonicalVita
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop, Text as SvgText } from "react-native-svg";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
+import { canonicalGlucose, glucoseDisplay, glucoseHistoryEntries, glucoseToMgDl, storedGlucoseMgDl, GLUCOSE_TIMING_OPTIONS, type GlucoseUnit, type GlucosePeriod } from "../glucoseHelpers";
 import {
   appointmentLines,
   trackerFields,
@@ -486,6 +487,63 @@ function BloodSugarField({
   );
 }
 
+
+function BloodSugarTimingPicker({value,onChange,editable}: {value:string; onChange:(value:string)=>void;editable:boolean}) {
+  const [open,setOpen]=useState(false);
+  useEffect(()=>{if(!editable)setOpen(false);},[editable]);
+  return <View style={{gap:9}}>
+    <Text style={{fontFamily:"DMSans_600SemiBold",fontSize:14,color:C.ink}}>Timing, such as before breakfast *</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel="Select timing"
+      accessibilityState={{ expanded: open, disabled: !editable }}
+      disabled={!editable} onPress={()=>setOpen(previous=>!previous)}
+      style={({pressed})=>({minHeight:58,borderRadius:20,borderWidth:1,
+        borderColor:themeBorder("#DED5E9"),backgroundColor:themeBackground(C.white),
+        flexDirection:"row",alignItems:"center",paddingHorizontal:17,gap:14,opacity:pressed?0.8:1})}>
+      <Icon name="alarm-outline" size={21} color={themeForeground("#7F3BC0")}/>
+      <Text style={{flex:1,fontFamily:"DMSans_400Regular",fontSize:14,
+        color:value?C.ink:themeForeground("#A8A1B4")}}>{value||"Select timing"}</Text>
+      <Icon name={open?"chevron-up-outline":"chevron-down-outline"} size={20} color={themeForeground("#2D2852")}/>
+    </Pressable>
+    {open&&<View style={{padding:5,borderRadius:20,borderWidth:1,
+      borderColor:themeBorder("#DED5E9"),backgroundColor:themeBackground(C.white),gap:3}}>
+      {GLUCOSE_TIMING_OPTIONS.map(option=><Pressable key={option} accessibilityRole="button"
+        accessibilityLabel={option} accessibilityState={{selected:value===option}}
+        onPress={()=>{onChange(option);setOpen(false);}}
+        style={({pressed})=>({minHeight:48,paddingHorizontal:14,borderRadius:15,
+          flexDirection:"row",alignItems:"center",justifyContent:"space-between",
+          backgroundColor:themeBackground(value===option?"#EFE2FA":pressed?"#F8F1FC":"#FFFEFF")})}>
+        <Text style={{fontFamily:"DMSans_600SemiBold",fontSize:13,color:C.ink}}>{option}</Text>
+        {value===option&&<Icon name="checkmark-circle" size={20} color={themeForeground("#7931B0")}/>}
+      </Pressable>)}
+    </View>}
+  </View>;
+}
+
+function BloodSugarHistoryChart({entries,unit}:{entries: Array<{id:string;recordedAt:string;values:Record<string,string>}>;unit:GlucoseUnit}) {
+  const ordered=entries.slice(0,30).reverse().flatMap(entry=>{
+    const mgDl=storedGlucoseMgDl(entry.values);
+    return mgDl===null?[]:[{at:entry.recordedAt,value:unit==="mg/dL"?mgDl:mgDl/18.0182}];
+  });
+  if(ordered.length<2)return <Text style={S.small}>At least two readings are needed to display a trend.</Text>;
+  const nums=ordered.map(p=>p.value),low=Math.min(...nums),high=Math.max(...nums);
+  const padding=Math.max(high-low,unit==="mg/dL"?10:0.6)*0.12;
+  const min=low-padding,max=high+padding;
+  const x=(i:number)=>18+i*282/(nums.length-1);
+  const y=(v:number)=>128-(v-min)*110/(max-min);
+  const path=nums.map((v,i)=>(i===0?"M":"L")+x(i).toFixed(2)+" "+y(v).toFixed(2)).join(" ");
+  return <View style={{borderRadius:22,padding:15,gap:8,borderWidth:1,
+    borderColor:themeBorder("#EAE3F2"),backgroundColor:themeBackground("#FAF7FD")}}>
+    <Text style={[S.h3,{fontSize:15}]}>Blood glucose trend ({unit})</Text>
+    <Svg width="100%" height={150} viewBox="0 0 320 150" accessibilityLabel="Blood sugar reading trend">
+      <Path d="M18 128H300M18 73H300M18 18H300" fill="none" stroke={themeBorder("#E1D5EC")} strokeWidth={1}/>
+      <Path d={path} fill="none" stroke={themeForeground("#893ABF")} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"/>
+      {nums.map((v,i)=><Circle key={i} cx={x(i)} cy={y(v)} r={3.5} fill={themeForeground("#893ABF")}/>)}
+    </Svg>
+    <Text style={S.small}>{ordered.length} recent readings · {new Date(ordered[0].at).toLocaleDateString()} to {new Date(ordered[ordered.length-1].at).toLocaleDateString()}</Text>
+    <Text style={S.small}>Recorded measurements only, not a diagnosis.</Text>
+  </View>;
+}
+
 function useTrackerReducedMotion() {
   const [reduced, setReduced] = useState(true);
 
@@ -877,6 +935,12 @@ export function TrackerScreen({
   const { state, dispatch, refresh } = useCare();
   const n = useNav();
   const [values, setValues] = useState<Record<string, string>>({});
+  const [glucoseUnit,setGlucoseUnit]=useState<GlucoseUnit>("mg/dL");
+  const glucoseCanonical=useRef<number|null>(null);
+  const [glucoseHistoryExpanded,setGlucoseHistoryExpanded]=useState(false);
+  const [glucosePeriod,setGlucosePeriod]=useState<GlucosePeriod>(30);
+  const [glucoseHistoryLoading,setGlucoseHistoryLoading]=useState(false);
+  const [glucoseHistoryError,setGlucoseHistoryError]=useState("");
   const [temperatureUnit, setTemperatureUnit] = useState<TemperatureUnit>("F");
   const temperatureF = useRef<number | null>(null);
   const savingLock = useRef(false);
@@ -933,13 +997,14 @@ export function TrackerScreen({
     setSaving(true);
     setError("");
     try {
-      const submitted = kind === "Vitals" ? canonicalVitals(values, temperatureUnit) : values;
+      const submitted = kind === "Vitals" ? canonicalVitals(values, temperatureUnit) : kind === "Blood sugar" ? canonicalGlucose(values, glucoseUnit) : values;
       if (kind === "Vitals" && values.temperature?.trim() && temperatureF.current !== null) {
         submitted.temperature = String(Number(temperatureF.current.toFixed(3)));
       }
       const entry = await saveObservation(kind, submitted);
       dispatch({ type: "entry", entry });
       temperatureF.current = null;
+      glucoseCanonical.current = null;
       setValues({});
       setSuccess(true);
     } catch (saveError) {
