@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { AppearanceProvider, themedScreen, useAppearance } from "./src/appearance";
-import { themeBackground, themeAction } from "./src/themeColors";
+import { themeBackground, themeAction, themeForeground } from "./src/themeColors";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -122,12 +122,12 @@ function MainTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: C.purple,
-        tabBarInactiveTintColor: dark ? "#A99DBB" : "#8A8494",
+        tabBarInactiveTintColor: dark ? "#ACA3BB" : "#8A8494",
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: dark ? "#211B2E" : "#FFFFFF",
+          backgroundColor: dark ? "#24202D" : "#FFFFFF",
           borderTopWidth: 1,
-          borderTopColor: dark ? "#453750" : "#F0E9F1",
+          borderTopColor: dark ? "#403749" : "#F0E9F1",
           height: 78,
           paddingTop: 8,
           paddingBottom: 12,
@@ -686,7 +686,7 @@ class StaffWorkspaceErrorBoundary extends React.Component<
             opacity: pressed ? 0.8 : 1,
           })}
         >
-          <Text style={{ fontFamily: "DMSans_700Bold", color: "#FFFFFF", fontSize: 14 }}>
+          <Text style={{ fontFamily: "DMSans_700Bold", color: themeForeground("#FFFFFF"), fontSize: 14 }}>
             Try opening again
           </Text>
         </Pressable>
@@ -880,7 +880,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
             opacity: pressed ? 0.8 : 1,
           })}
         >
-          <Text style={{ color: C.white, fontFamily: "DMSans_700Bold" }}>
+          <Text style={{ color: themeForeground("#FFFFFF"), fontFamily: "DMSans_700Bold" }}>
             Try again
           </Text>
         </Pressable>
@@ -935,7 +935,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
             opacity: pressed ? 0.8 : 1,
           })}
         >
-          <Text style={{ color: C.white, fontFamily: "DMSans_700Bold" }}>
+          <Text style={{ color: themeForeground("#FFFFFF"), fontFamily: "DMSans_700Bold" }}>
             Try again
           </Text>
         </Pressable>
@@ -999,7 +999,7 @@ function AppShell() {
     <SafeAreaProvider>
       <StatusBar style={dark ? "light" : "dark"} />
       <View
-        style={{ flex: 1, backgroundColor: dark ? "#0E0D17" : "#EDE5EF", alignItems: "center" }}
+        style={{ flex: 1, backgroundColor: dark ? "#17151F" : "#EDE5EF", alignItems: "center" }}
       >
         <View
           style={{
