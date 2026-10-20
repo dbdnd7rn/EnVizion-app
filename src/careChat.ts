@@ -132,15 +132,15 @@ export async function chatUnreadCount(conversationId: string, lastRead: string |
 }
 
 /** A fresh subscription + authoritative reload handles dropped networks without trusting cached messages. */
-export function chatSubscribe(conversationId: string, onChange: () => void) {
+export function chatSubscribe(conversationId: string, onMessages: () => void, onStatus: () => void) {
   const channel = supabase.channel("care-chat:" + conversationId + ":" + Math.random().toString(36).slice(2))
     .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages",
-      filter: "conversation_id=eq." + conversationId }, onChange)
+      filter: "conversation_id=eq." + conversationId }, onMessages)
     .on("postgres_changes", { event: "*", schema: "public", table: "chat_read_state",
-      filter: "conversation_id=eq." + conversationId }, onChange)
+      filter: "conversation_id=eq." + conversationId }, onStatus)
     .on("postgres_changes", { event: "*", schema: "public", table: "chat_typing_state",
-      filter: "conversation_id=eq." + conversationId }, onChange)
-    .subscribe(status => { if (status === "SUBSCRIBED") onChange(); });
+      filter: "conversation_id=eq." + conversationId }, onStatus)
+    .subscribe(status => { if (status === "SUBSCRIBED") { onMessages(); onStatus(); } });
   return () => { void supabase.removeChannel(channel); };
 }
 
