@@ -30,6 +30,8 @@ test("dark mode has readable low-glare copy and soft ivory action labels", () =>
     assert.ok(contrast(darkPalette.ink, darkPalette.paper) >= 7);
     assert.ok(contrast(darkPalette.muted, darkPalette.paper) >= 4.5);
     assert.ok(contrast(themeForeground("#FFFFFF"), themeAction("#74328F")) >= 4.5);
+    assert.ok(contrast(darkPalette.white, themeAction("#74328F")) >= 4.5);
+    assert.ok(contrast(darkPalette.ink, themeBackground("#FFFFFF")) >= 7);
     assert.notEqual(themeBackground("#FFFFFF"), "#FFFFFF");
     assert.notEqual(themeForeground("#FFFFFF"), "#FFFFFF");
     assert.ok(contrast(themeForeground("#FFFFFF"), themeBackground("#FFFFFF")) >= 7);
@@ -67,4 +69,15 @@ test("appearance is accessible from settings and subscribed across navigation", 
   assert.match(app, /AppearanceProvider/);
   assert.match(app, /component=\{themedScreen\(/);
   assert.match(provider, /AsyncStorage\.setItem\(STORAGE_KEY, next\)/);
+});
+
+test("main care screens avoid light-only controls in dark mode", () => {
+  const care = readFileSync(new URL("../src/screens/CareScreens.tsx", import.meta.url), "utf8");
+  const summary = readFileSync(new URL("../src/screens/SummaryScreen.tsx", import.meta.url), "utf8");
+  const home = readFileSync(new URL("../src/screens/MainScreens.tsx", import.meta.url), "utf8");
+  const ai = readFileSync(new URL("../src/screens/EnVizionAIScreen.tsx", import.meta.url), "utf8");
+  assert.match(care, /outputRange: dark \? \["#292331", "#342A41"\]/);
+  assert.match(summary, /primary \? themeAction\("#7B35A8"\) : themeBackground\("#FFFFFFA6"\)/);
+  assert.match(home, /backgroundColor: themeBackground\("#FFFFFFD4"\)/);
+  assert.match(ai, /item\.role === "user" \? themeForeground\("#FFFFFF"\)/);
 });
