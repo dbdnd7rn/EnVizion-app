@@ -314,9 +314,11 @@ export function CareTeamScreen() {
       setInviteEmail("");
       setInviteRole("caregiver");
       setMessage(
-        result.invitationEmailSent
-          ? "Invitation email requested and a 14-day in-app invitation is ready. Access stays pending until they accept."
-          : "A 14-day invitation is ready in their EnVizion account. Access stays pending until they accept.",
+        result.emailKind === "sign_in"
+          ? "A sign-in email was requested for this existing account. They must sign in and accept the 14-day care invitation."
+          : result.emailKind === "invitation"
+            ? "An account invitation email was requested. They must sign in and accept the 14-day care invitation."
+            : "The 14-day invitation is available in the app, but an email could not be requested. Ask them to sign in and accept it under Care Team & Sharing.",
       );
       await refresh();
     } catch (error) {
@@ -574,7 +576,7 @@ export function CareTeamScreen() {
                   title={
                     reminderCoolingDown(member)
                       ? "Reminder sent recently"
-                      : "Send invitation reminder"
+                      : "Send email reminder"
                   }
                   secondary
                   disabled={busyId !== null || reminderCoolingDown(member)}
@@ -584,13 +586,11 @@ export function CareTeamScreen() {
                     setBusyId(`reminder-${member.userId}`);
                     setMessage("");
                     try {
-                      await sendCareInvitationReminder(
-                        recipientId,
-                        member.userId,
-                      );
-                      setMessage(
-                        `Reminder sent to ${member.displayName} in EnVizion Life.`,
-                      );
+                      const reminder = await sendCareInvitationReminder(recipientId, member.userId);
+                       setMessage(reminder.emailRequested
+                         ? `A sign-in email was requested for ${member.displayName}. They must still accept the care invitation in EnVizion.`
+                         : `An in-app reminder was created for ${member.displayName}, but email was unavailable. They can sign in and accept the invitation manually.`
+                       );
                       await refresh();
                     } catch (error) {
                       setMessage(
@@ -615,10 +615,11 @@ export function CareTeamScreen() {
                     if (!recipientId) return;
                     setBusyId(`reinvite-${member.userId}`);
                     try {
-                      await reinviteCareTeamMember(recipientId, member.userId);
-                      setMessage(
-                        `A fresh 14-day invitation is ready for ${member.displayName}.`,
-                      );
+                      const reinvite = await reinviteCareTeamMember(recipientId, member.userId);
+                       setMessage(reinvite.emailRequested
+                         ? `A fresh 14-day invitation is ready for ${member.displayName}, and a sign-in email was requested.`
+                         : `A fresh 14-day invitation is ready for ${member.displayName}, but email was unavailable. Ask them to sign in.`
+                       );
                       await refresh();
                     } catch (error) {
                       setMessage(
@@ -662,10 +663,11 @@ export function CareTeamScreen() {
                     if (!recipientId) return;
                     setBusyId(member.userId);
                     try {
-                      await reinviteCareTeamMember(recipientId, member.userId);
-                      setMessage(
-                        `A fresh 14-day invitation is ready for ${member.displayName}.`,
-                      );
+                      const reinvite = await reinviteCareTeamMember(recipientId, member.userId);
+                       setMessage(reinvite.emailRequested
+                         ? `A fresh 14-day invitation is ready for ${member.displayName}, and a sign-in email was requested.`
+                         : `A fresh 14-day invitation is ready for ${member.displayName}, but email was unavailable. Ask them to sign in.`
+                       );
                       await refresh();
                     } catch (error) {
                       setMessage(
