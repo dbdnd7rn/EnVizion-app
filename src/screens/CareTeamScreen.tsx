@@ -576,7 +576,7 @@ export function CareTeamScreen() {
                   title={
                     reminderCoolingDown(member)
                       ? "Reminder sent recently"
-                      : "Send email reminder"
+                      : "Send invitation reminder"
                   }
                   secondary
                   disabled={busyId !== null || reminderCoolingDown(member)}
