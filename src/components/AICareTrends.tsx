@@ -22,7 +22,7 @@ export function AICareTrends({ initial, careRecipientId }: {initial: CareTrends;
     if (!active.current || inFlight.current || AppState.currentState === "background" || (typeof document !== "undefined" && document.hidden)) return;
     inFlight.current = true; const id = ++sequence.current; setLoading(true);
     try {
-      const result = await askCareAI({message:"Show care trends",history:[],careRecipientId,includeCareData:true});
+      const result = await askCareAI({message:"Show care trends",history:[],careRecipientId,includeCareData:true,naturalConversation:false});
       if (!active.current || sequence.current !== id) return;
       setData(result.trends);
       setProblem(result.trends ? "" : "Chart unavailable. Try refreshing again.");
