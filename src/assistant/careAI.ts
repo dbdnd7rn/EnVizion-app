@@ -10,6 +10,7 @@ export async function askCareAI(input: {
   history: AssistantHistory[];
   careRecipientId: string | null;
   includeCareData: boolean;
+  naturalConversation: boolean;
 }): Promise<CareAIAnswer> {
   const message = input.message.trim().slice(0, 1800);
   if (!message) throw new Error("Enter a message before sending.");
@@ -19,7 +20,7 @@ export async function askCareAI(input: {
   // General toolkit guidance contains no private profile information. Run the
   // same reviewed deterministic engine on-device so greetings and app-help
   // work even with a slow or temporarily disconnected network.
-  if (!input.includeCareData) {
+  if (!input.includeCareData && !input.naturalConversation) {
     const local = toolkitReply(message, input.history.slice(-12), {
       includeCareData: false,
       canDraft: false,
@@ -49,6 +50,7 @@ export async function askCareAI(input: {
         role: turn.role, content: turn.content.slice(0, 1800),
       })),
       includeCareData: input.includeCareData,
+      naturalConversation: input.naturalConversation,
       careRecipientId: input.includeCareData ? input.careRecipientId : null,
       timezone: detectedTimezone(),
     },
@@ -58,7 +60,7 @@ export async function askCareAI(input: {
         timer = setTimeout(() => {
           controller.abort();
           reject(new Error("Live care information is taking too long to respond. Please check your connection and retry. No care records were changed."));
-        }, 15000);
+        }, input.naturalConversation ? 24000 : 15000);
       }),
     ]));
   } finally {

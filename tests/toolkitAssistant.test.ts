@@ -195,3 +195,51 @@ test("trends require fresh consent and membership before accessing activity", as
   const failure=await createToolkitHandler(()=>failed.client,()=>now)(request({message:"Show care trends",includeCareData:true,careRecipientId:profile}));
   const body=await failure.json(); assert.equal(body.trends,undefined);assert.match(body.reply,/couldn't load/);
 });
+
+test("free-form conversation is opt-in and never overrides actions or urgent safety rules", async () => {
+  let calls = 0;
+  let payload: any;
+  const {client,reads}=mockClient();
+  const handler=createToolkitHandler(()=>client,()=>now,async input=>{
+    calls++;
+    payload=input;
+    return "I'm sorry you're not feeling well. What symptoms are you having, and when did they start?";
+  });
+  const builtIn=await handler(request({message:"I'm not feeling well today",naturalConversation:false}));
+  assert.equal((await builtIn.json()).engine,"toolkit");
+  assert.equal(calls,0);
+  const answer=await handler(request({message:"I'm not feeling well today",naturalConversation:true,history:[{role:"user",content:"Hi"}]}));
+  const body=await answer.json();
+  assert.equal(answer.status,200);
+  assert.equal(body.engine,"model");
+  assert.match(body.reply,/What symptoms/);
+  assert.equal(body.action,null);
+  assert.equal(calls,1);
+  assert.equal(reads.length,0);
+  assert.equal("profileName" in payload,false);
+  await handler(request({message:"Remind me to call the clinic",naturalConversation:true}));
+  await handler(request({message:"I can't breathe",naturalConversation:true}));
+  assert.equal(calls,1);
+});
+
+test("sharing profile with AI requires current RLS membership and separate care consent",async()=>{
+  const {client}=mockClient();
+  let payload: any;
+  const handler=createToolkitHandler(()=>client,()=>now,async input=>{payload=input;return "I see an upcoming clinic visit.";});
+  const shared=await handler(request({message:"What are my upcoming appointments?",includeCareData:true,careRecipientId:profile,naturalConversation:true}));
+  assert.equal(shared.status,200);
+  assert.equal((await shared.json()).engine,"model");
+  assert.equal(payload.profileName,"Authorized profile");
+  assert.equal(payload.records.appointments.records[0].title,"Clinic visit");
+  const revoked=mockClient({revoked:true});
+  let sent=false;
+  const denied=await createToolkitHandler(()=>revoked.client,()=>now,async()=>{sent=true;return "bad";})(request({message:"What are my appointments?",includeCareData:true,careRecipientId:profile,naturalConversation:true}));
+  assert.equal(denied.status,403);
+  assert.equal(sent,false);
+});
+test("missing provider is reported instead of pretending to be smart AI",async()=>{
+  const {client}=mockClient();
+  const result=await createToolkitHandler(()=>client,()=>now)(request({message:"Explain black holes",naturalConversation:true}));
+  assert.equal(result.status,503);
+  assert.match((await result.json()).error,/isn't configured/);
+});

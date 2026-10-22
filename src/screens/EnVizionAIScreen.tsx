@@ -89,6 +89,7 @@ export function EnVizionAIScreen() {
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [draftText, setDraftText] = useState("");
   const [careDataAllowed, setCareDataAllowed] = useState(false);
+  const [naturalConversation, setNaturalConversation] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState("");
@@ -153,7 +154,7 @@ export function EnVizionAIScreen() {
       const response = await askCareAI({
         message: value, history,
         careRecipientId: state.careRecipientId,
-        includeCareData: careDataAllowed,
+        includeCareData: careDataAllowed, naturalConversation,
       });
       if (id !== requestId.current) return;
       dispatch({ type: "conversation-turn", messages: [{ ...makeMessage("assistant", response.reply), resource: response.resource, trends: response.trends, suggestions: response.suggestions }] });
@@ -164,7 +165,7 @@ export function EnVizionAIScreen() {
     } finally {
       if (id === requestId.current) setBusy(false);
     }
-  }, [busy, careDataAllowed, dispatch, messages, pending, state.careRecipientId]);
+  }, [busy, careDataAllowed, naturalConversation, dispatch, messages, pending, state.careRecipientId]);
 
   const editPending = (changes: Partial<Record<string,string>>) => {
     if (!pending) return;
@@ -257,7 +258,7 @@ export function EnVizionAIScreen() {
             <AIAtmosphere variant="corner"/>
             <View style={{ flex: 1, gap: 4 }}>
               <Text style={{ fontFamily: "Lora_500Medium", fontSize: 21, color: themeForeground(INK) }}>A little support, anytime.</Text>
-              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12, color: themeForeground(MUTED) }}>Built-in toolkit guidance. No external AI.</Text>
+              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12, color: themeForeground(MUTED) }}>{naturalConversation ? "Natural conversation · Opted in" : "Private built-in toolkit guidance"}</Text>
             </View>
             <AIGlassOrb reducedMotion={reducedMotion} compact/>
           </View>
@@ -271,7 +272,7 @@ export function EnVizionAIScreen() {
             </Text>
             <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
               fontSize: 14, lineHeight: 22 }}>
-              I can help you find your way, check saved care updates, and prepare reminders or notes. What would help today?
+              Chat about your day, ask questions, explore the care toolkit, or prepare reminders and notes. What's on your mind?
             </Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
               {starters.map(item => (
@@ -298,6 +299,30 @@ export function EnVizionAIScreen() {
 
         <View style={[glass(), { padding: 17, gap: 12, backgroundColor: themeBackground("#FBF7FDEB") }]}>
           <AIAtmosphere variant="corner"/>
+          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+            <AIIconBubble><Icon name="sparkles-outline" color={themeForeground(PURPLE)} size={22}/></AIIconBubble>
+            <View style={{ flex: 1, gap: 3 }}>
+              <Text style={{ color: themeForeground(INK), fontFamily: "DMSans_600SemiBold", fontSize: 13 }}>Natural conversation</Text>
+              <Text style={{ color: themeForeground(MUTED), fontFamily: "DMSans_400Regular", fontSize: 11.5, lineHeight: 16.5 }}>
+                {naturalConversation ? "AI-powered replies and follow-up discussions" : "Turn on for thoughtful, free-form AI chat"}
+              </Text>
+            </View>
+            <Switch value={naturalConversation} accessibilityLabel="Allow sending messages to an external AI provider for natural conversation"
+              onValueChange={v => {
+                requestId.current += 1;
+                setBusy(false);
+                dispatch({ type: "conversation-clear" });
+                setNaturalConversation(v);
+                setPending(null);
+                setProblem("");
+              }}
+              trackColor={{ false: "#D9D4DE", true: "#D2AAE5" }} thumbColor={PURPLE}/>
+          </View>
+          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), fontSize: 10.8, lineHeight: 16 }}>
+            When enabled, your messages and recent chat are sent to an external AI provider to generate replies.
+            Keep it off for private, built-in toolkit guidance. Sharing care profile information is separate below.
+          </Text>
+          <View style={{ height: 1, backgroundColor: themeBorder("#E8DDEC") }}/>
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
             <AIIconBubble><Icon name="shield-checkmark-outline" color={themeForeground(PURPLE)} size={22}/></AIIconBubble>
             <View style={{ flex: 1, gap: 3 }}>
@@ -328,8 +353,8 @@ export function EnVizionAIScreen() {
           </View>
           <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
             fontSize: 10.8, lineHeight: 16 }}>
-            This assistant uses built-in toolkit guidance. Your chat is not sent to an external AI provider.
-            Enable this to use authorized records for the selected profile. Switching modes starts a fresh
+            Enable to use records for your selected, authorized care profile. With Natural conversation on,
+            requested care summaries may also be sent to the external AI provider. Switching modes clears this
             conversation. Nothing is saved to care records without your confirmation.
           </Text>
         </View>
@@ -371,7 +396,7 @@ export function EnVizionAIScreen() {
         {busy && <View accessibilityLabel="Toolkit assistant is preparing a reply" style={{ flexDirection: "row",
           alignItems: "center", gap: 10, padding: 15, borderRadius: 18, backgroundColor: themeBackground("#F6EDFB") }}>
           <ActivityIndicator color={themeForeground(PURPLE)}/>
-          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED) }}>Checking the toolkit…</Text>
+          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED) }}>{naturalConversation ? "Thinking about your message…" : "Checking the toolkit…"}</Text>
         </View>}
 
         {pending && (
