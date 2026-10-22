@@ -17,7 +17,7 @@ test("built-in AI greeting runs without a network call or profile data", () => {
   assert.ok(response.reply.trim().length > 8);
   assert.equal(response.action, null);
   assert.equal(response.trends, undefined);
-  assert.match(client, /if \(!input\.includeCareData\)/);
+  assert.match(client, /if \(!input\.includeCareData && !input\.naturalConversation\)/);
   assert.match(client, /toolkitReply\(message/);
   assert.match(client, /includeCareData: false/);
   assert.match(client, /canDraft: false/);
