@@ -327,7 +327,11 @@ export async function inviteCareTeamMember(input: {
   displayName: string;
   email: string;
   role: Exclude<CareRole, "owner">;
-}): Promise<{ invitationEmailSent: boolean; userId: string }> {
+}): Promise<{
+  invitationEmailSent: boolean;
+  emailKind: "invitation" | "sign_in" | null;
+  userId: string;
+}> {
   return invokeCareTeam({
     action: "invite",
     careRecipientId: input.careRecipientId,
@@ -364,8 +368,8 @@ export async function revokeCareTeamAccess(
 export async function reinviteCareTeamMember(
   careRecipientId: string,
   userId: string,
-) {
-  await invokeCareTeam({
+): Promise<{ ok: boolean; emailRequested: boolean }> {
+  return invokeCareTeam({
     action: "reinvite",
     careRecipientId,
     userId,
@@ -375,8 +379,8 @@ export async function reinviteCareTeamMember(
 export async function sendCareInvitationReminder(
   careRecipientId: string,
   userId: string,
-) {
-  await invokeCareTeam({
+): Promise<{ ok: boolean; remindedAt: string; emailRequested: boolean }> {
+  return invokeCareTeam({
     action: "send_reminder",
     careRecipientId,
     userId,
