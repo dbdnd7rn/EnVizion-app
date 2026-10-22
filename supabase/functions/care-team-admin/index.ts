@@ -88,6 +88,42 @@ async function findUserByEmail(admin: any, email: string) {
   throw new Error("Auth user lookup exceeded the safe pagination limit.");
 }
 
+// Existing Supabase Auth accounts cannot receive another admin invite. A
+// passwordless sign-in email helps them reach their pending *in-app* invite.
+// Sign-in is not acceptance: membership stays "invited" until they consent.
+async function requestExistingUserSignInEmail(
+  supabaseUrl: string, anonKey: string, email: string,
+): Promise<boolean> {
+  try {
+    const emailClient = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { error } = await emailClient.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: "https://envizion-life-caregiver.onrender.com/",
+      },
+    });
+    if (error) throw error;
+    return true; // Request accepted, inbox delivery not independently verified.
+  } catch (error) {
+    console.warn("Care invitation sign-in email request failed:",
+      error instanceof Error ? error.message : "Unknown email service error");
+    return false;
+  }
+}
+
+async function recordInvitationEmailRequest(
+  admin: any, careRecipientId: string, userId: string,
+) {
+  const { error } = await admin.from("care_recipient_members")
+    .update({ invite_email_requested_at: new Date().toISOString() })
+    .eq("care_recipient_id", careRecipientId)
+    .eq("user_id", userId).eq("status", "invited");
+  if (error) console.warn("Care invitation email timestamp update failed.");
+}
+
 async function getUsersById(admin: any, userIds: string[]) {
   const entries = await Promise.all(
     [...new Set(userIds)].map(async (userId) => {
@@ -1644,6 +1680,7 @@ Deno.serve(async (req: Request) => {
       }
 
       let target = await findUserByEmail(admin, email);
+      const existingAccount = Boolean(target);
       let invitationEmailSent = false;
 
       const { data: inviterAccount } = await admin.auth.admin.getUserById(user.id);
@@ -1770,7 +1807,21 @@ Deno.serve(async (req: Request) => {
 
       if (notificationError) throw notificationError;
 
-      return json({ ok: true, invitationEmailSent, userId: target.id });
+      if (existingAccount) {
+        invitationEmailSent = await requestExistingUserSignInEmail(
+          supabaseUrl, anonKey, email,
+        );
+        if (invitationEmailSent) {
+          await recordInvitationEmailRequest(admin, careRecipientId, target.id);
+        }
+      }
+      return json({
+        ok: true, invitationEmailSent,
+        emailKind: invitationEmailSent
+          ? (existingAccount ? "sign_in" : "invitation")
+          : null,
+        userId: target.id,
+      });
     }
 
     const targetUserId = String(payload.userId ?? "");
@@ -1883,7 +1934,18 @@ Deno.serve(async (req: Request) => {
 
       if (reminderConsentError) throw reminderConsentError;
 
-      return json({ ok: true, remindedAt: now });
+      const { data: reminderAccount, error: reminderAccountError } =
+        await admin.auth.admin.getUserById(targetUserId);
+      if (reminderAccountError) console.warn("Care reminder email lookup failed.");
+      const emailRequested = reminderAccount?.user?.email
+        ? await requestExistingUserSignInEmail(
+            supabaseUrl, anonKey, reminderAccount.user.email,
+          )
+        : false;
+      if (emailRequested) {
+        await recordInvitationEmailRequest(admin, careRecipientId, targetUserId);
+      }
+      return json({ ok: true, remindedAt: now, emailRequested });
     }
 
     if (action === "update_role") {
@@ -2066,7 +2128,18 @@ Deno.serve(async (req: Request) => {
         entity_id: careRecipientId,
       });
 
-      return json({ ok: true });
+      const { data: reinviteAccount, error: reinviteAccountError } =
+        await admin.auth.admin.getUserById(targetUserId);
+      if (reinviteAccountError) console.warn("Care reinvitation email lookup failed.");
+      const emailRequested = reinviteAccount?.user?.email
+        ? await requestExistingUserSignInEmail(
+            supabaseUrl, anonKey, reinviteAccount.user.email,
+          )
+        : false;
+      if (emailRequested) {
+        await recordInvitationEmailRequest(admin, careRecipientId, targetUserId);
+      }
+      return json({ ok: true, emailRequested });
     }
 
     return json({ error: "Unsupported care team action" }, 400);
