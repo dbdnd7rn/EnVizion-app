@@ -182,7 +182,7 @@ const guides: Array<{ match: RegExp; reply: string; resource: ToolkitResource }>
   { match: /\b(contacts?|providers?|directory|insurance)\b/i, reply: "Care Contacts holds the providers, services and other contacts saved for a care profile. Open it to view available contact details and use the call or email controls.", resource: resource("Open care contacts", "CareContacts") },
   { match: /\b(documents?|files?|upload|packet)\b/i, reply: "Care documents is where authorized users organize profile documents. Use the page's controls to add or view a file. I cannot upload or send documents from chat.", resource: resource("Open care documents", "CareDocuments") },
   { match: /\b(invite|care team|co.?caregiver|advocate|access review)\b/i, reply: "Care Team manages invitations and each member's authorized access. The primary advocate controls sharing. I cannot grant access or invite people through chat.", resource: resource("Open care team", "CareTeam") },
-  { match: /\b(privacy|consent|share.*information|data|chatgpt|openai|api key)\b/i, reply: "This toolkit assistant uses built-in guidance and your authorized app records. It does not send your chat to an external AI provider. Leave profile information off for general help; enabling it allows profile-specific summaries and drafts. Switching profiles or privacy modes clears this conversation.", resource: resource("Open privacy settings", "PrivacyData") },
+  { match: /\b(privacy|consent|share.*information|data|chatgpt|openai|api key)\b/i, reply: "This toolkit assistant uses built-in guidance and your authorized app records. Built-in mode does not send your chat to an external AI provider. When you separately enable Natural conversation, the current message and recent chat are sent to a model provider. Profile sharing remains a separate choice. Switching profiles or privacy modes clears this conversation.", resource: resource("Open privacy settings", "PrivacyData") },
   { match: /\b(dark (?:mode|theme)|accessibility|display|text size)\b/i, reply: "Open Accessibility & display to change the app's appearance. Device accessibility settings control reduced motion and system text size.", resource: resource("Open accessibility & display", "Accessibility") },
   { match: /\b(medication|medicine|prescription|pills?|tablets?)\b/i, reply: "Medication Management records the medication information entered by your care team. Follow the existing prescription and ask the prescriber or pharmacist about doses, side effects or changes. I cannot choose or change treatment.", resource: resource("Open medications", "Medications") },
   { match: /\b(hospital to home|discharge|transition)\b/i, reply: "Hospital to Home helps organize the recorded discharge and follow-up information. Use it to keep instructions and next steps together, and ask the care team to clarify anything uncertain.", resource: resource("Open hospital to home", "Transition") },
@@ -236,6 +236,7 @@ function coreToolkitReply(message: string, history: AssistantHistory[], context:
   if (/\b(?:rough|hard|bad|busy) day\b|\bnot (?:great|okay|good)\b/i.test(text)) return answer("Sounds like a lot today. What's been the hardest part: the practical tasks, finding time for yourself, or something else?");
   if (/\b(?:practical tasks|too much to do|where (?:do|should) i start)\b/i.test(text)) return answer("Let's take one thing at a time. We can look at your saved tasks, choose something you want to handle, and prepare a reminder. What would help first?", resource("Open care tasks", "CareTasks"));
   if (/^(?:because|mostly|just|it is|it's)\b/i.test(text) && /hardest part|caregiving can|feeling today/i.test(history.at(-1)?.content || "")) return answer("I hear you. We can stay with that for a moment, or make one practical thing easier. Would you like to tell me more, look at your tasks, or make a note of what happened?");
+  if (/\b(?:not feeling well|feel(?:ing)? sick|feel(?:ing)? unwell|under the weather|feeling ill|don't feel well)\b/i.test(text)) return answer("I'm sorry you're not feeling well. What symptoms are you having, and when did they start? If symptoms are severe or rapidly worsening, seek urgent medical help. Nothing will be put in a care log unless you ask.");
   if (isObservation(text)) return answer("Thanks for sharing that. Would you like to keep it in the care log? Say ‘Turn that into a note’ and I'll prepare your exact words for review. Or tell me more.");
   const guide = guides.find(g => g.match.test(text));
   if (guide) return answer(guide.reply, guide.resource);
@@ -245,6 +246,15 @@ function helpReply(intro = "I help with EnVizion toolkit tasks using built-in gu
   return answer(`${intro}\n\nTry:\n• Show my appointments\n• Show my care tasks\n• Set a reminder\n• Write a care note\n• Where are my care contacts?\n• I'm feeling tired\n\nReminders and notes always need your review and confirmation. I cannot diagnose, change medication, or save records just because you type ‘yes’.`);
 }
 
+export function mustHandleInToolkit(message: string, history: AssistantHistory[]): boolean {
+  const text = message.trim();
+  if (wantsReminder(text) || wantsNote(text) || wantsTrends(text)) return true;
+  if (/\b(?:turn|make|save|record|note)\b.*\b(?:this|that|it)\b/i.test(text)) return true;
+  if (/\b(?:suicid\w*|kill myself|end my life|hurt myself|self.harm|cannot stay safe|can't stay safe|emergency|chest pain|can'?t breathe|cannot breathe|unconscious|overdose|severe bleeding|stroke|diagnos\w*|prescribe(?: me| a| some|$)|increase (?:my |the )?dose|decrease (?:my |the )?dose|change (?:my |the )?dose|how much (?:insulin|medicine|medication)|should (?:i|we|he|she|they).*(?:take|stop|start)|is .*safe to take)\b/i.test(text)) return true;
+  if (/^(?:cancel|stop|never ?mind|discard|start over|yes|ok(?:ay)?|confirm|save(?: it)?)[.!\s]*$/i.test(text)) return true;
+  const last = history.at(-1);
+  return last?.role === "assistant" && [REMINDER_TITLE, REMINDER_DATE, REMINDER_TIME, NOTE_CONTENT].some(prompt => last.content.startsWith(prompt));
+}
 export const wantsTrends = (text: string) => /\b(trends?|graphs?|charts?|care activity|activity (?:this week|over time))\b/i.test(text);
 function isObservation(text: string) {
   return text.length > 12 && !text.includes("?") && !wantsNote(text) && !wantsReminder(text) &&

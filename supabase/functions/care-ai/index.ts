@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.116.0";
 import { createToolkitHandler, type CareReadClient } from "./handler.ts";
+import { generateModelReply } from "./conversationModel.ts";
 
 Deno.serve(createToolkitHandler((authorization) => {
   const url = Deno.env.get("SUPABASE_URL");
@@ -10,4 +11,8 @@ Deno.serve(createToolkitHandler((authorization) => {
     global: { headers: { Authorization: authorization } },
     auth: { persistSession: false, autoRefreshToken: false },
   }) as unknown as CareReadClient;
-}));
+}, () => new Date(), input => generateModelReply(
+  input,
+  Deno.env.get("OPENAI_API_KEY") ?? "",
+  Deno.env.get("OPENAI_CARE_MODEL") || "gpt-5-mini",
+)));

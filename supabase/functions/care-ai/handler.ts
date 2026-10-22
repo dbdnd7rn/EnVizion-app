@@ -1,4 +1,5 @@
-import { toolkitReply, requestedToolkitRecords, wantsTrends, localParts, validTimezone, localDayUTCWindow, type RecordKind, type RecordSection } from "./toolkit.ts";
+import { toolkitReply, mustHandleInToolkit, requestedToolkitRecords, wantsTrends, localParts, validTimezone, localDayUTCWindow, type RecordKind, type RecordSection } from "./toolkit.ts";
+import type { ModelInput } from "./conversationModel.ts";
 import type { AssistantHistory, CareTrends } from "./contracts.ts";
 
 const headers = {
@@ -87,7 +88,7 @@ export async function loadTrends(client: CareReadClient, careId: string, now: Da
   return {updatedAt:now.toISOString(), timezone, days};
 }
 
-export function createToolkitHandler(makeClient: (auth: string) => CareReadClient, now: () => Date = () => new Date()) {
+export function createToolkitHandler(makeClient: (auth: string) => CareReadClient, now: () => Date = () => new Date(), generate?: (input: ModelInput) => Promise<string>) {
   return async (req: Request): Promise<Response> => {
     if (req.method === "OPTIONS") return new Response("ok", { headers });
     if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -133,8 +134,25 @@ export function createToolkitHandler(makeClient: (auth: string) => CareReadClien
           records[kind] = await loadSection(client, careId, kind, current, /\btoday\b/i.test(message), timezone);
         }));
       }
-      // No model, external fetch, service-role key, or database write is involved.
       const response = toolkitReply(message, history, { includeCareData, canDraft, profileName, role, timezone, now: current, records, trends });
+      // External inference is strictly opt-in. Authentication and live RLS/
+      // membership checks above must succeed before any user data is shared.
+      // Drafts, emergencies and clinical decisions stay in the audited engine.
+      if (body.naturalConversation === true && !mustHandleInToolkit(message, history)) {
+        if (!generate) return json({ error: "Natural conversation isn't configured yet. Turn it off to use built-in guidance." }, 503);
+        try {
+          const reply = await generate({
+            message, history, timezone,
+            ...(includeCareData ? { profileName, records } : {}),
+          });
+          if (!reply.trim()) throw new Error("EMPTY_MODEL_REPLY");
+          return json({ reply, action: null, engine: "model" });
+        } catch (err) {
+          return json({ error: err instanceof Error && err.message === "AI_NOT_CONFIGURED"
+            ? "Natural conversation needs a server-side AI key. Turn it off to use built-in guidance."
+            : "Natural conversation is temporarily unavailable. Retry, or turn it off for built-in guidance. No care records were changed." }, 503);
+        }
+      }
       return json({ ...response, engine: "toolkit" });
     } catch {
       return json({ error: "The toolkit assistant couldn't load your information. Please try again." }, 500);
