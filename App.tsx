@@ -34,6 +34,7 @@ import {
   PatientHistoryScreen, PatientProfileScreen,
 } from "./src/screens/PatientExperience";
 import { CarePresenceProvider } from "./src/CarePresenceProvider";
+import {FamilyHomeScreen,FamilyUpdatesScreen,FamilyChatScreen,FamilyAppointmentsScreen,FamilyHelpScreen} from "./src/screens/FamilyExperience";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
 import { VitalsProgressScreen } from "./src/screens/VitalsProgressScreen";
@@ -156,10 +157,46 @@ function PatientTabs() {
   );
 }
 
+
+/** Same bottom navigation, fonts and theme as the main caregiver experience, with only family-authorized tools. */
+function FamilyTabs(){
+  const {dark}=useAppearance();
+  return <Tab.Navigator screenOptions={({route})=>({
+    headerShown:false,
+    tabBarHideOnKeyboard:true,
+    tabBarActiveTintColor:C.purple,
+    tabBarInactiveTintColor:dark?"#ACA3BB":"#8A8494",
+    tabBarStyle:{
+      backgroundColor:dark?"#24202D":"#FFFFFF",
+      borderTopWidth:1,
+      borderTopColor:dark?"#403749":"#F0E9F1",
+      height:78,paddingTop:8,paddingBottom:12,
+      shadowColor:dark?"#000000":"#2E2135",
+      shadowOpacity:0.035,shadowRadius:12,shadowOffset:{width:0,height:-3},elevation:5,
+    },
+    tabBarItemStyle:{paddingVertical:2},
+    tabBarLabelStyle:{fontFamily:"DMSans_600SemiBold",fontSize:10,marginTop:2},
+    tabBarIcon:({color,focused})=><Icon
+      name={({
+        FamilyHome:focused?"home":"home-outline",
+        FamilyUpdates:focused?"grid":"grid-outline",
+        FamilyChat:focused?"chatbubbles":"chatbubbles-outline",
+        FamilyHelp:focused?"heart":"heart-outline",
+      } as Record<string,string>)[route.name]||"ellipse-outline"}
+      color={color} size={23}/>,
+  })}>
+    <Tab.Screen name="FamilyHome" component={themedScreen(FamilyHomeScreen)} options={{tabBarLabel:"Home"}}/>
+    <Tab.Screen name="FamilyUpdates" component={themedScreen(FamilyUpdatesScreen)} options={{tabBarLabel:"Updates"}}/>
+    <Tab.Screen name="FamilyChat" component={themedScreen(FamilyChatScreen)} options={{tabBarLabel:"Chat"}}/>
+    <Tab.Screen name="FamilyHelp" component={themedScreen(FamilyHelpScreen)} options={{tabBarLabel:"Help"}}/>
+  </Tab.Navigator>;
+}
+
 function MainTabs() {
   const { dark } = useAppearance();
   const { state } = useCare();
   if (state.accessRole === "patient") return <PatientTabs />;
+  if (state.accessRole === "viewer") return <FamilyTabs />;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -428,7 +465,7 @@ function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
             component={themedScreen(MainTabs)}
             options={{ headerShown: false }}
           />
-          {state.accessRole !== "patient" ? (
+          {state.accessRole === "owner" || state.accessRole === "caregiver" ? (
             <>
           <Stack.Screen
             name="Tracker"
@@ -693,7 +730,7 @@ function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
             options={{ title: "Notification preferences" }}
           />
             </>
-          ) : (
+          ) : state.accessRole === "patient" ? (
             <>
               <Stack.Screen name="PatientDay" component={themedScreen(PatientDayScreen)} options={{ title: "My Day" }}/>
               <Stack.Screen name="PatientMedications" component={themedScreen(PatientMedicationsScreen)} options={{ title: "My Medications" }}/>
@@ -706,6 +743,13 @@ function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
               <Stack.Screen name="Accessibility" component={themedScreen(AccessibilityScreen)} options={{ title: "Accessibility & display" }}/>
               <Stack.Screen name="Notifications" component={themedScreen(NotificationsScreen)} options={{ title: "Notifications", headerShown: false }}/>
               <Stack.Screen name="NotificationSettings" component={themedScreen(NotificationSettingsScreen)} options={{ title: "Notification preferences" }}/>
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="FamilyAppointments" component={themedScreen(FamilyAppointmentsScreen)}
+                options={{title:"Shared appointments",headerShown:false}}/>
+              <Stack.Screen name="CareTeamChat" component={themedScreen(CareTeamChatScreen)}
+                options={{headerShown:false}}/>
             </>
           )}
         </Stack.Navigator>

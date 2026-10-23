@@ -5,6 +5,10 @@ export type Tabs = {
   Toolkit: undefined;
   Library: undefined;
   Support: undefined;
+  FamilyHome: undefined;
+  FamilyUpdates: undefined;
+  FamilyChat: undefined;
+  FamilyHelp: undefined;
   PatientHome: undefined;
   PatientCare: undefined;
   PatientTeam: undefined;
@@ -13,6 +17,7 @@ export type Tabs = {
 };
 export type RootStack = {
   Onboarding: undefined;
+  FamilyAppointments: undefined;
   PatientDay: undefined;
   PatientMedications: undefined;
   PatientAppointments: undefined;

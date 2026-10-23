@@ -38,6 +38,7 @@ import {
   Txt,
 } from "../ui";
 import { useNav } from "./MainScreens";
+import { FamilyHelpReviewSection } from "./FamilyHelpReviewSection";
 
 type Draft = {
   updateType: FamilyUpdateType;
@@ -653,6 +654,8 @@ export function FamilyCommunicationScreen() {
           );
         })
       )}
+
+      <FamilyHelpReviewSection />
 
       <Button
         title="Provider / insurance communication log"
