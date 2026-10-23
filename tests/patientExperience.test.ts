@@ -13,7 +13,8 @@ test("patient has five purpose-built tabs and a patient-only route branch", () =
     assert.match(navigation, new RegExp("\\b" + route + "\\b"));
   }
   assert.match(app, /state\.accessRole === "patient"/);
-  assert.match(app, /state\.accessRole === "owner" \|\| state\.accessRole === "caregiver"/);\n  assert.match(app, /state\.accessRole === "viewer"/);
+  assert.match(app, /state\.accessRole === "owner" \|\| state\.accessRole === "caregiver"/);
+  assert.match(app, /state\.accessRole === "viewer"/);
   assert.match(app, /<PatientTabs \/>/);
 });
 
