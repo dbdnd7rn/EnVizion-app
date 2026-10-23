@@ -8,6 +8,9 @@ import React, {
   useState,
 } from "react";
 import {
+  AccessibilityInfo,
+  Animated,
+  Easing,
   ActivityIndicator,
   AppState,
   Linking,
@@ -33,7 +36,7 @@ import {
   parseAuthCallback,
   passwordValidationMessage,
 } from "./authHelpers";
-import { Brand, Button, C, Card, Heading, Page, S, Txt } from "./ui";
+import { Brand, Button, C, Card, Heading, Icon, Page, S, Txt } from "./ui";
 
 type AuthContextValue = {
   session: Session | null;
@@ -536,6 +539,51 @@ export function PasswordRecoveryScreen() {
   );
 }
 
+
+function AuthBrandMotion() {
+  const phase = React.useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    let active = true;
+    let animation: Animated.CompositeAnimation | undefined;
+    function configure(reduced: boolean) {
+      animation?.stop();
+      phase.setValue(0);
+      if (!active || reduced) return;
+      animation = Animated.loop(Animated.timing(phase, {
+        toValue: 1, duration: 9000, easing: Easing.linear,
+        useNativeDriver: true, isInteraction: false,
+      }));
+      animation.start();
+    }
+    AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active) configure(value); }).catch(() => {});
+    const listener = AccessibilityInfo.addEventListener("reduceMotionChanged", configure);
+    return () => { active = false; animation?.stop(); listener.remove(); };
+  }, [phase]);
+  return (
+    <View style={{ alignItems: "center", paddingTop: 12, paddingBottom: 6, gap: 14 }}>
+      <View style={{ width: 204, height: 154, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ position: "absolute", width: 148, height: 148, borderRadius: 74, backgroundColor: C.lavender, opacity: 0.65 }} />
+        <Animated.View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
+          style={{ position: "absolute", width: 180, height: 140, borderRadius: 90, borderWidth: 1,
+            borderColor: C.line, transform: [{ rotate: phase.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] }) }] }}>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.purple, position: "absolute", top: 17, left: 22 }} />
+          <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: C.rose, position: "absolute", bottom: 15, right: 22 }} />
+        </Animated.View>
+        <Animated.Image source={require("../assets/envizion-original.png")} resizeMode="contain"
+          accessibilityLabel="EnVizion Life"
+          style={{ width: 154, height: 102, transform: [{ translateY: phase.interpolate({
+            inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, -5, 0, 5, 0],
+          }) }] }} />
+      </View>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 7, borderWidth: 1, borderColor: C.line,
+        borderRadius: 30, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: C.white }}>
+        <Icon name="shield-checkmark-outline" size={13} />
+        <Text style={[S.eyebrow, { fontSize: 9, letterSpacing: 1.4 }]}>YOUR CARE. CONNECTED.</Text>
+      </View>
+    </View>
+  );
+}
+
 export function AuthScreen() {
   const {
     signIn,
@@ -547,6 +595,7 @@ export function AuthScreen() {
     clearAuthMessage,
   } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -561,6 +610,7 @@ export function AuthScreen() {
 
   function switchMode(nextMode: "signin" | "signup" | "forgot") {
     setMode(nextMode);
+    setShowPassword(false);
     setMessage("");
     setPassword("");
     clearAuthMessage();
@@ -692,29 +742,15 @@ export function AuthScreen() {
 
   return (
     <Page>
-      <View style={{ alignItems: "flex-start" }}>
-        <Brand />
+      <AuthBrandMotion />
+
+      <View style={{ alignItems: "center", gap: 7, paddingBottom: 4 }}>
+      <Text style={[S.eyebrow, { fontSize: 9, letterSpacing: 2.5 }]}>ENVIZION LIFE WORKSPACE</Text>
+      <Text accessibilityRole="header" style={[S.title, { fontSize: 34, lineHeight: 40, textAlign: "center", letterSpacing: -1.2 }]}>{mode === "signin" ? "Care starts here." : mode === "signup" ? "A little closer. Together." : "Let’s get you back."}</Text>
+      <Text style={[S.body, { textAlign: "center", maxWidth: 300 }]}>{mode === "signin" ? "Your people. Your care. One connected space." : mode === "signup" ? "Create your account to join your care circle." : "We’ll email you a secure recovery link."}</Text>
       </View>
-
-      <Heading
-        eyebrow="ENVIZION LIFE"
-        title={
-          mode === "signin"
-            ? "Welcome back."
-            : mode === "signup"
-              ? "Create your EnVizion Life account."
-              : "Reset your password."
-        }
-        body={
-          mode === "signin"
-            ? "Sign in to securely continue your EnVizion Life workspace."
-            : mode === "signup"
-              ? "Your account keeps your authorized care access connected across visits."
-              : "Enter your email and we’ll send a recovery link. We won’t reveal whether an account exists."
-        }
-      />
-
-      <Card style={{ gap: 15 }}>
+      <Card style={{ gap: 17, padding: 22, borderRadius: 28, backgroundColor: C.white, shadowOpacity: 0.07, shadowRadius: 28, shadowOffset: { width: 0, height: 12 } }}>
+        <View style={[S.between, { marginBottom: 1 }]}><Text style={[S.h3, { fontSize: 18 }]}>{mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Account recovery"}</Text><Icon name="lock-closed-outline" size={17} color={C.muted} /></View>
         {mode === "signup" && (
           <View style={{ gap: 8 }}>
             <Text style={[S.h3, { fontSize: 13 }]}>Your name</Text>
@@ -723,7 +759,7 @@ export function AuthScreen() {
               value={fullName}
               onChangeText={setFullName}
               autoComplete="name"
-              style={S.input}
+              style={[S.input, { borderRadius: 14, backgroundColor: C.paper, shadowOpacity: 0, fontSize: 16 }]}
               placeholder="Your name"
               placeholderTextColor={themeForeground("#AAA0AF")}
             />
@@ -740,7 +776,7 @@ export function AuthScreen() {
             autoCorrect={false}
             autoComplete="email"
             keyboardType="email-address"
-            style={S.input}
+            style={[S.input, { borderRadius: 14, backgroundColor: C.paper, shadowOpacity: 0, fontSize: 16 }]}
             placeholder="you@example.com"
             placeholderTextColor={themeForeground("#AAA0AF")}
           />
@@ -749,6 +785,7 @@ export function AuthScreen() {
         {mode !== "forgot" && (
           <View style={{ gap: 8 }}>
             <Text style={[S.h3, { fontSize: 13 }]}>Password</Text>
+            <View style={{ position: "relative" }}>
             <TextInput
               accessibilityLabel="Password"
               value={password}
@@ -756,8 +793,10 @@ export function AuthScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              secureTextEntry
-              style={S.input}
+              secureTextEntry={!showPassword}
+              style={[S.input, { borderRadius: 14, backgroundColor: C.paper, shadowOpacity: 0, fontSize: 16, paddingRight: 56 }]}
+              returnKeyType="go"
+              onSubmitEditing={() => void submit()}
               placeholder={
                 mode === "signup"
                   ? `At least ${MIN_PASSWORD_LENGTH} characters`
@@ -765,6 +804,12 @@ export function AuthScreen() {
               }
               placeholderTextColor={themeForeground("#AAA0AF")}
             />
+            <Pressable accessibilityRole="button" accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+              onPress={() => setShowPassword(value => !value)}
+              style={{ position: "absolute", right: 4, top: 4, width: 46, minHeight: 46, alignItems: "center", justifyContent: "center" }}>
+              <Icon name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color={C.muted} />
+            </Pressable>
+            </View>
           </View>
         )}
 
@@ -791,7 +836,8 @@ export function AuthScreen() {
                   ? "Create account"
                   : "Send recovery link"
           }
-          disabled={busy}
+          disabled={busy || googleBusy}
+          icon="arrow-forward"
           onPress={() => void submit()}
         />
 
@@ -923,9 +969,7 @@ export function AuthScreen() {
       {(busy || googleBusy) && <ActivityIndicator color={C.purple} />}
 
       <Txt style={[S.small, { textAlign: "center" }]}>
-        Your account protects access to saved care information and authorized
-        staff tools. EnVizion Life does not replace emergency or professional
-        medical care.
+        Care feels better, together.\n        EnVizion Life supports care coordination and does not replace medical care.
       </Txt>
     </Page>
   );
