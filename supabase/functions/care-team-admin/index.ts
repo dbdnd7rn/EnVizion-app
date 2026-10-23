@@ -91,10 +91,103 @@ async function findUserByEmail(admin: any, email: string) {
 // Existing Supabase Auth accounts cannot receive another admin invite. A
 // passwordless sign-in email helps them reach their pending *in-app* invite.
 // Sign-in is not acceptance: membership stays "invited" until they consent.
+// Auth's Magic Link template reads user_metadata (".Data"). Store a *display-
+// only* invitation snapshot immediately before requesting an existing-user
+// sign-in link. This is never an authorization claim: RLS and explicit acceptance
+// continue to govern access. No medical notes, measurements or diagnoses go
+// into email metadata.
+async function prepareCareInvitationEmailContext(
+  admin: any,
+  careRecipientId: string,
+  userId: string,
+): Promise<boolean> {
+  const { data: membership, error: membershipError } = await admin
+    .from("care_recipient_members")
+    .select("role,status,invited_by,invited_name,invite_expires_at")
+    .eq("care_recipient_id", careRecipientId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (membershipError || membership?.status !== "invited" ||
+      invitationExpired(membership?.invite_expires_at)) return false;
+
+  const { data: recipient, error: recipientError } = await admin
+    .from("care_recipients")
+    .select("display_name")
+    .eq("id", careRecipientId)
+    .single();
+  if (recipientError || !recipient) return false;
+
+  const { data: inviteeAccount, error: accountError } =
+    await admin.auth.admin.getUserById(userId);
+  if (accountError || !inviteeAccount?.user) return false;
+
+  const inviterId = membership.invited_by;
+  const { data: inviterAccount } = inviterId
+    ? await admin.auth.admin.getUserById(inviterId)
+    : { data: null };
+  const { data: inviterProfile } = inviterId
+    ? await admin.from("profiles").select("full_name").eq("id", inviterId).maybeSingle()
+    : { data: null };
+  const inviterName = (
+    String(inviterProfile?.full_name ?? "").trim() ||
+    String(inviterAccount?.user?.user_metadata?.full_name ?? "").trim() ||
+    "Your Primary Advocate"
+  ).slice(0, 120);
+  const existingMetadata = inviteeAccount.user.user_metadata ?? {};
+  const metadata = typeof existingMetadata === "object" && !Array.isArray(existingMetadata)
+    ? existingMetadata
+    : {};
+  const snapshot = {
+    care_recipient_id: careRecipientId,
+    invited_by_name: inviterName,
+    care_recipient_name: String(recipient.display_name ?? "your care recipient").slice(0, 120),
+    invited_name: String(membership.invited_name ?? "").slice(0, 120),
+    care_access_role: roleLabel(membership.role as CareRole),
+    expires_on: membership.invite_expires_at
+      ? new Date(membership.invite_expires_at).toLocaleDateString("en-GB", {
+          day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+        })
+      : "",
+  };
+  const { error: updateError } = await admin.auth.admin.updateUserById(userId, {
+    user_metadata: { ...metadata, envizion_care_invitation: snapshot },
+  });
+  if (updateError) {
+    console.warn("Could not prepare personalized care invitation email.");
+    return false;
+  }
+  return true;
+}
+
+async function clearCareInvitationEmailContext(
+  admin: any, careRecipientId: string, userId: string,
+) {
+  try {
+    const { data, error } = await admin.auth.admin.getUserById(userId);
+    if (error || !data?.user) return;
+    const metadata = data.user.user_metadata ?? {};
+    if (metadata?.envizion_care_invitation?.care_recipient_id !== careRecipientId) return;
+    const { envizion_care_invitation: _old, ...remaining } = metadata;
+    const { error: clearError } = await admin.auth.admin.updateUserById(userId, {
+      user_metadata: remaining,
+    });
+    if (clearError) console.warn("Could not clear old invitation email context.");
+  } catch {
+    console.warn("Could not clear old invitation email context.");
+  }
+}
+
 async function requestExistingUserSignInEmail(
   supabaseUrl: string, anonKey: string, email: string,
+  admin: any, careRecipientId: string, userId: string,
 ): Promise<boolean> {
   try {
+    const personalized = await prepareCareInvitationEmailContext(
+      admin, careRecipientId, userId,
+    );
+    if (!personalized) {
+      console.warn("Care invitation email will use the generic sign-in fallback.");
+    }
     const emailClient = createClient(supabaseUrl, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -322,6 +415,7 @@ Deno.serve(async (req: Request) => {
 
       if (notificationError) throw notificationError;
 
+      await clearCareInvitationEmailContext(admin, careRecipientId, user.id);
       return json({ ok: true, accepted });
     }
 
@@ -1809,7 +1903,7 @@ Deno.serve(async (req: Request) => {
 
       if (existingAccount) {
         invitationEmailSent = await requestExistingUserSignInEmail(
-          supabaseUrl, anonKey, email,
+          supabaseUrl, anonKey, email, admin, careRecipientId, target.id,
         );
         if (invitationEmailSent) {
           await recordInvitationEmailRequest(admin, careRecipientId, target.id);
@@ -1940,6 +2034,7 @@ Deno.serve(async (req: Request) => {
       const emailRequested = reminderAccount?.user?.email
         ? await requestExistingUserSignInEmail(
             supabaseUrl, anonKey, reminderAccount.user.email,
+            admin, careRecipientId, targetUserId,
           )
         : false;
       if (emailRequested) {
@@ -2053,6 +2148,7 @@ Deno.serve(async (req: Request) => {
         entity_id: careRecipientId,
       });
 
+      await clearCareInvitationEmailContext(admin, careRecipientId, targetUserId);
       return json({ ok: true });
     }
 
@@ -2134,6 +2230,7 @@ Deno.serve(async (req: Request) => {
       const emailRequested = reinviteAccount?.user?.email
         ? await requestExistingUserSignInEmail(
             supabaseUrl, anonKey, reinviteAccount.user.email,
+            admin, careRecipientId, targetUserId,
           )
         : false;
       if (emailRequested) {
