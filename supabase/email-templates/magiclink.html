@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EnVizion Life — secure sign-in</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f5f0f8;font-family:Arial,Helvetica,sans-serif;color:#211a37;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f5f0f8;">
+      <tr>
+        <td align="center" style="padding:38px 14px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:550px;border-collapse:separate;background:#ffffff;border:1px solid #eaddf0;border-radius:24px;">
+            <tr>
+              <td style="background:#f0e3f9;padding:28px 30px;border-radius:24px 24px 0 0;">
+                <p style="margin:0;font-size:13px;letter-spacing:2.2px;font-weight:700;color:#70338f;">ENVIZION LIFE</p>
+                <p style="margin:10px 0 0;color:#574568;font-size:13px;">Care, connection and peace of mind.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:30px;">
+                {{ if .Data.envizion_care_invitation }}
+                <p style="font-size:12px;font-weight:700;letter-spacing:1.5px;color:#70338f;margin:0 0 12px;">PRIVATE CARE TEAM INVITATION</p>
+                <h1 style="font-size:26px;line-height:1.3;margin:0 0 18px;color:#211a37;">You've been invited to join a care team</h1>
+                {{ if .Data.envizion_care_invitation.invited_name }}
+                <p style="font-size:16px;line-height:1.65;margin:0 0 15px;">Hello {{ .Data.envizion_care_invitation.invited_name }},</p>
+                {{ end }}
+                <p style="font-size:16px;line-height:1.65;margin:0 0 18px;">
+                  <strong>{{ .Data.envizion_care_invitation.invited_by_name }}</strong> has invited you to
+                  <strong>EnVizion Life</strong> to join the care space for
+                  <strong>{{ .Data.envizion_care_invitation.care_recipient_name }}</strong>.
+                </p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7f1fb;border:1px solid #eadcf2;border-radius:16px;margin:0 0 22px;">
+                  <tr><td style="padding:17px 18px;">
+                    <p style="font-size:12px;color:#6d5d79;margin:0 0 5px;">YOUR INVITED ROLE</p>
+                    <p style="font-size:18px;font-weight:700;color:#70338f;margin:0 0 10px;">{{ .Data.envizion_care_invitation.care_access_role }}</p>
+                    <p style="font-size:13px;line-height:1.6;color:#554760;margin:0;">
+                      {{ if eq .Data.envizion_care_invitation.care_access_role "Care Recipient" }}
+                      You can view your shared care plan, medication information, appointments, care team and available care updates.
+                      {{ else }}
+                      You will see the care information and coordination tools permitted for your invited role.
+                      {{ end }}
+                    </p>
+                  </td></tr>
+                </table>
+                <h2 style="font-size:17px;margin:0 0 10px;">How to get started</h2>
+                <p style="font-size:14px;line-height:1.85;color:#53485f;margin:0 0 20px;">
+                  <strong>1.</strong> Select the secure sign-in link below.<br>
+                  <strong>2.</strong> Open <strong>Care Team &amp; Sharing</strong> in EnVizion Life.<br>
+                  <strong>3.</strong> Review the invitation and choose <strong>Accept</strong> if you want to join.
+                </p>
+                <p style="margin:0 0 24px;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#70338f;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 23px;border-radius:13px;">Sign in to review your invitation</a>
+                </p>
+                <p style="font-size:13px;line-height:1.7;color:#71647d;margin:0 0 16px;">
+                  {{ if .Data.envizion_care_invitation.expires_on }}
+                  Your in-app care invitation is valid until <strong>{{ .Data.envizion_care_invitation.expires_on }}</strong>.
+                  {{ else }}
+                  Your in-app care invitation is valid for 14 days.
+                  {{ end }}
+                  This sign-in link expires sooner and can only be used once. Signing in does not automatically accept the invitation.
+                </p>
+                {{ else }}
+                <h1 style="font-size:26px;line-height:1.3;margin:0 0 17px;color:#211a37;">Your secure EnVizion Life sign-in link</h1>
+                <p style="font-size:15px;line-height:1.7;margin:0 0 22px;color:#53485f;">
+                  Use the button below to sign in securely to your EnVizion Life account.
+                </p>
+                <p style="margin:0 0 23px;">
+                  <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#70338f;color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 23px;border-radius:13px;">Sign in to EnVizion Life</a>
+                </p>
+                <p style="font-size:13px;line-height:1.7;color:#71647d;margin:0 0 16px;">
+                  This sign-in link is single-use and expires shortly.
+                </p>
+                {{ end }}
+                <p style="font-size:12px;line-height:1.65;color:#8a7d92;border-top:1px solid #eee5f1;padding-top:17px;margin:0;">
+                  If you weren't expecting this email, simply ignore it. Never forward your secure sign-in link.
+                  EnVizion Life never asks you to email passwords or personal care records.
+                </p>
+              </td>
+            </tr>
+            <tr><td style="padding:19px 30px;background:#faf7fc;border-radius:0 0 24px 24px;text-align:center;color:#8a7d92;font-size:11px;">
+              © EnVizion Life · Private care coordination
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
