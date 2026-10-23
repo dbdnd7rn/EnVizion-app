@@ -372,7 +372,7 @@ export function EnVizionAIScreen() {
               {item.role === "user" ? "YOU" : "ENVIZION AI"}
             </Text>
             <Text selectable style={{ fontFamily: "DMSans_400Regular", fontSize: 14,
-              lineHeight: 22, color: item.role === "user" ? "#FFFFFF" : themeForeground(INK) }}>
+              lineHeight: 22, color: item.role === "user" ? themeForeground("#FFFFFF") : themeForeground(INK) }}>
               {item.text}
             </Text>
             {item.trends && careDataAllowed && previousProfile.current === state.careRecipientId && state.careRecipientId &&
@@ -435,7 +435,7 @@ export function EnVizionAIScreen() {
                         backgroundColor: pending.recurrence === recurrence ? themeAction(PURPLE) : themeBackground("#FFFFFF"),
                         borderWidth: 1, borderColor: themeBorder("#E1D0EB"),
                       }}>
-                      <Text style={{ fontSize: 12.5, color: pending.recurrence === recurrence ? "#FFFFFF" : themeForeground(PURPLE) }}>
+                      <Text style={{ fontSize: 12.5, color: pending.recurrence === recurrence ? themeForeground("#FFFFFF") : themeForeground(PURPLE) }}>
                         {recurrence === "none" ? "Once" : recurrence === "daily" ? "Daily" : "Weekly"}
                       </Text>
                     </Pressable>

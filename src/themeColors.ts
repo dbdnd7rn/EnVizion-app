@@ -7,10 +7,10 @@ export function setActiveAppearance(mode: AppearanceMode) { activeMode = mode; }
 export function activeAppearance() { return activeMode; }
 
 export const darkPalette: Record<string, string> = {
-  ink: "#E0D9E8", muted: "#ACA3BB", purple: "#CBA6E7",
+  ink: "#DCD5E5", muted: "#AFA8BC", purple: "#C7A3E2",
   deep: "#C5A4DF", lavender: "#30293C", paper: "#191720",
   line: "#403749", rose: "#F0A5B7", redBg: "#35242E",
-  green: "#86D6B4", white: "#EFE9F4",
+  green: "#86D6B4", white: "#E8E1EE",
 };
 
 function parseHex(source: string) {
@@ -57,11 +57,11 @@ export function appearanceColor(source: string, role: ColorRole = "foreground") 
     }
     if (role === "foreground") {
       // Soft ivory on actions prevents pure-white glare but still meets AA.
-      if (v > 0.86) return "#EFE9F4";
+      if (v > 0.86) return "#E8E1EE";
       if (isRose(r, g, b) && v < 0.70) return "#EFA6B8";
       if (isGreen(r, g, b) && v < 0.70) return "#89D6B5";
-      if (isPurple(r, g, b) && v < 0.73) return "#CBA6E7";
-      return v < 0.34 ? "#E0D9E8" : v < 0.60 ? "#B9B1C6" : "#ACA4BB";
+      if (isPurple(r, g, b) && v < 0.73) return "#C7A3E2";
+      return v < 0.34 ? "#DCD5E5" : v < 0.60 ? "#B9B1C6" : "#ACA4BB";
     }
     if (role === "tint" && v > 0.90) return "#302839";
     if (v > 0.96) return "#25212E";

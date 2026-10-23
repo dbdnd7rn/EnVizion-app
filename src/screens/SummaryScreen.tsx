@@ -1,5 +1,6 @@
 import { themeBackground, themeBorder, themeTint } from "../themeColors";
-import { themeForeground, themeShadow } from "../themeColors";
+import { themeForeground, themeShadow, themeAction } from "../themeColors";
+import { useAppearance } from "../appearance";
 import React, {
   useCallback,
   useEffect,
@@ -366,6 +367,7 @@ function SummaryAction({
   disabled?: boolean;
   onPress: () => void;
 }) {
+  const { dark } = useAppearance();
   return (
     <Pressable
       accessibilityRole="button"
@@ -379,7 +381,7 @@ function SummaryAction({
         overflow: "hidden",
         borderWidth: primary ? 0 : 1.3,
         borderColor: themeBorder("#B98CDA"),
-        backgroundColor: primary ? "#7B35A8" : "#FFFFFFA6",
+        backgroundColor: primary ? themeAction("#7B35A8") : themeBackground("#FFFFFFA6"),
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
@@ -410,9 +412,9 @@ function SummaryAction({
               x2="1"
               y2="0"
             >
-              <Stop offset="0" stopColor={themeTint("#8A43BC")} />
-              <Stop offset="0.5" stopColor={themeTint("#9844CC")} />
-              <Stop offset="1" stopColor={themeTint("#7431A7")} />
+              <Stop offset="0" stopColor={dark ? "#50366E" : themeTint("#8A43BC")} />
+              <Stop offset="0.5" stopColor={dark ? "#654082" : themeTint("#9844CC")} />
+              <Stop offset="1" stopColor={dark ? "#553774" : themeTint("#7431A7")} />
             </LinearGradient>
           </Defs>
           <Rect
@@ -428,13 +430,13 @@ function SummaryAction({
       <Icon
         name={icon}
         size={24}
-        color={primary ? "#FFFFFF" : "#71319B"}
+        color={primary ? themeForeground("#FFFFFF") : themeForeground("#71319B")}
       />
       <Text
         style={{
           fontFamily: "DMSans_600SemiBold",
           fontSize: 16,
-          color: primary ? "#FFFFFF" : "#71319B",
+          color: primary ? themeForeground("#FFFFFF") : themeForeground("#71319B"),
         }}
       >
         {title}

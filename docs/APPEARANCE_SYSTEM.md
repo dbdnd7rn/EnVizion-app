@@ -4,7 +4,7 @@
 Open **Profile → Accessibility & display → Appearance** and choose **Light** or **Dark**. The selection changes without clearing navigation, forms, or care records. The choice is stored locally using AsyncStorage at `@envizion-life/appearance/mode/v1` and loaded before the main interface appears. Light is the default for a device with no stored choice. A storage write failure displays a message and leaves the current visual mode in place for that session.
 
 ## Design
-Light retains the previous cream/white/lavender palette. Dark uses charcoal and aubergine surfaces, lavender text accents, subdued borders, and a deeper plum for filled buttons. White button labels must retain at least a 4.5:1 contrast ratio. Alerts retain text/icon/status identifiers; color alone does not carry meaning. Device text scaling, reduced motion and screen reader support are unchanged.
+Light retains the previous cream/white/lavender palette. Dark uses charcoal and aubergine surfaces, lavender text accents, subdued borders, and a deeper plum for filled buttons. Primary and secondary text use softer low-glare lavender/ivory instead of brilliant white. Animated care form surfaces, Home action icon tiles, care summary buttons and AI user messages use dark-aware colors; the light appearance remains unchanged. White button labels must retain at least a 4.5:1 contrast ratio. Alerts retain text/icon/status identifiers; color alone does not carry meaning. Device text scaling, reduced motion and screen reader support are unchanged.
 
 ## Implementation
 - `src/themeColors.ts`: semantic palettes and role-aware legacy-color mapping. `themeAction` is for white-on-primary filled controls; `themeForeground` is for accent labels and icons. Do not interchange them.
