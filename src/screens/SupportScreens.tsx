@@ -1,12 +1,13 @@
 import { themeBorder, themeTint } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, Switch, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, Switch, Text, View, useWindowDimensions } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import type { RootStack } from "../navigation";
 import { useCare } from "../store";
 import { specialists, trustedResources } from "../content";
+import { SpecialistArtwork, SPECIALIST_PALETTES, SPECIALIST_QUESTIONS, SPECIALIST_NOTES } from "../components/SpecialistArtwork";
 import { loadPublishedGuide, type ClinicalContentRecord } from "../clinicalContent";
 import {
   Brand,
@@ -935,506 +936,220 @@ export function GuideScreen({
     </Page>
   );
 }
+
+/** These guides deliberately share navigation and accessibility, but not a generic hero illustration. */
+const specialtyIcons = [
+  "people-outline", "heart-outline", "ribbon-outline", "water-outline",
+  "hardware-chip-outline", "analytics-outline", "fitness-outline", "body-outline",
+] as const;
+
+function SpecialtyGlass({children,accent,style}:{
+  children:React.ReactNode;accent:string;style?:any;
+}) {
+  return (
+    <View style={[{
+      overflow:"hidden",borderRadius:26,borderWidth:1,
+      borderColor:themeBorder("#E9E1F0"),backgroundColor:themeBackground("#FFFEFF"),
+      shadowColor:themeShadow(accent),shadowOpacity:0.075,
+      shadowRadius:17,shadowOffset:{width:0,height:6},elevation:2,
+    },style]}>{children}</View>
+  );
+}
+
 export function SpecialistsScreen() {
-  const n = useNav();
-  return (
-    <Page>
-      <Heading
-        eyebrow="HEALTHCARE NAVIGATION"
-        title="Understand your care team"
-        body="Different specialists, one shared goal: care for your loved one."
-      />
-      {specialists.map(([title, subtitle], i) => (
-        <Row
-          key={title}
-          title={title}
-          subtitle={subtitle}
-          icon={
-            [
-              "medical-outline",
-              "heart-outline",
-              "water-outline",
-              "leaf-outline",
-              "flower-outline",
-              "pulse-outline",
-              "fitness-outline",
-              "body-outline",
-            ][i]
-          }
-          onPress={() => n.navigate("Specialist", { index: i })}
-        />
-      ))}
-    </Page>
-  );
-}
-
-function SpecialistHeroGraphic() {
-  return (
-    <Svg width="100%" height="100%" viewBox="0 0 420 315">
-      <Defs>
-        <LinearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FBF7FF")} />
-          <Stop offset="1" stopColor={themeTint("#EEE3FB")} />
-        </LinearGradient>
-        <LinearGradient id="heart" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFB7D0")} />
-          <Stop offset="0.55" stopColor={themeTint("#DB8BDB")} />
-          <Stop offset="1" stopColor={themeTint("#9B64D5")} />
-        </LinearGradient>
-        <LinearGradient id="coat" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-          <Stop offset="1" stopColor={themeTint("#F3EEF9")} />
-        </LinearGradient>
-        <LinearGradient id="clipboard" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#8C65C5")} />
-          <Stop offset="1" stopColor={themeTint("#5D3C9A")} />
-        </LinearGradient>
-        <LinearGradient id="hair" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#51304F")} />
-          <Stop offset="1" stopColor={themeTint("#2D1732")} />
-        </LinearGradient>
-      </Defs>
-
-      <Path
-        d="M38 268C8 223 21 158 58 111C93 66 148 46 202 55C253 18 333 20 382 62C427 100 437 169 403 221C372 268 319 292 255 292H88C66 292 49 285 38 268Z"
-        fill="url(#bg)"
-      />
-
-      <Ellipse cx="52" cy="246" rx="20" ry="72" fill={themeTint("#B998E1")} transform="rotate(-32 52 246)" />
-      <Ellipse cx="89" cy="250" rx="18" ry="63" fill={themeTint("#D6C2F0")} transform="rotate(22 89 250)" />
-      <Ellipse cx="362" cy="233" rx="20" ry="72" fill={themeTint("#AF8ADC")} transform="rotate(24 362 233)" />
-      <Ellipse cx="392" cy="257" rx="17" ry="61" fill={themeTint("#DCC8F1")} transform="rotate(32 392 257)" />
-
-      <G>
-        <Path
-          d="M104 94C104 75 119 63 136 63C152 63 162 73 167 85C172 73 183 63 198 63C216 63 230 75 230 94C230 123 202 145 167 169C133 146 104 124 104 94Z"
-          fill="url(#heart)"
-        />
-        <Path d="M124 111h19l8-19 11 35 10-22 8 11h25" stroke={themeTint("#FFF")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </G>
-
-      <G transform="translate(50 142)">
-        <Rect x="0" y="12" width="97" height="116" rx="15" fill={themeTint("#FFF")} opacity="0.95" />
-        <Rect x="34" y="0" width="38" height="22" rx="7" fill={themeTint("#8E64C2")} />
-        <Circle cx="53" cy="3" r="6" fill={themeTint("#F4EFFB")} />
-        <Path d="M18 45l9 9 17-20" stroke={themeTint("#8760BE")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <Path d="M18 77l9 9 17-20" stroke={themeTint("#8760BE")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <Path d="M18 109l9 9 17-20" stroke={themeTint("#8760BE")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <Rect x="51" y="38" width="30" height="7" rx="3.5" fill={themeTint("#C8B5E3")} />
-        <Rect x="51" y="70" width="33" height="7" rx="3.5" fill={themeTint("#D4C6E8")} />
-        <Rect x="51" y="102" width="26" height="7" rx="3.5" fill={themeTint("#D4C6E8")} />
-      </G>
-
-      <G transform="translate(328 78)">
-        <Rect x="0" y="0" width="74" height="74" rx="20" fill={themeTint("#FFF")} opacity="0.88" />
-        <Path d="M31 16h13v15h15v13H44v15H31V44H16V31h15Z" fill={themeTint("#9A68CE")} />
-      </G>
-
-      <G>
-        <Path d="M179 122C174 74 205 45 248 47C293 49 322 80 319 125C317 160 303 181 282 198H194C183 179 181 153 179 122Z" fill="url(#hair)" />
-        <Path d="M218 101C224 72 249 58 278 68C296 74 308 90 309 108C294 96 281 92 266 93C249 94 236 97 218 101Z" fill={themeTint("#3E2143")} />
-        <Circle cx="251" cy="114" r="43" fill={themeTint("#F1BDA4")} />
-        <Circle cx="237" cy="114" r="3" fill={themeTint("#4A324D")} />
-        <Circle cx="267" cy="114" r="3" fill={themeTint("#4A324D")} />
-        <Path d="M242 133C249 139 257 139 266 132" stroke={themeTint("#C9766D")} strokeWidth="3" fill="none" strokeLinecap="round" />
-        <Path d="M212 147C205 184 212 221 221 260H307C320 213 319 176 300 147C280 162 232 163 212 147Z" fill="url(#coat)" />
-        <Path d="M246 160L258 180L272 160V258H244Z" fill={themeTint("#B89BE5")} />
-        <Path d="M219 160L242 176L229 197L240 258H218C209 219 205 185 219 160Z" fill={themeTint("#FFF")} />
-        <Path d="M297 160L274 176L287 197L276 258H307C317 218 316 184 297 160Z" fill={themeTint("#FFF")} />
-        <Path d="M229 162C214 187 212 214 218 242" stroke={themeTint("#3D3159")} strokeWidth="6" fill="none" strokeLinecap="round" />
-        <Path d="M286 162C301 188 302 213 295 240" stroke={themeTint("#3D3159")} strokeWidth="6" fill="none" strokeLinecap="round" />
-        <Circle cx="220" cy="244" r="9" fill={themeTint("#2F2548")} />
-        <Circle cx="294" cy="242" r="15" fill={themeTint("#76719A")} stroke={themeTint("#39344F")} strokeWidth="5" />
-        <Path d="M222 247c11 13 24 15 35 15s22-2 36-14" stroke={themeTint("#5C5476")} strokeWidth="4" fill="none" strokeLinecap="round" />
-
-        <G transform="translate(262 201) rotate(-7 55 48)">
-          <Rect x="0" y="0" width="112" height="94" rx="13" fill="url(#clipboard)" />
-          <Rect x="40" y="-4" width="42" height="12" rx="6" fill={themeTint("#69469D")} />
-          <Rect x="10" y="12" width="92" height="70" rx="9" fill={themeTint("#7854AE")} opacity="0.32" />
-        </G>
-        <Path d="M269 264c-13-3-24-2-31 3-8 5-8 15 0 22 8 7 21 10 32 8" fill={themeTint("#F1BDA4")} />
-      </G>
-
-      <Path d="M365 197c12-27 21-42 35-50-1 22-10 40-35 50Z" fill={themeTint("#A98BDC")} />
-      <Path d="M357 223c17-25 29-36 44-40-6 21-18 36-44 40Z" fill={themeTint("#C8AFE9")} />
-      <Path d="M351 248c19-22 34-31 48-31-10 19-24 31-48 31Z" fill={themeTint("#E0C9F2")} />
-      <Path d="M82 216c-14-24-26-34-41-38 7 19 19 33 41 38Z" fill={themeTint("#CBB2EA")} />
-      <Path d="M91 241c-18-21-33-29-48-28 10 18 25 28 48 28Z" fill={themeTint("#B18EDC")} />
-    </Svg>
-  );
-}
-
-export function SpecialistScreen({
-  route,
-}: NativeStackScreenProps<RootStack, "Specialist">) {
-  const n = useNav();
-  const item = specialists[route.params.index];
-
-  if (!item)
-    return (
-      <Page>
-        <Heading title="Specialist not found" />
-      </Page>
-    );
-
-  const questions = [
-    {
-      text: "What is the next step in our care plan?",
-      icon: "chatbubble-ellipses-outline",
-      background: "#F1E9FA",
-      color: themeForeground("#74329A"),
-    },
-    {
-      text: "What changes should prompt us to call?",
-      icon: "call-outline",
-      background: "#FBE7F5",
-      color: themeForeground("#8C36A4"),
-    },
-    {
-      text: "How will you coordinate with the rest of the care team?",
-      icon: "people",
-      background: "#F0E8FA",
-      color: themeForeground("#74329A"),
-    },
-  ];
-
-  return (
-    <Page>
-      <View
-        style={{
-          minHeight: 236,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 4,
-          overflow: "hidden",
-          marginHorizontal: -2,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            minWidth: 0,
-            gap: 8,
-            paddingTop: 4,
-            paddingLeft: 2,
-          }}
-        >
-          <Text
-            style={[
-              S.eyebrow,
-              {
-                color: themeForeground("#74329A"),
-                fontSize: 10.5,
-                letterSpacing: 2.55,
-              },
-            ]}
-          >
-            MEET YOUR CARE TEAM
-          </Text>
-
-          <Text
-            accessibilityRole="header"
-            style={{
-              fontFamily: "DMSans_700Bold",
-              fontSize: 36,
-              lineHeight: 41,
-              letterSpacing: -0.85,
-              color: themeForeground("#17143D"),
-            }}
-          >
-            {item[0]}
-          </Text>
-
-          <Text
-            style={{
-              fontFamily: "DMSans_400Regular",
-              fontSize: 15.5,
-              lineHeight: 23,
-              color: themeForeground("#747184"),
-              maxWidth: 180,
-            }}
-          >
-            {item[1]}
+  const n=useNav();
+  const {width}=useWindowDimensions();
+  const narrow=width<380;
+  return <Page>
+    <View style={{gap:11,marginBottom:7}}>
+      <Text style={[S.eyebrow,{color:themeForeground("#7639A5"),letterSpacing:2.7}]}>
+        HEALTHCARE NAVIGATION
+      </Text>
+      <View style={{flexDirection:"row",alignItems:"center",gap:5,minHeight:166}}>
+        <View style={{flex:1,justifyContent:"center",gap:10,zIndex:1}}>
+          <Text accessibilityRole="header" style={{
+            fontFamily:"Lora_500Medium",fontSize:narrow?28:35,
+            lineHeight:narrow?38:44,letterSpacing:-.8,color:themeForeground("#17143D"),
+          }}>Understand your care team</Text>
+          <Text style={{fontFamily:"DMSans_400Regular",fontSize:14,lineHeight:21,
+            color:themeForeground("#777187")}}>
+            Different specialists, one shared goal: care for your loved one.
           </Text>
         </View>
-
-        <View
-          pointerEvents="none"
-          style={{
-            width: 198,
-            height: 214,
-            marginRight: -8,
-          }}
-        >
-          <SpecialistHeroGraphic />
+        <View style={{width:narrow?116:148,height:160,marginRight:-9}} pointerEvents="none">
+          <SpecialistArtwork index={0} height={160} motion/>
         </View>
       </View>
-
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Before your visit"
-        onPress={() => n.navigate("Appointments")}
-        style={({ pressed }) => ({
-          minHeight: 136,
-          borderRadius: 28,
-          paddingHorizontal: 18,
-          paddingVertical: 18,
-          backgroundColor: themeBackground("#F7F1FC"),
-          borderWidth: 1,
-          borderColor: themeBorder("#E7DCEF"),
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 16,
-          opacity: pressed ? 0.82 : 1,
-          transform: [{ scale: pressed ? 0.992 : 1 }],
-          shadowColor: themeShadow("#54315F"),
-          shadowOpacity: 0.065,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 2,
-        })}
-      >
-        <View
-          style={{
-            width: 78,
-            height: 78,
-            borderRadius: 24,
-            backgroundColor: themeBackground("#FFFFFF"),
-            alignItems: "center",
-            justifyContent: "center",
-            shadowColor: themeShadow("#553066"),
-            shadowOpacity: 0.05,
-            shadowRadius: 10,
-            shadowOffset: { width: 0, height: 5 },
-            elevation: 1,
-          }}
-        >
-          <View style={{ position: "relative" }}>
-            <Icon name="clipboard-outline" size={39} color={themeForeground("#6F3E9B")} />
-            <View
-              style={{
-                position: "absolute",
-                right: -9,
-                bottom: -8,
-                width: 29,
-                height: 29,
-                borderRadius: 9,
-                backgroundColor: themeBackground("#7D48AA"),
-                alignItems: "center",
-                justifyContent: "center",
-                borderWidth: 3,
-                borderColor: themeBorder("#FFFFFF"),
-              }}
-            >
-              <Icon name="add" size={18} color={themeForeground("#FFFFFF")} />
+      <Text style={[S.small,{color:themeForeground("#777187")}]}>
+        Choose a specialty to explore visit preparation and helpful questions.
+      </Text>
+    </View>
+    {specialists.map(([title,subtitle],i)=>{
+      const palette=SPECIALIST_PALETTES[i]??SPECIALIST_PALETTES[0];
+      return <Pressable key={title} accessibilityRole="button"
+        accessibilityLabel={`Open ${title} specialist guide`}
+        onPress={()=>n.navigate("Specialist",{index:i})}
+        style={({pressed})=>({opacity:pressed?.82:1,transform:[{scale:pressed?.994:1}]})}>
+        <SpecialtyGlass accent={palette.accent} style={{minHeight:112}}>
+          <View pointerEvents="none" style={{position:"absolute",top:0,right:0,bottom:0,width:"48%",opacity:.47}}>
+            <SpecialistArtwork index={i} height={128} compact/>
+          </View>
+          <View style={{flexDirection:"row",alignItems:"center",gap:14,
+            paddingHorizontal:17,paddingVertical:17,minHeight:112}}>
+            <View style={{width:58,height:58,borderRadius:20,
+              backgroundColor:themeBackground(palette.pale),
+              alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+              <SpecialistArtwork index={i} height={54} compact/>
+            </View>
+            <View style={{flex:1,justifyContent:"center",gap:5}}>
+              <Text style={{fontFamily:"DMSans_700Bold",fontSize:16.5,lineHeight:22,
+                color:themeForeground("#17143D")}}>{title}</Text>
+              <Text style={{fontFamily:"DMSans_400Regular",fontSize:12.5,lineHeight:18,
+                color:themeForeground("#777187")}}>{subtitle}</Text>
+            </View>
+            <View style={{width:35,height:35,borderRadius:19,alignItems:"center",
+              justifyContent:"center",backgroundColor:themeBackground(palette.pale)}}>
+              <Icon name="chevron-forward" size={22} color={themeForeground(palette.accent)}/>
             </View>
           </View>
+        </SpecialtyGlass>
+      </Pressable>;
+    })}
+    <Text style={[S.small,{lineHeight:19,marginTop:3}]}>
+      These specialist guides explain general care roles. Your clinical team can help with individual referrals.
+    </Text>
+  </Page>;
+}
+
+export function SpecialistScreen({route}:NativeStackScreenProps<RootStack,"Specialist">) {
+  const n=useNav();
+  const {width}=useWindowDimensions();
+  const item=specialists[route.params.index];
+  if(!item) return <Page><Heading title="Specialist not found" /></Page>;
+  const index=route.params.index;
+  const palette=SPECIALIST_PALETTES[index]??SPECIALIST_PALETTES[0];
+  const questions=SPECIALIST_QUESTIONS[index]??SPECIALIST_QUESTIONS[0];
+  const specialtyNote=SPECIALIST_NOTES[index]??SPECIALIST_NOTES[0];
+  const compact=width<380;
+  const toAppointments=()=>n.navigate("Appointments");
+
+  return <Page>
+    <View style={{minHeight:226,position:"relative",justifyContent:"center",
+      borderRadius:30,overflow:"hidden",marginHorizontal:-5,
+      backgroundColor:themeBackground("#FFFDFC")}}>
+      <View style={{position:"absolute",right:-30,bottom:-3,width:compact?195:230,height:220,opacity:.96}} pointerEvents="none">
+        <SpecialistArtwork index={index} height={215} motion/>
+      </View>
+      <View style={{width:compact?"63%":"61%",paddingHorizontal:15,gap:9,zIndex:1,
+        paddingVertical:27}}>
+        <Text style={[S.eyebrow,{letterSpacing:2.6,fontSize:10,
+          color:themeForeground(palette.accent)}]}>MEET YOUR CARE TEAM</Text>
+        <Text accessibilityRole="header" style={{
+          fontFamily:"Lora_500Medium",fontSize:compact?30:37,
+          lineHeight:compact?39:46,letterSpacing:-1.05,
+          color:themeForeground("#17143D")}}>{item[0]}</Text>
+        <Text style={{fontFamily:"DMSans_400Regular",fontSize:14.5,
+          lineHeight:22,color:themeForeground("#777187")}}>{item[1]}</Text>
+        <View style={{width:45,height:3,borderRadius:3,
+          backgroundColor:themeBackground(palette.accent),marginTop:5}}/>
+      </View>
+    </View>
+
+    <Pressable accessibilityRole="button" accessibilityLabel={`Before your ${item[0]} visit`}
+      onPress={toAppointments} style={({pressed})=>({opacity:pressed?.82:1})}>
+      <SpecialtyGlass accent={palette.accent} style={{
+        backgroundColor:themeBackground(palette.pale)}}>
+        <View style={{position:"absolute",right:-38,bottom:-32,width:152,opacity:.24}} pointerEvents="none">
+          <SpecialistArtwork index={index} height={154} compact/>
         </View>
-
-        <View style={{ flex: 1, gap: 7 }}>
-          <Text
-            style={{
-              fontFamily: "DMSans_700Bold",
-              fontSize: 22,
-              lineHeight: 27,
-              color: themeForeground("#17143D"),
-            }}
-          >
-            Before your visit
-          </Text>
-          <Text
-            style={{
-              fontFamily: "DMSans_400Regular",
-              fontSize: 14.5,
-              lineHeight: 21,
-              color: themeForeground("#777187"),
-            }}
-          >
-            {item[2]}
-          </Text>
+        <View style={{flexDirection:"row",alignItems:"center",gap:15,padding:19,minHeight:137}}>
+          <View style={{width:64,height:64,borderRadius:21,
+            backgroundColor:themeBackground("#FFFFFF"),justifyContent:"center",
+            alignItems:"center",shadowColor:themeShadow(palette.accent),
+            shadowOpacity:.06,shadowRadius:9,shadowOffset:{width:0,height:3}}}>
+            <Icon name="clipboard-outline" size={33} color={themeForeground(palette.accent)}/>
+          </View>
+          <View style={{flex:1,gap:7}}>
+            <Text style={{fontFamily:"DMSans_700Bold",fontSize:19,lineHeight:24,
+              color:themeForeground("#17143D")}}>Before your visit</Text>
+            <Text style={{fontFamily:"DMSans_400Regular",fontSize:13.5,lineHeight:21,
+              color:themeForeground("#777187")}}>{item[2]}</Text>
+          </View>
+          <Icon name="chevron-forward" size={23} color={themeForeground(palette.accent)}/>
         </View>
+      </SpecialtyGlass>
+    </Pressable>
 
-        <Icon name="chevron-forward" size={27} color={themeForeground("#76369B")} />
-      </Pressable>
-
-      <View style={{ gap: 14 }}>
-        <Text
-          style={{
-            fontFamily: "DMSans_700Bold",
-            fontSize: 27,
-            lineHeight: 33,
-            letterSpacing: -0.5,
-            color: themeForeground("#17143D"),
-          }}
-        >
-          A few questions to ask
-        </Text>
-
-        {questions.map((question) => (
-          <Pressable
-            key={question.text}
-            accessibilityRole="button"
-            accessibilityLabel={question.text}
-            onPress={() => n.navigate("Appointments")}
-            style={({ pressed }) => ({
-              minHeight: 91,
-              borderRadius: 25,
-              paddingHorizontal: 15,
-              paddingVertical: 14,
-              backgroundColor: themeBackground("#FFFFFF"),
-              borderWidth: 1,
-              borderColor: themeBorder("#EEE8F0"),
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 14,
-              opacity: pressed ? 0.78 : 1,
-              transform: [{ scale: pressed ? 0.99 : 1 }],
-              shadowColor: themeShadow("#3D2649"),
-              shadowOpacity: 0.035,
-              shadowRadius: 12,
-              shadowOffset: { width: 0, height: 5 },
-              elevation: 1,
-            })}
-          >
-            <View
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: question.background,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon
-                name={question.icon}
-                size={27}
-                color={question.color}
-              />
+    <View style={{gap:12}}>
+      <Text style={{fontFamily:"Lora_500Medium",fontSize:25,lineHeight:34,
+        color:themeForeground("#17143D"),marginBottom:2}}>
+        A few questions to ask
+      </Text>
+      {questions.map((question,j)=><Pressable key={question.text}
+        accessibilityRole="button" accessibilityLabel={question.text}
+        onPress={toAppointments} style={({pressed})=>({opacity:pressed?.8:1})}>
+        <SpecialtyGlass accent={palette.accent} style={{minHeight:90}}>
+          <View pointerEvents="none" style={{position:"absolute",right:7,bottom:-32,
+            width:125,opacity:.15}}>
+            <SpecialistArtwork index={index} height={125} compact/>
+          </View>
+          <View style={{flexDirection:"row",gap:14,alignItems:"center",
+            paddingVertical:17,paddingHorizontal:15}}>
+            <View style={{width:54,height:54,borderRadius:19,backgroundColor:
+              themeBackground(j%2===0?palette.pale:"#F0E8F8"),
+              alignItems:"center",justifyContent:"center"}}>
+              <Icon name={question.icon} size={27} color={themeForeground(palette.accent)}/>
             </View>
-
-            <Text
-              style={{
-                flex: 1,
-                fontFamily: "DMSans_500Medium",
-                fontSize: 15.5,
-                lineHeight: 22,
-                color: themeForeground("#17143D"),
-              }}
-            >
+            <Text style={{flex:1,fontFamily:"DMSans_500Medium",
+              fontSize:14.5,lineHeight:21,color:themeForeground("#17143D")}}>
               {question.text}
             </Text>
+            <View style={{height:35,width:35,borderRadius:18,
+              backgroundColor:themeBackground(palette.pale),alignItems:"center",
+              justifyContent:"center"}}>
+              <Icon name="chevron-forward" size={21} color={themeForeground(palette.accent)}/>
+            </View>
+          </View>
+        </SpecialtyGlass>
+      </Pressable>)}
+    </View>
 
-            <Icon name="chevron-forward" size={24} color={themeForeground("#79349B")} />
-          </Pressable>
-        ))}
-      </View>
+    <Pressable accessibilityRole="button" accessibilityLabel="Open my appointment questions"
+      onPress={toAppointments} style={({pressed})=>({
+        minHeight:61,borderRadius:31,paddingHorizontal:20,
+        flexDirection:"row",alignItems:"center",justifyContent:"center",gap:11,
+        backgroundColor:themeBackground("#70338F"),
+        shadowColor:themeShadow("#70338F"),shadowOpacity:.2,
+        shadowRadius:18,shadowOffset:{width:0,height:8},elevation:4,
+        opacity:pressed?.84:1})}>
+      <Icon name="document-text-outline" size={22} color={themeForeground("#FFFFFF")}/>
+      <Text style={{flex:1,textAlign:"center",fontFamily:"DMSans_600SemiBold",
+        fontSize:14.5,color:themeForeground("#FFFFFF")}}>
+        Open my appointment questions
+      </Text>
+      <Icon name="chevron-forward" size={22} color={themeForeground("#FFFFFF")}/>
+    </Pressable>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Open my appointment questions"
-        onPress={() => n.navigate("Appointments")}
-        style={({ pressed }) => ({
-          minHeight: 62,
-          borderRadius: 31,
-          paddingHorizontal: 22,
-          backgroundColor: themeBackground("#7D38A0"),
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 12,
-          opacity: pressed ? 0.84 : 1,
-          transform: [{ scale: pressed ? 0.99 : 1 }],
-          shadowColor: themeShadow("#6F2E89"),
-          shadowOpacity: 0.2,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 4,
-        })}
-      >
-        <Icon name="document-text-outline" size={23} color={themeForeground("#FFFFFF")} />
-        <Text
-          style={{
-            flex: 1,
-            textAlign: "center",
-            fontFamily: "DMSans_600SemiBold",
-            fontSize: 15.5,
-            color: themeForeground("#FFFFFF"),
-          }}
-        >
-          Open my appointment questions
-        </Text>
-        <Icon name="chevron-forward" size={22} color={themeForeground("#FFFFFF")} />
-      </Pressable>
-
-      <View
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          minHeight: 88,
-          paddingHorizontal: 10,
-          paddingBottom: 14,
-          flexDirection: "row",
-          alignItems: "flex-start",
-          gap: 12,
-        }}
-      >
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            left: -70,
-            right: -70,
-            bottom: -62,
-            height: 105,
-            borderRadius: 70,
-            backgroundColor: themeBackground("#F4ECFB"),
-            transform: [{ rotate: "-3deg" }],
-          }}
-        />
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            left: 100,
-            right: -110,
-            bottom: -72,
-            height: 100,
-            borderRadius: 70,
-            backgroundColor: themeBackground("#FCECF7"),
-            transform: [{ rotate: "4deg" }],
-          }}
-        />
-
-        <View
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: 17,
-            backgroundColor: themeBackground("#EFE4F7"),
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 1,
-          }}
-        >
-          <Icon name="information-outline" size={20} color={themeForeground("#7A4A94")} />
+    <SpecialtyGlass accent={palette.accent}>
+      <View style={{flexDirection:"row",alignItems:"flex-start",gap:12,padding:16}}>
+        <View style={{height:40,width:40,borderRadius:20,
+          alignItems:"center",justifyContent:"center",
+          backgroundColor:themeBackground(palette.pale)}}>
+          <Icon name="information-circle-outline" size={23} color={themeForeground(palette.accent)}/>
         </View>
-
-        <Text
-          style={{
-            flex: 1,
-            fontFamily: "DMSans_400Regular",
-            fontSize: 12.5,
-            lineHeight: 18,
-            color: themeForeground("#777187"),
-          }}
-        >
-          This guide explains general roles. Your primary care team can help with
-          individual referral questions.
-        </Text>
+        <View style={{flex:1,gap:4}}>
+          <Text style={{fontFamily:"DMSans_700Bold",fontSize:14.5,color:themeForeground("#17143D")}}>
+            About this guide
+          </Text>
+          <Text style={{fontFamily:"DMSans_400Regular",fontSize:12.5,
+            lineHeight:19,color:themeForeground("#777187")}}>
+            {specialtyNote} This is general information, not an individual treatment plan.
+            Your primary care team can help with referral questions.
+          </Text>
+        </View>
       </View>
-    </Page>
-  );
+    </SpecialtyGlass>
+  </Page>;
 }
 export function CoachingScreen() {
   const { state, dispatch } = useCare();
