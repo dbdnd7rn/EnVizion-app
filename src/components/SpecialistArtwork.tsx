@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Platform, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useAppearance } from "../appearance";
@@ -153,17 +153,22 @@ export function SpecialistArtwork({ index, height = 160, compact = false, motion
   index: number; height?: number; compact?: boolean; motion?: boolean;
 }) {
   const { dark } = useAppearance();
+  // Every artwork has its own SVG resource ID. The list renders several
+  // SVGs at once, so shared IDs can produce cross-card gradients on web.
+  const reactId = useId();
+  const gradientId = "specialistGlow" + reactId.replace(/[^a-zA-Z0-9_-]/g, "");
   const theme = SPECIALIST_PALETTES[index] ?? SPECIALIST_PALETTES[0];
   const [animate, setAnimate] = useState(false);
   const offset = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (!motion) return;
     let mounted = true;
-    const subscription = AccessibilityInfo.addEventListener("reduceMotionChanged", reduced => setAnimate(!reduced));
-    AccessibilityInfo.isReduceMotionEnabled().then(reduced => {
+    const subscription = AccessibilityInfo.addEventListener?.("reduceMotionChanged", reduced => setAnimate(!reduced));
+    const motionPreference = AccessibilityInfo.isReduceMotionEnabled?.();
+    motionPreference?.then(reduced => {
       if (mounted) setAnimate(!reduced);
     }).catch(() => setAnimate(false));
-    return () => { mounted = false; subscription.remove(); };
+    return () => { mounted = false; subscription?.remove(); };
   }, [motion]);
   useEffect(() => {
     if (!animate || !motion) { offset.stopAnimation(); offset.setValue(0); return; }
@@ -177,13 +182,13 @@ export function SpecialistArtwork({ index, height = 160, compact = false, motion
   return <Animated.View pointerEvents="none" style={{width:"100%",height,transform:[{translateY:offset}]}}>
     <Svg width="100%" height="100%" viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" accessibilityLabel={`${theme.title} illustration`}>
       <Defs>
-        <LinearGradient id="specialistGlow" x1="0" x2="1" y1="0" y2="1">
+        <LinearGradient id={gradientId} x1="0" x2="1" y1="0" y2="1">
           <Stop offset="0" stopColor={dark?"#382D49":theme.pale}/>
           <Stop offset="1" stopColor={dark?"#564068":theme.secondary} stopOpacity=".5"/>
         </LinearGradient>
       </Defs>
       <Path d="M17 111C-3 70 31 22 79 24C111-7 169 3 188 29C236 25 265 62 249 106C267 145 234 194 176 187C135 210 95 192 67 184C22 188 0 155 17 111Z"
-        fill="url(#specialistGlow)" opacity={compact?".55":"1"}/>
+        fill={`url(#${gradientId})`} opacity={compact?".55":"1"}/>
       <Ellipse cx="45" cy="166" rx="11" ry="31" transform="rotate(-32 45 166)" fill={theme.secondary} opacity=".28"/>
       <Ellipse cx="226" cy="40" rx="12" ry="28" transform="rotate(34 226 40)" fill={theme.accent} opacity=".18"/>
       <Circle cx="220" cy="155" r="9" fill={theme.accent} opacity=".22"/>
