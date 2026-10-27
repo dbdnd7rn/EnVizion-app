@@ -938,11 +938,6 @@ export function GuideScreen({
 }
 
 /** These guides deliberately share navigation and accessibility, but not a generic hero illustration. */
-const specialtyIcons = [
-  "people-outline", "heart-outline", "ribbon-outline", "water-outline",
-  "hardware-chip-outline", "analytics-outline", "fitness-outline", "body-outline",
-] as const;
-
 function SpecialtyGlass({children,accent,style}:{
   children:React.ReactNode;accent:string;style?:any;
 }) {
@@ -1031,17 +1026,18 @@ export function SpecialistScreen({route}:NativeStackScreenProps<RootStack,"Speci
   const questions=SPECIALIST_QUESTIONS[index]??SPECIALIST_QUESTIONS[0];
   const specialtyNote=SPECIALIST_NOTES[index]??SPECIALIST_NOTES[0];
   const compact=width<380;
+  // Make room for long names rather than compressing them beside an image.
+  const stackedHero=compact && item[0].length>19;
   const toAppointments=()=>n.navigate("Appointments");
 
   return <Page>
-    <View style={{minHeight:226,position:"relative",justifyContent:"center",
+    <View style={{minHeight:stackedHero?310:226,position:"relative",
+      justifyContent:stackedHero?"flex-start":"center",
       borderRadius:30,overflow:"hidden",marginHorizontal:-5,
       backgroundColor:themeBackground("#FFFDFC")}}>
-      <View style={{position:"absolute",right:-30,bottom:-3,width:compact?195:230,height:220,opacity:.96}} pointerEvents="none">
-        <SpecialistArtwork index={index} height={215} motion/>
-      </View>
-      <View style={{width:compact?"63%":"61%",paddingHorizontal:15,gap:9,zIndex:1,
-        paddingVertical:27}}>
+      <View style={{width:stackedHero?"100%":compact?"63%":"61%",
+        paddingHorizontal:15,gap:9,zIndex:1,
+        paddingVertical:stackedHero?18:27}}>
         <Text style={[S.eyebrow,{letterSpacing:2.6,fontSize:10,
           color:themeForeground(palette.accent)}]}>MEET YOUR CARE TEAM</Text>
         <Text accessibilityRole="header" style={{
@@ -1052,6 +1048,14 @@ export function SpecialistScreen({route}:NativeStackScreenProps<RootStack,"Speci
           lineHeight:22,color:themeForeground("#777187")}}>{item[1]}</Text>
         <View style={{width:45,height:3,borderRadius:3,
           backgroundColor:themeBackground(palette.accent),marginTop:5}}/>
+      </View>
+      <View pointerEvents="none" style={stackedHero?{
+        alignSelf:"flex-end",width:205,height:155,marginTop:-9,marginRight:-6,
+      }:{
+        position:"absolute",right:-30,bottom:-3,
+        width:compact?195:230,height:220,opacity:.96,
+      }}>
+        <SpecialistArtwork index={index} height={stackedHero?155:215} motion/>
       </View>
     </View>
 

@@ -36,3 +36,15 @@ test("specialty artwork respects reduced motion and dark mode",()=>{
   assert.match(artworks,/Animated\.loop/);
   assert.match(artworks,/motion = false/);
 });
+
+test("all SVG artwork instances have unique gradient resource IDs",()=>{
+  assert.match(artworks,/useId\(\)/);
+  assert.match(artworks,/id=\{gradientId\}/);
+  assert.match(artworks,/fill=\{`url\(#\$\{gradientId\}\)`\}/);
+  assert.doesNotMatch(artworks,/id="specialistGlow"/);
+});
+test("long specialty names use a stacked mobile hero instead of overlapping the art",()=>{
+  assert.match(source,/const stackedHero=compact && item\[0\]\.length>19/);
+  assert.match(source,/minHeight:stackedHero\?310:226/);
+  assert.match(source,/height=\{stackedHero\?155:215\}/);
+});
