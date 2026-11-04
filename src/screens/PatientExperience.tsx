@@ -263,7 +263,7 @@ export function PatientHomeScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
           <NotificationBell onPress={() => n.navigate("Notifications")}/>
           <Pressable accessibilityRole="button" accessibilityLabel="Open my profile"
-            onPress={() => n.navigate("PatientProfile")}
+            onPress={() => n.navigate("Main", { screen: "PatientProfile" })}
             style={{ padding: 3, borderRadius: 26, borderWidth: 1,
               backgroundColor: themeBackground("#F2E9F8"), borderColor: themeBorder("#E7D8F0") }}>
             <ProfileAvatar name={state.name || "Care Recipient"} size={39}/>
@@ -298,14 +298,14 @@ export function PatientHomeScreen() {
       </View>
       {today.length > 0 && <View accessibilityLabel={done + " of " + today.length + " care activities completed"}
         style={{ height: 6, backgroundColor: themeBackground("#EBE1F1"), borderRadius: 5, overflow: "hidden" }}>
-        <View style={{ width: percent + "%", height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
+        <View style={{ width: `${percent}%` as `${number}%`, height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
       </View>}
     </> : null}
     <PatientPlanContent plan={plan} limit={2}/>
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
       <PatientHeading eyebrow="ONE TAP AWAY" title="Your care essentials"/>
       <Pressable accessibilityRole="button" accessibilityLabel="View all care features"
-        onPress={() => n.navigate("PatientCare")} style={{ minHeight: 44, justifyContent: "center" }}>
+        onPress={() => n.navigate("Main", { screen: "PatientCare" })} style={{ minHeight: 44, justifyContent: "center" }}>
         <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 12.5 }}>View all</Text>
       </Pressable>
     </View>
