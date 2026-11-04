@@ -578,7 +578,7 @@ export function PatientAppointmentsScreen() {
   </Page>;
 }
 function Trend({ values }: { values: number[] }) {
-  if (values.length < 2) return <PatientText muted size={13}>A trend appears after at least two measurements.</PatientText>;
+  if (values.length < 2) return null;
   const recent = values.slice(-12);
   const min = Math.min(...recent); const max = Math.max(...recent);
   const span = Math.max(1, max - min);
@@ -602,13 +602,8 @@ export function PatientHealthScreen() {
   const glucose = trend("Blood sugar", "glucose");
   const systolic = trend("Vitals", "systolic");
   return <Page>
-    <PatientHeading eyebrow="HEALTH RECORD" title="Your measurements"
-      subtitle="A clear view of readings entered by your care team. No automated medical interpretation."/>
-    <View style={{ flexDirection: "row", gap: 10 }}>
-      <PatientCount value={glucose.length} label="Glucose readings" icon="water-outline"/>
-      <PatientCount value={systolic.length} label="Blood pressure readings" icon="pulse-outline"/>
-    </View>
-    <PatientGlass tint="#E8F5F0">
+    <PatientHeading eyebrow="MY CARE" title="My health"/>
+    {glucose.length > 0 && <PatientGlass tint="#E8F5F0">
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Icon name="water-outline" size={20} color={themeForeground(PURPLE)}/>
         <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 15 }}>Blood glucose</Text>
@@ -621,9 +616,9 @@ export function PatientHealthScreen() {
           <PatientText muted size={12.5}>mg/dL · latest saved</PatientText>
         </View>
         <Trend values={glucose}/>
-      </> : <PatientText muted size={13}>No blood glucose readings saved yet.</PatientText>}
-    </PatientGlass>
-    <PatientGlass tint="#F2E8FA">
+      </> : null}
+    </PatientGlass>}
+    {systolic.length > 0 && <PatientGlass tint="#F2E8FA">
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Icon name="pulse-outline" size={20} color={themeForeground(PURPLE)}/>
         <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 15 }}>Systolic blood pressure</Text>
@@ -636,9 +631,11 @@ export function PatientHealthScreen() {
           <PatientText muted size={12.5}>mmHg · latest saved</PatientText>
         </View>
         <Trend values={systolic}/>
-      </> : <PatientText muted size={13}>No blood pressure readings saved yet.</PatientText>}
-    </PatientGlass>
-    <PatientHeading eyebrow="RECENT ENTRIES" title="Measurements on record"/>
+      </> : null}
+    </PatientGlass>}
+    {!glucose.length && !systolic.length && <PatientEmpty icon="pulse-outline"
+      title="No trends yet" detail="Your saved readings will appear here."/>}
+    {state.entries.length > 0 && <PatientHeading eyebrow="SAVED" title="Recent readings"/>}
     {state.entries.length ? state.entries.slice(0, 15).map(entry => <PatientGlass key={entry.id} compact>
       <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
         <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 14.5 }}>{entry.kind}</Text>
@@ -647,10 +644,9 @@ export function PatientHealthScreen() {
       {Object.entries(entry.values).filter(([, value]) => Boolean(value)).map(([key, value]) => (
         <PatientText key={key} size={13}>{key.replace(/_/g, " ")}: {value}</PatientText>
       ))}
-    </PatientGlass>) : <PatientEmpty icon="pulse-outline" title="No readings yet"
-      detail="Measurements your care team records will appear here."/>}
+    </PatientGlass>) : null}
     <PatientInfo icon="information-circle-outline"
-      text="A change in a reading is not a diagnosis. Ask your healthcare professional about any concerns."/>
+      text="Readings are not a diagnosis. Ask your clinician about concerns."/>
   </Page>;
 }
 export function PatientTeamScreen() {
