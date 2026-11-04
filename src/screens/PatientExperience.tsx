@@ -771,24 +771,21 @@ export function PatientHistoryScreen() {
         title: visit.title, info: "Appointment (scheduled, not attendance-confirmed)" })),
   ].sort((a, b) => b.date.localeCompare(a.date)), [state.entries, state.medicationRecords, completions, visits]);
   return <Page>
-    <PatientHeading eyebrow="YOUR CARE JOURNEY" title="Care history"
-      subtitle="A timeline of information your care team has recorded."/>
+    <PatientHeading eyebrow="TIMELINE" title="Care history"/>
     {visitsLoading && <ActivityIndicator color={C.purple} accessibilityLabel="Loading appointment history"/>}
     {Boolean(visitsError) && <PatientEmpty icon="cloud-offline-outline"
       title="Some care history is unavailable" detail={visitsError}/>}
     {!events.length && !visitsLoading && !visitsError
       ? <PatientEmpty icon="time-outline" title="Your care story begins here"
-          detail="Once your care team saves an activity or observation, it will appear here."/> : events.length > 0 ?
+          detail="Recorded events will appear here."/> : events.length > 0 ?
       <View style={{ gap: 10 }}>
-        <PatientInfo icon="information-circle-outline"
-          text="Events describe saved records. A scheduled appointment does not confirm attendance."/>
         {events.slice(0, 60).map((event, index) => <View key={event.id}
           style={{ flexDirection: "row", alignItems: "stretch", gap: 10 }}>
           <View style={{ width: 28, alignItems: "center" }}>
-            <View style={{ width: 27, height: 27, borderRadius: 14,
+            <View style={{ width: 31, height: 31, borderRadius: 16,
               backgroundColor: themeBackground("#EEDFF7"),
               alignItems: "center", justifyContent: "center" }}>
-              <Icon name="ellipse" size={12} color={themeForeground(PURPLE)}/>
+              <Icon name={event.id.startsWith("v") ? "pulse-outline" : event.id.startsWith("m") ? "medical-outline" : event.id.startsWith("a") ? "calendar-outline" : "checkmark-outline"} size={16} color={themeForeground(PURPLE)}/>
             </View>
             {index < Math.min(events.length, 60) - 1 && <View style={{ width: 2, flex: 1,
               backgroundColor: themeBackground("#E6D6EF"), marginVertical: 4 }}/>}
