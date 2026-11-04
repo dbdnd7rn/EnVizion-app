@@ -24,6 +24,8 @@ test("ordinary greetings and toolkit navigation need no private-profile access",
 test("the assistant requires a deliberate one-tap opt-in and re-asks without reusing private history", () => {
   const screen = readFileSync(new URL("../src/screens/EnVizionAIScreen.tsx", import.meta.url), "utf8");
   assert.match(screen, /sendingRef\.current = true/);
+  assert.match(screen, /lastBlockedRequestRef\.current === blockedKey/);
+  assert.match(screen, /lastBlockedRequestRef\.current = blockedKey/);
   assert.match(screen, /if \(!value \|\| busy \|\| sendingRef\.current\) return/);
   assert.match(screen, /profilePrompt === value && messages\.at\(-1\)\?\.role === "assistant"/);
   assert.match(screen, /const priorMessages = explicitlyApprovedProfile \? \[\] :/);
