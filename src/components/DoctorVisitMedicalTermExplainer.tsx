@@ -1,8 +1,7 @@
 import React, { useRef, useState } from "react";
 import { ActivityIndicator, Pressable, Switch, Text, TextInput, View } from "react-native";
 import { themeBackground, themeBorder, themeForeground } from "../themeColors";
-import { explainDoctorVisitTerm } from "../doctorVisitTermExplanation";
-import type { TermExplanation } from "../../supabase/functions/doctor-visit-terms/contracts";
+import { explainDoctorVisitTerm, type DoctorVisitTermAnswer } from "../doctorVisitTermExplanation";
 import { Button, C, Card, Icon, S, Txt } from "../ui";
 
 const sampleTerms = ["Tachycardia", "Edema", "Benign"];
@@ -12,7 +11,7 @@ export function DoctorVisitMedicalTermExplainer({ visitId }: { visitId: string }
   const [phrase, setPhrase] = useState("");
   const [allowAi, setAllowAi] = useState(false);
   const [explaining, setExplaining] = useState(false);
-  const [result, setResult] = useState<TermExplanation | null>(null);
+  const [result, setResult] = useState<DoctorVisitTermAnswer | null>(null);
   const [explainedTerm, setExplainedTerm] = useState("");
   const [error, setError] = useState("");
   const version = useRef(0);
@@ -194,6 +193,16 @@ export function DoctorVisitMedicalTermExplainer({ visitId }: { visitId: string }
             <Icon name="book-outline" color={C.purple} size={22} />
             <Text style={S.h2}>{explainedTerm}</Text>
           </View>
+          <Text style={[S.small, { color: themeForeground(C.purple) }]}>
+            {result.source === "glossary"
+              ? "Built-in medical glossary · AI service unavailable"
+              : "AI-generated general explanation"}
+          </Text>
+          {Boolean(result.notice) && (
+            <View style={{ padding: 10, borderRadius: 13, backgroundColor: themeBackground("#F4EAF9") }}>
+              <Txt style={S.small}>{result.notice}</Txt>
+            </View>
+          )}
           <View style={{ gap: 4 }}>
             <Text style={S.h3}>{result.known ? "In simple words" : "Meaning not confirmed"}</Text>
             <Txt>{result.plainMeaning}</Txt>
