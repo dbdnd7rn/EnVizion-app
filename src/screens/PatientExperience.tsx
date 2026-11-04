@@ -359,8 +359,7 @@ export function PatientDayScreen() {
   const completed = new Set(plan.completions.filter(c => c.completedOn === dayKey(new Date())).map(c => c.itemId));
   const done = today.filter(item => completed.has(item.id)).length;
   return <Page>
-    <PatientHeading eyebrow="TODAY" title="Your daily plan"
-      subtitle="A simple view of the activities your care team has shared with you."/>
+    <PatientHeading eyebrow="TODAY" title="My day"/>
     {!plan.loading && !plan.error && Boolean(state.careRecipientId) && <PatientGlass tint="#E9DDF5" compact>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
         <View style={{ flex: 1, gap: 4 }}>
@@ -377,14 +376,14 @@ export function PatientDayScreen() {
           height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
       </View>
     </PatientGlass>}
-    <PatientHeading eyebrow="SHARED ACTIVITIES" title="What's on today"/>
     <PatientPlanContent plan={plan}/>
     <PatientInfo icon="information-circle-outline"
-      text="Only your care team can change this plan or mark activities complete. Check with them if something looks wrong."/>
+      text="Your care team updates this plan."/>
   </Page>;
 }
 export function PatientMedicationsScreen() {
   const { state } = useCare();
+  const [detailMedId, setDetailMedId] = useState<string | null>(null);
   const [medications, setMedications] = useState<ManagedMedication[]>([]);
   const [records, setRecords] = useState<ManagedMedicationRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -404,10 +403,9 @@ export function PatientMedicationsScreen() {
     return () => { active = false; };
   }, [state.careRecipientId]));
   return <Page>
-    <PatientHeading eyebrow="MEDICATIONS" title="Your medication list"
-      subtitle="Schedules and instructions recorded by your care team."/>
+    <PatientHeading eyebrow="MY CARE" title="Medications"/>
     <PatientInfo icon="shield-checkmark-outline"
-      text="For your safety, this page is read-only. Always follow your clinician's instructions and check with them before changing medication."/>
+      text="Read only · Follow your clinician's directions."/>
     {!loading && !error && medications.length > 0 && <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
       <View style={{ borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7,
         backgroundColor: themeBackground("#F0E5F8") }}>
@@ -442,9 +440,24 @@ export function PatientMedicationsScreen() {
           <View style={{ padding: 12, borderRadius: 15, backgroundColor: themeBackground("#FAF6FC") }}>
             <PatientText size={13.5}>{med.instructions || "No additional instructions recorded."}</PatientText>
           </View>
-          {med.purpose ? <PatientText muted size={12.5}>Purpose: {med.purpose}</PatientText> : null}
-          {med.prescriber ? <PatientText muted size={12.5}>Prescriber: {med.prescriber}</PatientText> : null}
-          {med.pharmacy ? <PatientText muted size={12.5}>Pharmacy: {med.pharmacy}</PatientText> : null}
+          {(med.purpose || med.prescriber || med.pharmacy) && <>
+            <Pressable accessibilityRole="button" accessibilityLabel={"More details for " + med.name}
+              accessibilityState={{ expanded: detailMedId === med.id }}
+              onPress={() => setDetailMedId(detailMedId === med.id ? null : med.id)}
+              style={{ flexDirection: "row", alignItems: "center", gap: 7, minHeight: 43 }}>
+              <Icon name="information-circle-outline" size={18} color={themeForeground(PURPLE)}/>
+              <Text style={{ fontFamily: SEMI, fontSize: 12.5, color: themeForeground(PURPLE) }}>
+                {detailMedId === med.id ? "Hide details" : "More details"}
+              </Text>
+              <Icon name={detailMedId === med.id ? "chevron-up-outline" : "chevron-down-outline"}
+                size={16} color={themeForeground(PURPLE)}/>
+            </Pressable>
+            {detailMedId === med.id && <View style={{ gap: 6 }}>
+              {med.purpose ? <PatientText muted size={12.5}>Purpose: {med.purpose}</PatientText> : null}
+              {med.prescriber ? <PatientText muted size={12.5}>Prescriber: {med.prescriber}</PatientText> : null}
+              {med.pharmacy ? <PatientText muted size={12.5}>Pharmacy: {med.pharmacy}</PatientText> : null}
+            </View>}
+          </>}
           {med.refillDueOn ? <PatientText muted size={12.5}>Refill date: {readableDate(med.refillDueOn)}</PatientText> : null}
           <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
             <Icon name="time-outline" size={15} color={themeForeground(PURPLE)}/>
@@ -452,7 +465,7 @@ export function PatientMedicationsScreen() {
           </View>
         </PatientGlass>;
       }) : <PatientEmpty icon="medkit-outline" title="No medications listed yet"
-        detail="Your care team's saved medication information will appear here when available."/>}
+        detail="Your care team will add your medication list."/>}
   </Page>;
 }
 type PatientAppointment = {
