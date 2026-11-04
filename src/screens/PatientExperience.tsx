@@ -707,15 +707,27 @@ export function PatientHistoryScreen() {
   const { state } = useCare();
   const { completions } = usePatientPlan(state.careRecipientId);
   const [visits, setVisits] = useState<PatientAppointment[]>([]);
+  const [visitsLoading, setVisitsLoading] = useState(true);
+  const [visitsError, setVisitsError] = useState("");
   useFocusEffect(useCallback(() => {
-    let active = true; setVisits([]);
-    if (state.careRecipientId) {
-      Promise.resolve(supabase.from("appointments")
-        .select("id,title,starts_at,appointment_date,appointment_time,location,notes")
-        .eq("care_recipient_id", state.careRecipientId).limit(100))
-        .then(({ data }) => { if (active) setVisits((data ?? []) as PatientAppointment[]); })
-        .catch(() => { if (active) setVisits([]); });
+    let active = true;
+    setVisits([]); setVisitsError(""); setVisitsLoading(true);
+    if (!state.careRecipientId) {
+      setVisitsLoading(false);
+      return () => { active = false; };
     }
+    Promise.resolve(supabase.from("appointments")
+      .select("id,title,starts_at,appointment_date,appointment_time,location,notes")
+      .eq("care_recipient_id", state.careRecipientId).limit(100))
+      .then(({ data, error: problem }) => {
+        if (!active) return;
+        if (problem) setVisitsError(problem.message);
+        else setVisits((data ?? []) as PatientAppointment[]);
+      })
+      .catch(reason => {
+        if (active) setVisitsError(reason instanceof Error ? reason.message : "Appointment history unavailable.");
+      })
+      .finally(() => { if (active) setVisitsLoading(false); });
     return () => { active = false; };
   }, [state.careRecipientId]));
   const events = useMemo(() => [
@@ -732,8 +744,12 @@ export function PatientHistoryScreen() {
   return <Page>
     <PatientHeading eyebrow="YOUR CARE JOURNEY" title="Care history"
       subtitle="A timeline of information your care team has recorded."/>
-    {!events.length ? <PatientEmpty icon="time-outline" title="Your care story begins here"
-      detail="Once your care team saves an activity or observation, it will appear here."/> :
+    {visitsLoading && <ActivityIndicator color={C.purple} accessibilityLabel="Loading appointment history"/>}
+    {Boolean(visitsError) && <PatientEmpty icon="cloud-offline-outline"
+      title="Some care history is unavailable" detail={visitsError}/>}
+    {!events.length && visitsLoading ? null : !events.length && !visitsError
+      ? <PatientEmpty icon="time-outline" title="Your care story begins here"
+          detail="Once your care team saves an activity or observation, it will appear here."/> : events.length > 0 ?
       <View style={{ gap: 10 }}>
         <PatientInfo icon="information-circle-outline"
           text="Events describe saved records. A scheduled appointment does not confirm attendance."/>
