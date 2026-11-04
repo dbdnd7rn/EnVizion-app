@@ -35,6 +35,7 @@ import {
 } from "./src/screens/PatientExperience";
 import { CarePresenceProvider } from "./src/CarePresenceProvider";
 import {FamilyHomeScreen,FamilyUpdatesScreen,FamilyChatScreen,FamilyAppointmentsScreen,FamilyHelpScreen} from "./src/screens/FamilyExperience";
+import { FamilyProfileScreen } from "./src/screens/FamilyProfileScreen";
 import { SummaryScreen } from "./src/screens/SummaryScreen";
 import { CareInsightsScreen } from "./src/screens/CareInsightsScreen";
 import { VitalsProgressScreen } from "./src/screens/VitalsProgressScreen";
@@ -750,6 +751,16 @@ function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
                 options={{title:"Shared appointments",headerShown:false}}/>
               <Stack.Screen name="CareTeamChat" component={themedScreen(CareTeamChatScreen)}
                 options={{headerShown:false}}/>
+              <Stack.Screen name="FamilyProfile" component={themedScreen(FamilyProfileScreen)}
+                options={{title:"Your profile"}}/>
+              <Stack.Screen name="PrivacyData" component={themedScreen(PrivacyDataScreen)}
+                options={{title:"Account, privacy & data"}}/>
+              <Stack.Screen name="Accessibility" component={themedScreen(AccessibilityScreen)}
+                options={{title:"Accessibility & display"}}/>
+              <Stack.Screen name="NotificationSettings" component={themedScreen(NotificationSettingsScreen)}
+                options={{title:"Notification preferences"}}/>
+              <Stack.Screen name="PilotFeedback" component={themedScreen(PilotFeedbackScreen)}
+                options={{title:"Pilot feedback"}}/>
             </>
           )}
         </Stack.Navigator>
