@@ -3,7 +3,7 @@ import type {
   PilotSummary,
   ProgramDocumentType,
 } from "./pilot";
-import { missingPilotDocumentTypes, pilotDocumentLabels, requiredPilotDocumentTypes } from "./pilotConsentSafety";
+import { missingPilotDocumentTypes, pilotDocumentLabels, requiredPilotDocumentTypes } from "./pilotConsentSafety.ts";
 
 export type LaunchReadinessLevel = "ready" | "attention" | "blocked";
 
