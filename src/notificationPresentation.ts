@@ -1,3 +1,5 @@
+import type { CareRole } from "./careTeam";
+
 export type NotificationFilter = "all" | "unread";
 
 export type NotificationPresentationRecord = {
@@ -26,8 +28,10 @@ export type NotificationDestination = {
     | "CareSchedule"
     | "CareCoordinationInbox"
     | "FamilyCommunication"
-    | "CareDocuments";
-  params?: { requestId: string } | { conversationId: string };
+    | "CareDocuments"
+    | "Main"
+    | "FamilyAppointments";
+  params?: { requestId: string } | { conversationId: string } | { screen: "FamilyUpdates" | "FamilyHelp" };
   activateCareRecipientId?: string;
 };
 
@@ -41,7 +45,28 @@ export function filterNotifications<T extends { readAt: string | null }>(
 
 export function notificationDestination(
   item: NotificationPresentationRecord,
+  careRole: CareRole = "owner",
 ): NotificationDestination | null {
+  // Family accounts have a smaller route allowlist than caregivers. This
+  // prevents private/legacy notification links from navigating to screens
+  // that viewers are not allowed to open.
+  if (careRole === "viewer") {
+    if (item.entityType === "care_chat" && item.entityId)
+      return { route: "CareTeamChat", params: { conversationId: item.entityId } };
+    if (item.entityType === "care_family_update" ||
+        item.entityType === "family_care_report")
+      return { route: "Main", params: { screen: "FamilyUpdates" } };
+    if (item.entityType === "family_shared_appointment")
+      return { route: "FamilyAppointments" };
+    if (item.entityType === "family_help_offer")
+      return { route: "Main", params: { screen: "FamilyHelp" } };
+    return null;
+  }
+  if (careRole === "patient") {
+    if (item.entityType === "care_chat" && item.entityId)
+      return { route: "CareTeamChat", params: { conversationId: item.entityId } };
+    return null;
+  }
   if (item.audience === "staff") {
     if (item.entityType === "support_request" && item.entityId) {
       return {
@@ -102,8 +127,13 @@ export function notificationDestination(
     return { route: "CareCoordinationInbox" };
   }
 
-  if (item.entityType === "care_family_update") {
+  if (item.entityType === "care_family_update" ||
+      item.entityType === "family_care_report" ||
+      item.entityType === "family_help_offer") {
     return { route: "FamilyCommunication" };
+  }
+  if (item.entityType === "family_shared_appointment") {
+    return { route: "CareCalendar" };
   }
 
   if (item.entityType === "care_document") return { route: "CareDocuments" };

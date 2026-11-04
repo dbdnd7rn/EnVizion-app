@@ -29,6 +29,7 @@ import { NotificationGlassBell } from "../components/NotificationGlassBell";
 import { C, Icon } from "../ui";
 import { setActiveCareRecipient } from "../careTeam";
 import { useCare } from "../store";
+import type { CareRole } from "../careTeam";
 import { useNav } from "./MainScreens";
 
 const glassShadow =
@@ -129,16 +130,18 @@ function NotificationCard({
   item,
   index,
   reducedMotion,
+  careRole,
   onPress,
 }: {
   item: NotificationRecord;
   index: number;
   reducedMotion: boolean;
+  careRole: CareRole;
   onPress: () => void;
 }) {
   const opacity = useRef(new Animated.Value(1)).current;
   const translateY = useRef(new Animated.Value(0)).current;
-  const destination = notificationDestination(item);
+  const destination = notificationDestination(item, careRole);
   const actionable = Boolean(destination || !item.readAt);
 
   useEffect(() => {
@@ -239,7 +242,7 @@ function BackgroundGlow() {
 
 export function NotificationsScreen() {
   const n = useNav();
-  const { refresh: refreshCare } = useCare();
+  const { state, refresh: refreshCare } = useCare();
   const {
     items,
     unreadCount,
@@ -305,7 +308,7 @@ export function NotificationsScreen() {
 
   async function openNotification(item: NotificationRecord) {
     setMessage("");
-    const destination = notificationDestination(item);
+    const destination = notificationDestination(item, state.accessRole);
 
     try {
       if (!item.readAt) await markRead(item.id);
@@ -574,6 +577,7 @@ export function NotificationsScreen() {
                   item={item}
                   index={index}
                   reducedMotion={reducedMotion}
+                  careRole={state.accessRole}
                   onPress={() => void openNotification(item)}
                 />
               ))
