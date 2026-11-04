@@ -51,7 +51,7 @@ import { useCare } from "../store";
 import { DoctorVisitSchedulePicker } from "../components/DoctorVisitSchedulePicker";
 import { DoctorVisitMedicalTermExplainer } from "../components/DoctorVisitMedicalTermExplainer";
 import { doctorVisitSchedulingError } from "../doctorVisitDateTimeHelpers";
-import { canReviseDoctorVisit, isDoctorVisitSummaryDirty, preferredDoctorVisitSummary, visitCaptureHasUnsavedChanges } from "../doctorVisitWorkflowHelpers";
+import { canReviseDoctorVisit, generateDoctorVisitDraftSafely, isDoctorVisitSummaryDirty, preferredDoctorVisitSummary, visitCaptureHasUnsavedChanges } from "../doctorVisitWorkflowHelpers";
 import {
   Button,
   C,
@@ -619,18 +619,18 @@ export function DoctorVisitCompanionScreen() {
     setBusy("ai");
     setMessage("");
     try {
-      if (unsaved) {
-        // Save what is visible first; a failed save must stop AI generation.
-        await updateDoctorVisitCapture({
+      const summary = await generateDoctorVisitDraftSafely({
+        needsSave: unsaved,
+        save: () => updateDoctorVisitCapture({
           visitId: selected.visit.id,
           careRecipientId: selected.visit.careRecipientId,
           rawNotes,
           transcriptText,
           status: selected.visit.status === "prep" || selected.visit.status === "in_visit"
             ? "in_visit" : selected.visit.status,
-        });
-      }
-      const summary = await generateDoctorVisitAiSummary(selected.visit.id);
+        }),
+        generate: () => generateDoctorVisitAiSummary(selected.visit.id),
+      });
       setSummaryDraft({
         summaryText: summary.summaryText,
         newOrders: listText(summary.newOrders),
