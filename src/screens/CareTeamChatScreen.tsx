@@ -205,13 +205,18 @@ export function CareTeamChatScreen() {
     const load = async () => {
       try {
         const initial = await chatPage(activeId);
-        if (!alive) return;
+        if (!alive || !isCurrentConversation(activeId)) return;
         setMessages(initial); setHasEarlier(initial.length===40);
         await chatMarkRead(activeId);
-        if (alive) await updateStatus(activeId);
+        if (alive && isCurrentConversation(activeId)) await updateStatus(activeId);
       } catch {
-        if (alive) { setError("Could not open this conversation. Your access may have changed."); setSelected(null); }
-      } finally { if (alive) setLoadingMessages(false); }
+        if (alive && isCurrentConversation(activeId)) {
+          setError("Could not open this conversation. Your access may have changed.");
+          closeConversation();
+        }
+      } finally {
+        if (alive && isCurrentConversation(activeId)) setLoadingMessages(false);
+      }
     };
     void load();
     const unsubscribe = chatSubscribe(activeId,
@@ -272,26 +277,42 @@ export function CareTeamChatScreen() {
   const send = async () => {
     if (!selected || !draft.trim() || busy) return;
     if (draft.trim().length>2000) { setError("Messages must be 2,000 characters or less."); return; }
+    const roomId = selected.id;
+    const content = draft;
+    const editingId = editing?.id;
+    const replyId = replyTo?.id ?? null;
     setBusy(true); setError("");
+    let persisted = false;
     try {
-      if (editing) await chatEdit(editing.id,draft);
-      else {
+      if (editingId) {
+        await chatEdit(editingId,content);
+      } else {
         const nonce=nonceRef.current ?? (Date.now().toString(36)+"-"+Math.random().toString(36).slice(2)+"-"+Math.random().toString(36).slice(2));
         nonceRef.current=nonce;
-        const sent=await chatSend(selected.id,draft,nonce,replyTo?.id);
-        setMessages(current=>mergeChatMessages(current,[sent]));
+        const sent=await chatSend(roomId,content,nonce,replyId);
+        if (isCurrentConversation(roomId)) {
+          setMessages(current=>mergeChatMessages(current,[sent]));
+        }
       }
-      nonceRef.current=null; setDraft(""); setEditing(null); setReplyTo(null);
-      await refreshMessages(selected.id,true);
-    } catch { setError("Your message was not saved. Try sending again."); }
-    finally { setBusy(false); }
+      persisted = true;
+      if (isCurrentConversation(roomId)) {
+        nonceRef.current=null; setDraft(""); setEditing(null); setReplyTo(null);
+        await refreshMessages(roomId,true);
+      }
+    } catch {
+      if (isCurrentConversation(roomId)) {
+        setError(persisted
+          ? "Your message was saved, but the chat could not refresh. Reopen the conversation."
+          : "Your message was not confirmed as saved. Retry without changing the text to avoid duplicates.");
+      }
+    } finally { setBusy(false); }
   };
 
   const remove = async (message: ChatMessage) => {
     if (busy || message.sender_id!==userId) return;
     setBusy(true);
     try { await chatDelete(message.id); if (selected) await refreshMessages(selected.id,true); }
-    catch { setError("Could not remove the message."); }
+    catch { if (selected?.id === activeConversationRef.current) setError("Could not remove the message."); }
     finally { setBusy(false); }
   };
 
