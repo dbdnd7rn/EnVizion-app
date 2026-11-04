@@ -61,3 +61,17 @@ export function visitCaptureHasUnsavedChanges(
   return rawNotes.trim() !== saved.rawNotes.trim()
     || transcriptText.trim() !== saved.transcriptText.trim();
 }
+
+
+/**
+ * Await persistence before triggering AI. A save failure must propagate
+ * and prevent inference from stale notes.
+ */
+export async function generateDoctorVisitDraftSafely<T>(input: {
+  needsSave: boolean;
+  save: () => Promise<unknown>;
+  generate: () => Promise<T>;
+}): Promise<T> {
+  if (input.needsSave) await input.save();
+  return input.generate();
+}
