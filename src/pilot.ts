@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import type { StaffMembership } from "./staff";
+import { missingPilotDocumentTypes } from "./pilotConsentSafety";
 
 export type PilotStatus = "invited" | "active" | "paused" | "exited";
 export type ProgramDocumentType =
@@ -172,6 +173,7 @@ export type PilotConsentState = {
   enrolled: boolean;
   status: PilotStatus | null;
   outstanding: ProgramDocument[];
+  missingRequiredTypes: ProgramDocumentType[];
 };
 
 async function invokePilotAdmin<T>(
@@ -211,8 +213,10 @@ export async function loadPilotConsentState(): Promise<PilotConsentState> {
     error: userError,
   } = await supabase.auth.getUser();
 
+  // A network failure or invalid session is NOT proof of non-enrollment.
+  // Fail closed so the pilot gate does not silently grant access.
   if (userError || !user) {
-    return { enrolled: false, status: null, outstanding: [] };
+    throw userError ?? new Error("We could not verify your account. Sign in again.");
   }
 
   const { data: enrollment, error: enrollmentError } = await supabase
@@ -223,12 +227,12 @@ export async function loadPilotConsentState(): Promise<PilotConsentState> {
 
   if (enrollmentError) throw enrollmentError;
   if (!enrollment) {
-    return { enrolled: false, status: null, outstanding: [] };
+    return { enrolled: false, status: null, outstanding: [], missingRequiredTypes: [] };
   }
 
   const status = enrollment.status as PilotStatus;
   if (!["invited", "active"].includes(status)) {
-    return { enrolled: true, status, outstanding: [] };
+    return { enrolled: true, status, outstanding: [], missingRequiredTypes: [] };
   }
 
   const now = new Date().toISOString();
@@ -256,6 +260,9 @@ export async function loadPilotConsentState(): Promise<PilotConsentState> {
   return {
     enrolled: true,
     status,
+    missingRequiredTypes: missingPilotDocumentTypes(
+      (documents ?? []).map((row) => String(row.document_type)),
+    ),
     outstanding: (documents ?? [])
       .filter((row) => !acceptedIds.has(row.id))
       .map((row) => ({
