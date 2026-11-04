@@ -109,6 +109,21 @@ create trigger notify_family_help_offer_status
 after insert or update of status on public.family_help_offers
 for each row execute function private.notify_family_help_offer_status();
 
+-- Family viewers cannot read the raw appointments table. The private
+-- function checks one appointment ID using the privileged table view while
+-- returning only a boolean for the currently authenticated family member.
+create or replace function private.notification_can_view_shared_appointment(p_appointment uuid)
+returns boolean language sql stable security definer set search_path=''
+as $
+  select (select auth.uid()) is not null and exists (
+    select 1 from public.appointments a
+    where a.id=p_appointment and a.shared_with_family=true
+      and private.is_active_family_viewer(a.care_recipient_id)
+  );
+$;
+revoke all on function private.notification_can_view_shared_appointment(uuid) from public,anon;
+grant execute on function private.notification_can_view_shared_appointment(uuid) to authenticated;
+
 -- Existing family update/chat notices may remain in history after access
 -- is revoked. Read-time RLS blocks them if the referenced item is no longer
 -- visible. This is restrictive: it also applies to UPDATE's required SELECT.
@@ -128,11 +143,8 @@ using (
         and (private.can_edit_care_recipient(r.care_recipient_id)
           or private.is_active_family_viewer(r.care_recipient_id))
     )
-    when 'family_shared_appointment' then exists (
-      select 1 from public.appointments a
-      where a.id=entity_id and a.shared_with_family
-        and private.is_active_family_viewer(a.care_recipient_id)
-    )
+    when 'family_shared_appointment' then
+      private.notification_can_view_shared_appointment(entity_id)
     when 'family_help_offer' then exists (
       select 1 from public.family_help_offers h
       where h.id=entity_id and (
