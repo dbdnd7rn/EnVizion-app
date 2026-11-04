@@ -93,7 +93,7 @@ function FamilyStatus({loading,error,empty}:{
 }
 
 export function FamilyHomeScreen(){
-  const {state}=useCare(),n=useNav(),{signOut}=useAuth();
+  const {state}=useCare(),n=useNav();
   const {width}=useWindowDimensions();
   const height=width<375?370:405;
   const day=new Date().getHours(),when=day<12?"morning":day<18?"afternoon":"evening";
@@ -115,8 +115,9 @@ export function FamilyHomeScreen(){
     <FamilyReveal>
       <View style={[S.between,{paddingBottom:9}]}>
         <Brand/>
-        <Pressable accessibilityRole="button" accessibilityLabel="Sign out of EnVizion Life"
-          onPress={()=>void signOut()}
+        <Pressable accessibilityRole="button" accessibilityLabel="Open your family profile"
+          accessibilityHint="View your role, change your photo and manage account settings"
+          onPress={()=>n.navigate("FamilyProfile")}
           style={{borderRadius:28,backgroundColor:themeBackground("#F1E8F8"),padding:7}}>
           <ProfileAvatar name={state.name||"Family Member"} size={42}/>
         </Pressable>
