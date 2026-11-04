@@ -100,6 +100,7 @@ export function EnVizionAIScreen() {
   const previousProfile = useRef(state.careRecipientId);
   const requestId = useRef(0);
   const sendingRef = useRef(false);
+  const lastBlockedRequestRef = useRef<string | null>(null);
   const firstName = state.name.trim().split(/\s+/)[0] || "there";
   const canEdit = (state.accessRole === "owner" || state.accessRole === "caregiver") &&
     Boolean(state.careRecipientId);
@@ -136,6 +137,7 @@ export function EnVizionAIScreen() {
     setPending(null);
     setCareDataAllowed(false);
     setProfilePrompt(null);
+    lastBlockedRequestRef.current = null;
     setProblem("");
     setBusy(false);
   }, [dispatch, state.careRecipientId]);
@@ -148,7 +150,10 @@ export function EnVizionAIScreen() {
     const gate = profileRequestGate(value, { careRecipientId: state.careRecipientId, includeCareData });
     if (gate !== "ready") {
       // The same blocked shortcut must not generate another pair of chat bubbles.
-      if (profilePrompt === value && messages.at(-1)?.role === "assistant") return;
+      const blockedKey = `${state.careRecipientId ?? "none"}:${gate}:${value.toLowerCase()}`;
+      if (lastBlockedRequestRef.current === blockedKey ||
+          (profilePrompt === value && messages.at(-1)?.role === "assistant")) return;
+      lastBlockedRequestRef.current = blockedKey;
       const reply = gate === "select-profile"
         ? "Choose a care profile first. I can only show records from a profile you are authorized to view."
         : "Care profile access is off. To answer using real saved records, choose ‘Use profile and continue’ below. Natural conversation is a separate optional setting.";
@@ -160,6 +165,7 @@ export function EnVizionAIScreen() {
       return;
     }
     sendingRef.current = true;
+    lastBlockedRequestRef.current = null;
     setProfilePrompt(null);
     setProblem("");
     // Typing confirmation never saves, and leaves the editable draft available.
@@ -266,7 +272,7 @@ export function EnVizionAIScreen() {
           disabled={busy||saving} onPress={() => {
             requestId.current += 1;
             dispatch({ type: "conversation-clear" });
-            setPending(null); setProfilePrompt(null); setProblem("");
+            setPending(null); setProfilePrompt(null); lastBlockedRequestRef.current = null; setProblem("");
           }} style={{
             width: 44, height: 44, borderRadius: 22, backgroundColor: themeBackground("#F5EBFB"),
             alignItems: "center", justifyContent: "center",
@@ -344,6 +350,7 @@ export function EnVizionAIScreen() {
                 dispatch({ type: "conversation-clear" });
                 setNaturalConversation(v);
                 setProfilePrompt(null);
+                lastBlockedRequestRef.current = null;
                 setPending(null);
                 setProblem("");
               }}
@@ -379,6 +386,7 @@ export function EnVizionAIScreen() {
                 dispatch({ type: "conversation-clear" });
                 setCareDataAllowed(v);
                 setProfilePrompt(null);
+                lastBlockedRequestRef.current = null;
                 setPending(null);
                 setProblem("");
               }}
