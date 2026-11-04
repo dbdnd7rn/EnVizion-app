@@ -12,7 +12,7 @@ test("client, pilot-validation and launch-signoff enforce the same three distinc
   for (const edge of [validation, admin]) {
     assert.match(edge, /const required(?:Pilot)?DocumentTypes = \[/);
     for (const type of required) assert.match(edge, new RegExp('"' + type + '"'));
-    assert.match(edge, /missing(?:Required)?DocumentTypes = required(?:Pilot)?DocumentTypes\.filter/);
+    assert.match(edge, /missing(?:Required|Document)Types = required(?:Pilot)?DocumentTypes\.filter/);
   }
   assert.deepEqual(missingPilotDocumentTypes([]), required);
   assert.deepEqual(missingPilotDocumentTypes(["privacy_notice","privacy_notice","terms_of_use"]), ["pilot_consent"]);
