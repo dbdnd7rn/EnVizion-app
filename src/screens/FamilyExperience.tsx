@@ -327,10 +327,9 @@ export function FamilyAppointmentsScreen(){
   useFocusEffect(useCallback(()=>{
     let active=true;setItems([]);setError("");setLoading(true);
     if(!state.careRecipientId){setLoading(false);return()=>{active=false;};}
-    Promise.resolve(supabase.from("appointments")
-      .select("id,title,appointment_date,appointment_time,starts_at,location")
-      .eq("care_recipient_id",state.careRecipientId)
-      .order("created_at",{ascending:false}).limit(100))
+    Promise.resolve(supabase.rpc("family_shared_appointments",{
+      p_recipient: state.careRecipientId,
+    }))
       .then(({data,error:problem})=>{
         if(!active)return;
         if(problem)throw problem;
@@ -355,7 +354,7 @@ export function FamilyAppointmentsScreen(){
   </FamilyCard>;
   return <Page>
     <FamilyHeading eyebrow="SHARED APPOINTMENTS" title="Looking ahead."
-      description="View visit details shared through the care profile. Only caregivers can edit appointments."/>
+      description="Only visits explicitly shared by the care team appear here. Private appointment notes and questions stay protected."/>
     {loading||error||!items.length?<FamilyStatus loading={loading} error={error}
       empty="No appointments have been shared with you yet."/>:<>
       <Text style={S.h2}>Upcoming visits</Text>
