@@ -1,27 +1,13 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-10-20",
+  "reviewedAt": "2026-11-04",
   "exceptions": [
-    {
-      "id": "GHSA-vfj7-8cjw-p6xm",
-      "package": "braces",
-      "severity": "high",
-      "expiresOn": "2026-10-31",
-      "reason": "Upstream advisory currently publishes no patched version. Exposure is through Expo/Metro/Jest build tooling; keep monitoring and remove this exception immediately when upstream ships a compatible fix."
-    },
     {
       "id": "GHSA-86w9-cpqp-85rv",
       "package": "node-forge",
       "severity": "high",
-      "expiresOn": "2026-10-31",
-      "reason": "Upstream advisory currently has no known patched version. Exposure is through Expo code-signing tooling; keep monitoring and remove this exception immediately when upstream ships a compatible fix."
-    },
-    {
-      "id": "GHSA-hp3w-g68c-fv3c",
-      "package": "sprintf-js",
-      "severity": "moderate",
-      "expiresOn": "2026-10-31",
-      "reason": "No patched npm release as of 2026-10-20 (GHSA-hp3w-g68c-fv3c). Reached through Babel/Jest code-coverage instrumentation -> @istanbuljs/load-nyc-config -> js-yaml v3 -> argparse -> sprintf-js. The mobile/web app never passes attacker-supplied format strings to this dev-tool chain. This limited exception covers only this exact advisory; continue failing on all new findings, and remove it as soon as upstream publishes a compatible fix or the development dependency chain can be replaced."
+      "expiresOn": "2026-11-11",
+      "reason": "Re-reviewed 2026-11-04: GitHub Advisory Database still lists no patched node-forge release. Transitive dependency is imported by Expo CLI and @expo/code-signing-certificates build/signing tooling; not used by EnVizion application code for verifying user-controlled RSA signatures. Temporary seven-day exception ONLY for GHSA-86w9-cpqp-85rv. Recheck upstream fix and dependency graph before 2026-11-11; do not extend automatically."
     }
   ]
 }
