@@ -757,6 +757,8 @@ function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
                 options={{title:"Account, privacy & data"}}/>
               <Stack.Screen name="Accessibility" component={themedScreen(AccessibilityScreen)}
                 options={{title:"Accessibility & display"}}/>
+              <Stack.Screen name="Notifications" component={themedScreen(NotificationsScreen)}
+                options={{title:"Notifications",headerShown:false}}/>
               <Stack.Screen name="NotificationSettings" component={themedScreen(NotificationSettingsScreen)}
                 options={{title:"Notification preferences"}}/>
               <Stack.Screen name="PilotFeedback" component={themedScreen(PilotFeedbackScreen)}
