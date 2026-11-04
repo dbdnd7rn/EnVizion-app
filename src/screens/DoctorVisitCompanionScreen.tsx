@@ -51,6 +51,7 @@ import { useCare } from "../store";
 import { DoctorVisitSchedulePicker } from "../components/DoctorVisitSchedulePicker";
 import { DoctorVisitMedicalTermExplainer } from "../components/DoctorVisitMedicalTermExplainer";
 import { doctorVisitSchedulingError } from "../doctorVisitDateTimeHelpers";
+import { canReviseDoctorVisit, generateDoctorVisitDraftSafely, isDoctorVisitSummaryDirty, preferredDoctorVisitSummary, visitCaptureHasUnsavedChanges } from "../doctorVisitWorkflowHelpers";
 import {
   Button,
   C,
@@ -242,14 +243,11 @@ export function DoctorVisitCompanionScreen() {
     [selected],
   );
 
-  const activeSummary = useMemo<DoctorVisitSummary | null>(() => {
-    if (!selected) return null;
-    return (
-      selected.summaries.find((summary) => summary.status === "approved") ??
-      selected.summaries.find((summary) => summary.status === "draft") ??
-      null
-    );
-  }, [selected]);
+  const activeSummary = useMemo<DoctorVisitSummary | null>(
+    () => selected ? preferredDoctorVisitSummary(selected.summaries) : null, [selected],
+  );
+  const summaryHasUnsavedChanges = isDoctorVisitSummaryDirty(summaryDraft, activeSummary);
+  const visitIsPublished = selected?.visit.status === "published";
 
   useEffect(() => {
     if (!selected) {
@@ -361,10 +359,12 @@ export function DoctorVisitCompanionScreen() {
         careRecipientId: selected.visit.careRecipientId,
         rawNotes,
         transcriptText,
-        status: "in_visit",
+        status: selected.visit.status === "prep" || selected.visit.status === "in_visit" ? "in_visit" : selected.visit.status,
       });
       await refresh();
-      setMessage("Visit notes saved.");
+      setMessage(visitIsPublished
+        ? "Notes saved. The previously shared recap was not changed; contact the care team for a correction."
+        : "Visit notes saved.");
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -570,6 +570,14 @@ export function DoctorVisitCompanionScreen() {
 
   async function saveManualSummary() {
     if (!selected || readOnly || busy) return;
+    if (!canReviseDoctorVisit(selected.visit.status)) {
+      setMessage("This recap is already shared. Edits cannot silently replace what family members received.");
+      return;
+    }
+    if (!isDoctorVisitSummaryDirty(summaryDraft, activeSummary)) {
+      setMessage("No unsaved summary changes to save.");
+      return;
+    }
     setBusy("summary");
     try {
       const summary = await saveManualDoctorVisitSummary({
@@ -599,10 +607,30 @@ export function DoctorVisitCompanionScreen() {
 
   async function generateAi() {
     if (!selected || readOnly || busy) return;
+    if (!canReviseDoctorVisit(selected.visit.status)) {
+      setMessage("This recap is already shared and cannot be silently replaced.");
+      return;
+    }
+    if (!rawNotes.trim() && !transcriptText.trim()) {
+      setMessage("Add visit notes or a transcript before requesting an AI draft.");
+      return;
+    }
+    const unsaved = visitCaptureHasUnsavedChanges(rawNotes, transcriptText, selected.visit);
     setBusy("ai");
     setMessage("");
     try {
-      const summary = await generateDoctorVisitAiSummary(selected.visit.id);
+      const summary = await generateDoctorVisitDraftSafely({
+        needsSave: unsaved,
+        save: () => updateDoctorVisitCapture({
+          visitId: selected.visit.id,
+          careRecipientId: selected.visit.careRecipientId,
+          rawNotes,
+          transcriptText,
+          status: selected.visit.status === "prep" || selected.visit.status === "in_visit"
+            ? "in_visit" : selected.visit.status,
+        }),
+        generate: () => generateDoctorVisitAiSummary(selected.visit.id),
+      });
       setSummaryDraft({
         summaryText: summary.summaryText,
         newOrders: listText(summary.newOrders),
@@ -610,15 +638,12 @@ export function DoctorVisitCompanionScreen() {
         redFlags: listText(summary.redFlags),
       });
       await refresh();
-      setMessage(
-        "AI draft generated from the saved notes/transcript. Review every item before approval.",
-      );
+      setMessage(unsaved
+        ? "Latest visit notes saved before generating the AI draft. Review every item before approval."
+        : "AI draft generated from saved notes/transcript. Review every item before approval.");
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "The AI draft could not be generated.",
-      );
+      setMessage(error instanceof Error ? error.message
+        : "AI draft not generated. Verify that visit notes were saved.");
     } finally {
       setBusy("");
     }
@@ -626,6 +651,14 @@ export function DoctorVisitCompanionScreen() {
 
   async function approve() {
     if (!selected || !activeSummary || readOnly || busy) return;
+    if (activeSummary.status !== "draft") {
+      setMessage("Only a saved draft can be approved.");
+      return;
+    }
+    if (isDoctorVisitSummaryDirty(summaryDraft, activeSummary)) {
+      setMessage("Save your revised summary before approving. Unsaved edits are not approved.");
+      return;
+    }
     setBusy("approve");
     try {
       await approveDoctorVisitSummary({
@@ -648,6 +681,14 @@ export function DoctorVisitCompanionScreen() {
 
   async function share() {
     if (!selected || !activeSummary || readOnly || busy) return;
+    if (activeSummary.status !== "approved") {
+      setMessage("Review and approve the latest saved summary before sharing.");
+      return;
+    }
+    if (isDoctorVisitSummaryDirty(summaryDraft, activeSummary)) {
+      setMessage("Save and approve your latest edits before sharing. Do not send family an outdated recap.");
+      return;
+    }
     setBusy("share");
     try {
       const result = await publishDoctorVisitSummary({
@@ -1333,33 +1374,39 @@ export function DoctorVisitCompanionScreen() {
                     icon="sparkles-outline"
                     disabled={
                       Boolean(busy) ||
-                      (!selected.visit.rawNotes.trim() &&
-                        !selected.visit.transcriptText.trim() &&
-                        !rawNotes.trim() &&
-                        !transcriptText.trim())
+                      !canReviseDoctorVisit(selected.visit.status) ||
+                      (!rawNotes.trim() && !transcriptText.trim())
                     }
-                    onPress={async () => {
-                      if (
-                        rawNotes !== selected.visit.rawNotes ||
-                        transcriptText !== selected.visit.transcriptText
-                      ) {
-                        await saveCapture();
-                      }
-                      void generateAi();
-                    }}
+                    onPress={() => void generateAi()}
                   />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Button
-                    title="Save manual draft"
+                    title={activeSummary ? "Save revised draft" : "Save manual draft"}
                     secondary
-                    disabled={Boolean(busy)}
+                    disabled={
+                      Boolean(busy) ||
+                      !canReviseDoctorVisit(selected.visit.status) ||
+                      !summaryHasUnsavedChanges
+                    }
                     onPress={() => void saveManualSummary()}
                   />
                 </View>
               </View>
             )}
 
+            {visitIsPublished && (
+              <Card style={{ backgroundColor: themeBackground("#FFF7EC") }}>
+                <Text style={S.h3}>This recap has already been shared.</Text>
+                <Txt style={S.small}>Editing these fields or saving notes does not update the family feed. Contact the care team for a correction.</Txt>
+              </Card>
+            )}
+            {summaryHasUnsavedChanges && !readOnly && !visitIsPublished && (
+              <Card style={{ backgroundColor: themeBackground("#FFF7EC") }}>
+                <Text style={S.h3}>Unsaved summary edits</Text>
+                <Txt style={S.small}>Save revised draft before approving or sharing. The displayed changes have not been saved yet.</Txt>
+              </Card>
+            )}
             <Field
               label="Brief visit recap"
               value={summaryDraft.summaryText}
@@ -1452,8 +1499,8 @@ export function DoctorVisitCompanionScreen() {
                 <Button
                   title={busy === "approve" ? "Approving…" : "Approve reviewed summary"}
                   icon="checkmark-circle-outline"
-                  disabled={Boolean(busy)}
-                  onPress={() => void approve()}
+                  disabled={Boolean(busy) || summaryHasUnsavedChanges || visitIsPublished}
+                   onPress={() => void approve()}
                 />
               )}
           </Card>
@@ -1484,7 +1531,7 @@ export function DoctorVisitCompanionScreen() {
                   title={busy === "share" ? "Sharing…" : "Share approved visit recap"}
                   icon="send-outline"
                   disabled={
-                    Boolean(busy) || activeSummary?.status !== "approved"
+                    Boolean(busy) || activeSummary?.status !== "approved" || summaryHasUnsavedChanges
                   }
                   onPress={() => void share()}
                 />
