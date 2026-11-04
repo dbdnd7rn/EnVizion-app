@@ -180,7 +180,7 @@ test("AI provider errors do not leak secrets or claim a definition was generated
   await assert.rejects(() => generateTermExplanation(
     input, "secret", "gpt-5-mini",
     async () => new Response("secret provider error", { status: 503 }),
-  ), /AI_PROVIDER_UNAVAILABLE/);
+  ), /AI_PROVIDER_HTTP_503/);
 });
 
 test("Doctor Visit screen exposes opt-in explainer, per-visit reset, no auto transcript or record writes", () => {
