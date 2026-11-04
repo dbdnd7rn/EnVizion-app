@@ -274,125 +274,84 @@ function PatientPlanContent({ plan, limit }: { plan: PatientPlanData; limit?: nu
 }
 export function PatientHomeScreen() {
   const n = useNav();
-  const tabs = useNavigation<BottomTabNavigationProp<Tabs>>();
   const { state, refresh, syncError } = useCare();
   const first = state.name.trim().split(/\s+/)[0] || "there";
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const todayLabel = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+  const greeting = hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening";
+  const todayLabel = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
   const plan = usePatientPlan(state.careRecipientId);
   const today = todayItems(plan.items);
-  const done = plan.completions.filter(c => c.completedOn === dayKey(new Date()) &&
-    today.some(item => item.id === c.itemId)).length;
-  const percent = today.length ? Math.max(0, Math.min(100, done / today.length * 100)) : 0;
+  const doneIds = new Set(plan.completions.filter(c => c.completedOn === dayKey(new Date())).map(c => c.itemId));
+  const done = today.filter(item => doneIds.has(item.id)).length;
+  const percent = today.length ? Math.round(done / today.length * 100) : 0;
   return <Page>
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+      marginTop: -12, marginBottom: -12 }}>
+      <Brand/>
+      <NotificationBell onPress={() => n.navigate("Notifications")}/>
+    </View>
     <PatientReveal>
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-        marginTop: -10, marginBottom: -10, gap: 8 }}>
-        <Brand/>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
-          <NotificationBell onPress={() => n.navigate("Notifications")}/>
-          <Pressable accessibilityRole="button" accessibilityLabel="Open my profile"
-            onPress={() => tabs.navigate("PatientProfile")}
-            style={{ padding: 3, borderRadius: 26, borderWidth: 1,
-              backgroundColor: themeBackground("#F2E9F8"), borderColor: themeBorder("#E7D8F0") }}>
-            <ProfileAvatar name={state.name || "Care Recipient"} size={39}/>
-          </Pressable>
+      <View style={{ borderRadius: 29, overflow: "hidden", backgroundColor: themeBackground("#F3E8FA"),
+        borderColor: themeBorder("#E6D7EF"), borderWidth: 1, padding: 19, gap: 3 }}>
+        <Text style={{ fontFamily: SEMI, fontSize: 11, letterSpacing: 0.8,
+          color: themeForeground(PURPLE) }}>{todayLabel}</Text>
+        <Text style={{ fontFamily: "Lora_500Medium", fontSize: 30, lineHeight: 41,
+          color: themeForeground(INK), marginTop: 3 }}>{greeting}, {first}.</Text>
+        <PatientHeroArt/>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Icon name="sparkles-outline" color={themeForeground(PURPLE)} size={17}/>
+          <Text style={{ fontFamily: FONT, fontSize: 12.5, color: themeForeground(MUTED) }}>
+            One day at a time
+          </Text>
         </View>
       </View>
     </PatientReveal>
-    <PatientReveal>
-      <View style={{ borderRadius: 29, overflow: "hidden", backgroundColor: themeBackground("#F4E9FA"),
-        borderColor: themeBorder("#E4D5EF"), borderWidth: 1, padding: 20, gap: 3 }}>
-        <Text style={{ fontFamily: SEMI, fontSize: 10, letterSpacing: 1.5,
-          color: themeForeground(PURPLE) }}>MY ENVIZION SPACE · {todayLabel.toUpperCase()}</Text>
-        <Text style={{ fontFamily: "Lora_500Medium", fontSize: 30, lineHeight: 40,
-          color: themeForeground(INK), marginTop: 7 }}>{greeting}, {first}.</Text>
-        <PatientText muted size={13.5}>Your day, your care, and your people. All together.</PatientText>
-        <PatientHeroArt/>
-        <Pressable accessibilityRole="button" accessibilityLabel="Open my daily care plan"
-          onPress={() => n.navigate("PatientDay")} style={{ flexDirection: "row",
-            alignItems: "center", alignSelf: "flex-start", gap: 8, minHeight: 43,
-            paddingHorizontal: 16, borderRadius: 22, backgroundColor: themeBackground("#70338F") }}>
-          <Text style={{ fontFamily: SEMI, color: themeForeground("#FFFFFF"), fontSize: 12.5 }}>View my day</Text>
-          <Icon name="arrow-forward-outline" size={16} color={themeForeground("#FFFFFF")}/>
-        </Pressable>
-      </View>
-    </PatientReveal>
-    <PatientHeading eyebrow="TODAY'S CARE" title="Your day at a glance"
-      subtitle="Only the activities shared by your care team."/>
+    <PatientHeading eyebrow="TODAY" title="Your progress"/>
     {!plan.loading && !plan.error && state.careRecipientId ? <>
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <PatientCount value={today.length} label="On today's plan" icon="calendar-outline"/>
+        <PatientCount value={today.length} label="Planned" icon="calendar-outline"/>
         <PatientCount value={done} label="Completed" icon="checkmark-circle-outline"/>
       </View>
-      {today.length > 0 && <View accessibilityLabel={done + " of " + today.length + " care activities completed"}
-        style={{ height: 6, backgroundColor: themeBackground("#EBE1F1"), borderRadius: 5, overflow: "hidden" }}>
-        <View style={{ width: `${Math.round(percent)}%` as const, height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
-      </View>}
+      <View accessibilityLabel={done + " of " + today.length + " activities completed"}
+        style={{ height: 8, backgroundColor: themeBackground("#EBE0F2"), borderRadius: 6, overflow: "hidden" }}>
+        <View style={{ width: `${percent}%` as const, height: "100%",
+          backgroundColor: themeBackground(PURPLE), borderRadius: 6 }}/>
+      </View>
     </> : null}
-    <PatientPlanContent plan={plan} limit={2}/>
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-      <PatientHeading eyebrow="ONE TAP AWAY" title="Your care essentials"/>
-      <Pressable accessibilityRole="button" accessibilityLabel="View all care features"
-        onPress={() => tabs.navigate("PatientCare")} style={{ minHeight: 44, justifyContent: "center" }}>
-        <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 12.5 }}>View all</Text>
-      </Pressable>
-    </View>
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-      <PatientTile title="Medications" detail="Schedules & guidance" icon="medical-outline"
-        onPress={() => n.navigate("PatientMedications")}/>
-      <PatientTile title="Appointments" detail="Visits & next steps" icon="calendar-outline" accent="#E9E9FA"
-        onPress={() => n.navigate("PatientAppointments")}/>
-      <PatientTile title="My health" detail="Saved measurements" icon="pulse-outline" accent="#E7F4EF"
-        onPress={() => n.navigate("PatientHealth")}/>
-      <PatientTile title="Care history" detail="Your recorded timeline" icon="time-outline" accent="#F8EDF1"
-        onPress={() => n.navigate("PatientHistory")}/>
-    </View>
-    <PatientAction title="Message my care team" icon="chatbubbles-outline"
-      detail="A private chat with your authorized caregivers"
-      onPress={() => n.navigate("CareTeamChat", { careRecipientId: state.careRecipientId ?? undefined })}/>
+    <PatientPlanContent plan={plan} limit={1}/>
     {syncError ? <PatientInfo icon="cloud-offline-outline" text={syncError}/> : null}
-    <Pressable accessibilityRole="button" accessibilityLabel="Refresh care information"
-      onPress={() => void refresh()} style={{ minHeight: 46, flexDirection: "row", gap: 8,
-        justifyContent: "center", alignItems: "center" }}>
-      <Icon name="refresh-outline" color={themeForeground(PURPLE)} size={18}/>
-      <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 13 }}>Refresh my information</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel="Refresh home care information"
+      onPress={() => void refresh()} style={{ width: 45, minHeight: 45,
+        alignSelf: "flex-end", alignItems: "center", justifyContent: "center",
+        borderRadius: 18, backgroundColor: themeBackground("#F1E8F8") }}>
+      <Icon name="refresh-outline" color={themeForeground(PURPLE)} size={19}/>
     </Pressable>
   </Page>;
 }
 export function PatientCareHubScreen() {
   const n = useNav();
   return <Page>
-    <PatientHeading eyebrow="MY CARE" title="Everything you need."
-      subtitle="Your information, thoughtfully organised in one place."/>
-    <PatientGlass tint="#E9DBF5">
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
-        <View style={{ width: 49, height: 49, borderRadius: 17,
-          justifyContent: "center", alignItems: "center", backgroundColor: themeBackground("#F0E5FA") }}>
-          <Icon name="sparkles-outline" size={24} color={themeForeground(PURPLE)}/>
-        </View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={{ fontFamily: SEMI, fontSize: 15, color: themeForeground(INK) }}>Your personal care space</Text>
-          <PatientText muted size={12.5}>Choose what you want to see. Your record remains read-only.</PatientText>
-        </View>
-      </View>
-    </PatientGlass>
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-      <PatientTile title="My day" detail="Routines and activities" icon="sunny-outline"
+    <PatientHeading eyebrow="EXPLORE" title="My care"/>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 11 }}>
+      <PatientTile title="My day" detail="Daily plan" icon="sunny-outline"
         onPress={() => n.navigate("PatientDay")}/>
-      <PatientTile title="Medications" detail="My current medication list" icon="medical-outline" accent="#F8EAF4"
-        onPress={() => n.navigate("PatientMedications")}/>
-      <PatientTile title="Appointments" detail="Visit plans and details" icon="calendar-outline" accent="#E9E9FA"
-        onPress={() => n.navigate("PatientAppointments")}/>
-      <PatientTile title="My health" detail="Measurements & history" icon="pulse-outline" accent="#E6F2EB"
-        onPress={() => n.navigate("PatientHealth")}/>
+      <PatientTile title="Medications" detail="Prescriptions and schedules" icon="medical-outline"
+        accent="#F8EAF4" onPress={() => n.navigate("PatientMedications")}/>
+      <PatientTile title="Appointments" detail="Visits" icon="calendar-outline"
+        accent="#E9E9FA" onPress={() => n.navigate("PatientAppointments")}/>
+      <PatientTile title="My health" detail="Measurements" icon="pulse-outline"
+        accent="#E6F2EB" onPress={() => n.navigate("PatientHealth")}/>
+      <PatientTile title="History" detail="Recorded activity" icon="time-outline"
+        accent="#F7EEF3" onPress={() => n.navigate("PatientHistory")}/>
+      <PatientTile title="EnVizion AI" detail="Private care toolkit" icon="sparkles-outline"
+        accent="#EAE2F8" onPress={() => n.navigate("Assistant")}/>
     </View>
-    <PatientAction icon="time-outline" title="My care history"
-      detail="See the recorded events in your care journey"
-      onPress={() => n.navigate("PatientHistory")}/>
-    <PatientInfo icon="information-circle-outline"
-      text="This shared care record helps you stay informed. For medical decisions, speak with your healthcare professional."/>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 4 }}>
+      <Icon name="lock-closed-outline" color={themeForeground(PURPLE)} size={16}/>
+      <Text style={{ fontFamily: FONT, color: themeForeground(MUTED), fontSize: 12 }}>
+        Shared records · Read only
+      </Text>
+    </View>
   </Page>;
 }
 export function PatientDayScreen() {
