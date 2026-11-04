@@ -85,6 +85,12 @@ export async function writeSecureEmergencySnapshot(
     throw new Error("The emergency summary is too large for secure offline storage. Reduce lengthy notes and retry.");
   }
   const previous = parseManifest(await storage.getItemAsync(base));
+  // Register cleanup BEFORE writing sensitive chunks. A failed index write
+  // must not create an untracked persistent emergency snapshot.
+  const ids = await listEmergencyCachedRecipients(storage, userId);
+  const nextIds = [recipientId, ...ids.filter(id => id !== recipientId)]
+    .slice(0, MAX_CACHED_RECIPIENTS);
+  await storage.setItemAsync(indexKey(userId), JSON.stringify(nextIds));
   const nextSlot: Slot = previous?.slot === "a" ? "b" : "a";
   try {
     for (let i = 0; i < chunks.length; i++) {
@@ -105,11 +111,7 @@ export async function writeSecureEmergencySnapshot(
     await Promise.allSettled(Array.from({ length: previous.count }, (_, i) =>
       storage.deleteItemAsync(partKey(base, previous.slot, i))));
   }
-  const ids = await listEmergencyCachedRecipients(storage, userId);
-  const nextIds = [recipientId, ...ids.filter(id => id !== recipientId)]
-    .slice(0, MAX_CACHED_RECIPIENTS);
-  // Cache indexing is a best-effort sign-out cleanup aid, not an access gate.
-  await storage.setItemAsync(indexKey(userId), JSON.stringify(nextIds)).catch(() => {});
+  // Indexed before the commit so explicit sign-out can wipe this snapshot.
 }
 
 export async function readSecureEmergencySnapshot(
