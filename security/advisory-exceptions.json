@@ -8,6 +8,27 @@
       "severity": "high",
       "expiresOn": "2026-11-11",
       "reason": "Re-reviewed 2026-11-04: GitHub Advisory Database still lists no patched node-forge release. Transitive dependency is imported by Expo CLI and @expo/code-signing-certificates build/signing tooling; not used by EnVizion application code for verifying user-controlled RSA signatures. Temporary seven-day exception ONLY for GHSA-86w9-cpqp-85rv. Recheck upstream fix and dependency graph before 2026-11-11; do not extend automatically."
+    },
+    {
+      "id": "GHSA-3g3m-2fjr-6pw4",
+      "package": "glob",
+      "severity": "moderate",
+      "expiresOn": "2026-11-11",
+      "reason": "Temporary 7-day build-tool exception: current Expo SDK 54 transitive glob v13 is pinned by @expo/*; affected post-abort traversal applies only to build-time local path walks, not the EnVizion web runtime, which serves static dist. Patch glob >=14.0.2 is outside Expo's declared major range; do not override without native/build validation. Upstream issue expo/expo#52735. Review by 2026-11-11."
+    },
+    {
+      "id": "GHSA-g3hv-75wg-m249",
+      "package": "minimatch",
+      "severity": "moderate",
+      "expiresOn": "2026-11-11",
+      "reason": "Temporary 7-day build-tool exception: npm audit flags transitive minimatch in Expo/React Native/Jest and legacy glob build tooling. EnVizion does not process remote/user-controlled glob patterns at runtime; available minimatch >=11.0.1 requires unsupported transitive major updates. Do not force global override that breaks old glob7 callers; revalidate and upgrade SDK/tooling by 2026-11-11."
+    },
+    {
+      "id": "GHSA-gcqx-w48m-w2h4",
+      "package": "deepmerge",
+      "severity": "low",
+      "expiresOn": "2026-11-11",
+      "reason": "Temporary 7-day exception: Expo @expo/config consumes deepmerge v4.3.1 from trusted local configuration during build, not end-user objects at runtime. GitHub Advisory Database lists no patched release. Keep trust boundary and review by 2026-11-11."
     }
   ]
 }
