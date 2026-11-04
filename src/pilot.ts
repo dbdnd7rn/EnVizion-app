@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 import type { StaffMembership } from "./staff";
-import { missingPilotDocumentTypes } from "./pilotConsentSafety";
+import { missingPilotDocumentTypes } from "./pilotConsentSafety.ts";
 
 export type PilotStatus = "invited" | "active" | "paused" | "exited";
 export type ProgramDocumentType =
