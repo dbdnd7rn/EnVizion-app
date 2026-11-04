@@ -39,6 +39,7 @@ import {
 } from "../ui";
 import { useNav } from "./MainScreens";
 import { FamilyHelpReviewSection } from "./FamilyHelpReviewSection";
+import { FamilyCareReportPublisher } from "./FamilyCareReportPublisher";
 
 type Draft = {
   updateType: FamilyUpdateType;
@@ -334,6 +335,8 @@ export function FamilyCommunicationScreen() {
           <Txt style={S.small}>awaiting your acknowledgement</Txt>
         </Card>
       </View>
+
+      <FamilyCareReportPublisher />
 
       {Boolean(message) && (
         <Card>
