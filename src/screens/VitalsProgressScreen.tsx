@@ -94,6 +94,8 @@ export function VitalsProgressScreen() {
   const { state } = useCare();
   const n = useNav();
   const [unit, setUnit] = useState<TemperatureUnit>("F");
+  const [savingUnit, setSavingUnit] = useState(false);
+  const [unitError, setUnitError] = useState("");
   const [filter, setFilter] = useState<Filter>("30");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -132,6 +134,22 @@ export function VitalsProgressScreen() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [state.careRecipientId, filter, filter === "custom" ? startDate : "", filter === "custom" ? endDate : "", refreshId]));
+
+  async function changeTemperatureUnit(next: TemperatureUnit) {
+    if (savingUnit || next === unit) return;
+    const previous = unit;
+    setUnit(next);
+    setUnitError("");
+    setSavingUnit(true);
+    try {
+      await saveTemperaturePreference(next);
+    } catch {
+      setUnit(previous);
+      setUnitError("Could not save your temperature unit preference. Please try again.");
+    } finally {
+      setSavingUnit(false);
+    }
+  }
 
   async function loadMore() {
     if (moreLoading || loading || !hasMore || !state.careRecipientId || !bounds) return;
@@ -202,11 +220,12 @@ export function VitalsProgressScreen() {
             <Text style={[S.small, { flex: 1 }]}>Temperature display</Text>
             {(["C","F"] as TemperatureUnit[]).map(u =>
               <Pressable key={u} accessibilityRole="button" accessibilityLabel={`Display Celsius °${u === "C" ? "C" : "Fahrenheit"}`}
-                accessibilityState={{ selected: unit === u }} onPress={() => { setUnit(u); void saveTemperaturePreference(u).catch(() => {}); }}
+                accessibilityState={{ selected: unit === u, disabled: savingUnit }} disabled={savingUnit} onPress={() => void changeTemperatureUnit(u)}
                 style={{ borderRadius: 14, paddingHorizontal: 17, paddingVertical: 9, backgroundColor: themeBackground(unit === u ? "#743895" : "#F1EAF9") }}>
                 <Text style={{ color: unit === u ? "#FFFFFF" : themeForeground("#743895") }}>°{u}</Text>
               </Pressable>)}
           </View>
+          {Boolean(unitError) && <Text accessibilityRole="alert" style={[S.small, { color: C.rose }]}>{unitError}</Text>}
           <Text style={[S.small, { color: themeForeground("#7E738A"), lineHeight: 18 }]}>Each chart point is one observation, including multiple readings on the same day. Older temperatures without a recorded unit are excluded from converted charts.</Text>
           {!rows.length ? <Card style={{ borderRadius: 23, gap: 8 }}><Icon name="clipboard-outline" size={27} color={C.purple} /><Text style={S.h3}>No observations in this period</Text><Txt>Try a longer date range or record a new observation.</Txt></Card> : rows.map(entry =>
             <Card key={entry.id} style={{ borderRadius: 20, gap: 9 }}>
