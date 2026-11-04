@@ -83,6 +83,12 @@ const drillTypes = new Set([
   "notification_recovery",
 ]);
 
+const requiredPilotDocumentTypes = [
+  "privacy_notice",
+  "pilot_consent",
+  "terms_of_use",
+] as const;
+
 function allTrue(source: Record<string, unknown>, keys: string[]) {
   return keys.every((key) => source[key] === true);
 }
@@ -102,18 +108,26 @@ async function pilotContext(admin: any, userId: string) {
   const now = new Date().toISOString();
   const { data: docs, error: docsError } = await admin
     .from("program_documents")
-    .select("id")
+    .select("id, document_type")
     .eq("status", "published")
     .or(`effective_at.is.null,effective_at.lte.${now}`);
 
   if (docsError) throw docsError;
 
   const documentIds = (docs ?? []).map((row: any) => row.id);
-  if (!documentIds.length) {
+  const publishedTypes = new Set((docs ?? []).map(
+    (row: any) => String(row.document_type),
+  ));
+  const missingRequiredTypes = requiredPilotDocumentTypes.filter(
+    (type) => !publishedTypes.has(type),
+  );
+  // The server must not trust the client consent gate. Zero published
+  // documents, duplicates, or absent document types never mean consent.
+  if (missingRequiredTypes.length || !documentIds.length) {
     return {
       active: true,
       cohort: enrollment.cohort ?? "",
-      consentCurrent: true,
+      consentCurrent: false,
     };
   }
 
