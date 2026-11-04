@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, AppState, Text, View } from "react-native";
 import { useAuth } from "./auth";
 import {
@@ -30,13 +30,17 @@ export function PilotConsentGate({
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [message, setMessage] = useState("");
+  const requestSerialRef = useRef(0);
 
   const refresh = useCallback(async () => {
+    const serial = ++requestSerialRef.current;
     setLoading(true);
     setMessage("");
     try {
-      setState(await loadPilotConsentState());
+      const next = await loadPilotConsentState();
+      if (serial === requestSerialRef.current) setState(next);
     } catch (error) {
+      if (serial !== requestSerialRef.current) return;
       setState(null);
       setMessage(
         error instanceof Error
@@ -44,7 +48,7 @@ export function PilotConsentGate({
           : "We could not verify the current pilot participation documents.",
       );
     } finally {
-      setLoading(false);
+      if (serial === requestSerialRef.current) setLoading(false);
     }
   }, []);
 
@@ -55,7 +59,10 @@ export function PilotConsentGate({
     const subscription = AppState.addEventListener("change", (next) => {
       if (next === "active") void refresh();
     });
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      requestSerialRef.current += 1;
+    };
   }, [refresh]);
 
   if (loading) {
