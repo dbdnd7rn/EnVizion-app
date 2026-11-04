@@ -18,6 +18,7 @@ export type Tabs = {
 export type RootStack = {
   Onboarding: undefined;
   FamilyAppointments: undefined;
+  FamilyProfile: undefined;
   PatientDay: undefined;
   PatientMedications: undefined;
   PatientAppointments: undefined;
