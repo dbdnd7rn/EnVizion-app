@@ -147,6 +147,8 @@ test("web never persists emergency PHI in AsyncStorage; native cache is scoped t
   assert.match(screen,/isCurrentEmergencyRequest\(/);
   assert.match(screen,/setCreatedShare\(null\)/);
   assert.match(screen,/currentScopeRef\.current !== requestedScope/);
+  assert.match(screen,/const requestedRecipientId = careRecipientId/);
+  assert.match(screen,/await loadEmergencyShareLinks\(requestedRecipientId\)/);
   assert.match(screen,/createdShare\.careRecipientId === careRecipientId/);
   assert.match(screen,/emergencyAccessWasDenied\(error\)/);
   assert.match(screen,/loadedScope === activeScope/);
