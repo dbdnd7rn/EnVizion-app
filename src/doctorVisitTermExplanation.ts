@@ -4,6 +4,11 @@ import {
   type TermExplanation,
 } from "../supabase/functions/doctor-visit-terms/contracts";
 
+export type DoctorVisitTermAnswer = TermExplanation & {
+  source: "ai" | "glossary";
+  notice: string;
+};
+
 /**
  * Invokes the authenticated Supabase Edge Function.
  * No saved notes, transcript, care profile or identity is included in the body.
@@ -13,7 +18,7 @@ export async function explainDoctorVisitTerm(input: {
   visitId: string;
   term: string;
   context?: string;
-}): Promise<TermExplanation> {
+}): Promise<DoctorVisitTermAnswer> {
   const { data, error } = await supabase.functions.invoke("doctor-visit-terms", {
     body: {
       visitId: input.visitId,
@@ -41,5 +46,11 @@ export async function explainDoctorVisitTerm(input: {
   if (data?.error && typeof data.error === "string") throw new Error(data.error);
   const explanation = parseTermExplanation(data?.explanation);
   if (!explanation) throw new Error("The AI response could not be verified. Please try another term.");
-  return explanation;
+  return {
+    ...explanation,
+    source: data?.source === "glossary" ? "glossary" : "ai",
+    notice: data?.source === "glossary" && typeof data?.notice === "string"
+      ? data.notice.slice(0, 300)
+      : "",
+  };
 }
