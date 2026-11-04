@@ -2,7 +2,6 @@ import React,{useCallback,useEffect,useRef,useState} from "react";
 import {AccessibilityInfo,ActivityIndicator,Animated,Pressable,Text,TextInput,View,useWindowDimensions,Platform} from "react-native";
 import {useFocusEffect} from "@react-navigation/native";
 import {useCare} from "../store";
-import {useAuth} from "../auth";
 import {useAppearance} from "../appearance";
 import {C,S,Page,Brand,Icon,Button} from "../ui";
 import {themeBackground,themeBorder,themeForeground,themeShadow} from "../themeColors";
