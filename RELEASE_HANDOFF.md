@@ -100,3 +100,21 @@ This section supersedes earlier claims of launch readiness; the original Septemb
 ### Promotion rule
 
 Do **not** deploy a new client-facing production release solely because a web export succeeds. Require a green dependency/security gate, an authenticated smoke pass for critical roles and data flows, up-to-date privacy/clinical approvals, and real pilot sign-off (or an explicitly labeled pre-pilot review release). Native store distribution requires separate developer accounts and device acceptance.
+
+
+## Step 8 pre-pilot QA handover — 4 November 2026
+
+The full role/device/recovery checklist and current no-evidence launch status are now in
+[Step 8 Pre-Pilot QA & Handover](docs/STEP8_PREPILOT_QA_HANDOVER_2026-11-04.md).
+
+The older 27 October deployment statement above is **historical**: Render subsequently
+confirmed the Step 7 pilot-consent release \`52e6602\` live with HTTP 200 on 4 November.
+For any newer release, check Render's actual live commit rather than using this static note.
+
+Step 8 also adds server-side enforcement in \`launch-validation\` and \`launch-admin\`:
+all three **distinct**, currently published and effective participation-document
+types must exist before validation passes or a launch sign-off can be approved.
+A zero-document or partial-document set is **not** completed consent. Edge Function
+deployment and the Render web deployment are independently versioned and require
+separate verification. See the linked checklist for pending clinical review, real
+device evidence and final client sign-off.

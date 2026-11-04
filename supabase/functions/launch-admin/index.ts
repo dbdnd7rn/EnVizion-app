@@ -33,12 +33,17 @@ const requiredDrills = [
   "packet_recovery",
   "notification_recovery",
 ];
+const requiredDocumentTypes = [
+  "privacy_notice",
+  "pilot_consent",
+  "terms_of_use",
+];
 
 async function currentPublishedDocuments(admin: any) {
   const now = new Date().toISOString();
   const { data, error } = await admin
     .from("program_documents")
-    .select("id")
+    .select("id, document_type")
     .eq("status", "published")
     .or(`effective_at.is.null,effective_at.lte.${now}`);
   if (error) throw error;
@@ -50,8 +55,7 @@ async function consentCompletionCount(
   userIds: string[],
   documentIds: string[],
 ) {
-  if (!userIds.length) return 0;
-  if (!documentIds.length) return userIds.length;
+  if (!userIds.length || !documentIds.length) return 0;
 
   const { data, error } = await admin
     .from("user_document_acceptances")
@@ -96,11 +100,6 @@ async function pilotFoundation(admin: any) {
   const publishedTypes = new Set(
     currentDocuments.map((row: any) => String(row.document_type)),
   );
-  const requiredDocumentTypes = [
-    "privacy_notice",
-    "pilot_consent",
-    "terms_of_use",
-  ];
   const missingDocumentTypes = requiredDocumentTypes.filter(
     (type) => !publishedTypes.has(type),
   );
@@ -241,6 +240,12 @@ async function operationsSnapshot(admin: any) {
 
 async function gateForWave(admin: any, wave: any, operations?: any) {
   const docs = await currentPublishedDocuments(admin);
+  const publishedTypes = new Set(docs.map(
+    (row: any) => String(row.document_type),
+  ));
+  const missingDocumentTypes = requiredDocumentTypes.filter(
+    (type) => !publishedTypes.has(type),
+  );
   const { data: enrollments, error: enrollmentError } = await admin
     .from("pilot_enrollments")
     .select("user_id")
@@ -249,11 +254,13 @@ async function gateForWave(admin: any, wave: any, operations?: any) {
   if (enrollmentError) throw enrollmentError;
 
   const userIds = (enrollments ?? []).map((row: any) => row.user_id);
-  const consentComplete = await consentCompletionCount(
-    admin,
-    userIds,
-    docs.map((row: any) => row.id),
-  );
+  const consentComplete = missingDocumentTypes.length
+    ? 0
+    : await consentCompletionCount(
+        admin,
+        userIds,
+        docs.map((row: any) => row.id),
+      );
 
   const [{ data: runs, error: runError }, { data: drills, error: drillError }, { data: signoff, error: signoffError }] =
     await Promise.all([
@@ -305,7 +312,9 @@ async function gateForWave(admin: any, wave: any, operations?: any) {
     blockers.push("Launch wave is not active");
   }
   if (!userIds.length) blockers.push("No active pilot participants are in this cohort");
-  if (!docs.length) blockers.push("No required pilot documents are currently published");
+  for (const type of missingDocumentTypes) {
+    blockers.push(`Required pilot document not published: ${type.replaceAll("_", " ")}`);
+  }
   if (userIds.length && consentComplete < userIds.length) {
     blockers.push(
       `${userIds.length - consentComplete} active pilot participant(s) are not current on required documents`,
