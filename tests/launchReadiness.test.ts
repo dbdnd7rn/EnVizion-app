@@ -20,6 +20,7 @@ test("launch readiness is ready when operational signals are clear", () => {
       pilot,
       operations,
       publishedRequiredDocuments: 3,
+      publishedRequiredDocumentTypes: ["privacy_notice", "pilot_consent", "terms_of_use"],
     }),
     {
       level: "ready",
@@ -46,6 +47,39 @@ test("launch readiness flags missing required documents", () => {
     publishedRequiredDocuments: 0,
   });
 
-  assert.equal(result.level, "attention");
-  assert.match(result.issues.join(" "), /no required participation documents/i);
+  assert.equal(result.level, "blocked");
+  assert.match(result.issues.join(" "), /required participation documents/i);
+});
+
+
+test("launch readiness rejects 3 documents that do not cover all required types", () => {
+  const result = launchReadiness({
+    pilot,
+    operations,
+    publishedRequiredDocuments: 3,
+    publishedRequiredDocumentTypes: ["privacy_notice", "privacy_notice", "terms_of_use"],
+  });
+  assert.equal(result.level, "blocked");
+  assert.match(result.issues.join(" "), /Pilot participation consent/);
+});
+
+test("pilot readiness cannot be green before anyone has actually joined the active pilot", () => {
+  const result = launchReadiness({
+    pilot: { ...pilot, activePilot: 0, activeConsentComplete: 0 },
+    operations,
+    publishedRequiredDocuments: 3,
+    publishedRequiredDocumentTypes: ["privacy_notice", "pilot_consent", "terms_of_use"],
+  });
+  assert.notEqual(result.level, "ready");
+  assert.match(result.issues.join(" "), /No active pilot participants/);
+});
+
+test("a complete, consent-current pilot with all 3 types can have clear operational signals", () => {
+  const result = launchReadiness({
+    pilot,
+    operations,
+    publishedRequiredDocuments: 3,
+    publishedRequiredDocumentTypes: ["privacy_notice", "pilot_consent", "terms_of_use"],
+  });
+  assert.deepEqual(result, { level: "ready", issues: [] });
 });
