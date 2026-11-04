@@ -81,3 +81,10 @@ test("approved summaries and practical offers remain recipient-scoped after hard
   assert.match(help,/\.eq\("care_recipient_id",careRecipientId\)/);
   assert.match(restricted,/private\.is_active_family_viewer\(care_recipient_id\)/);
 });
+
+test("family privacy settings do not offer unavailable care-team administration",()=>{
+  const privacy=read("../src/screens/PrivacyDataScreen.tsx");
+  assert.match(privacy,/state\.accessRole === "owner" \|\| state\.accessRole === "caregiver"/);
+  assert.match(privacy,/n\.navigate\("CareTeam"\)/);
+  assert.match(privacy,/Family Members can view approved information/);
+});
