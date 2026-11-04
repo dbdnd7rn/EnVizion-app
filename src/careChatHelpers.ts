@@ -11,3 +11,12 @@ export function mergeChatMessages<T extends { id: string; created_at: string }>(
 export function chatSearchTerm(query: string) {
   return query.trim().slice(0,100).replace(/[%,_]/g," ");
 }
+
+
+/** Do not render asynchronous chat data after the user switches rooms or profiles. */
+export function chatResponseMatchesScope(
+  requestedId: string | null,
+  activeId: string | null,
+): boolean {
+  return Boolean(requestedId) && requestedId === activeId;
+}
