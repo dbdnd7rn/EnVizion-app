@@ -7,8 +7,8 @@ const screen = readFileSync(new URL("../src/screens/PatientExperience.tsx", impo
 const navigation = readFileSync(new URL("../src/navigation.ts", import.meta.url), "utf8");
 const backend = readFileSync(new URL("../src/backend.ts", import.meta.url), "utf8");
 
-test("patient has five purpose-built tabs and a patient-only route branch", () => {
-  for (const route of ["PatientHome", "PatientCare", "PatientTeam", "PatientAI", "PatientProfile"]) {
+test("patient has four purpose-built tabs and a patient-only route branch", () => {
+  for (const route of ["PatientHome", "PatientCare", "PatientTeam", "PatientProfile"]) {
     assert.match(app, new RegExp('name="' + route + '"'));
     assert.match(navigation, new RegExp("\\b" + route + "\\b"));
   }
@@ -16,6 +16,9 @@ test("patient has five purpose-built tabs and a patient-only route branch", () =
   assert.match(app, /state\.accessRole === "owner" \|\| state\.accessRole === "caregiver"/);
   assert.match(app, /state\.accessRole === "viewer"/);
   assert.match(app, /<PatientTabs \/>/);
+  const patientTabs = app.slice(app.indexOf("function PatientTabs()"), app.indexOf("function FamilyTabs()"));
+  assert.equal((patientTabs.match(/<Tab.Screen name="Patient/g) ?? []).length, 4);
+  assert.doesNotMatch(patientTabs, /name="PatientAI"/);
 });
 
 test("patient branch contains only patient care screens and permitted shared tools", () => {
@@ -39,7 +42,8 @@ test("patient care renders authenticated records and reuses existing chat, AI an
   assert.match(screen, /care_recipient_id", state\.careRecipientId/);
   assert.match(screen, /n\.navigate\("CareTeamChat"/);
   assert.match(screen, /ProfileAvatar/);
-  assert.match(app, /PatientAI" component=\{themedScreen\(EnVizionAIScreen\)\}/);
+  assert.match(app, /name="Assistant" component=\{themedScreen\(EnVizionAIScreen\)\}/);
+  assert.match(screen, /n\.navigate\("Assistant"\)/);
   assert.doesNotMatch(screen, /fake record|demo patient|sample medication/i);
 });
 

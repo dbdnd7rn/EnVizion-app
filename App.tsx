@@ -151,7 +151,6 @@ function PatientTabs() {
               PatientHome: focused ? "home" : "home-outline",
               PatientCare: focused ? "grid" : "grid-outline",
               PatientTeam: focused ? "people" : "people-outline",
-              PatientAI: focused ? "sparkles" : "sparkles-outline",
               PatientProfile: focused ? "person" : "person-outline",
             } as Record<string, string>)[route.name] || "ellipse-outline"}
             color={color} size={21}/>
@@ -160,7 +159,6 @@ function PatientTabs() {
       <Tab.Screen name="PatientHome" component={themedScreen(PatientHomeScreen)} options={{ tabBarLabel: "Home" }}/>
       <Tab.Screen name="PatientCare" component={themedScreen(PatientCareHubScreen)} options={{ tabBarLabel: "My Care" }}/>
       <Tab.Screen name="PatientTeam" component={themedScreen(PatientTeamScreen)} options={{ tabBarLabel: "Care Team" }}/>
-      <Tab.Screen name="PatientAI" component={themedScreen(EnVizionAIScreen)} options={{ tabBarLabel: "Assistant" }}/>
       <Tab.Screen name="PatientProfile" component={themedScreen(PatientProfileScreen)} options={{ tabBarLabel: "Profile" }}/>
     </Tab.Navigator>
   );

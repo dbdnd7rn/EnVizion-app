@@ -12,7 +12,6 @@ export type Tabs = {
   PatientHome: undefined;
   PatientCare: undefined;
   PatientTeam: undefined;
-  PatientAI: undefined;
   PatientProfile: undefined;
 };
 export type RootStack = {

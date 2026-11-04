@@ -17,7 +17,7 @@ test("all nine care-recipient screens retain their own accessible route and layo
   assert.match(app, /name="PatientHome"/);
   assert.match(app, /name="PatientCare"/);
   assert.match(app, /name="PatientTeam"/);
-  assert.match(app, /name="PatientAI"/);
+  assert.doesNotMatch(app.slice(app.indexOf("function PatientTabs()"), app.indexOf("function FamilyTabs()")), /name="PatientAI"/);
   assert.match(app, /name="PatientProfile"/);
   assert.match(app, /tabBarHideOnKeyboard: true/);
 });
