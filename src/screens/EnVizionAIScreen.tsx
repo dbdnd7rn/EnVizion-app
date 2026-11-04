@@ -92,7 +92,6 @@ export function EnVizionAIScreen() {
   const [careDataAllowed, setCareDataAllowed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [profilePrompt, setProfilePrompt] = useState<string | null>(null);
-  const [naturalConversation, setNaturalConversation] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
   const [problem, setProblem] = useState("");
@@ -156,10 +155,7 @@ export function EnVizionAIScreen() {
       lastBlockedRequestRef.current = blockedKey;
       const reply = gate === "select-profile"
         ? "Choose a care profile first. I can only show records from a profile you are authorized to view."
-        : "Care profile access is off. Choose ‘Use profile and continue’ to answer from your authorized records. " +
-          (naturalConversation
-            ? "Natural chat is ON, so the requested summary may also be sent to the external AI provider."
-            : "Natural chat is OFF, so this uses the private toolkit service only.");
+        : "Care profile access is off. Choose ‘Use profile and continue’ to answer from authorized saved records. EnVizion uses its own care-toolkit service, not an external AI model.";
       if (!retry) dispatch({ type: "conversation-turn", messages: [makeMessage("user", value)] });
       dispatch({ type: "conversation-turn", messages: [makeMessage("assistant", reply)] });
       setProfilePrompt(gate === "enable-profile" ? value : null);
@@ -188,7 +184,7 @@ export function EnVizionAIScreen() {
       const response = await askCareAI({
         message: value, history,
         careRecipientId: state.careRecipientId,
-        includeCareData, naturalConversation,
+        includeCareData,
       });
       if (id !== requestId.current) return;
       dispatch({ type: "conversation-turn", messages: [{ ...makeMessage("assistant", response.reply), resource: response.resource, trends: response.trends, suggestions: response.suggestions }] });
@@ -200,7 +196,7 @@ export function EnVizionAIScreen() {
       sendingRef.current = false;
       if (id === requestId.current) setBusy(false);
     }
-  }, [busy, careDataAllowed, naturalConversation, dispatch, messages, pending, profilePrompt, state.careRecipientId]);
+  }, [busy, careDataAllowed, dispatch, messages, pending, profilePrompt, state.careRecipientId]);
 
   const editPending = (changes: Partial<Record<string,string>>) => {
     if (!pending) return;
@@ -331,39 +327,16 @@ export function EnVizionAIScreen() {
             <View style={{ flex: 1, gap: 2 }}>
               <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13, color: themeForeground(INK) }}>Privacy & AI settings</Text>
               <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11, color: themeForeground(MUTED) }}>
-                Care profile: {careDataAllowed ? "On" : "Off"} · Natural chat: {naturalConversation ? "On" : "Off"}
+                Care profile: {careDataAllowed ? "On" : "Off"} · Built-in assistant
               </Text>
             </View>
             <Icon name={settingsOpen ? "chevron-up-outline" : "chevron-down-outline"} color={themeForeground(PURPLE)} size={20}/>
           </Pressable>
           {settingsOpen && (<>
-          <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
-            <AIIconBubble><Icon name="sparkles-outline" color={themeForeground(PURPLE)} size={22}/></AIIconBubble>
-            <View style={{ flex: 1, gap: 3 }}>
-              <Text style={{ color: themeForeground(INK), fontFamily: "DMSans_600SemiBold", fontSize: 13 }}>Natural conversation</Text>
-              <Text style={{ color: themeForeground(MUTED), fontFamily: "DMSans_400Regular", fontSize: 11.5, lineHeight: 16.5 }}>
-                {naturalConversation ? "AI-powered replies and follow-up discussions" : "Turn on for thoughtful, free-form AI chat"}
-              </Text>
-            </View>
-            <Text style={{ color: themeForeground(naturalConversation ? "#70338F" : MUTED), fontFamily: "DMSans_600SemiBold", fontSize: 11 }}>{naturalConversation ? "ON" : "OFF"}</Text>
-            <Switch value={naturalConversation} accessibilityLabel="Allow sending messages to an external AI provider for natural conversation"
-              onValueChange={v => {
-                requestId.current += 1;
-                setBusy(false);
-                dispatch({ type: "conversation-clear" });
-                setNaturalConversation(v);
-                setProfilePrompt(null);
-                lastBlockedRequestRef.current = null;
-                setPending(null);
-                setProblem("");
-              }}
-              trackColor={{ false: "#D9D4DE", true: "#D2AAE5" }} thumbColor={PURPLE}/>
-          </View>
-          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), fontSize: 10.8, lineHeight: 16 }}>
-            When enabled, your messages and recent chat are sent to an external AI provider to generate replies.
-            Keep it off for private, built-in toolkit guidance. Sharing care profile information is separate below.
+          <Text style={{ color: themeForeground(MUTED), fontFamily: "DMSans_400Regular", fontSize: 11.5, lineHeight: 18 }}>
+            EnVizion answers supported questions using built-in guidance. No ChatGPT account or external AI model is connected to this chat.
+            You can separately allow it to read your authorized care profile below.
           </Text>
-          <View style={{ height: 1, backgroundColor: themeBorder("#E8DDEC") }}/>
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
             <AIIconBubble><Icon name="shield-checkmark-outline" color={themeForeground(PURPLE)} size={22}/></AIIconBubble>
             <View style={{ flex: 1, gap: 3 }}>
@@ -380,7 +353,7 @@ export function EnVizionAIScreen() {
             <Text style={{ color: themeForeground(careDataAllowed ? "#70338F" : MUTED), fontFamily: "DMSans_600SemiBold", fontSize: 11 }}>{careDataAllowed ? "ON" : "OFF"}</Text>
             <Switch value={careDataAllowed}
               disabled={!state.careRecipientId || busy}
-              accessibilityLabel="Share authorized care profile data with the AI for this conversation"
+              accessibilityLabel="Allow EnVizion to read selected authorized care profile records for this conversation"
               onValueChange={(v) => {
                 // The old chat can contain private record excerpts. Do not send it
                 // to the provider under a different privacy preference.
@@ -397,9 +370,7 @@ export function EnVizionAIScreen() {
           </View>
           <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED),
             fontSize: 10.8, lineHeight: 16 }}>
-            Enable to use records for your selected, authorized care profile. With Natural conversation on,
-            requested care summaries may also be sent to the external AI provider. Switching modes clears this
-            conversation. Nothing is saved to care records without your confirmation.
+            Enable to use records for the selected authorized care profile. The toolkit service checks your care-team access before reading records. Switching this setting clears the conversation. Nothing is saved to care records without your confirmation.
           </Text>
           </>)}
         </View>
@@ -456,7 +427,7 @@ export function EnVizionAIScreen() {
         {busy && <View accessibilityLabel="Toolkit assistant is preparing a reply" style={{ flexDirection: "row",
           alignItems: "center", gap: 10, padding: 15, borderRadius: 18, backgroundColor: themeBackground("#F6EDFB") }}>
           <ActivityIndicator color={themeForeground(PURPLE)}/>
-          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED) }}>{naturalConversation ? "Thinking about your message…" : "Checking the toolkit…"}</Text>
+          <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED) }}>{"Checking your care toolkit…"}</Text>
         </View>}
 
         {pending && (
