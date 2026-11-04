@@ -21,4 +21,5 @@ test("patient care progress bar uses a typed percent width between 0 and 100",()
   const src=readFileSync(new URL("../src/screens/PatientExperience.tsx",import.meta.url),"utf8");
   assert.match(src,/const percent = today\.length \? Math\.max\(0, Math\.min\(100, done \/ today\.length \* 100\)\) : 0/);
   assert.match(src, /width: \x60\$\{percent\}%\x60 as \x60\$\{number\}%\x60/);
+  assert.match(src, /width: \x60\$\{today\.length \? Math\.min\(100, done \/ today\.length \* 100\) : 0\}%\x60 as \x60\$\{number\}%\x60/);
 });
