@@ -243,138 +243,35 @@ function PatientPlanContent({ plan, limit }: { plan: PatientPlanData; limit?: nu
     </PatientGlass>
   ))}</View>;
 }
-function PatientPlanList({ limit }: { limit?: number }) {
+export function PatientDayScreen() {
   const { state } = useCare();
   const plan = usePatientPlan(state.careRecipientId);
-  return <PatientPlanContent plan={plan} limit={limit}/>;
-}
-export function PatientHomeScreen() {
-  const n = useNav();
-  const { state, refresh, syncError } = useCare();
-  const first = state.name.trim().split(/\s+/)[0] || "there";
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const todayLabel = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-  const plan = usePatientPlan(state.careRecipientId);
   const today = todayItems(plan.items);
-  const done = plan.completions.filter(c => c.completedOn === dayKey(new Date()) &&
-    today.some(item => item.id === c.itemId)).length;
-  const percent = today.length ? Math.max(0, Math.min(100, done / today.length * 100)) : 0;
+  const completed = new Set(plan.completions.filter(c => c.completedOn === dayKey(new Date())).map(c => c.itemId));
+  const done = today.filter(item => completed.has(item.id)).length;
   return <Page>
-    <PatientReveal>
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between",
-        marginTop: -10, marginBottom: -10, gap: 8 }}>
-        <Brand/>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
-          <NotificationBell onPress={() => n.navigate("Notifications")}/>
-          <Pressable accessibilityRole="button" accessibilityLabel="Open my profile"
-            onPress={() => n.navigate("PatientProfile")}
-            style={{ padding: 3, borderRadius: 26, borderWidth: 1,
-              backgroundColor: themeBackground("#F2E9F8"), borderColor: themeBorder("#E7D8F0") }}>
-            <ProfileAvatar name={state.name || "Care Recipient"} size={39}/>
-          </Pressable>
+    <PatientHeading eyebrow="TODAY" title="Your daily plan"
+      subtitle="A simple view of the activities your care team has shared with you."/>
+    {!plan.loading && !plan.error && Boolean(state.careRecipientId) && <PatientGlass tint="#E9DDF5" compact>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        <View style={{ flex: 1, gap: 4 }}>
+          <PatientText muted size={12.5}>Recorded progress today</PatientText>
+          <Text style={{ fontFamily: "Lora_500Medium", fontSize: 24, color: themeForeground(INK) }}>
+            {done} of {today.length} completed
+          </Text>
         </View>
+        <Icon name="checkmark-circle-outline" size={29} color={themeForeground(PURPLE)}/>
       </View>
-    </PatientReveal>
-    <PatientReveal>
-      <View style={{ borderRadius: 29, overflow: "hidden", backgroundColor: themeBackground("#F4E9FA"),
-        borderColor: themeBorder("#E4D5EF"), borderWidth: 1, padding: 20, gap: 3 }}>
-        <Text style={{ fontFamily: SEMI, fontSize: 10, letterSpacing: 1.5,
-          color: themeForeground(PURPLE) }}>MY ENVIZION SPACE · {todayLabel.toUpperCase()}</Text>
-        <Text style={{ fontFamily: "Lora_500Medium", fontSize: 30, lineHeight: 40,
-          color: themeForeground(INK), marginTop: 7 }}>{greeting}, {first}.</Text>
-        <PatientText muted size={13.5}>Your day, your care, and your people. All together.</PatientText>
-        <PatientHeroArt/>
-        <Pressable accessibilityRole="button" accessibilityLabel="Open my daily care plan"
-          onPress={() => n.navigate("PatientDay")} style={{ flexDirection: "row",
-            alignItems: "center", alignSelf: "flex-start", gap: 8, minHeight: 43,
-            paddingHorizontal: 16, borderRadius: 22, backgroundColor: themeBackground("#70338F") }}>
-          <Text style={{ fontFamily: SEMI, color: themeForeground("#FFFFFF"), fontSize: 12.5 }}>View my day</Text>
-          <Icon name="arrow-forward-outline" size={16} color={themeForeground("#FFFFFF")}/>
-        </Pressable>
+      <View style={{ height: 7, borderRadius: 5, overflow: "hidden",
+        backgroundColor: themeBackground("#EDE2F2") }}>
+        <View style={{ width: (today.length ? Math.min(100, done / today.length * 100) : 0) + "%",
+          height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
       </View>
-    </PatientReveal>
-    <PatientHeading eyebrow="TODAY'S CARE" title="Your day at a glance"
-      subtitle="Only the activities shared by your care team."/>
-    {!plan.loading && !plan.error && state.careRecipientId ? <>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <PatientCount value={today.length} label="On today's plan" icon="calendar-outline"/>
-        <PatientCount value={done} label="Completed" icon="checkmark-circle-outline"/>
-      </View>
-      {today.length > 0 && <View accessibilityLabel={done + " of " + today.length + " care activities completed"}
-        style={{ height: 6, backgroundColor: themeBackground("#EBE1F1"), borderRadius: 5, overflow: "hidden" }}>
-        <View style={{ width: percent + "%", height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
-      </View>}
-    </> : null}
-    <PatientPlanContent plan={plan} limit={2}/>
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-      <PatientHeading eyebrow="ONE TAP AWAY" title="Your care essentials"/>
-      <Pressable accessibilityRole="button" accessibilityLabel="View all care features"
-        onPress={() => n.navigate("PatientCare")} style={{ minHeight: 44, justifyContent: "center" }}>
-        <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 12.5 }}>View all</Text>
-      </Pressable>
-    </View>
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-      <PatientTile title="Medications" detail="Schedules & guidance" icon="medical-outline"
-        onPress={() => n.navigate("PatientMedications")}/>
-      <PatientTile title="Appointments" detail="Visits & next steps" icon="calendar-outline" accent="#E9E9FA"
-        onPress={() => n.navigate("PatientAppointments")}/>
-      <PatientTile title="My health" detail="Saved measurements" icon="pulse-outline" accent="#E7F4EF"
-        onPress={() => n.navigate("PatientHealth")}/>
-      <PatientTile title="Care history" detail="Your recorded timeline" icon="time-outline" accent="#F8EDF1"
-        onPress={() => n.navigate("PatientHistory")}/>
-    </View>
-    <PatientAction title="Message my care team" icon="chatbubbles-outline"
-      detail="A private chat with your authorized caregivers"
-      onPress={() => n.navigate("CareTeamChat", { careRecipientId: state.careRecipientId ?? undefined })}/>
-    {syncError ? <PatientInfo icon="cloud-offline-outline" text={syncError}/> : null}
-    <Pressable accessibilityRole="button" accessibilityLabel="Refresh care information"
-      onPress={() => void refresh()} style={{ minHeight: 46, flexDirection: "row", gap: 8,
-        justifyContent: "center", alignItems: "center" }}>
-      <Icon name="refresh-outline" color={themeForeground(PURPLE)} size={18}/>
-      <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 13 }}>Refresh my information</Text>
-    </Pressable>
-  </Page>;
-}
-export function PatientCareHubScreen() {
-  const n = useNav();
-  return <Page>
-    <PatientHeading eyebrow="MY CARE" title="Everything you need."
-      subtitle="Your information, thoughtfully organised in one place."/>
-    <PatientGlass tint="#E9DBF5">
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 13 }}>
-        <View style={{ width: 49, height: 49, borderRadius: 17,
-          justifyContent: "center", alignItems: "center", backgroundColor: themeBackground("#F0E5FA") }}>
-          <Icon name="sparkles-outline" size={24} color={themeForeground(PURPLE)}/>
-        </View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={{ fontFamily: SEMI, fontSize: 15, color: themeForeground(INK) }}>Your personal care space</Text>
-          <PatientText muted size={12.5}>Choose what you want to see. Your record remains read-only.</PatientText>
-        </View>
-      </View>
-    </PatientGlass>
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-      <PatientTile title="My day" detail="Routines and activities" icon="sunny-outline"
-        onPress={() => n.navigate("PatientDay")}/>
-      <PatientTile title="Medications" detail="My current medication list" icon="medical-outline" accent="#F8EAF4"
-        onPress={() => n.navigate("PatientMedications")}/>
-      <PatientTile title="Appointments" detail="Visit plans and details" icon="calendar-outline" accent="#E9E9FA"
-        onPress={() => n.navigate("PatientAppointments")}/>
-      <PatientTile title="My health" detail="Measurements & history" icon="pulse-outline" accent="#E6F2EB"
-        onPress={() => n.navigate("PatientHealth")}/>
-    </View>
-    <PatientAction icon="time-outline" title="My care history"
-      detail="See the recorded events in your care journey"
-      onPress={() => n.navigate("PatientHistory")}/>
+    </PatientGlass>}
+    <PatientHeading eyebrow="SHARED ACTIVITIES" title="What's on today"/>
+    <PatientPlanContent plan={plan}/>
     <PatientInfo icon="information-circle-outline"
-      text="This shared care record helps you stay informed. For medical decisions, speak with your healthcare professional."/>
-  </Page>;
-}
-export function PatientDayScreen() {
-  return <Page>
-    <PatientHeading eyebrow="MY DAY" title="A plan made with care"
-      subtitle="Your scheduled activities and the actions your care team has marked complete."/>
-    <PatientPlanList/>
+      text="Only your care team can change this plan or mark activities complete. Check with them if something looks wrong."/>
   </Page>;
 }
 export function PatientMedicationsScreen() {
@@ -398,31 +295,55 @@ export function PatientMedicationsScreen() {
     return () => { active = false; };
   }, [state.careRecipientId]));
   return <Page>
-    <PatientHeading eyebrow="MY MEDICATIONS" title="A clearer medication list"
-      subtitle="The schedules and directions your care team has recorded. Always consult a clinician before changing medication."/>
+    <PatientHeading eyebrow="MEDICATIONS" title="Your medication list"
+      subtitle="Schedules and instructions recorded by your care team."/>
+    <PatientInfo icon="shield-checkmark-outline"
+      text="For your safety, this page is read-only. Always follow your clinician's instructions and check with them before changing medication."/>
+    {!loading && !error && medications.length > 0 && <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+      <View style={{ borderRadius: 20, paddingHorizontal: 12, paddingVertical: 7,
+        backgroundColor: themeBackground("#F0E5F8") }}>
+        <Text style={{ fontFamily: SEMI, fontSize: 12, color: themeForeground(PURPLE) }}>
+          {medications.length} current medication{medications.length === 1 ? "" : "s"}
+        </Text>
+      </View>
+    </View>}
     {loading ? <ActivityIndicator color={C.purple} accessibilityLabel="Loading medications"/> : error ?
       <PatientEmpty icon="cloud-offline-outline" title="Medication list unavailable" detail={error}/> :
       medications.length ? medications.map(med => {
         const logged = records.filter(record => record.medicationId === med.id && !record.correctedAt);
-        return <PatientGlass key={med.id} tint="#F6E9F5">
+        return <PatientGlass key={med.id} tint="#F1E4F6">
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
-            <Icon name="medical-outline" size={30} color={themeForeground(PURPLE)}/>
+            <View style={{ width: 46, height: 46, borderRadius: 16,
+              alignItems: "center", justifyContent: "center",
+              backgroundColor: themeBackground("#F1E5F9") }}>
+              <Icon name="medical-outline" size={23} color={themeForeground(PURPLE)}/>
+            </View>
             <View style={{ flex: 1, gap: 3 }}>
-              <Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>{med.name}</Text>
-              <PatientText muted size={13}>{med.isPrn ? "As needed (PRN)" : med.time || "No schedule recorded"}</PatientText>
+              <Text style={{ fontFamily: SEMI, fontSize: 16, color: themeForeground(INK) }}>{med.name}</Text>
+              <PatientText muted size={12.5}>{med.isPrn ? "As needed (PRN)" : med.time || "Time not recorded"}</PatientText>
             </View>
           </View>
-          {med.dose || med.route ? <PatientText>{[med.dose, med.route].filter(Boolean).join(" · ")}</PatientText> : null}
-          <PatientText>{med.instructions || "No additional instructions recorded."}</PatientText>
-          {med.purpose ? <PatientText muted size={13}>Purpose: {med.purpose}</PatientText> : null}
-          {med.prescriber ? <PatientText muted size={13}>Recorded prescriber: {med.prescriber}</PatientText> : null}
-          {med.pharmacy ? <PatientText muted size={13}>Pharmacy: {med.pharmacy}</PatientText> : null}
-          {med.refillDueOn ? <PatientText muted size={13}>Refill date on record: {readableDate(med.refillDueOn)}</PatientText> : null}
-          <PatientText muted size={13}>Medication activity: {logged.length} recorded event{logged.length === 1 ? "" : "s"}</PatientText>
+          {(med.dose || med.route) && <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
+            {[med.dose, med.route].filter(Boolean).map((value, index) => <View key={index}
+              style={{ borderRadius: 14, paddingHorizontal: 10, paddingVertical: 7,
+                backgroundColor: themeBackground("#F2EAF8") }}>
+              <Text style={{ fontFamily: SEMI, fontSize: 12, color: themeForeground(PURPLE) }}>{value}</Text>
+            </View>)}
+          </View>}
+          <View style={{ padding: 12, borderRadius: 15, backgroundColor: themeBackground("#FAF6FC") }}>
+            <PatientText size={13.5}>{med.instructions || "No additional instructions recorded."}</PatientText>
+          </View>
+          {med.purpose ? <PatientText muted size={12.5}>Purpose: {med.purpose}</PatientText> : null}
+          {med.prescriber ? <PatientText muted size={12.5}>Prescriber: {med.prescriber}</PatientText> : null}
+          {med.pharmacy ? <PatientText muted size={12.5}>Pharmacy: {med.pharmacy}</PatientText> : null}
+          {med.refillDueOn ? <PatientText muted size={12.5}>Refill date: {readableDate(med.refillDueOn)}</PatientText> : null}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+            <Icon name="time-outline" size={15} color={themeForeground(PURPLE)}/>
+            <PatientText muted size={12}>Medication records: {logged.length} event{logged.length === 1 ? "" : "s"}</PatientText>
+          </View>
         </PatientGlass>;
-      }) : <PatientEmpty icon="medkit-outline" title="No medications listed"
-        detail="When your care team records a medication, its schedule and instructions will appear here."/>}
-    <PatientGlass><PatientText muted size={13}>This shared medication list is not a prescription or dosing recommendation. Patients cannot change clinician instructions or medication records from this page.</PatientText></PatientGlass>
+      }) : <PatientEmpty icon="medkit-outline" title="No medications listed yet"
+        detail="Your care team's saved medication information will appear here when available."/>}
   </Page>;
 }
 type PatientAppointment = {
@@ -454,25 +375,55 @@ export function PatientAppointmentsScreen() {
     String(item.appointment_date || item.starts_at).slice(0, 10) >= dayKey(new Date()));
   const past = sorted.filter(item => item.appointment_date || item.starts_at)
     .filter(item => String(item.appointment_date || item.starts_at).slice(0, 10) < dayKey(new Date()));
-  const appointmentCard = (item: PatientAppointment) => <PatientGlass key={item.id} tint="#E9F0FD">
-    <Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>{item.title}</Text>
-    <PatientText>{readableDate(item.appointment_date || item.starts_at)} · {timeLabel(item.appointment_time || (item.starts_at ? item.starts_at.slice(11, 16) : null))}</PatientText>
-    <PatientText muted>{item.location || "Location to be confirmed"}</PatientText>
-    {item.notes ? <PatientText muted size={13}>{item.notes}</PatientText> : null}
+  const appointmentCard = (item: PatientAppointment) => <PatientGlass key={item.id} tint="#ECEAF9">
+    <View style={{ flexDirection: "row", gap: 13, alignItems: "flex-start" }}>
+      <View style={{ width: 47, height: 50, borderRadius: 16,
+        justifyContent: "center", alignItems: "center",
+        backgroundColor: themeBackground("#F0E6F8") }}>
+        <Icon name="calendar-outline" size={23} color={themeForeground(PURPLE)}/>
+      </View>
+      <View style={{ flex: 1, gap: 6 }}>
+        <Text style={{ fontFamily: SEMI, fontSize: 15.5, color: themeForeground(INK) }}>{item.title}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Icon name="time-outline" size={14} color={themeForeground(PURPLE)}/>
+          <PatientText muted size={12.5}>{readableDate(item.appointment_date || item.starts_at)} · {timeLabel(item.appointment_time || (item.starts_at ? item.starts_at.slice(11, 16) : null))}</PatientText>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Icon name="location-outline" size={14} color={themeForeground(PURPLE)}/>
+          <PatientText muted size={12.5}>{item.location || "Location to be confirmed"}</PatientText>
+        </View>
+      </View>
+    </View>
+    {item.notes && <View style={{ borderRadius: 14, padding: 11,
+      backgroundColor: themeBackground("#F8F4FA") }}>
+      <PatientText muted size={13}>{item.notes}</PatientText>
+    </View>}
   </PatientGlass>;
   return <Page>
-    <PatientHeading eyebrow="MY APPOINTMENTS" title="Looking ahead"
-      subtitle="Visit details and preparation notes recorded by your care team."/>
-    {loading ? <ActivityIndicator color={C.purple}/> : error ?
-      <PatientEmpty icon="cloud-offline-outline" title="Appointments are unavailable" detail={error}/> :
+    <PatientHeading eyebrow="APPOINTMENTS" title="Your upcoming visits"
+      subtitle="Dates, locations, and helpful details shared by your care team."/>
+    {!loading && !error && <View style={{ flexDirection: "row", gap: 9, flexWrap: "wrap" }}>
+      <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 17,
+        backgroundColor: themeBackground("#F0E7F7") }}>
+        <Text style={{ fontFamily: SEMI, fontSize: 12, color: themeForeground(PURPLE) }}>
+          {upcoming.length} upcoming
+        </Text>
+      </View>
+      {past.length > 0 && <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 17,
+        backgroundColor: themeBackground("#F5F0F8") }}>
+        <Text style={{ fontFamily: FONT, fontSize: 12, color: themeForeground(MUTED) }}>{past.length} previous</Text>
+      </View>}
+    </View>}
+    {loading ? <ActivityIndicator color={C.purple} accessibilityLabel="Loading appointments"/> : error ?
+      <PatientEmpty icon="cloud-offline-outline" title="Appointments unavailable" detail={error}/> :
       upcoming.length ? upcoming.map(appointmentCard) :
-      <PatientEmpty icon="calendar-outline" title="No upcoming visits"
-        detail="Future appointments will appear when your care team adds them."/>}
-    {!loading && !error && past.length ? <>
-      <PatientHeading eyebrow="PREVIOUS VISITS" title="Earlier appointments"
-        subtitle="Past appointments recorded by your care team."/>
+      <PatientEmpty icon="calendar-outline" title="No upcoming appointments"
+        detail="Your future visits will appear here once they have been added to your care plan."/>}
+    {!loading && !error && past.length > 0 && <>
+      <PatientHeading eyebrow="YOUR HISTORY" title="Earlier appointments"
+        subtitle="Previously scheduled visits. An entry does not confirm attendance."/>
       {past.slice(-10).reverse().map(appointmentCard)}
-    </> : null}
+    </>}
   </Page>;
 }
 function Trend({ values }: { values: number[] }) {
@@ -500,25 +451,55 @@ export function PatientHealthScreen() {
   const glucose = trend("Blood sugar", "glucose");
   const systolic = trend("Vitals", "systolic");
   return <Page>
-    <PatientHeading eyebrow="MY HEALTH" title="Understanding my record"
-      subtitle="Recorded measurements, displayed without interpretation or diagnosis."/>
-    <PatientGlass tint="#E8F4F0"><Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>Blood glucose (mg/dL)</Text>
-      {glucose.length ? <><PatientText>Latest: {glucose[glucose.length - 1]}</PatientText><Trend values={glucose}/></> :
-        <PatientText muted>No blood glucose measurements recorded.</PatientText>}
+    <PatientHeading eyebrow="HEALTH RECORD" title="Your measurements"
+      subtitle="A clear view of readings entered by your care team. No automated medical interpretation."/>
+    <View style={{ flexDirection: "row", gap: 10 }}>
+      <PatientCount value={glucose.length} label="Glucose readings" icon="water-outline"/>
+      <PatientCount value={systolic.length} label="Blood pressure readings" icon="pulse-outline"/>
+    </View>
+    <PatientGlass tint="#E8F5F0">
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <Icon name="water-outline" size={20} color={themeForeground(PURPLE)}/>
+        <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 15 }}>Blood glucose</Text>
+      </View>
+      {glucose.length ? <>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 7 }}>
+          <Text style={{ fontFamily: "Lora_500Medium", fontSize: 28, color: themeForeground(PURPLE) }}>
+            {glucose[glucose.length - 1]}
+          </Text>
+          <PatientText muted size={12.5}>mg/dL · latest saved</PatientText>
+        </View>
+        <Trend values={glucose}/>
+      </> : <PatientText muted size={13}>No blood glucose readings saved yet.</PatientText>}
     </PatientGlass>
-    <PatientGlass><Text style={{ fontFamily: BOLD, color: themeForeground(INK), fontSize: 17 }}>Systolic blood pressure (mmHg)</Text>
-      {systolic.length ? <><PatientText>Latest: {systolic[systolic.length - 1]}</PatientText><Trend values={systolic}/></> :
-        <PatientText muted>No blood pressure measurements recorded.</PatientText>}
+    <PatientGlass tint="#F2E8FA">
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <Icon name="pulse-outline" size={20} color={themeForeground(PURPLE)}/>
+        <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 15 }}>Systolic blood pressure</Text>
+      </View>
+      {systolic.length ? <>
+        <View style={{ flexDirection: "row", alignItems: "baseline", gap: 7 }}>
+          <Text style={{ fontFamily: "Lora_500Medium", fontSize: 28, color: themeForeground(PURPLE) }}>
+            {systolic[systolic.length - 1]}
+          </Text>
+          <PatientText muted size={12.5}>mmHg · latest saved</PatientText>
+        </View>
+        <Trend values={systolic}/>
+      </> : <PatientText muted size={13}>No blood pressure readings saved yet.</PatientText>}
     </PatientGlass>
-    {state.entries.length ? state.entries.slice(0, 15).map(entry => <PatientGlass key={entry.id}>
-      <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 15 }}>{entry.kind}</Text>
-      <PatientText muted size={13}>{readableDate(entry.recordedAt)}</PatientText>
+    <PatientHeading eyebrow="RECENT ENTRIES" title="Measurements on record"/>
+    {state.entries.length ? state.entries.slice(0, 15).map(entry => <PatientGlass key={entry.id} compact>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 10 }}>
+        <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 14.5 }}>{entry.kind}</Text>
+        <PatientText muted size={12}>{readableDate(entry.recordedAt)}</PatientText>
+      </View>
       {Object.entries(entry.values).filter(([, value]) => Boolean(value)).map(([key, value]) => (
-        <PatientText key={key} size={14}>{key.replace(/_/g, " ")}: {value}</PatientText>
+        <PatientText key={key} size={13}>{key.replace(/_/g, " ")}: {value}</PatientText>
       ))}
-    </PatientGlass>) : <PatientEmpty icon="heart-outline" title="Your health record is ready"
-      detail="Observations added by your care team will appear here."/>}
-    <PatientText muted size={13}>Changes in these recordings are not a diagnosis. Discuss questions with your healthcare professional.</PatientText>
+    </PatientGlass>) : <PatientEmpty icon="pulse-outline" title="No readings yet"
+      detail="Measurements your care team records will appear here."/>}
+    <PatientInfo icon="information-circle-outline"
+      text="A change in a reading is not a diagnosis. Ask your healthcare professional about any concerns."/>
   </Page>;
 }
 export function PatientTeamScreen() {
@@ -542,33 +523,56 @@ export function PatientTeamScreen() {
   const roleName = (member: CareTeamMember | undefined) => member?.role === "owner" ? "Primary Advocate"
     : member?.role === "caregiver" ? "Co-Caregiver" : member?.role === "patient" ? "Care Recipient" : "Care team member";
   return <Page>
-    <PatientHeading eyebrow="MY CARE TEAM" title="The people beside you"
-      subtitle="People currently authorized to participate in your care conversation."/>
-    <PatientAction icon="chatbubbles-outline" title="Care Team Chat"
-      detail="A private conversation with your authorized care team"
-      onPress={() => n.navigate("CareTeamChat", { careRecipientId: state.careRecipientId ?? undefined })}/>
-    {loading ? <ActivityIndicator color={C.purple}/> : error ?
+    <PatientHeading eyebrow="YOUR CARE CIRCLE" title="The people beside you"
+      subtitle="Members currently authorized to coordinate your care."/>
+    <PatientGlass tint="#E8DAF3">
+      <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+        <View style={{ width: 49, height: 49, borderRadius: 17, alignItems: "center",
+          justifyContent: "center", backgroundColor: themeBackground("#EADCF5") }}>
+          <Icon name="chatbubbles-outline" size={24} color={themeForeground(PURPLE)}/>
+        </View>
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={{ fontFamily: SEMI, fontSize: 15, color: themeForeground(INK) }}>Care Team Chat</Text>
+          <PatientText muted size={12.5}>Private conversation with your authorized caregivers.</PatientText>
+        </View>
+      </View>
+      <Pressable accessibilityRole="button" accessibilityLabel="Open private care team chat"
+        onPress={() => n.navigate("CareTeamChat", { careRecipientId: state.careRecipientId ?? undefined })}
+        style={{ minHeight: 45, borderRadius: 18, backgroundColor: themeBackground(PURPLE),
+          flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
+        <Icon name="chatbubble-ellipses-outline" size={17} color={themeForeground("#FFFFFF")}/>
+        <Text style={{ fontFamily: SEMI, fontSize: 13, color: themeForeground("#FFFFFF") }}>Open private chat</Text>
+      </Pressable>
+    </PatientGlass>
+    <PatientHeading eyebrow="PEOPLE" title="Your care team"/>
+    {loading ? <ActivityIndicator color={C.purple} accessibilityLabel="Loading care team"/> : error ?
       <PatientEmpty icon="cloud-offline-outline" title="Care team unavailable" detail={error}/> :
       people.length ? people.map(person => {
         const member = roster.find(item => item.userId === person.user_id);
-        return <PatientGlass key={person.user_id} tint="#E9F1F8">
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+        return <PatientGlass key={person.user_id} compact tint="#EDE6F8">
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             {person.avatar_url ? <Image source={{ uri: person.avatar_url }}
               accessibilityLabel={"Profile photo of " + (person.full_name || "care team member")}
-              style={{ width: 58, height: 58, borderRadius: 29 }}/> :
-              <View style={{ width: 58, height: 58, borderRadius: 29,
-                justifyContent: "center", alignItems: "center", backgroundColor: themeBackground("#E9D9F3") }}>
-                <Text style={{ fontFamily: BOLD, color: themeForeground(PURPLE), fontSize: 22 }}>{(person.full_name || "?")[0].toUpperCase()}</Text>
+              style={{ width: 48, height: 48, borderRadius: 24 }}/> :
+              <View style={{ width: 48, height: 48, borderRadius: 24,
+                justifyContent: "center", alignItems: "center", backgroundColor: themeBackground("#EEE2F7") }}>
+                <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 19 }}>
+                  {(person.full_name || "?")[0].toUpperCase()}
+                </Text>
               </View>}
             <View style={{ flex: 1, gap: 4 }}>
-              <Text style={{ fontFamily: BOLD, fontSize: 16, color: themeForeground(INK) }}>{person.full_name || "Care team member"}</Text>
-              <PatientText muted size={13}>{roleName(member)}</PatientText>
+              <Text style={{ fontFamily: SEMI, fontSize: 14.5, color: themeForeground(INK) }}>
+                {person.full_name || "Care team member"}
+              </Text>
+              <PatientText muted size={12.5}>{roleName(member)}</PatientText>
             </View>
+            <Icon name="shield-checkmark-outline" size={19} color={themeForeground("#9470AD")}/>
           </View>
         </PatientGlass>;
-      }) :
-      <PatientEmpty icon="people-outline" title="Your care circle"
-        detail="Authorized care team members will appear here when available."/>}
+      }) : <PatientEmpty icon="people-outline" title="Your care circle"
+        detail="Authorized care team members will appear when available."/>}
+    <PatientInfo icon="lock-closed-outline"
+      text="Care Team Chat is private to people with active permission for this care profile."/>
   </Page>;
 }
 export function PatientHistoryScreen() {
@@ -598,18 +602,34 @@ export function PatientHistoryScreen() {
         title: visit.title, info: "Appointment (scheduled, not attendance-confirmed)" })),
   ].sort((a, b) => b.date.localeCompare(a.date)), [state.entries, state.medicationRecords, completions, visits]);
   return <Page>
-    <PatientHeading eyebrow="MY CARE HISTORY" title="The story of your care"
-      subtitle="A timeline of activities and observations already recorded."/>
-    {events.length ? events.slice(0, 60).map(event => <PatientGlass key={event.id}>
-      <View style={{ flexDirection: "row", gap: 13, alignItems: "center" }}>
-        <Icon name="checkmark-circle-outline" size={27} color={themeForeground(PURPLE)}/>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontFamily: SEMI, fontSize: 15, color: themeForeground(INK) }}>{event.title}</Text>
-          <PatientText muted size={13}>{event.info} · {readableDate(event.date)}</PatientText>
-        </View>
-      </View>
-    </PatientGlass>) : <PatientEmpty icon="time-outline" title="Your care story begins here"
-      detail="Once your care team records activities, a timeline will appear."/>}
+    <PatientHeading eyebrow="YOUR CARE JOURNEY" title="Care history"
+      subtitle="A timeline of information your care team has recorded."/>
+    {!events.length ? <PatientEmpty icon="time-outline" title="Your care story begins here"
+      detail="Once your care team saves an activity or observation, it will appear here."/> :
+      <View style={{ gap: 10 }}>
+        <PatientInfo icon="information-circle-outline"
+          text="Events describe saved records. A scheduled appointment does not confirm attendance."/>
+        {events.slice(0, 60).map((event, index) => <View key={event.id}
+          style={{ flexDirection: "row", alignItems: "stretch", gap: 10 }}>
+          <View style={{ width: 28, alignItems: "center" }}>
+            <View style={{ width: 27, height: 27, borderRadius: 14,
+              backgroundColor: themeBackground("#EEDFF7"),
+              alignItems: "center", justifyContent: "center" }}>
+              <Icon name="ellipse" size={12} color={themeForeground(PURPLE)}/>
+            </View>
+            {index < Math.min(events.length, 60) - 1 && <View style={{ width: 2, flex: 1,
+              backgroundColor: themeBackground("#E6D6EF"), marginVertical: 4 }}/>}
+          </View>
+          <View style={{ flex: 1, paddingBottom: 2 }}>
+            <PatientGlass compact>
+              <Text style={{ fontFamily: SEMI, fontSize: 14.5,
+                color: themeForeground(INK) }}>{event.title}</Text>
+              <PatientText muted size={12.5}>{event.info}</PatientText>
+              <PatientText muted size={12}>{readableDate(event.date)}</PatientText>
+            </PatientGlass>
+          </View>
+        </View>)}
+      </View>}
   </Page>;
 }
 export function PatientProfileScreen() {
@@ -619,7 +639,61 @@ export function PatientProfileScreen() {
   const avatar = useProfileAvatar();
   const { dark, setMode, saveError } = useAppearance();
   return <Page>
-    <PatientHeading eyebrow="MY PROFILE" title="My personal space"
+    <PatientHeading eyebrow="YOUR ACCOUNT" title="Profile & preferences"
+      subtitle="Your photo, personal settings, and care-sharing information."/>
+    <View style={{ borderRadius: 27, padding: 21, gap: 14, overflow: "hidden",
+      borderWidth: 1, borderColor: themeBorder("#E7D9EF"),
+      backgroundColor: themeBackground("#F3E9FA") }}>
+      <View style={{ flexDirection: "row", gap: 15, alignItems: "center" }}>
+        <ProfileAvatar name={state.name || "Care Recipient"} size={77}/>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={{ fontFamily: "Lora_500Medium", fontSize: 22,
+            color: themeForeground(INK) }}>{state.name || "Your account"}</Text>
+          <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 11.5 }}>
+            CARE RECIPIENT
+          </Text>
+          {session?.user.email ? <PatientText muted size={12}>{session.user.email}</PatientText> : null}
+        </View>
+      </View>
+      {state.careRecipientName && <PatientInfo icon="shield-checkmark-outline"
+        text={"Selected care profile: " + state.careRecipientName}/>}
+      <Pressable accessibilityRole="button" accessibilityLabel="Change profile picture"
+        disabled={avatar.busy} onPress={() => void avatar.pickAndUpload()}
+        style={{ minHeight: 45, borderRadius: 18, backgroundColor: themeBackground("#FFFFFF"),
+          flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+          borderWidth: 1, borderColor: themeBorder("#E4D4EC") }}>
+        <Icon name="camera-outline" size={17} color={themeForeground(PURPLE)}/>
+        <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 13 }}>
+          {avatar.busy ? "Saving your photo…" : "Change profile photo"}
+        </Text>
+      </Pressable>
+      {avatar.error ? <Text accessibilityRole="alert" style={{ fontFamily: FONT,
+        fontSize: 12.5, color: themeForeground("#B34761") }}>{avatar.error}</Text> : null}
+    </View>
+    <PatientHeading eyebrow="COMFORT" title="Display settings"/>
+    <PatientAction icon="contrast-outline" title={dark ? "Switch to light mode" : "Switch to dark mode"}
+      detail="Adjust the appearance for a comfortable view"
+      onPress={() => void setMode(dark ? "light" : "dark")}/>
+    {saveError ? <Text accessibilityRole="alert" style={{ fontFamily: FONT,
+      color: themeForeground("#B34761"), fontSize: 12.5 }}>{saveError}</Text> : null}
+    <PatientAction icon="accessibility-outline" title="Accessibility & display"
+      detail="Text size, motion, and appearance" onPress={() => n.navigate("Accessibility")}/>
+    <PatientHeading eyebrow="ACCOUNT" title="Privacy & notifications"/>
+    <PatientAction icon="notifications-outline" title="Notifications"
+      detail="Manage the alerts you receive" onPress={() => n.navigate("NotificationSettings")}/>
+    <PatientAction icon="shield-checkmark-outline" title="Privacy & care sharing"
+      detail="Understand your information and consent" onPress={() => n.navigate("PrivacyData")}/>
+    <Pressable accessibilityRole="button" accessibilityLabel="Sign out"
+      onPress={() => void signOut()} style={{ minHeight: 52, borderRadius: 20,
+        backgroundColor: themeBackground("#F5EDF7"), borderWidth: 1,
+        borderColor: themeBorder("#EBDDF1"), flexDirection: "row", gap: 9,
+        justifyContent: "center", alignItems: "center" }}>
+      <Icon name="log-out-outline" size={18} color={themeForeground(PURPLE)}/>
+      <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 13.5 }}>Sign out</Text>
+    </Pressable>
+  </Page>;
+}
+ title="My personal space"
       subtitle="Your account, comfort settings, and care-sharing preferences."/>
     <PatientGlass>
       <View style={{ alignItems: "center", gap: 12, paddingVertical: 9 }}>
