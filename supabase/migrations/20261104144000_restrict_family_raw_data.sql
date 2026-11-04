@@ -46,7 +46,7 @@ $$;
 -- Family viewers do not need a CareGroup record or its potentially sensitive name.
 create or replace function private.can_view_care_group(target_group_id uuid)
 returns boolean language sql stable security definer set search_path = ''
-as $
+as $$
   select (select auth.uid()) is not null and (
     exists (select 1 from public.care_groups g
       where g.id=target_group_id and g.created_by=(select auth.uid()))
@@ -55,7 +55,7 @@ as $
         and gm.user_id=(select auth.uid())
         and gm.status='active' and gm.role in ('primary_advocate','co_caregiver'))
   );
-$;
+$$;
 
 -- Even an authorized family profile card must not surface arbitrary relationship
 -- text from the clinical profile. The person and the invitation remain visible.
@@ -64,7 +64,7 @@ returns table (
   id uuid, display_name text, relationship text,
   care_group_id uuid, created_at timestamptz, is_owner boolean
 ) language sql stable security definer set search_path = ''
-as $
+as $$
   select r.id,r.display_name,
     case when private.is_active_family_viewer(r.id) then null::text
          else r.relationship end,
@@ -74,7 +74,7 @@ as $
   where (select auth.uid()) is not null
     and private.can_view_care_recipient(r.id)
   order by r.created_at asc;
-$;
+$$;
 
 -- Replace old broad read predicates with editor/patient-only raw-data access.
 -- Preserve all other predicates (ready status, draft controls, staff exceptions).
