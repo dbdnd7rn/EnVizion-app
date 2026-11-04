@@ -136,21 +136,39 @@ export async function publishFamilyReport(
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error("Please sign in again.");
   // Database policy additionally requires the Primary Advocate to own this care profile.
-  const { error } = await supabase.from("family_care_reports").upsert({
-    care_recipient_id: careRecipientId,
-    period: preview.period,
-    start_on: preview.startOn,
+  const { data: existing, error: lookupError } = await supabase
+    .from("family_care_reports").select("id")
+    .eq("care_recipient_id", careRecipientId)
+    .eq("period", preview.period).eq("start_on", preview.startOn)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+  const publishedAt = new Date().toISOString();
+  const values = {
     planned_count: preview.plannedCount,
     completed_count: preview.completedCount,
     activities: preview.activities,
     summary_note: note.trim(),
     published: true,
     published_by: user.id,
-    published_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    created_by: user.id,
-  }, { onConflict: "care_recipient_id,period,start_on" });
-  if (error) throw error;
+    published_at: publishedAt,
+    updated_at: publishedAt,
+  };
+  // Update only columns explicitly granted to the Primary Advocate. Using
+  // upsert would try to UPDATE immutable ownership/identity columns too.
+  if (existing) {
+    const { data, error } = await supabase.from("family_care_reports")
+      .update(values).eq("id", existing.id)
+      .eq("care_recipient_id", careRecipientId).select("id").maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("The report could not be updated with your permissions.");
+  } else {
+    const { error } = await supabase.from("family_care_reports").insert({
+      ...values,
+      care_recipient_id: careRecipientId, period: preview.period,
+      start_on: preview.startOn, created_by: user.id,
+    });
+    if (error) throw error;
+  }
 }
 
 export async function unpublishFamilyReport(
