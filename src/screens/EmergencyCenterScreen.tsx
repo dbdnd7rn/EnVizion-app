@@ -1,8 +1,8 @@
 import { themeForeground, themeBorder, themeShadow, themeTint } from "../themeColors";
 import { themeBackground, themeAction } from "../themeColors";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-native-qrcode-svg";
-import { ActivityIndicator, Linking, Modal, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Modal, Platform, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import {
@@ -34,6 +34,8 @@ import { medicationReconciliationLabel } from "../medicationManagementHelpers";
 import { printHtmlResource } from "../printing";
 import { supabase } from "../supabase";
 import { useCare } from "../store";
+import { useAuth } from "../auth";
+import { emergencyAccessWasDenied, emergencyScope, emergencySnapshotStaleness, isCurrentEmergencyRequest } from "../emergencyAccessSafety";
 import {
   Button,
   C,
@@ -329,11 +331,22 @@ const emergencyDetailIcons: Record<EmergencyDetailSection, string> = {
 export function EmergencyCenterScreen() {
   const n = useNav();
   const { state } = useCare();
+  const { user } = useAuth();
+  const userId = user?.id ?? null;
   const careRecipientId = state.careRecipientId;
+  const activeScope = emergencyScope(userId, careRecipientId);
+  const currentScopeRef = useRef(activeScope);
+  currentScopeRef.current = activeScope;
+  const requestSerialRef = useRef(0);
   const readOnly =
     state.accessRole === "viewer" || state.accessRole === "patient";
 
-  const [data, setData] = useState<EmergencyCenterData>(emptyData);
+  const [storedData, setStoredData] = useState<EmergencyCenterData>(emptyData);
+  const [loadedScope, setLoadedScope] = useState<string | null>(null);
+  const [offlineScope, setOfflineScope] = useState<string | null>(null);
+  const [offlineReady, setOfflineReady] = useState(false);
+  // Never render the last selected patient's details while a new profile loads.
+  const data = loadedScope === activeScope && activeScope ? storedData : emptyData();
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [activeDetail, setActiveDetail] = useState<EmergencyDetailSection | null>(null);
@@ -366,7 +379,7 @@ export function EmergencyCenterScreen() {
   const [poaPhone, setPoaPhone] = useState("");
 
   const applyProfile = useCallback((next: EmergencyCenterData) => {
-    setData(next);
+    setStoredData(next);
     const profile = next.profile;
     setLocalEmergencyNumber(profile?.localEmergencyNumber ?? "");
     setPreferredHospital(profile?.preferredHospital ?? "");
@@ -385,45 +398,84 @@ export function EmergencyCenterScreen() {
   }, []);
 
   const refresh = useCallback(async () => {
-    if (!careRecipientId) {
+    const recipientId = careRecipientId;
+    const accountId = userId;
+    const requestedScope = emergencyScope(accountId, recipientId);
+    const serial = ++requestSerialRef.current;
+    const isCurrent = () => isCurrentEmergencyRequest(
+      requestedScope, currentScopeRef.current, serial, requestSerialRef.current,
+    );
+
+    setLoading(true);
+    setLoadedScope(null);
+    setOfflineScope(null);
+    setOfflineSummary(null);
+    setOfflineReady(false);
+    setShareLinks([]);
+    setCreatedShare(null);
+    setMessage("");
+
+    if (!recipientId || !accountId || !requestedScope) {
       applyProfile(emptyData());
       setLoading(false);
       return;
     }
 
-    setLoading(true);
     try {
-      const next = await loadEmergencyCenterData(careRecipientId);
+      const next = await loadEmergencyCenterData(recipientId);
+      if (!isCurrent()) return;
       applyProfile(next);
-      const cached = await cacheEmergencyOfflineSummary(careRecipientId, next);
-      setOfflineSummary(cached);
+      setLoadedScope(requestedScope);
+
+      let cacheWarning = "";
+      try {
+        const cached = await cacheEmergencyOfflineSummary(recipientId, next, accountId);
+        if (!isCurrent()) return;
+        setOfflineSummary(cached);
+        setOfflineScope(requestedScope);
+        setOfflineReady(Platform.OS !== "web");
+      } catch {
+        cacheWarning = "Live emergency information loaded, but the encrypted offline copy could not be saved on this device.";
+      }
 
       if (!readOnly) {
         try {
-          setShareLinks(await loadEmergencyShareLinks(careRecipientId));
+          const links = await loadEmergencyShareLinks(recipientId);
+          if (isCurrent()) setShareLinks(links);
         } catch {
-          setShareLinks([]);
+          if (isCurrent()) setShareLinks([]);
         }
-      } else {
-        setShareLinks([]);
       }
-
-      setMessage("");
+      if (isCurrent()) {
+        setMessage(cacheWarning || (Platform.OS === "web"
+          ? "For privacy, browser emergency snapshots are not saved offline. Use the installed mobile app for encrypted offline access."
+          : ""));
+      }
     } catch (error) {
-      const cached = await loadEmergencyOfflineSummary(careRecipientId);
+      if (!isCurrent()) return;
+      const accessDenied = emergencyAccessWasDenied(error);
+      const cached = accessDenied ? null
+        : await loadEmergencyOfflineSummary(recipientId, accountId);
+      if (!isCurrent()) return;
+      applyProfile(emptyData());
+      setLoadedScope(null);
       setOfflineSummary(cached);
+      setOfflineScope(cached ? requestedScope : null);
+      setOfflineReady(Boolean(cached));
       setShareLinks([]);
       setMessage(
-        cached
-          ? "You appear to be offline. Showing the last securely cached emergency snapshot."
-          : error instanceof Error
-            ? error.message
-            : "We could not load emergency information.",
+        accessDenied
+          ? "Access to this emergency care profile could not be verified. No cached medical information is shown."
+          : cached
+            ? "Showing your last encrypted device snapshot. Changes made by the care team while offline will not appear here. " +
+              (emergencySnapshotStaleness(cached.cachedAt) || "Confirm critical details when you reconnect.")
+            : error instanceof Error ? error.message
+            : "Emergency information could not be loaded. A prior secure snapshot was not available.",
       );
     } finally {
-      setLoading(false);
+      if (isCurrent()) setLoading(false);
     }
-  }, [applyProfile, careRecipientId, readOnly]);
+  }, [applyProfile, careRecipientId, userId, readOnly]);
 
   useEffect(() => {
     void refresh();
@@ -460,14 +512,17 @@ export function EmergencyCenterScreen() {
   );
 
   const criticalSummary = useMemo(() => {
-    if (data.profile && careRecipientId) {
+    if (loadedScope === activeScope && activeScope && data.profile && careRecipientId) {
       return buildEmergencyOfflineSummary(careRecipientId, data);
     }
-    return offlineSummary;
-  }, [careRecipientId, data, offlineSummary]);
+    return loadedScope !== activeScope && offlineScope === activeScope && activeScope &&
+      offlineSummary?.careRecipientId === careRecipientId ? offlineSummary : null;
+  }, [activeScope, loadedScope, offlineScope, careRecipientId, data, offlineSummary]);
+  const showingOfflineSnapshot = !data.profile && criticalSummary !== null;
 
   async function createShare() {
-    if (!careRecipientId || readOnly || busy) return;
+    if (!careRecipientId || readOnly || busy || !activeScope || !data.profile) return;
+    const requestedScope = activeScope;
     setBusy(true);
     setMessage("");
     try {
@@ -475,41 +530,51 @@ export function EmergencyCenterScreen() {
         careRecipientId,
         expiresInMinutes: shareMinutes,
       });
+      if (currentScopeRef.current !== requestedScope) return;
       setCreatedShare(created);
-      setShareLinks(await loadEmergencyShareLinks(careRecipientId));
+      const links = await loadEmergencyShareLinks(careRecipientId);
+      if (currentScopeRef.current !== requestedScope) return;
+      setShareLinks(links);
       setMessage(
         `Temporary emergency link created. It expires ${new Date(
           created.expiresAt,
         ).toLocaleString()}.`,
       );
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not create the temporary emergency link.",
-      );
+      if (currentScopeRef.current === requestedScope) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "We could not create the temporary emergency link.",
+        );
+      }
     } finally {
       setBusy(false);
     }
   }
 
   async function revokeShare(shareId: string) {
-    if (readOnly || busy) return;
+    if (readOnly || busy || !careRecipientId || !activeScope) return;
+    const requestedScope = activeScope;
+    const requestedRecipientId = careRecipientId;
     setBusy(true);
     setMessage("");
     try {
       await revokeEmergencyShareLink(shareId);
+      if (currentScopeRef.current !== requestedScope) return;
       if (createdShare?.id === shareId) setCreatedShare(null);
-      if (careRecipientId) {
-        setShareLinks(await loadEmergencyShareLinks(careRecipientId));
-      }
+      const links = await loadEmergencyShareLinks(requestedRecipientId);
+      if (currentScopeRef.current !== requestedScope) return;
+      setShareLinks(links);
       setMessage("Temporary emergency link revoked.");
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not revoke the temporary emergency link.",
-      );
+      if (currentScopeRef.current === requestedScope) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "We could not revoke the temporary emergency link.",
+        );
+      }
     } finally {
       setBusy(false);
     }
@@ -1194,8 +1259,13 @@ export function EmergencyCenterScreen() {
           </View>
 
           <Txt style={{ color: themeForeground("#BFAFC4"), fontSize: 10.5 }}>
-            Offline copy updated{" "}
+            {showingOfflineSnapshot
+              ? "Encrypted device snapshot from "
+              : offlineReady && Platform.OS !== "web"
+                ? "Encrypted offline snapshot saved "
+                : "Emergency summary generated "}
             {new Date(criticalSummary.cachedAt).toLocaleString()}.
+            {showingOfflineSnapshot ? " Verify all details before relying on them." : ""}
           </Txt>
         </Card>
       )}
@@ -1692,7 +1762,7 @@ export function EmergencyCenterScreen() {
               </>
             )}
 
-            {createdShare && (
+            {createdShare && createdShare.careRecipientId === careRecipientId && (
               <Card style={{ backgroundColor: themeBackground("#EEF7F3") }}>
                 <View style={S.between}>
                   <View style={{ flex: 1, gap: 4 }}>

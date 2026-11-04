@@ -2,6 +2,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 import type { EmergencyCenterData } from "./emergencyCenter";
+import {
+  clearSecureEmergencySnapshotsForUser,
+  deleteSecureEmergencySnapshot,
+  readSecureEmergencySnapshot,
+  writeSecureEmergencySnapshot,
+  type EmergencySecureStore,
+} from "./emergencySecureCache";
 
 export type EmergencyOfflineSummary = {
   version: 1;
@@ -33,10 +40,17 @@ export type EmergencyOfflineSummary = {
   }>;
 };
 
-function key(careRecipientId: string) {
-  return `envizion:emergency-offline:${careRecipientId}`;
+function oldWebCacheKey(careRecipientId: string) {
+  return "envizion:emergency-offline:" + careRecipientId;
 }
-
+const nativeStorage: EmergencySecureStore = {
+  getItemAsync: (storageKey) => SecureStore.getItemAsync(storageKey),
+  setItemAsync: (storageKey, value) =>
+    SecureStore.setItemAsync(storageKey, value, {
+      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    }),
+  deleteItemAsync: (storageKey) => SecureStore.deleteItemAsync(storageKey),
+};
 function trim(value: unknown, max = 500) {
   return String(value ?? "").trim().slice(0, max);
 }
@@ -78,67 +92,63 @@ export function buildEmergencyOfflineSummary(
   };
 }
 
-async function setValue(storageKey: string, value: string) {
+/**
+ * Web has no equivalent of device-encrypted SecureStore. Purge the old
+ * unencrypted browser cache and never persist medical details in AsyncStorage.
+ * On native, cache belongs to one signed-in account AND one care recipient.
+ */
+async function purgeLegacyWebSummary(careRecipientId: string) {
   if (Platform.OS === "web") {
-    await AsyncStorage.setItem(storageKey, value);
-    return;
+    await AsyncStorage.removeItem(oldWebCacheKey(careRecipientId)).catch(() => {});
   }
-  await SecureStore.setItemAsync(storageKey, value, {
-    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-  });
-}
-
-async function getValue(storageKey: string) {
-  if (Platform.OS === "web") {
-    return AsyncStorage.getItem(storageKey);
-  }
-  return SecureStore.getItemAsync(storageKey);
 }
 
 export async function cacheEmergencyOfflineSummary(
   careRecipientId: string,
   data: EmergencyCenterData,
+  userId: string,
 ) {
   const summary = buildEmergencyOfflineSummary(careRecipientId, data);
-  let encoded = JSON.stringify(summary);
-
-  if (encoded.length > 7_000) {
-    summary.medications = summary.medications.slice(0, 10);
-    summary.allergies = summary.allergies.slice(0, 500);
-    summary.importantConditions = summary.importantConditions.slice(0, 500);
-    summary.emergencyNotes = summary.emergencyNotes.slice(0, 500);
-    encoded = JSON.stringify(summary);
-  }
-
-  await setValue(key(careRecipientId), encoded);
+  await purgeLegacyWebSummary(careRecipientId);
+  if (Platform.OS === "web") return summary;
+  if (!userId) throw new Error("Sign in to enable secure offline emergency access.");
+  await writeSecureEmergencySnapshot(
+    nativeStorage, userId, careRecipientId, JSON.stringify(summary),
+  );
   return summary;
 }
 
 export async function loadEmergencyOfflineSummary(
   careRecipientId: string,
+  userId: string,
 ): Promise<EmergencyOfflineSummary | null> {
-  const encoded = await getValue(key(careRecipientId));
-  if (!encoded) return null;
-
+  await purgeLegacyWebSummary(careRecipientId);
+  if (Platform.OS === "web" || !userId) return null;
   try {
+    const encoded = await readSecureEmergencySnapshot(nativeStorage, userId, careRecipientId);
+    if (!encoded) return null;
     const parsed = JSON.parse(encoded) as EmergencyOfflineSummary;
-    if (parsed?.version !== 1 || parsed.careRecipientId !== careRecipientId) {
-      return null;
-    }
+    if (parsed?.version !== 1 || parsed.careRecipientId !== careRecipientId ||
+        !Number.isFinite(Date.parse(parsed.cachedAt)) ||
+        !Array.isArray(parsed.medications)) return null;
     return parsed;
   } catch {
     return null;
   }
 }
 
-export async function clearEmergencyOfflineSummary(careRecipientId: string) {
-  if (Platform.OS === "web") {
-    await AsyncStorage.removeItem(key(careRecipientId));
-    return;
+export async function clearEmergencyOfflineSummary(careRecipientId: string, userId: string) {
+  await purgeLegacyWebSummary(careRecipientId);
+  if (Platform.OS !== "web" && userId) {
+    await deleteSecureEmergencySnapshot(nativeStorage, userId, careRecipientId);
   }
-  await SecureStore.deleteItemAsync(key(careRecipientId));
 }
 
+export async function clearEmergencyOfflineSnapshotsForUser(userId: string) {
+  if (Platform.OS !== "web" && userId) {
+    await clearSecureEmergencySnapshotsForUser(nativeStorage, userId);
+  }
+}
 
 function htmlEscape(value: unknown) {
   return String(value ?? "")
