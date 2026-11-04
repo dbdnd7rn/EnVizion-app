@@ -1,4 +1,5 @@
 import { parseTermRequest, type TermExplanation, type TermRequest } from "./contracts.ts";
+import { explainKnownMedicalTerm } from "./glossary.ts";
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
@@ -74,15 +75,33 @@ export function createMedicalTermHandler(
 
       let explanation: TermExplanation;
       try {
-        // Do not pass visit records, patient name, provider name or member data.
+        // No visit records, patient name, provider name or membership data are sent.
         explanation = await explain(validated.value);
+        return json({ explanation, source: "ai" });
       } catch (error) {
-        if (error instanceof Error && error.message === "AI_NOT_CONFIGURED") {
-          return json({ error: "Medical term explanations are not configured yet. Ask your clinician for clarification." }, 503);
+        // Log ONLY a short operational reason code, never a term, context,
+        // model message, patient identifier, access token, or provider response.
+        const reason = error instanceof Error ? error.message : "";
+        const safeReason = /^AI_(?:NOT_CONFIGURED|INVALID_RESPONSE|PROVIDER_HTTP_[1-5][0-9]{2}|TIMEOUT)$/.test(reason)
+          ? reason
+          : error instanceof Error && error.name === "AbortError" ? "AI_TIMEOUT" : "AI_UNKNOWN";
+        console.error("medical_term_provider_failure", safeReason);
+        const glossary = explainKnownMedicalTerm(validated.value.term);
+        if (glossary) {
+          return json({
+            explanation: glossary,
+            source: "glossary",
+            notice: "The live AI service could not respond. This general definition is from the built-in glossary and does not interpret your visit details.",
+          });
         }
-        return json({ error: "The explainer is temporarily unavailable. Please try again or ask the clinician directly." }, 503);
+        const notConfigured = safeReason === "AI_NOT_CONFIGURED";
+        return json({
+          error: notConfigured
+            ? "The AI provider has not been configured by the app administrator. Try a common term or ask the clinician."
+            : "The AI service could not respond. Try another common term or ask the app administrator to check provider access and billing.",
+          code: notConfigured ? "AI_NOT_CONFIGURED" : "AI_SERVICE_UNAVAILABLE",
+        }, 503);
       }
-      return json({ explanation });
     } catch {
       return json({ error: "Could not explain this term right now. Please try again." }, 500);
     }
