@@ -24,6 +24,7 @@ import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import * as WebBrowser from "expo-web-browser";
 import Svg, { Path } from "react-native-svg";
 import { supabase } from "./supabase";
+import { clearEmergencyOfflineSnapshotsForUser } from "./emergencyOffline";
 import { withStartupTimeout } from "./startupTimeout";
 import {
   MIN_PASSWORD_LENGTH,
@@ -416,6 +417,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async signOut() {
         setRecoveryMode(false);
         setAuthMessage("");
+        // Best-effort wipe of encrypted emergency snapshots before session ends.
+        if (session?.user.id) {
+          await clearEmergencyOfflineSnapshotsForUser(session.user.id).catch(() => {});
+        }
         await supabase.auth.signOut();
       },
     }),
