@@ -1,7 +1,17 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useAuth } from "../auth";
 import { useCare } from "../store";
+import {
+  loadCareSpaces,
+  loadPendingCareInvitations,
+  respondToCareInvitation,
+  setActiveCareRecipient,
+  type CareInvitation,
+  type CareSpace,
+  type CareRole,
+} from "../careTeam";
 import { ProfileAvatar, useProfileAvatar } from "../profileAvatar";
 import { themeBackground, themeBorder, themeForeground, themeShadow } from "../themeColors";
 import { Brand, Icon, Page } from "../ui";
@@ -76,6 +86,182 @@ function FamilyProfileLink({
       <Icon name="chevron-forward-outline" color={themeForeground("#877793")} size={19} />
     </Pressable>
   );
+}
+
+
+function familyRoleText(role: CareRole): string {
+  return ({
+    owner: "Primary Advocate",
+    caregiver: "Co-Caregiver",
+    patient: "Care Recipient",
+    viewer: "Family Member",
+  })[role];
+}
+
+/**
+ * Account-level invitation controls, deliberately separate from the four
+ * family care tools. A viewer cannot manage other members or clinical records.
+ */
+function FamilyCareAccessPanel() {
+  const n = useNav();
+  const { refresh } = useCare();
+  const [invitations, setInvitations] = useState<CareInvitation[]>([]);
+  const [spaces, setSpaces] = useState<CareSpace[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    return Promise.all([loadPendingCareInvitations(), loadCareSpaces()]);
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    setLoading(true);
+    setError("");
+    void load()
+      .then(([pending, accessible]) => {
+        if (!active) return;
+        setInvitations(pending);
+        setSpaces(accessible);
+      })
+      .catch((e) => {
+        if (active) setError(e instanceof Error ? e.message : "Could not load your care invitations.");
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [load]));
+
+  async function respond(invitation: CareInvitation, action: "accept" | "decline") {
+    if (busy) return;
+    setBusy(invitation.careRecipientId);
+    setError("");
+    try {
+      await respondToCareInvitation(invitation.careRecipientId, action);
+      if (action === "accept") {
+        await refresh();
+        n.reset({ index: 0, routes: [{ name: "Main" }] });
+      } else {
+        const [pending, accessible] = await load();
+        setInvitations(pending);
+        setSpaces(accessible);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not respond to this invitation.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function switchSpace(space: CareSpace) {
+    if (space.active || busy) return;
+    setBusy(space.careRecipientId);
+    setError("");
+    try {
+      await setActiveCareRecipient(space.careRecipientId);
+      await refresh();
+      n.reset({ index: 0, routes: [{ name: "Main" }] });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not switch care profiles.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return <FamilyProfileCard>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+      <View style={{ width: 44, height: 44, borderRadius: 16,
+        backgroundColor: themeBackground("#F2E7FA"),
+        alignItems: "center", justifyContent: "center" }}>
+        <Icon name="people-outline" color={themeForeground(PURPLE)} size={23} />
+      </View>
+      <View style={{ flex: 1, gap: 4 }}>
+        <Text style={{ fontFamily: SEMI, fontSize: 17,
+          color: themeForeground(INK) }}>Invitations & care spaces</Text>
+        <Text style={{ fontFamily: REGULAR, fontSize: 12, lineHeight: 18,
+          color: themeForeground(MUTED) }}>
+          Accept invitations and switch between care profiles you are authorized to view.
+        </Text>
+      </View>
+    </View>
+    {loading && <ActivityIndicator color={themeForeground(PURPLE)} />}
+    {Boolean(error) && <Text accessibilityRole="alert"
+      style={{ fontFamily: REGULAR, fontSize: 12, color: themeForeground("#A23F66") }}>
+      {error}
+    </Text>}
+    {!loading && invitations.length > 0 && <View style={{ gap: 11 }}>
+      <Text style={{ fontFamily: SEMI, fontSize: 13.5,
+        color: themeForeground(INK) }}>Pending invitations ({invitations.length})</Text>
+      {invitations.map(invitation => <View key={invitation.careRecipientId}
+        style={{ backgroundColor: themeBackground("#F6EFFA"),
+          borderRadius: 19, borderWidth: 1, borderColor: themeBorder("#E7D9F0"),
+          padding: 14, gap: 10 }}>
+        <Text style={{ fontFamily: SEMI, fontSize: 14,
+          color: themeForeground(INK) }}>{invitation.careRecipientName}</Text>
+        <Text style={{ fontFamily: REGULAR, fontSize: 12, lineHeight: 19,
+          color: themeForeground(MUTED) }}>
+          {invitation.inviterName} invited you as a {familyRoleText(invitation.role)}.
+          Access remains inactive until you accept.
+        </Text>
+        {Boolean(invitation.inviteExpiresAt) && <Text style={{
+          fontFamily: REGULAR, fontSize: 11, color: themeForeground(MUTED),
+        }}>Invitation expires {new Date(invitation.inviteExpiresAt!).toLocaleDateString()}</Text>}
+        <View style={{ flexDirection: "row", gap: 9 }}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Accept care invitation"
+            disabled={busy !== null} onPress={() => void respond(invitation, "accept")}
+            style={{ flex: 1, padding: 12, borderRadius: 17,
+              backgroundColor: themeBackground("#70338F"), alignItems: "center",
+              opacity: busy !== null ? 0.55 : 1 }}>
+            <Text style={{ color: themeForeground("#FFFFFF"), fontFamily: SEMI, fontSize: 12 }}>
+              {busy === invitation.careRecipientId ? "Updating…" : "Accept"}
+            </Text>
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="Decline care invitation"
+            disabled={busy !== null} onPress={() => void respond(invitation, "decline")}
+            style={{ flex: 1, padding: 12, borderRadius: 17,
+              backgroundColor: themeBackground("#FFFFFF"), alignItems: "center",
+              borderColor: themeBorder("#E4D6EE"), borderWidth: 1,
+              opacity: busy !== null ? 0.55 : 1 }}>
+            <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 12 }}>
+              Decline
+            </Text>
+          </Pressable>
+        </View>
+      </View>)}
+    </View>}
+    {!loading && !invitations.length &&
+      <Text style={{ fontFamily: REGULAR, fontSize: 12,
+        color: themeForeground(MUTED) }}>No invitations waiting for your response.</Text>}
+    {!loading && spaces.length > 0 && <View style={{ gap: 10 }}>
+      <Text style={{ fontFamily: SEMI, fontSize: 13.5,
+        color: themeForeground(INK) }}>Your care profiles</Text>
+      {spaces.map(space => <Pressable key={space.careRecipientId}
+        accessibilityRole="button"
+        accessibilityLabel={space.active
+          ? space.careRecipientName + ", current care profile"
+          : "Switch to " + space.careRecipientName}
+        accessibilityState={{ selected: space.active, disabled: space.active || busy !== null }}
+        onPress={() => void switchSpace(space)}
+        disabled={space.active || busy !== null}
+        style={{ flexDirection: "row", gap: 10, alignItems: "center",
+          borderRadius: 18, padding: 12, borderWidth: 1,
+          borderColor: themeBorder(space.active ? "#D7BDE8" : "#ECE3F1"),
+          backgroundColor: themeBackground(space.active ? "#F4EBFA" : "#FFFEFF"),
+          opacity: busy !== null && !space.active ? 0.7 : 1 }}>
+        <Icon name={space.active ? "checkmark-circle-outline" : "heart-outline"}
+          size={22} color={themeForeground(PURPLE)} />
+        <View style={{ flex: 1, gap: 3 }}>
+          <Text style={{ fontFamily: SEMI, fontSize: 13,
+            color: themeForeground(INK) }}>{space.careRecipientName}</Text>
+          <Text style={{ fontFamily: REGULAR, fontSize: 11,
+            color: themeForeground(MUTED) }}>{familyRoleText(space.role)}
+            {space.active ? " · Current profile" : ""}</Text>
+        </View>
+        {!space.active && <Icon name="chevron-forward-outline" size={20}
+          color={themeForeground(PURPLE)} />}
+      </Pressable>)}
+    </View>}
+  </FamilyProfileCard>;
 }
 
 export function FamilyProfileScreen() {
@@ -348,6 +534,8 @@ export function FamilyProfileScreen() {
           Your role is managed by the Primary Advocate. You can view only information shared with your role.
         </Text>
       </FamilyProfileCard>
+
+      <FamilyCareAccessPanel />
 
       <FamilyProfileCard>
         <Text style={{

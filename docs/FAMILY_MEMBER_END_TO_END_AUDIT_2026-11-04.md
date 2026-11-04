@@ -42,3 +42,32 @@ Use an **authorized pair of disposable test accounts**, with a synthetic, fictio
 ## Remaining production readiness items
 
 A successful GitHub build **cannot substitute for a two-account signed-in acceptance test**. Complete checklist above before claiming the flow is 100% verified. Supabase security advisors may still report intentional public chat RPCs implemented as SECURITY DEFINER with explicit membership checks; review and monitor those, and enable leaked-password protection in the Auth configuration. Avoid bypassing the security gate or using real patient records for QA.
+
+
+## Follow-up read-only production authorization verification (2026-11-04)
+
+This second pass used **transaction-scoped, rolled-back** `authenticated` role simulation against *existing account memberships*. It did **not** read or change names, email addresses, clinical values, message bodies, or patient records; only access predicates and row counts were inspected. No test accounts or care data were created.
+
+| Authorization check (scoped to the account's Family Member care recipient) | Result |
+|---|---|
+| Active viewer has approved family access | PASS |
+| Active viewer can directly query raw care recipient row | BLOCKED (0) |
+| Active viewer can directly query raw care plan / observations / medication | BLOCKED (0) |
+| Active viewer can directly query raw appointments / doctor visits | BLOCKED (0) |
+| Active viewer can see own non-clinical help offer | PASS (1) |
+| Active viewer can read authorized Care Team Chat | PASS (2 conversations, 2 messages counted; no content inspected) |
+| Revoked viewer has active family access | BLOCKED |
+| Revoked viewer can see profile card, updates, reports, help offers, or shared appointments | BLOCKED (0) |
+| Revoked viewer can read Chat conversations, messages, or participant roster | BLOCKED (0) |
+| Anonymous role can execute safe appointment and profile RPCs | BLOCKED |
+| Live production reports/explicitly shared appointments available for family | NONE at audit time (0 published reports, 0 explicitly shared appointments) |
+
+**Role-overlap caveat:** One tested user also has a separate active **Care Recipient** membership. Patient access to that *other* profile is legitimate and should not be confused with raw access to the user's Family Member profile. All raw-data negative checks above were filtered to the **Family Member's specific recipient**.
+
+**Functional gap found and fixed:** An already active Family Member who was invited to another care profile had no in-dashboard entry to accept the invitation or switch care profiles without re-entering onboarding/restarting the app. Their existing Profile screen now checks pending invitations on focus, offers explicit Accept/Decline, lists only server-authorized care spaces, and switches using `setActiveCareRecipient` followed by a fresh care-state refresh. This is an *account* feature; the four family-care tabs remain unchanged. Regression tests: `tests/familyInvitationAccess.test.ts`.
+
+**Supabase security advisor observations:** The advisor still reports public authenticated chat `SECURITY DEFINER` RPCs (intended but membership-gated) and leaked-password protection disabled. These should be separately reviewed and, if possible, leaked-password detection enabled. This audit did not weaken or bypass the RPC authorization checks.
+
+### Still requires authenticated interactive QA
+
+No real email was sent or inbox inspected as part of this pass. A brand-new invitee, an existing invitee, actual Accept/Decline UI, publishing a first family report, explicitly sharing a first visit, help-offer submission, and mobile UI were **not** exercised with browser login credentials. These steps remain on the original 16-point real-account QA checklist. Do not claim 100% end-to-end completion until those tests pass.
