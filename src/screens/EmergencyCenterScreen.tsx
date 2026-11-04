@@ -554,22 +554,27 @@ export function EmergencyCenterScreen() {
   }
 
   async function revokeShare(shareId: string) {
-    if (readOnly || busy) return;
+    if (readOnly || busy || !careRecipientId || !activeScope) return;
+    const requestedScope = activeScope;
+    const requestedRecipientId = careRecipientId;
     setBusy(true);
     setMessage("");
     try {
       await revokeEmergencyShareLink(shareId);
+      if (currentScopeRef.current !== requestedScope) return;
       if (createdShare?.id === shareId) setCreatedShare(null);
-      if (careRecipientId) {
-        setShareLinks(await loadEmergencyShareLinks(careRecipientId));
-      }
+      const links = await loadEmergencyShareLinks(requestedRecipientId);
+      if (currentScopeRef.current !== requestedScope) return;
+      setShareLinks(links);
       setMessage("Temporary emergency link revoked.");
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not revoke the temporary emergency link.",
-      );
+      if (currentScopeRef.current === requestedScope) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "We could not revoke the temporary emergency link.",
+        );
+      }
     } finally {
       setBusy(false);
     }
