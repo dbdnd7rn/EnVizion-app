@@ -36,7 +36,7 @@ test("AI care note drafts require an explicit summary", () => {
 test("AI interface respects care consent and never writes without a review step", () => {
   const screen = readFileSync(new URL("../src/screens/EnVizionAIScreen.tsx", import.meta.url), "utf8");
   assert.match(screen,/careDataAllowed/);
-  assert.match(screen,/includeCareData: careDataAllowed/);
+  assert.match(screen,/const includeCareData = explicitlyApprovedProfile \|\| careDataAllowed/);
   assert.match(screen,/requestId\.current \+= 1/);
   assert.match(screen,/type: "conversation-clear"/);
   assert.match(screen,/Review before saving/);
