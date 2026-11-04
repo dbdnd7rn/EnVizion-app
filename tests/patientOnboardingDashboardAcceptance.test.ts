@@ -67,6 +67,6 @@ test("appointment queries show offline/permission failure instead of hanging or 
   assert.match(history, /const \[visitsError, setVisitsError\]/);
   assert.match(history, /if \(problem\) setVisitsError\(problem\.message\)/);
   assert.match(history, /Some care history is unavailable/);
-  assert.match(history, /!events\.length && visitsLoading \? null/);
+  assert.match(history, /!events\.length && !visitsLoading && !visitsError/);
   assert.match(history, /if \(active\) setVisitsLoading\(false\)/);
 });
