@@ -969,7 +969,7 @@ export function AuthScreen() {
       {(busy || googleBusy) && <ActivityIndicator color={C.purple} />}
 
       <Txt style={[S.small, { textAlign: "center" }]}>
-        Care feels better, together.\n        EnVizion Life supports care coordination and does not replace medical care.
+        Care feels better, together.{"\n"}EnVizion Life supports care coordination and does not replace medical care.
       </Txt>
     </Page>
   );
