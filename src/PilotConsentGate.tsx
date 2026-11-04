@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Text, View } from "react-native";
 import { useAuth } from "./auth";
 import {
   acceptProgramDocument,
@@ -8,6 +8,7 @@ import {
   type ProgramDocument,
 } from "./pilot";
 import { Brand, Button, C, Card, Heading, Page, S, Txt } from "./ui";
+import { pilotConsentMayProceed, pilotDocumentLabels } from "./pilotConsentSafety";
 
 function actionLabel(document: ProgramDocument) {
   if (document.documentType === "pilot_consent") {
@@ -49,6 +50,12 @@ export function PilotConsentGate({
 
   useEffect(() => {
     void refresh();
+    // A new required document may have been published while the app was away.
+    // Recheck current consent before returning an existing pilot to clinical data.
+    const subscription = AppState.addEventListener("change", (next) => {
+      if (next === "active") void refresh();
+    });
+    return () => subscription.remove();
   }, [refresh]);
 
   if (loading) {
@@ -91,7 +98,43 @@ export function PilotConsentGate({
   }
 
   const document = state.outstanding[0];
-  if (!document) return <>{children}</>;
+  if (pilotConsentMayProceed(state)) return <>{children}</>;
+  if (!document && state.missingRequiredTypes.length > 0) {
+    return (
+      <Page>
+        <Brand />
+        <Heading
+          eyebrow="PILOT PARTICIPATION"
+          title="Your pilot documents are not ready yet."
+          body="The administrator must publish every required participation document before your pilot workspace can open. No consent has been assumed."
+        />
+        <Card style={{ backgroundColor: C.redBg }}>
+          <Text accessibilityRole="alert" style={S.body}>
+            Required documents still awaiting publication:
+          </Text>
+          {state.missingRequiredTypes.map((type) => (
+            <Txt key={type} style={S.small}>• {pilotDocumentLabels[type]}</Txt>
+          ))}
+        </Card>
+        <Button title="Check again" onPress={() => void refresh()} />
+        <Button title="Sign out" secondary onPress={() => void signOut()} />
+        <Txt style={S.small}>
+          Contact your EnVizion Life pilot coordinator. Your care records have not been changed.
+        </Txt>
+      </Page>
+    );
+  }
+  // A required document can be reviewed and accepted even when another
+  // required document is pending publication; the gate remains closed until
+  // every current version is available and accepted.
+  if (!document) return (
+    <Page>
+      <Brand />
+      <Heading eyebrow="PILOT PARTICIPATION" title="Consent verification is incomplete." />
+      <Button title="Check again" onPress={() => void refresh()} />
+      <Button title="Sign out" secondary onPress={() => void signOut()} />
+    </Page>
+  );
 
   async function accept() {
     setAccepting(true);
