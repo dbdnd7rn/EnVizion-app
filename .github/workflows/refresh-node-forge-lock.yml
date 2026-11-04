@@ -1,0 +1,53 @@
+name: Refresh pinned node-forge and verify EnVizion release
+
+on:
+  push:
+    paths:
+      - .github/workflows/refresh-node-forge-lock.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    if: github.repository == 'dbdnd7rn/EnVizion-app' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Require patched node-forge (Expo signing transitive dependency)
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync, writeFileSync } from "node:fs";
+          const file = "package.json";
+          const pkg = JSON.parse(readFileSync(file, "utf8"));
+          pkg.overrides = { ...pkg.overrides, "node-forge": "1.4.1" };
+          writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
+          EOF
+          npm install --package-lock-only --ignore-scripts --no-audit
+      - name: Install and verify lockfile
+        run: npm ci --no-audit
+      - name: Verify TypeScript, tests, web build and export
+        run: |
+          npm run typecheck
+          npm run build:web
+          npm run smoke:dist
+      - name: Enforce reviewed npm security gate
+        run: node scripts/security-audit.mjs
+      - name: Commit verified dependency update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency changes required."
+          else
+            git commit -m "security: upgrade locked node-forge to patched 1.4.1"
+            git push origin HEAD:main
+          fi
