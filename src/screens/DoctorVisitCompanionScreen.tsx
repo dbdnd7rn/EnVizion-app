@@ -48,6 +48,8 @@ import {
   reminderLocalParts,
 } from "../reminders";
 import { useCare } from "../store";
+import { DoctorVisitSchedulePicker } from "../components/DoctorVisitSchedulePicker";
+import { doctorVisitSchedulingError } from "../doctorVisitDateTimeHelpers";
 import {
   Button,
   C,
@@ -176,6 +178,7 @@ export function DoctorVisitCompanionScreen() {
   );
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [formError, setFormError] = useState("");
   const [physicianName, setPhysicianName] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [visitDate, setVisitDate] = useState(nowParts.date);
@@ -274,14 +277,23 @@ export function DoctorVisitCompanionScreen() {
 
   async function createVisit() {
     if (!careRecipientId || readOnly || busy) return;
-
+    if (!physicianName.trim()) {
+      setFormError("Please enter the clinician or physician name.");
+      return;
+    }
+    const validationError = doctorVisitSchedulingError(visitDate, visitTime);
+    if (validationError) {
+      setFormError(validationError);
+      return;
+    }
     const appointmentDatetime = localDateTimeToIso(visitDate, visitTime);
     if (!appointmentDatetime) {
-      setMessage("Check the visit date and time.");
+      setFormError("Please select another date and time.");
       return;
     }
 
     setBusy("create");
+    setFormError("");
     setMessage("");
     try {
       const visit = await createDoctorVisit({
@@ -298,14 +310,15 @@ export function DoctorVisitCompanionScreen() {
 
       setPhysicianName("");
       setSpecialty("");
+      setFormError("");
       setCreateOpen(false);
       await refresh();
       setSelectedId(visit.id);
       setMessage("Visit companion created. Add questions before the appointment.");
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "We could not create the visit.",
-      );
+      const detail = error instanceof Error ? error.message : "We could not create the visit.";
+      setFormError(detail);
+      setMessage(detail);
     } finally {
       setBusy("");
     }
@@ -780,20 +793,24 @@ export function DoctorVisitCompanionScreen() {
               );
             })}
           </View>
-          <Field
-            label="Visit date (YYYY-MM-DD)"
-            value={visitDate}
-            onChange={setVisitDate}
-          />
-          <Field
-            label="Visit time (HH:MM)"
-            value={visitTime}
-            onChange={setVisitTime}
+          <DoctorVisitSchedulePicker
+            date={visitDate}
+            time={visitTime}
+            onDateChange={(value) => { setVisitDate(value); setFormError(""); }}
+            onTimeChange={(value) => { setVisitTime(value); setFormError(""); }}
+            disabled={Boolean(busy)}
           />
           <Field label="Location" value={location} onChange={setLocation} />
+          {Boolean(formError) && (
+            <Card style={{ backgroundColor: themeBackground("#FFF1F3"), borderColor: themeBackground("#F5C9D4") }}>
+              <Text accessibilityRole="alert" style={[S.body, { color: themeForeground("#A82C48") }]}>
+                {formError}
+              </Text>
+            </Card>
+          )}
           <Button
             title={busy === "create" ? "Creating…" : "Create visit"}
-            disabled={Boolean(busy) || !physicianName.trim()}
+            disabled={Boolean(busy)}
             onPress={() => void createVisit()}
           />
         </Card>
