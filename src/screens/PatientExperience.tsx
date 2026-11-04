@@ -386,7 +386,7 @@ export function PatientDayScreen() {
       </View>
       <View style={{ height: 7, borderRadius: 5, overflow: "hidden",
         backgroundColor: themeBackground("#EDE2F2") }}>
-        <View style={{ width: (today.length ? Math.min(100, done / today.length * 100) : 0) + "%",
+        <View style={{ width: `${today.length ? Math.min(100, done / today.length * 100) : 0}%` as `${number}%`,
           height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
       </View>
     </PatientGlass>}
