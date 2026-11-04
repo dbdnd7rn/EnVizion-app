@@ -114,13 +114,13 @@ for each row execute function private.notify_family_help_offer_status();
 -- returning only a boolean for the currently authenticated family member.
 create or replace function private.notification_can_view_shared_appointment(p_appointment uuid)
 returns boolean language sql stable security definer set search_path=''
-as $
+as $$
   select (select auth.uid()) is not null and exists (
     select 1 from public.appointments a
     where a.id=p_appointment and a.shared_with_family=true
       and private.is_active_family_viewer(a.care_recipient_id)
   );
-$;
+$$;
 revoke all on function private.notification_can_view_shared_appointment(uuid) from public,anon;
 grant execute on function private.notification_can_view_shared_appointment(uuid) to authenticated;
 
