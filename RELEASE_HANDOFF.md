@@ -84,3 +84,19 @@ This is a truthful empty pilot, not a missing software feature. The system is wa
 The build is considered complete when the codebase contains the required workflows, automated gates, reporting and release configuration and the release gate is green.
 
 That does **not** mean clinical approval or launch approval is complete. Those statuses require real human review and real-world evidence and must remain separate.
+
+## Current audit update — 4 November 2026
+
+This section supersedes earlier claims of launch readiness; the original September handoff is retained for history.
+
+- **Production deployment:** Render serves the last verified live web build from 27 October 2026 (commit `b9a3258`). Later source edits are **not declared deployed** until a new live Render deployment is confirmed.
+- **Quality gate:** TypeScript, unit/domain suite and production web artifact export passed on the November CI runs. Dependency security audit is **failing** after newly disclosed Expo transitive dependency advisories. Keep the gate blocking; see [Issue #39](https://github.com/dbdnd7rn/EnVizion-app/issues/39) and GitHub Actions for the latest state.
+- **Security review:** the two withdrawn advisory exceptions were removed; the remaining `node-forge` exception expires on **11 November 2026**. Do not silently renew. Supabase flags leaked-password protection as disabled; administrator/plan action is required.
+- **Database:** all public tables were reported with RLS enabled in the Nov 4 audit. Twelve scheduled jobs ran successfully in the preceding 24 hours. Six missing chat/family FK indexes were applied through migration `20261104102522_index_envizion_chat_and_family_foreign_keys`; the following performance advisory check no longer reported missing FK indexes.
+- **Production launch evidence:** 8 clinical-content records remain Draft, required participation-document records = 0, and pilot enrollment, launch-wave, acceptance-run, recovery-drill and sign-off tables have zero records. These are **real approval and testing tasks**, not defects that should be hidden with fake records.
+- **Unproven cross-device workflows:** real iOS/Android builds, invitation email delivery, caregiver/family member roles, full chat and push delivery, access recertification, AI natural-conversation availability, data retention and dark-mode accessibility still require human signed-in testing. Push-device registration currently has no records.
+- **Scope:** Do not use or mutate the unrelated VAC eHealth HMS project. Do not invent patient activity, launch sign-offs, or clinical approvals to populate dashboards.
+
+### Promotion rule
+
+Do **not** deploy a new client-facing production release solely because a web export succeeds. Require a green dependency/security gate, an authenticated smoke pass for critical roles and data flows, up-to-date privacy/clinical approvals, and real pilot sign-off (or an explicitly labeled pre-pilot review release). Native store distribution requires separate developer accounts and device acceptance.
