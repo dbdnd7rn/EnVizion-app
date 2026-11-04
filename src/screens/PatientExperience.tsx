@@ -747,7 +747,7 @@ export function PatientHistoryScreen() {
     {visitsLoading && <ActivityIndicator color={C.purple} accessibilityLabel="Loading appointment history"/>}
     {Boolean(visitsError) && <PatientEmpty icon="cloud-offline-outline"
       title="Some care history is unavailable" detail={visitsError}/>}
-    {!events.length && visitsLoading ? null : !events.length && !visitsError
+    {!events.length && !visitsLoading && !visitsError
       ? <PatientEmpty icon="time-outline" title="Your care story begins here"
           detail="Once your care team saves an activity or observation, it will appear here."/> : events.length > 0 ?
       <View style={{ gap: 10 }}>
@@ -773,7 +773,7 @@ export function PatientHistoryScreen() {
             </PatientGlass>
           </View>
         </View>)}
-      </View>}
+      </View> : null}
   </Page>;
 }
 export function PatientProfileScreen() {
