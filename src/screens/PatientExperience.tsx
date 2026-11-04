@@ -6,7 +6,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
 import { useAuth } from "../auth";
-import { useAppearance } from "../appearance";
 import { loadCarePlan, type CarePlanItem, type CarePlanCompletion } from "../carePlan";
 import { loadMedicationManagement, type ManagedMedication, type ManagedMedicationRecord } from "../medicationManagement";
 import { loadCareTeam, type CareTeamMember } from "../careTeam";
@@ -807,10 +806,9 @@ export function PatientProfileScreen() {
   const { state } = useCare();
   const { signOut, session } = useAuth();
   const avatar = useProfileAvatar();
-  const { dark, setMode, saveError } = useAppearance();
+  const [careAccessOpen, setCareAccessOpen] = useState(false);
   return <Page>
-    <PatientHeading eyebrow="YOUR ACCOUNT" title="Profile & preferences"
-      subtitle="Your photo, personal settings, and care-sharing information."/>
+    <PatientHeading eyebrow="ACCOUNT" title="Profile"/>
     <View style={{ borderRadius: 27, padding: 21, gap: 14, overflow: "hidden",
       borderWidth: 1, borderColor: themeBorder("#E7D9EF"),
       backgroundColor: themeBackground("#F3E9FA") }}>
@@ -840,20 +838,32 @@ export function PatientProfileScreen() {
       {avatar.error ? <Text accessibilityRole="alert" style={{ fontFamily: FONT,
         fontSize: 12.5, color: themeForeground("#B34761") }}>{avatar.error}</Text> : null}
     </View>
-    <AccountCareAccessPanel />
-    <PatientHeading eyebrow="COMFORT" title="Display settings"/>
-    <PatientAction icon="contrast-outline" title={dark ? "Switch to light mode" : "Switch to dark mode"}
-      detail="Adjust the appearance for a comfortable view"
-      onPress={() => void setMode(dark ? "light" : "dark")}/>
-    {saveError ? <Text accessibilityRole="alert" style={{ fontFamily: FONT,
-      color: themeForeground("#B34761"), fontSize: 12.5 }}>{saveError}</Text> : null}
-    <PatientAction icon="accessibility-outline" title="Accessibility & display"
-      detail="Text size, motion, and appearance" onPress={() => n.navigate("Accessibility")}/>
-    <PatientHeading eyebrow="ACCOUNT" title="Privacy & notifications"/>
+    <PatientHeading eyebrow="CONTROLS" title="Settings"/>
+    <Pressable accessibilityRole="button" accessibilityLabel="Manage care access"
+      accessibilityState={{ expanded: careAccessOpen }}
+      onPress={() => setCareAccessOpen(value => !value)}
+      style={({ pressed }) => ({
+        flexDirection: "row", alignItems: "center", gap: 13, minHeight: 65,
+        borderRadius: 20, borderWidth: 1, borderColor: themeBorder("#E9DFF0"),
+        backgroundColor: themeBackground("#FFFEFF"), paddingHorizontal: 16,
+        opacity: pressed ? 0.75 : 1,
+      })}>
+      <View style={{ width: 43, height: 43, borderRadius: 15,
+        backgroundColor: themeBackground("#EEE4F7"), alignItems: "center", justifyContent: "center" }}>
+        <Icon name="people-outline" size={22} color={themeForeground(PURPLE)}/>
+      </View>
+      <Text style={{ fontFamily: SEMI, fontSize: 14, flex: 1,
+        color: themeForeground(INK) }}>Care access</Text>
+      <Icon name={careAccessOpen ? "chevron-up-outline" : "chevron-forward-outline"}
+        size={19} color={themeForeground(PURPLE)}/>
+    </Pressable>
+    {careAccessOpen && <AccountCareAccessPanel/>}
+    <PatientAction icon="accessibility-outline" title="Display & accessibility"
+      onPress={() => n.navigate("Accessibility")}/>
     <PatientAction icon="notifications-outline" title="Notifications"
-      detail="Manage the alerts you receive" onPress={() => n.navigate("NotificationSettings")}/>
-    <PatientAction icon="shield-checkmark-outline" title="Privacy & care sharing"
-      detail="Understand your information and consent" onPress={() => n.navigate("PrivacyData")}/>
+      onPress={() => n.navigate("NotificationSettings")}/>
+    <PatientAction icon="shield-checkmark-outline" title="Privacy"
+      onPress={() => n.navigate("PrivacyData")}/>
     <Pressable accessibilityRole="button" accessibilityLabel="Sign out"
       onPress={() => void signOut()} style={{ minHeight: 52, borderRadius: 20,
         backgroundColor: themeBackground("#F5EDF7"), borderWidth: 1,
