@@ -71,8 +71,8 @@ test("all clinical reads are limited by RLS, including doctor audio and revocati
   assert.match(restricted,/alter policy care_family_updates_select_shared/);
   assert.match(restricted,/alter policy care_members_select/);
   assert.match(restricted,/alter policy family_help_offer_read/);
-  assert.match(restricted,/function private\\.can_view_care_group/);
-  assert.match(restricted,/private\\.is_active_family_viewer\\(r\\.id\\) then null::text/);
+  assert.match(restricted,/function private\.can_view_care_group/);
+  assert.match(restricted,/private\.is_active_family_viewer\(r\.id\) then null::text/);
   assert.match(restricted,/private\.chat_is_member\(c\.care_recipient_id,\(select auth\.uid\(\)\)\)/);
   assert.match(restricted,/gm\.role in \('primary_advocate','co_caregiver'\)/);
 });
