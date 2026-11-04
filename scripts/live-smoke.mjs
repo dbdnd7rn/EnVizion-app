@@ -1,3 +1,5 @@
+import { hasHtmlFallback, isJavascriptContentType, resolveLocalScriptUrl } from "./liveSmokeHelpers.mjs";
+
 const target =
   process.env.SMOKE_URL ||
   process.argv[2] ||
@@ -10,6 +12,7 @@ function fail(message) {
 
 const response = await fetch(target, {
   redirect: "follow",
+  signal: AbortSignal.timeout(30000),
   headers: { "User-Agent": "EnVizion-Release-Smoke/1.0" },
 });
 if (!response.ok) fail(`Root returned HTTP ${response.status}.`);
@@ -24,14 +27,29 @@ const scriptSources = [...html.matchAll(/<script[^>]+src=["']([^"']+)["']/gi)]
 if (!scriptSources.length) fail("No JavaScript bundle was referenced.");
 
 for (const source of scriptSources.slice(0, 3)) {
-  const url = new URL(source, response.url).toString();
+  let url;
+  try {
+    url = resolveLocalScriptUrl(source, response.url);
+  } catch (error) {
+    fail(error instanceof Error ? error.message : "Invalid script URL.");
+  }
   const asset = await fetch(url, {
     redirect: "follow",
+    signal: AbortSignal.timeout(30000),
     headers: { "User-Agent": "EnVizion-Release-Smoke/1.0" },
   });
+  if (new URL(asset.url).origin !== new URL(response.url).origin) {
+    fail(`Bundle ${url} redirected outside the application origin.`);
+  }
   if (!asset.ok) fail(`Bundle ${url} returned HTTP ${asset.status}.`);
-  const body = await asset.arrayBuffer();
+  if (!isJavascriptContentType(asset.headers.get("content-type"))) {
+    fail(`Bundle ${url} returned a non-JavaScript content type; possible HTML fallback.`);
+  }
+  const body = Buffer.from(await asset.arrayBuffer());
   if (body.byteLength < 1_000) fail(`Bundle ${url} is unexpectedly small.`);
+  if (hasHtmlFallback(body.toString("utf8", 0, 1024))) {
+    fail(`Bundle ${url} contains an HTML fallback instead of JavaScript.`);
+  }
 }
 
 console.log(
