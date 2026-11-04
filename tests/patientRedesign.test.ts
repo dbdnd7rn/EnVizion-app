@@ -49,7 +49,7 @@ test("patient records remain read-only and include honest empty and loading stat
   assert.match(patient, /useFocusEffect/);
   assert.match(patient, /PatientEmpty/);
   assert.match(patient, /ActivityIndicator/);
-  assert.match(patient, /For your safety, this page is read-only/);
+  assert.match(patient, /Read only · Follow your clinician/);
   assert.doesNotMatch(patient, /recordMedicationDose\(|saveObservation\(|updateMedication\(/);
 });
 
