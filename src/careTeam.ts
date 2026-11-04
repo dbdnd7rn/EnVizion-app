@@ -458,8 +458,16 @@ export async function loadAccessibleCareContexts(
     ]),
   );
 
-  return (recipientsResult.data ?? [])
-    .map((recipient) => {
+  type SafeCareProfile = {
+    id: string;
+    display_name: string;
+    relationship: string | null;
+    care_group_id: string | null;
+    created_at: string;
+    is_owner: boolean;
+  };
+  return ((recipientsResult.data ?? []) as SafeCareProfile[])
+    .map((recipient): AccessibleCareContext | null => {
       const directRole = directByRecipient.get(recipient.id) ?? null;
       const groupRole = recipient.care_group_id
         ? (groupById.get(recipient.care_group_id) ?? null)
