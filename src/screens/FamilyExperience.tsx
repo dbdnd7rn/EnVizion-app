@@ -10,6 +10,7 @@ import {HomeJourneyArtwork} from "../components/HomeJourneyArtwork";
 import {HomeGlassOrb} from "../components/HomeGlassMotion";
 import {useNav} from "./MainScreens";
 import {loadFamilyCommunicationCenter,familyUpdateTypeLabels,type FamilyUpdate} from "../familyCommunication";
+import { NotificationBell } from "../notifications";
 import {loadApprovedFamilyReports,familyReportDateLabel,type FamilyCareReport,type FamilyReportPeriod} from "../familyReports";
 import {loadFamilyHelpOffers,offerFamilyHelp,practicalHelpLabels,practicalHelpTypes,type PracticalHelpType,type FamilyHelpOffer} from "../familyHelp";
 import {supabase} from "../supabase";
@@ -114,12 +115,15 @@ export function FamilyHomeScreen(){
     <FamilyReveal>
       <View style={[S.between,{paddingBottom:9}]}>
         <Brand/>
-        <Pressable accessibilityRole="button" accessibilityLabel="Open your family profile"
-          accessibilityHint="View your role, change your photo and manage account settings"
-          onPress={()=>n.navigate("FamilyProfile")}
-          style={{borderRadius:28,backgroundColor:themeBackground("#F1E8F8"),padding:7}}>
-          <ProfileAvatar name={state.name||"Family Member"} size={42}/>
-        </Pressable>
+        <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
+          <NotificationBell onPress={()=>n.navigate("Notifications")}/>
+          <Pressable accessibilityRole="button" accessibilityLabel="Open your family profile"
+            accessibilityHint="View your role, change your photo and manage account settings"
+            onPress={()=>n.navigate("FamilyProfile")}
+            style={{borderRadius:28,backgroundColor:themeBackground("#F1E8F8"),padding:7}}>
+            <ProfileAvatar name={state.name||"Family Member"} size={42}/>
+          </Pressable>
+        </View>
       </View>
     </FamilyReveal>
     <FamilyReveal delay={70}>
