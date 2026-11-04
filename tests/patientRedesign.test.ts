@@ -32,10 +32,13 @@ test("modern patient home uses real brand, live plan data and clear direct actio
   assert.match(patient, /<PatientTile title="Medications"/);
   assert.match(patient, /<PatientTile title="Appointments"/);
   assert.match(patient, /<PatientTile title="My health"/);
-  assert.match(patient, /<PatientTile title="Care history"/);
+  assert.match(patient, /<PatientTile title="History"/);
+  assert.match(patient, /<PatientTile title="EnVizion AI"/);
   assert.match(patient, /n\.navigate\("CareTeamChat"/);
-  assert.match(patient, /tabs\.navigate\("PatientProfile"\)/);
-  assert.match(patient, /tabs\.navigate\("PatientCare"\)/);
+  assert.match(patient, /n\.navigate\("Assistant"\)/);
+  const home = patient.slice(patient.indexOf("export function PatientHomeScreen()"), patient.indexOf("export function PatientCareHubScreen()"));
+  assert.doesNotMatch(home, /CareTeamChat|<PatientTile|tabs\.navigate|Message my care team/);
+  assert.match(home, /<PatientPlanContent plan=\{plan\} limit=\{1\}/);
   assert.doesNotMatch(patient, /demo patient|sample medication|fake record/i);
 });
 

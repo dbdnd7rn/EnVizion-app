@@ -44,6 +44,7 @@ test("patient care renders authenticated records and reuses existing chat, AI an
   assert.match(screen, /ProfileAvatar/);
   assert.match(app, /name="Assistant" component=\{themedScreen\(EnVizionAIScreen\)\}/);
   assert.match(screen, /n\.navigate\("Assistant"\)/);
+  assert.doesNotMatch(navigation, /PatientAI: undefined/);
   assert.doesNotMatch(screen, /fake record|demo patient|sample medication/i);
 });
 
