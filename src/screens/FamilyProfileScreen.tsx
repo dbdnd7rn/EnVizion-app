@@ -102,7 +102,7 @@ function familyRoleText(role: CareRole): string {
  * Account-level invitation controls, deliberately separate from the four
  * family care tools. A viewer cannot manage other members or clinical records.
  */
-function FamilyCareAccessPanel() {
+export function AccountCareAccessPanel() {
   const n = useNav();
   const { refresh } = useCare();
   const [invitations, setInvitations] = useState<CareInvitation[]>([]);
@@ -535,7 +535,7 @@ export function FamilyProfileScreen() {
         </Text>
       </FamilyProfileCard>
 
-      <FamilyCareAccessPanel />
+      <AccountCareAccessPanel />
 
       <FamilyProfileCard>
         <Text style={{
