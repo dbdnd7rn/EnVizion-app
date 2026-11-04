@@ -1,6 +1,6 @@
 # EnVizion toolkit assistant
 
-EnVizion AI now has two separately selected modes. Built-in toolkit guidance remains deterministic and private; natural conversation is opt-in and calls an external model from the authenticated Supabase Edge Function. Only opted-in messages and up to eight recent shortened turns are sent. It uses server-side `OPENAI_API_KEY` (and optional `OPENAI_CARE_MODEL`, default `gpt-5-mini`). If the key is missing or the provider is unavailable, the interface displays a clear error rather than pretending that built-in replies are model-generated. The app never includes the secret.
+EnVizion AI uses its own bounded, deterministic care-toolkit engine. It **does not connect to the developer's personal ChatGPT account, call OpenAI or another external AI model, or require an API key** for this chat. General guidance can run on the device; care-profile requests use an authenticated Supabase Edge Function that verifies current membership and Row Level Security. The former external “Natural conversation” switch was removed so unavailable providers cannot break ordinary conversations. This is not a full general-purpose language model; unsupported topics receive an honest answer rather than a fabricated one.
 
 ## Supported interactions
 
@@ -17,11 +17,11 @@ The assistant always verifies the caller through Supabase Auth. Profile data rem
 
 Reminder and note drafts additionally require a caregiver/owner role. A proposed draft does not write anything. The existing client-side editing, date validation and Confirm & save controls call the existing RLS-protected reminder and communication APIs. Typing `yes`, `confirm` or `save` in chat does not save a record. Changing profile or privacy mode clears the conversation and pending draft. Retrying a failed reply does not duplicate the user's message.
 
-Built-in guidance never sends chat data to a model provider. In natural conversation, the model receives the message and last eight shortened chat turns after explicit opt-in. Only when care profile information is separately enabled do authorized, RLS-scoped, question-specific care summaries leave the server. Credentials, profile IDs, and all unrelated private records are excluded. Users can switch modes, which clears the old conversation. AI requests may incur provider charges. Other app features with their own provider integrations, such as visit transcription or visit summaries, are outside this change; their secrets have not been removed.
+EnVizion AI chat does not send messages or records to an external AI-model provider. Authorized profile-specific requests are sent to EnVizion's Supabase Edge Function; no care records are returned without active membership and the user's explicit profile-consent toggle. Draft actions remain review-only until the user confirms. Other app features (such as Doctor Visit Companion transcription, summaries, or medical-term explanations) have their own provider requirements and are outside this chat change.
 
 ## Boundaries
 
-Built-in mode remains a bounded toolkit assistant. Natural conversation can answer broader everyday questions but is not a clinical decision, diagnosis, symptom-triage or emergency system. It cannot prescribe, choose doses, change medications, invite users, upload documents, complete tasks or make other unsupported changes through chat. Supportive check-ins are fixed guidance, not therapy. Urgent or self-harm-related messages receive a conservative direction to appropriate human/emergency support, without inventing emergency numbers.
+EnVizion AI remains a bounded toolkit assistant, not a general language model, clinical decision, diagnosis, symptom-triage or emergency system. It cannot prescribe, choose doses, change medications, invite users, upload documents, complete tasks or make other unsupported changes through chat. Supportive check-ins are fixed guidance, not therapy. Urgent or self-harm-related messages receive a conservative direction to appropriate human/emergency support, without inventing emergency numbers.
 
 Reminder parsing deliberately supports a limited grammar. The editable draft is the source of truth for the user's confirmation. Recurring reminder summaries display their stored schedule and do not calculate the next firing time.
 
@@ -31,7 +31,7 @@ This change includes both the current source for `supabase/functions/care-ai` an
 
 - Frontend: `npm run build:web`, then `npm run smoke:dist`.
 - Pure engine and authenticated handler checks: `node --experimental-strip-types --test tests/toolkitAssistant.test.ts tests/careAI.test.ts`.
-- Publish the five function source files (`index.ts`, `handler.ts`, `toolkit.ts`, `contracts.ts`, `conversationModel.ts`) to the existing `care-ai` function in project `nvmepknmkptltnuxdyfv`.
+- Publish the four function source files (`index.ts`, `handler.ts`, `toolkit.ts`, `contracts.ts`) to the existing `care-ai` function in project `nvmepknmkptltnuxdyfv`.
 - Publish the reviewed frontend commit through the existing Render service.
 - Signed-in acceptance: greet with profile access off; enable the intended profile; show appointments/tasks; prepare a future reminder; edit/discard it; prepare a factual note; save only after explicit confirmation; verify its real record; switch profiles and confirm that the conversation and draft clear.
 

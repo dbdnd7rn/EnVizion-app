@@ -48,7 +48,7 @@ test("AI interface respects care consent and never writes without a review step"
   assert.match(screen,/Nothing is saved to care records without your confirmation/);
 });
 
-test("assistant requires explicit consent before sending content to a model", () => {
+test("assistant uses only its own toolkit and never forwards chat to an AI model", () => {
   const screen = readFileSync(new URL("../src/screens/EnVizionAIScreen.tsx", import.meta.url), "utf8");
   const app = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
   const client = readFileSync(new URL("../src/assistant/careAI.ts", import.meta.url), "utf8");
@@ -59,8 +59,10 @@ test("assistant requires explicit consent before sending content to a model", ()
   assert.match(client,/history: input\.history\.slice\(-12\)/);
   const server = readFileSync(new URL("../supabase/functions/care-ai/index.ts", import.meta.url), "utf8");
   const handler = readFileSync(new URL("../supabase/functions/care-ai/handler.ts", import.meta.url), "utf8");
-  assert.match(server, /OPENAI_API_KEY/);
-  assert.match(handler, /body\.naturalConversation === true/);
-  assert.match(client, /!input\.includeCareData && !input\.naturalConversation/);
+  assert.doesNotMatch(server, /OPENAI_API_KEY|generateModelReply|openai/i);
+  assert.doesNotMatch(handler, /generateModelReply|body\.naturalConversation|api\.openai/i);
+  assert.doesNotMatch(client, /naturalConversation|api\.openai/i);
+  assert.doesNotMatch(screen, /Natural conversation|external AI provider/i);
+  assert.match(client, /if \(!input\.includeCareData\)/);
   assert.match(handler, /client\.auth\.getUser/);
 });
