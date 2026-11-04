@@ -474,6 +474,7 @@ type PatientAppointment = {
 };
 export function PatientAppointmentsScreen() {
   const { state } = useCare();
+  const [expandedVisitId, setExpandedVisitId] = useState<string | null>(null);
   const [items, setItems] = useState<PatientAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -499,33 +500,59 @@ export function PatientAppointmentsScreen() {
     String(item.appointment_date || item.starts_at).slice(0, 10) >= dayKey(new Date()));
   const past = sorted.filter(item => item.appointment_date || item.starts_at)
     .filter(item => String(item.appointment_date || item.starts_at).slice(0, 10) < dayKey(new Date()));
-  const appointmentCard = (item: PatientAppointment) => <PatientGlass key={item.id} tint="#ECEAF9">
-    <View style={{ flexDirection: "row", gap: 13, alignItems: "flex-start" }}>
-      <View style={{ width: 47, height: 50, borderRadius: 16,
-        justifyContent: "center", alignItems: "center",
-        backgroundColor: themeBackground("#F0E6F8") }}>
-        <Icon name="calendar-outline" size={23} color={themeForeground(PURPLE)}/>
-      </View>
-      <View style={{ flex: 1, gap: 6 }}>
-        <Text style={{ fontFamily: SEMI, fontSize: 15.5, color: themeForeground(INK) }}>{item.title}</Text>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Icon name="time-outline" size={14} color={themeForeground(PURPLE)}/>
-          <PatientText muted size={12.5}>{readableDate(item.appointment_date || item.starts_at)} · {timeLabel(item.appointment_time || (item.starts_at ? item.starts_at.slice(11, 16) : null))}</PatientText>
+  const appointmentCard = (item: PatientAppointment) => {
+    const value = item.appointment_date || item.starts_at;
+    const parsed = value ? new Date(value.length === 10 ? value + "T12:00:00" : value) : null;
+    const valid = parsed && Number.isFinite(parsed.getTime());
+    const expanded = expandedVisitId === item.id;
+    return <PatientGlass key={item.id} tint="#ECEAF9" compact>
+      <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+        <View style={{ width: 60, minHeight: 68, borderRadius: 18,
+          justifyContent: "center", alignItems: "center", gap: 2,
+          backgroundColor: themeBackground("#F0E6F8") }}>
+          {valid ? <>
+            <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 10.5 }}>
+              {parsed.toLocaleDateString(undefined, { month: "short" }).toUpperCase()}
+            </Text>
+            <Text style={{ fontFamily: "Lora_500Medium", color: themeForeground(PURPLE), fontSize: 27 }}>
+              {parsed.getDate()}
+            </Text>
+          </> : <Icon name="calendar-outline" size={26} color={themeForeground(PURPLE)}/>}
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Icon name="location-outline" size={14} color={themeForeground(PURPLE)}/>
-          <PatientText muted size={12.5}>{item.location || "Location to be confirmed"}</PatientText>
+        <View style={{ flex: 1, gap: 6 }}>
+          <Text style={{ fontFamily: SEMI, fontSize: 15, color: themeForeground(INK) }}>{item.title}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+            <Icon name="time-outline" size={14} color={themeForeground(PURPLE)}/>
+            <PatientText muted size={12.5}>
+              {timeLabel(item.appointment_time || (item.starts_at ? item.starts_at.slice(11, 16) : null))}
+            </PatientText>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+            <Icon name="location-outline" size={14} color={themeForeground(PURPLE)}/>
+            <PatientText muted size={12.5}>{item.location || "Location pending"}</PatientText>
+          </View>
         </View>
       </View>
-    </View>
-    {item.notes && <View style={{ borderRadius: 14, padding: 11,
-      backgroundColor: themeBackground("#F8F4FA") }}>
-      <PatientText muted size={13}>{item.notes}</PatientText>
-    </View>}
-  </PatientGlass>;
+      {item.notes && <>
+        <Pressable accessibilityRole="button" accessibilityLabel={"Visit notes for " + item.title}
+          accessibilityState={{ expanded }} onPress={() => setExpandedVisitId(expanded ? null : item.id)}
+          style={{ minHeight: 44, alignItems: "center", flexDirection: "row", gap: 8 }}>
+          <Icon name="document-text-outline" size={18} color={themeForeground(PURPLE)}/>
+          <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 12.5 }}>
+            {expanded ? "Hide notes" : "Visit notes"}
+          </Text>
+          <Icon name={expanded ? "chevron-up-outline" : "chevron-down-outline"}
+            color={themeForeground(PURPLE)} size={16}/>
+        </Pressable>
+        {expanded && <View style={{ borderRadius: 13, padding: 11,
+          backgroundColor: themeBackground("#F8F4FB") }}>
+          <PatientText muted size={12.5}>{item.notes}</PatientText>
+        </View>}
+      </>}
+    </PatientGlass>;
+  };
   return <Page>
-    <PatientHeading eyebrow="APPOINTMENTS" title="Your upcoming visits"
-      subtitle="Dates, locations, and helpful details shared by your care team."/>
+    <PatientHeading eyebrow="MY CARE" title="Appointments"/>
     {!loading && !error && <View style={{ flexDirection: "row", gap: 9, flexWrap: "wrap" }}>
       <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 17,
         backgroundColor: themeBackground("#F0E7F7") }}>
@@ -542,10 +569,10 @@ export function PatientAppointmentsScreen() {
       <PatientEmpty icon="cloud-offline-outline" title="Appointments unavailable" detail={error}/> :
       upcoming.length ? upcoming.map(appointmentCard) :
       <PatientEmpty icon="calendar-outline" title="No upcoming appointments"
-        detail="Your future visits will appear here once they have been added to your care plan."/>}
+        detail="Visits will appear once scheduled."/>}
     {!loading && !error && past.length > 0 && <>
-      <PatientHeading eyebrow="YOUR HISTORY" title="Earlier appointments"
-        subtitle="Previously scheduled visits. An entry does not confirm attendance."/>
+      <PatientHeading eyebrow="HISTORY" title="Past visits"/>
+      <PatientInfo icon="information-circle-outline" text="Scheduled visits do not confirm attendance."/>
       {past.slice(-10).reverse().map(appointmentCard)}
     </>}
   </Page>;
