@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   AccessibilityInfo, ActivityIndicator, Animated, Image, Platform, Pressable, Text, View,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { Tabs } from "../navigation";
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { useCare } from "../store";
 import { useAuth } from "../auth";
@@ -245,6 +247,7 @@ function PatientPlanContent({ plan, limit }: { plan: PatientPlanData; limit?: nu
 }
 export function PatientHomeScreen() {
   const n = useNav();
+  const tabs = useNavigation<BottomTabNavigationProp<Tabs>>();
   const { state, refresh, syncError } = useCare();
   const first = state.name.trim().split(/\s+/)[0] || "there";
   const hour = new Date().getHours();
@@ -263,7 +266,7 @@ export function PatientHomeScreen() {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
           <NotificationBell onPress={() => n.navigate("Notifications")}/>
           <Pressable accessibilityRole="button" accessibilityLabel="Open my profile"
-            onPress={() => n.navigate("PatientProfile")}
+            onPress={() => tabs.navigate("PatientProfile")}
             style={{ padding: 3, borderRadius: 26, borderWidth: 1,
               backgroundColor: themeBackground("#F2E9F8"), borderColor: themeBorder("#E7D8F0") }}>
             <ProfileAvatar name={state.name || "Care Recipient"} size={39}/>
@@ -298,14 +301,14 @@ export function PatientHomeScreen() {
       </View>
       {today.length > 0 && <View accessibilityLabel={done + " of " + today.length + " care activities completed"}
         style={{ height: 6, backgroundColor: themeBackground("#EBE1F1"), borderRadius: 5, overflow: "hidden" }}>
-        <View style={{ width: percent + "%", height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
+        <View style={{ width: `${Math.round(percent)}%` as const, height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
       </View>}
     </> : null}
     <PatientPlanContent plan={plan} limit={2}/>
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
       <PatientHeading eyebrow="ONE TAP AWAY" title="Your care essentials"/>
       <Pressable accessibilityRole="button" accessibilityLabel="View all care features"
-        onPress={() => n.navigate("PatientCare")} style={{ minHeight: 44, justifyContent: "center" }}>
+        onPress={() => tabs.navigate("PatientCare")} style={{ minHeight: 44, justifyContent: "center" }}>
         <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 12.5 }}>View all</Text>
       </Pressable>
     </View>
@@ -386,7 +389,7 @@ export function PatientDayScreen() {
       </View>
       <View style={{ height: 7, borderRadius: 5, overflow: "hidden",
         backgroundColor: themeBackground("#EDE2F2") }}>
-        <View style={{ width: (today.length ? Math.min(100, done / today.length * 100) : 0) + "%",
+        <View style={{ width: `${Math.round(today.length ? Math.min(100, done / today.length * 100) : 0)}%` as const,
           height: "100%", backgroundColor: themeBackground(PURPLE), borderRadius: 5 }}/>
       </View>
     </PatientGlass>}
