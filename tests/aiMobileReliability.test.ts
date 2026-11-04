@@ -51,7 +51,7 @@ test("iOS AI composer is moved above the keyboard with frame events", () => {
 
 test("consent, explicit-save safeguards and new-conversation controls remain", () => {
   for (const term of [
-    /careDataAllowed/, /const includeCareData = explicitlyApprovedProfile \\|\\| careDataAllowed/,
+    /careDataAllowed/, /const includeCareData = explicitlyApprovedProfile \|\| careDataAllowed/,
     /Review before saving/, /Confirm & save/,
     /createCareReminder\(/, /createCareCommunication\(/,
     /requestId\.current \+= 1/, /type: "conversation-clear"/,
