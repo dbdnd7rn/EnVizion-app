@@ -9,11 +9,11 @@ const app = read("../App.tsx");
 const edge = read("../supabase/functions/care-team-admin/index.ts");
 
 test("family profile checks for new invitations while an account is already active", () => {
-  assert.match(profile, /function FamilyCareAccessPanel\(\)/);
+  assert.match(profile, /export function AccountCareAccessPanel\(\)/);
   assert.match(profile, /useFocusEffect\(useCallback\(/);
   assert.match(profile, /loadPendingCareInvitations\(\)/);
   assert.match(profile, /loadCareSpaces\(\)/);
-  assert.match(profile, /<FamilyCareAccessPanel \/>/);
+  assert.match(profile, /<AccountCareAccessPanel \/>/);
   assert.match(profile, /Pending invitations/);
   assert.match(profile, /Accept care invitation/);
   assert.match(profile, /Decline care invitation/);
