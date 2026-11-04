@@ -15,6 +15,7 @@ import {
   chatSearch, chatSend, chatSignalTyping, chatSubscribe, chatTypingStates, chatUnreadCount,
   mergeChatMessages, type ChatConversation, type ChatMessage, type ChatPerson, type ChatRead, type ChatTyping,
 } from "../careChat";
+import { chatResponseMatchesScope } from "../careChatHelpers";
 
 const PURPLE = "#70338F";
 const timeLabel = (value: string) => new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -74,6 +75,31 @@ export function CareTeamChatScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const lastVisibleMessageId = useRef<string | null>(null);
   const activeId = selected?.id ?? null;
+  const activeRecipientRef = useRef<string | null>(recipientId);
+  const activeConversationRef = useRef<string | null>(activeId);
+  // Keep request guards in sync even when an async request resolves between renders.
+  useEffect(() => { activeRecipientRef.current = recipientId; }, [recipientId]);
+  useEffect(() => { activeConversationRef.current = activeId; }, [activeId]);
+  const isCurrentRecipient = (id: string) =>
+    chatResponseMatchesScope(id, activeRecipientRef.current);
+  const isCurrentConversation = (id: string) =>
+    chatResponseMatchesScope(id, activeConversationRef.current);
+
+  function closeConversation() {
+    activeConversationRef.current = null;
+    setSelected(null);
+    setMessages([]); setReads([]); setTyping([]);
+    setSearchResults(null); setReplyTo(null); setEditing(null);
+    setDraft(""); nonceRef.current = null;
+  }
+
+  function switchCareProfile(id: string) {
+    activeRecipientRef.current = id;
+    closeConversation();
+    setRecipientId(id);
+    setPeople([]); setConversations([]); setUnread({});
+    setError("");
+  }
 
   const personName = useCallback((id: string) => people.find(p=>p.user_id===id)?.full_name?.trim() || (id===userId ? "You" : "Care teammate"), [people,userId]);
   const recipientName = spaces.find(p=>p.careRecipientId===recipientId)?.careRecipientName || state.careRecipientName || "Care profile";
@@ -90,9 +116,12 @@ export function CareTeamChatScreen() {
           const convo = await chatConversationById(route.params.conversationId);
           if (!mounted) return;
           if (!convo) { setError("This conversation is no longer available to your account."); return; }
+          activeRecipientRef.current = convo.care_recipient_id;
+          activeConversationRef.current = convo.id;
           setRecipientId(convo.care_recipient_id);
           setSelected(convo);
         } else if (!recipientId && list.length) {
+          activeRecipientRef.current = list[0].careRecipientId;
           setRecipientId(list[0].careRecipientId);
         }
       } catch {
@@ -106,6 +135,7 @@ export function CareTeamChatScreen() {
     try {
       const groupId = await chatOpen(id);
       const [roster, rooms] = await Promise.all([chatPeople(id),chatConversations(id)]);
+      if (!isCurrentRecipient(id)) return;
       // 'open' is idempotent and creates the shared group if this profile has no chat yet.
       if (!rooms.some(r=>r.id===groupId)) throw new Error("Group conversation unavailable");
       setPeople(roster);
@@ -116,11 +146,13 @@ export function CareTeamChatScreen() {
           const last = states.find(s=>s.user_id===userId)?.last_read_at ?? null;
           return [room.id, await chatUnreadCount(room.id,last,userId)] as const;
         }));
-        setUnread(Object.fromEntries(counts));
+        if (isCurrentRecipient(id)) setUnread(Object.fromEntries(counts));
       }
     } catch {
-      setError("You may no longer have access to this care team. Try refreshing.");
-      setPeople([]); setConversations([]);
+      if (isCurrentRecipient(id)) {
+        setError("You may no longer have access to this care team. Try refreshing.");
+        setPeople([]); setConversations([]); setUnread({});
+      }
     }
   }, [userId]);
 
@@ -142,26 +174,33 @@ export function CareTeamChatScreen() {
   const updateStatus = useCallback(async (id: string) => {
     try {
       const [nextReads,nextTyping] = await Promise.all([chatReadStates(id),chatTypingStates(id)]);
+      if (!isCurrentConversation(id)) return;
       setReads(nextReads); setTyping(nextTyping);
     } catch { /* Access is rechecked on the next authoritative message fetch. */ }
   }, []);
 
   const refreshMessages = useCallback(async (id: string, markRead: boolean) => {
+    if (!isCurrentConversation(id)) return;
     try {
       const latest = await chatPage(id);
+      if (!isCurrentConversation(id)) return;
       setMessages(current => mergeChatMessages(current,latest));
       if (markRead) await chatMarkRead(id);
+      if (!isCurrentConversation(id)) return;
       await updateStatus(id);
-      if (recipientId && userId) void loadRooms(recipientId);
+      if (recipientId && userId && isCurrentRecipient(recipientId))
+        void loadRooms(recipientId);
     } catch {
+      if (!isCurrentConversation(id)) return;
       setError("Your conversation may have changed permissions. Please reopen it.");
-      setSelected(null); setMessages([]);
+      closeConversation();
     }
   }, [recipientId,userId,loadRooms,updateStatus]);
 
   useEffect(() => {
     if (!activeId) { setMessages([]); setReads([]); setTyping([]); return; }
     let alive = true;
+    activeConversationRef.current = activeId;
     setLoadingMessages(true); setMessages([]); setSearch(""); setSearchResults(null);
     const load = async () => {
       try {
@@ -184,7 +223,10 @@ export function CareTeamChatScreen() {
     const foreground = AppState.addEventListener("change", status => {
       if (alive && status==="active") void refreshMessages(activeId,true);
     });
-    return () => { alive=false; unsubscribe(); foreground.remove(); clearInterval(heartbeat); };
+    return () => {
+      alive=false; unsubscribe(); foreground.remove(); clearInterval(heartbeat);
+      if (activeConversationRef.current === activeId) activeConversationRef.current = null;
+    };
   }, [activeId,refreshMessages,updateStatus]);
 
   useEffect(() => {
@@ -195,6 +237,7 @@ export function CareTeamChatScreen() {
 
   const openRoom = (room: ChatConversation) => {
     lastVisibleMessageId.current = null;
+    activeConversationRef.current = room.id;
     setError(""); setSelected(room); setDraft(""); setReplyTo(null); setEditing(null);
     setSearch(""); nonceRef.current=null;
     setUnread(prev=>({ ...prev,[room.id]:0 }));
@@ -206,10 +249,14 @@ export function CareTeamChatScreen() {
     try {
       const id=await chatOpen(recipientId,peerId);
       const rooms=await chatConversations(recipientId);
+      if (!isCurrentRecipient(recipientId)) return;
       setConversations(rooms);
       const room=rooms.find(c=>c.id===id);
       if (room) openRoom(room);
-    } catch { setError("That caregiver may no longer be authorized to chat."); }
+    } catch {
+      if (isCurrentRecipient(recipientId))
+        setError("That caregiver may no longer be authorized to chat.");
+    }
     finally { setBusy(false); }
   };
 
@@ -250,18 +297,28 @@ export function CareTeamChatScreen() {
 
   const searchHistory = async () => {
     if (!selected) return;
+    const roomId = selected.id;
+    const term = search.trim();
     setError("");
-    try { setSearchResults(search.trim() ? await chatSearch(selected.id,search) : null); }
-    catch { setError("Search is unavailable right now."); }
+    try {
+      const result = term ? await chatSearch(roomId,term) : null;
+      if (isCurrentConversation(roomId)) setSearchResults(result);
+    } catch {
+      if (isCurrentConversation(roomId)) setError("Search is unavailable right now.");
+    }
   };
   const loadEarlier = async () => {
     if (!selected || busy || !messages.length) return;
+    const roomId = selected.id;
     setBusy(true);
     try {
-      const older=await chatPage(selected.id,messages[0].created_at);
+      const older=await chatPage(roomId,messages[0].created_at);
+      if (!isCurrentConversation(roomId)) return;
       setHasEarlier(older.length===40);
       setMessages(current=>mergeChatMessages(older,current));
-    } catch { setError("Could not load earlier messages."); }
+    } catch {
+      if (isCurrentConversation(roomId)) setError("Could not load earlier messages.");
+    }
     finally { setBusy(false); }
   };
 
@@ -291,7 +348,7 @@ export function CareTeamChatScreen() {
     <KeyboardAvoidingView behavior={Platform.OS==="ios"?"padding":undefined} style={{flex:1}} keyboardVerticalOffset={Platform.OS==="ios"?10:0}>
       <View style={{flex:1,width:"100%",maxWidth:wide,alignSelf:"center"}}>
         <View style={{flexDirection:"row",alignItems:"center",gap:12,padding:16,paddingBottom:12}}>
-          {topButton("Back", "arrow-back-outline", () => selected ? setSelected(null) : nav.goBack())}
+          {topButton("Back", "arrow-back-outline", () => selected ? closeConversation() : nav.goBack())}
           <View style={{flex:1}}>
             <Text style={{color:palette.ink,fontSize:21,fontWeight:"700"}} numberOfLines={1}>
               {selected ? chatTitle : "Care Team Chat"}
@@ -300,7 +357,7 @@ export function CareTeamChatScreen() {
               {selected ? "Private space for authorized caregivers" : "Real people, shared care · Separate from the AI Assistant"}
             </Text>
           </View>
-          {selected ? topButton("Close conversation","close-outline",()=>setSelected(null)) : <View style={{width:36,height:36,borderRadius:18,backgroundColor:palette.panel,justifyContent:"center",alignItems:"center"}}><Icon name="chatbubbles-outline" color={palette.mine} size={19}/></View>}
+          {selected ? topButton("Close conversation","close-outline",closeConversation) : <View style={{width:36,height:36,borderRadius:18,backgroundColor:palette.panel,justifyContent:"center",alignItems:"center"}}><Icon name="chatbubbles-outline" color={palette.mine} size={19}/></View>}
         </View>
         {Boolean(error) && <Text accessibilityRole="alert" style={{marginHorizontal:16,marginBottom:8,color:dark?"#F3B7CA":"#A52D57",fontSize:13}}>{error}</Text>}
         {!selected ? <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{paddingHorizontal:16,paddingBottom:38,gap:16}}>
@@ -310,7 +367,7 @@ export function CareTeamChatScreen() {
           </View>
           {loading && <ActivityIndicator color={palette.mine}/>}
           {!!spaces.length && <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:8,paddingVertical:3}}>
-            {spaces.map(p=><Pressable key={p.careRecipientId} accessibilityRole="button" onPress={()=>{setRecipientId(p.careRecipientId);setSelected(null);setError("");}}
+            {spaces.map(p=><Pressable key={p.careRecipientId} accessibilityRole="button" onPress={()=>switchCareProfile(p.careRecipientId)}
               style={{paddingHorizontal:15,paddingVertical:10,borderRadius:18,backgroundColor:recipientId===p.careRecipientId?palette.mine:palette.card,borderWidth:1,borderColor:palette.border}}>
               <Text style={{color:recipientId===p.careRecipientId?palette.mineText:palette.ink,fontWeight:"600"}}>{p.careRecipientName}</Text>
             </Pressable>)}
