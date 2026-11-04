@@ -49,6 +49,7 @@ import {
 } from "../reminders";
 import { useCare } from "../store";
 import { DoctorVisitSchedulePicker } from "../components/DoctorVisitSchedulePicker";
+import { DoctorVisitMedicalTermExplainer } from "../components/DoctorVisitMedicalTermExplainer";
 import { doctorVisitSchedulingError } from "../doctorVisitDateTimeHelpers";
 import {
   Button,
@@ -1305,6 +1306,12 @@ export function DoctorVisitCompanionScreen() {
               />
             )}
           </Card>
+
+          <Section title="Understand medical terms · During or after the visit" />
+          <DoctorVisitMedicalTermExplainer
+            key={selected.visit.id}
+            visitId={selected.visit.id}
+          />
 
           <Section title="3 · Review the visit summary" />
           <Card>
