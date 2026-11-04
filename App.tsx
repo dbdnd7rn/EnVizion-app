@@ -131,33 +131,40 @@ function PatientTabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarHideOnKeyboard: true,
-        tabBarActiveTintColor: C.purple,
-        tabBarInactiveTintColor: dark ? "#B7A9C0" : "#80768D",
+        tabBarActiveTintColor: dark ? "#D5B1ED" : "#70338F",
+        tabBarInactiveTintColor: dark ? "#AAA0BA" : "#81758B",
         tabBarStyle: {
-          backgroundColor: dark ? "#282230" : "#FFFCFF",
-          borderTopColor: dark ? "#45384F" : "#F0E7F3",
-          borderTopWidth: 1, height: 80, paddingTop: 8, paddingBottom: 12,
+          backgroundColor: dark ? "#292231" : "#FFFDFF",
+          borderTopColor: dark ? "#43354F" : "#E9E0F0",
+          borderTopWidth: 1, height: 76, paddingTop: 7, paddingBottom: 11,
+          shadowColor: dark ? "#000000" : "#655079", shadowOpacity: 0.055,
+          shadowRadius: 14, shadowOffset: { width: 0, height: -4 }, elevation: 5,
         },
-        tabBarLabelStyle: { fontFamily: "DMSans_600SemiBold", fontSize: 10 },
-        tabBarIcon: ({ color, focused }) => <Icon
-          name={({
-            PatientHome: focused ? "home" : "home-outline",
-            PatientCare: focused ? "heart" : "heart-outline",
-            PatientTeam: focused ? "people" : "people-outline",
-            PatientAI: focused ? "sparkles" : "sparkles-outline",
-            PatientProfile: focused ? "person-circle" : "person-circle-outline",
-          } as Record<string, string>)[route.name] || "ellipse-outline"}
-          color={color} size={23}/>,
+        tabBarItemStyle: { paddingVertical: 1 },
+        tabBarLabelStyle: { fontFamily: "DMSans_600SemiBold", fontSize: 10.5, marginTop: 1 },
+        tabBarIcon: ({ color, focused }) => <View style={{
+          width: 40, height: 32, borderRadius: 17, justifyContent: "center", alignItems: "center",
+          backgroundColor: focused ? themeBackground("#F0E2F8") : "transparent",
+        }}>
+          <Icon
+            name={({
+              PatientHome: focused ? "home" : "home-outline",
+              PatientCare: focused ? "grid" : "grid-outline",
+              PatientTeam: focused ? "people" : "people-outline",
+              PatientAI: focused ? "sparkles" : "sparkles-outline",
+              PatientProfile: focused ? "person" : "person-outline",
+            } as Record<string, string>)[route.name] || "ellipse-outline"}
+            color={color} size={21}/>
+        </View>,
       })}>
       <Tab.Screen name="PatientHome" component={themedScreen(PatientHomeScreen)} options={{ tabBarLabel: "Home" }}/>
       <Tab.Screen name="PatientCare" component={themedScreen(PatientCareHubScreen)} options={{ tabBarLabel: "My Care" }}/>
       <Tab.Screen name="PatientTeam" component={themedScreen(PatientTeamScreen)} options={{ tabBarLabel: "Care Team" }}/>
-      <Tab.Screen name="PatientAI" component={themedScreen(EnVizionAIScreen)} options={{ tabBarLabel: "AI Companion" }}/>
+      <Tab.Screen name="PatientAI" component={themedScreen(EnVizionAIScreen)} options={{ tabBarLabel: "Assistant" }}/>
       <Tab.Screen name="PatientProfile" component={themedScreen(PatientProfileScreen)} options={{ tabBarLabel: "Profile" }}/>
     </Tab.Navigator>
   );
 }
-
 
 /** Same bottom navigation, fonts and theme as the main caregiver experience, with only family-authorized tools. */
 function FamilyTabs(){
