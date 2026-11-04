@@ -38,6 +38,12 @@ import {
   type DoctorVisitSummary,
 } from "../doctorVisits";
 import {
+  availableDoctorVisitSuggestions,
+  doctorVisitQuestionAlreadyAdded,
+  doctorVisitSpecialtyOptions,
+  resolveDoctorVisitSpecialty,
+} from "../doctorVisitQuestionSuggestions";
+import {
   localDateTimeToIso,
   reminderLocalParts,
 } from "../reminders";
@@ -225,6 +231,13 @@ export function DoctorVisitCompanionScreen() {
     [bundles, selectedId],
   );
 
+  const suggestedQuestions = useMemo(
+    () => selected
+      ? availableDoctorVisitSuggestions(selected.visit.specialty, selected.questions)
+      : [],
+    [selected],
+  );
+
   const activeSummary = useMemo<DoctorVisitSummary | null>(() => {
     if (!selected) return null;
     return (
@@ -300,6 +313,10 @@ export function DoctorVisitCompanionScreen() {
 
   async function addQuestion() {
     if (!selected || readOnly || busy || !newQuestion.trim()) return;
+    if (doctorVisitQuestionAlreadyAdded(newQuestion, selected.questions)) {
+      setMessage("This question is already on the visit checklist.");
+      return;
+    }
     setBusy("question");
     try {
       await addDoctorVisitQuestion({
@@ -734,6 +751,35 @@ export function DoctorVisitCompanionScreen() {
             onChange={setPhysicianName}
           />
           <Field label="Specialty (optional)" value={specialty} onChange={setSpecialty} />
+          <Txt style={S.small}>
+            Choose a specialty to get relevant pre-visit questions, or enter your own above.
+          </Txt>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
+            {doctorVisitSpecialtyOptions.map((option) => {
+              const active = specialty.trim().toLowerCase() === option.toLowerCase();
+              return (
+                <Pressable
+                  key={option}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Select ${option} specialty`}
+                  accessibilityState={{ selected: active }}
+                  onPress={() => setSpecialty(option)}
+                  style={{
+                    borderRadius: 20,
+                    borderWidth: 1,
+                    borderColor: active ? C.purple : themeBackground("#E5D9EC"),
+                    backgroundColor: themeBackground(active ? "#EEE2F7" : "#FAF7FC"),
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                  }}
+                >
+                  <Text style={[S.small, { color: themeForeground(C.purple) }]}>
+                    {option}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
           <Field
             label="Visit date (YYYY-MM-DD)"
             value={visitDate}
@@ -831,6 +877,65 @@ export function DoctorVisitCompanionScreen() {
               </View>
               <Icon name="clipboard-outline" size={27} color={C.purple} />
             </View>
+
+            {!readOnly && (
+              <View style={{ gap: 9, paddingVertical: 5 }}>
+                <Text style={S.h3}>
+                  Suggested questions · {resolveDoctorVisitSpecialty(selected.visit.specialty)}
+                </Text>
+                <Txt style={S.small}>
+                  From the EnVizion Life Professional Care Team caregiver guide.
+                  These are optional prompts, not medical instructions. Tap one
+                  to copy it into the editable question field below, then save it.
+                </Txt>
+                {suggestedQuestions.length ? (
+                  suggestedQuestions.map((suggestion) => {
+                    const chosen =
+                      newQuestion.trim() === suggestion.question &&
+                      questionCategory === suggestion.category;
+                    return (
+                      <Pressable
+                        key={suggestion.id}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Prepare question: ${suggestion.question}`}
+                        accessibilityHint="Copies the question into the editable field. It is not saved until Add question is selected."
+                        disabled={Boolean(busy)}
+                        accessibilityState={{ selected: chosen, disabled: Boolean(busy) }}
+                        onPress={() => {
+                          setNewQuestion(suggestion.question);
+                          setQuestionCategory(suggestion.category);
+                        }}
+                        style={{
+                          padding: 12,
+                          gap: 5,
+                          borderRadius: 15,
+                          borderWidth: 1,
+                          borderColor: chosen ? C.purple : themeBackground("#E8DDEC"),
+                          backgroundColor: themeBackground(chosen ? "#EFE5F8" : "#FAF7FC"),
+                        }}
+                      >
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+                          <Icon
+                            name={chosen ? "checkmark-circle" : "add-circle-outline"}
+                            size={18}
+                            color={C.purple}
+                          />
+                          <Text style={[S.small, { color: themeForeground(C.purple) }]}>
+                            {suggestion.category} · {chosen ? "Ready to edit" : "Use question"}
+                          </Text>
+                        </View>
+                        <Txt>{suggestion.question}</Txt>
+                      </Pressable>
+                    );
+                  })
+                ) : (
+                  <Txt style={S.small}>
+                    All suggested questions are already on this visit checklist.
+                    You can still add your own.
+                  </Txt>
+                )}
+              </View>
+            )}
 
             {!selected.questions.length && (
               <Txt>No questions added yet. Add the things you do not want to forget.</Txt>
