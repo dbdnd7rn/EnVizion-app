@@ -86,3 +86,14 @@ test("history queries apply care recipient filter and RLS rather than fake data"
   assert.match(progress,/customRangeBounds/);
   assert.match(progress,/hasMore/);
 });
+
+test("temperature unit save failures are visible and cannot masquerade as a saved preference", () => {
+  const progress = readFileSync(new URL("../src/screens/VitalsProgressScreen.tsx", import.meta.url), "utf8");
+  assert.match(progress, /await saveTemperaturePreference\(next\)/);
+  assert.match(progress, /setUnit\(previous\)/);
+  assert.match(progress, /accessibilityRole="alert"/);
+  assert.match(progress, /disabled=\{savingUnit\}/);
+  assert.doesNotMatch(progress, /saveTemperaturePreference\([^)]*\)\.catch\(\(\) => \{\}\)/);
+  assert.match(original, /setError\("Temperature unit changed for this entry/);
+  assert.doesNotMatch(original, /saveTemperaturePreference\([^)]*\)\.catch\(\(\) => \{\}\)/);
+});
