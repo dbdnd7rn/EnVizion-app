@@ -744,7 +744,7 @@ function SignedInNavigation({ reducedMotion }: { reducedMotion: boolean }) {
               <Stack.Screen name="PatientHealth" component={themedScreen(PatientHealthScreen)} options={{ title: "My Health" }}/>
               <Stack.Screen name="PatientHistory" component={themedScreen(PatientHistoryScreen)} options={{ title: "My Care History" }}/>
               <Stack.Screen name="CareTeamChat" component={themedScreen(CareTeamChatScreen)} options={{ headerShown: false }}/>
-              <Stack.Screen name="Assistant" component={themedScreen(EnVizionAIScreen)} options={{ title: "AI Care Companion" }}/>
+              <Stack.Screen name="Assistant" component={themedScreen(EnVizionAIScreen)} options={{ headerShown: false }}/>
               <Stack.Screen name="PrivacyData" component={themedScreen(PrivacyDataScreen)} options={{ title: "Privacy & care sharing" }}/>
               <Stack.Screen name="Accessibility" component={themedScreen(AccessibilityScreen)} options={{ title: "Accessibility & display" }}/>
               <Stack.Screen name="Notifications" component={themedScreen(NotificationsScreen)} options={{ title: "Notifications", headerShown: false }}/>

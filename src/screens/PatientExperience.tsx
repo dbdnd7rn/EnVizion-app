@@ -358,7 +358,6 @@ export function PatientDayScreen() {
   const completed = new Set(plan.completions.filter(c => c.completedOn === dayKey(new Date())).map(c => c.itemId));
   const done = today.filter(item => completed.has(item.id)).length;
   return <Page>
-    <PatientHeading eyebrow="TODAY" title="My day"/>
     {!plan.loading && !plan.error && Boolean(state.careRecipientId) && <PatientGlass tint="#E9DDF5" compact>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
         <View style={{ flex: 1, gap: 4 }}>
@@ -402,7 +401,6 @@ export function PatientMedicationsScreen() {
     return () => { active = false; };
   }, [state.careRecipientId]));
   return <Page>
-    <PatientHeading eyebrow="MY CARE" title="Medications"/>
     <PatientInfo icon="shield-checkmark-outline"
       text="Read only · Follow your clinician's directions."/>
     {!loading && !error && medications.length > 0 && <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
@@ -551,7 +549,6 @@ export function PatientAppointmentsScreen() {
     </PatientGlass>;
   };
   return <Page>
-    <PatientHeading eyebrow="MY CARE" title="Appointments"/>
     {!loading && !error && <View style={{ flexDirection: "row", gap: 9, flexWrap: "wrap" }}>
       <View style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 17,
         backgroundColor: themeBackground("#F0E7F7") }}>
@@ -601,7 +598,6 @@ export function PatientHealthScreen() {
   const glucose = trend("Blood sugar", "glucose");
   const systolic = trend("Vitals", "systolic");
   return <Page>
-    <PatientHeading eyebrow="MY CARE" title="My health"/>
     {glucose.length > 0 && <PatientGlass tint="#E8F5F0">
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Icon name="water-outline" size={20} color={themeForeground(PURPLE)}/>
@@ -770,7 +766,6 @@ export function PatientHistoryScreen() {
         title: visit.title, info: "Appointment (scheduled, not attendance-confirmed)" })),
   ].sort((a, b) => b.date.localeCompare(a.date)), [state.entries, state.medicationRecords, completions, visits]);
   return <Page>
-    <PatientHeading eyebrow="TIMELINE" title="Care history"/>
     {visitsLoading && <ActivityIndicator color={C.purple} accessibilityLabel="Loading appointment history"/>}
     {Boolean(visitsError) && <PatientEmpty icon="cloud-offline-outline"
       title="Some care history is unavailable" detail={visitsError}/>}
