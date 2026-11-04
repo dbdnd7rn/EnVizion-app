@@ -670,56 +670,66 @@ export function PatientTeamScreen() {
   const roleName = (member: CareTeamMember | undefined) => member?.role === "owner" ? "Primary Advocate"
     : member?.role === "caregiver" ? "Co-Caregiver" : member?.role === "patient" ? "Care Recipient" : "Care team member";
   return <Page>
-    <PatientHeading eyebrow="YOUR CARE CIRCLE" title="The people beside you"
-      subtitle="Members currently authorized to coordinate your care."/>
-    <PatientGlass tint="#E8DAF3">
-      <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
-        <View style={{ width: 49, height: 49, borderRadius: 17, alignItems: "center",
-          justifyContent: "center", backgroundColor: themeBackground("#EADCF5") }}>
-          <Icon name="chatbubbles-outline" size={24} color={themeForeground(PURPLE)}/>
-        </View>
-        <View style={{ flex: 1, gap: 3 }}>
-          <Text style={{ fontFamily: SEMI, fontSize: 15, color: themeForeground(INK) }}>Care Team Chat</Text>
-          <PatientText muted size={12.5}>Private conversation with your authorized caregivers.</PatientText>
+    <PatientHeading eyebrow="CONNECTED" title="Your people"/>
+    <Pressable accessibilityRole="button" accessibilityLabel="Open private Care Team Chat"
+      accessibilityHint="Talk with your authorized care team"
+      onPress={() => n.navigate("CareTeamChat", { careRecipientId: state.careRecipientId ?? undefined })}
+      style={({ pressed }) => ({
+        minHeight: 100, borderRadius: 24, padding: 17, borderWidth: 1,
+        borderColor: themeBorder("#DAC8EB"), backgroundColor: themeBackground("#EEE2F8"),
+        flexDirection: "row", alignItems: "center", gap: 13,
+        overflow: "hidden", opacity: pressed ? 0.75 : 1,
+      })}>
+      <Svg width={99} height={105} viewBox="0 0 99 105" pointerEvents="none"
+        style={{ position: "absolute", right: -14, top: -14, opacity: 0.7 }}>
+        <Circle cx={64} cy={37} r={47} fill={themeTint("#E4CDF3")}/>
+        <Circle cx={64} cy={37} r={30} stroke={themeTint("#BB94D6")} strokeWidth={2} fill="none"/>
+      </Svg>
+      <View style={{ width: 55, height: 55, borderRadius: 20,
+        backgroundColor: themeBackground("#E0C9F0"), alignItems: "center", justifyContent: "center" }}>
+        <Icon name="chatbubbles-outline" size={29} color={themeForeground(PURPLE)}/>
+      </View>
+      <View style={{ flex: 1, gap: 6 }}>
+        <Text style={{ fontFamily: SEMI, fontSize: 16, color: themeForeground(INK) }}>Team chat</Text>
+        <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+          <Icon name="lock-closed-outline" size={13} color={themeForeground(PURPLE)}/>
+          <Text style={{ fontFamily: FONT, fontSize: 12, color: themeForeground(MUTED) }}>Private</Text>
         </View>
       </View>
-      <Pressable accessibilityRole="button" accessibilityLabel="Open private care team chat"
-        onPress={() => n.navigate("CareTeamChat", { careRecipientId: state.careRecipientId ?? undefined })}
-        style={{ minHeight: 45, borderRadius: 18, backgroundColor: themeBackground(PURPLE),
-          flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}>
-        <Icon name="chatbubble-ellipses-outline" size={17} color={themeForeground("#FFFFFF")}/>
-        <Text style={{ fontFamily: SEMI, fontSize: 13, color: themeForeground("#FFFFFF") }}>Open private chat</Text>
-      </Pressable>
-    </PatientGlass>
-    <PatientHeading eyebrow="PEOPLE" title="Your care team"/>
+      <Icon name="arrow-forward-outline" size={21} color={themeForeground(PURPLE)}/>
+    </Pressable>
     {loading ? <ActivityIndicator color={C.purple} accessibilityLabel="Loading care team"/> : error ?
-      <PatientEmpty icon="cloud-offline-outline" title="Care team unavailable" detail={error}/> :
+      <PatientEmpty icon="cloud-offline-outline" title="Team unavailable" detail={error}/> :
       people.length ? people.map(person => {
         const member = roster.find(item => item.userId === person.user_id);
         return <PatientGlass key={person.user_id} compact tint="#EDE6F8">
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             {person.avatar_url ? <Image source={{ uri: person.avatar_url }}
               accessibilityLabel={"Profile photo of " + (person.full_name || "care team member")}
-              style={{ width: 48, height: 48, borderRadius: 24 }}/> :
-              <View style={{ width: 48, height: 48, borderRadius: 24,
-                justifyContent: "center", alignItems: "center", backgroundColor: themeBackground("#EEE2F7") }}>
+              style={{ width: 52, height: 52, borderRadius: 26 }}/> :
+              <View style={{ width: 52, height: 52, borderRadius: 26,
+                justifyContent: "center", alignItems: "center",
+                backgroundColor: themeBackground("#EEE2F7") }}>
                 <Text style={{ fontFamily: SEMI, color: themeForeground(PURPLE), fontSize: 19 }}>
                   {(person.full_name || "?")[0].toUpperCase()}
                 </Text>
               </View>}
-            <View style={{ flex: 1, gap: 4 }}>
+            <View style={{ flex: 1, gap: 5 }}>
               <Text style={{ fontFamily: SEMI, fontSize: 14.5, color: themeForeground(INK) }}>
                 {person.full_name || "Care team member"}
               </Text>
-              <PatientText muted size={12.5}>{roleName(member)}</PatientText>
+              <View style={{ alignSelf: "flex-start", paddingHorizontal: 9, paddingVertical: 5,
+                backgroundColor: themeBackground("#F1E7F8"), borderRadius: 12 }}>
+                <Text style={{ fontFamily: SEMI, fontSize: 11.5, color: themeForeground(PURPLE) }}>
+                  {roleName(member)}
+                </Text>
+              </View>
             </View>
             <Icon name="shield-checkmark-outline" size={19} color={themeForeground("#9470AD")}/>
           </View>
         </PatientGlass>;
       }) : <PatientEmpty icon="people-outline" title="Your care circle"
-        detail="Authorized care team members will appear when available."/>}
-    <PatientInfo icon="lock-closed-outline"
-      text="Care Team Chat is private to people with active permission for this care profile."/>
+        detail="Team members will appear when available."/>}
   </Page>;
 }
 export function PatientHistoryScreen() {
