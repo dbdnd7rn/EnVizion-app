@@ -57,6 +57,10 @@ test("consent gate does not silently open an enrolled pilot without documents an
   assert.match(source, /state\.missingRequiredTypes\.map/);
   assert.match(source, /AppState\.addEventListener\("change"/);
   assert.match(source, /if \(next === "active"\) void refresh\(\)/);
+  assert.match(source, /const serial = \+\+requestSerialRef\.current/);
+  assert.match(source, /if \(serial === requestSerialRef\.current\) setState\(next\)/);
+  assert.match(source, /if \(serial === requestSerialRef\.current\) setLoading\(false\)/);
+  assert.match(source, /requestSerialRef\.current \+= 1/);
   assert.match(source, /const document = state\.outstanding\[0\]/);
   assert.match(source, /await acceptProgramDocument\(document\.id\)/);
 });
