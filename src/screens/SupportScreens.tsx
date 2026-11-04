@@ -87,6 +87,39 @@ function invitationRolePresentation(role: CareInvitation["role"]) {
   };
 }
 
+
+function InvitationFamilyArtwork() {
+  return (
+    <Svg width={192} height={148} viewBox="0 0 220 160" accessible={false}>
+      <Defs>
+        <LinearGradient id="invitationFamilyGlow" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor={themeTint("#F6E9FF")} />
+          <Stop offset="1" stopColor={themeTint("#EED7FA")} />
+        </LinearGradient>
+        <LinearGradient id="invitationFamilyPurple" x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor={themeTint("#AE72CF")} />
+          <Stop offset="1" stopColor={themeTint("#70338F")} />
+        </LinearGradient>
+      </Defs>
+      <Path
+        d="M27 119C12 100 23 75 42 67C59 61 58 38 78 36C93 36 98 20 116 27C136 35 143 22 156 37C169 50 176 45 188 63C202 84 196 100 207 118C217 141 170 144 128 144H69C46 144 33 135 27 119Z"
+        fill="url(#invitationFamilyGlow)"
+      />
+      <Circle cx={57} cy={79} r={17} fill={themeTint("#AB6CCD")} />
+      <Circle cx={163} cy={79} r={17} fill={themeTint("#AC6CCF")} />
+      <Path d="M29 122C29 101 40 96 57 96S85 101 85 122V131H29Z" fill={themeTint("#A463C5")} />
+      <Path d="M135 122C135 101 146 96 163 96S191 101 191 122V131H135Z" fill={themeTint("#A463C5")} />
+      <Circle cx={110} cy={57} r={22} fill="url(#invitationFamilyPurple)" />
+      <Path d="M70 131V109C70 88 86 81 110 81S150 88 150 109V131Z" fill="url(#invitationFamilyPurple)" />
+      <Circle cx={110} cy={124} r={24} fill={themeTint("#FDF8FF")} />
+      <Path
+        d="M110 137L98 125C91 118 97 109 104 113L110 118L116 113C123 109 129 118 122 125Z"
+        fill={themeTint("#8138A0")}
+      />
+    </Svg>
+  );
+}
+
 export function OnboardingScreen() {
   const n = useNav();
   const { dispatch, refresh } = useCare();
@@ -288,191 +321,305 @@ export function OnboardingScreen() {
   if (pendingInvite) {
     const presentation = invitationRolePresentation(pendingInvite.role);
     const invitedAt = pendingInvite.invitedAt
-      ? new Date(pendingInvite.invitedAt).toLocaleDateString()
+      ? new Date(pendingInvite.invitedAt).toLocaleDateString("en-GB", {
+          day: "2-digit", month: "short", year: "numeric",
+        })
       : "";
+    const familyMember = pendingInvite.role === "viewer";
+    const permissionTitles = familyMember
+      ? ["View care updates", "See shared appointments & tasks", "Access shared documents"]
+      : presentation.permissions.map(([, label]) => label);
+    const permissionDetails = familyMember
+      ? [
+          "Stay informed on your loved one's care.",
+          "Keep track of important dates and activities.",
+          "View files and information shared with you.",
+        ]
+      : pendingInvite.role === "patient"
+        ? [
+            "See the information your care team shares with you.",
+            "Keep track of your care and appointments.",
+            "Find your shared documents and emergency details.",
+          ]
+        : [
+            "Keep important care records current.",
+            "Help your team organize the next steps.",
+            "Find visit summaries and shared files.",
+          ];
 
     return (
       <Page>
-        <View style={S.between}>
+        <View style={[S.between, { minHeight: 70 }]}>
           <Brand />
           <View
-            style={[
-              S.pill,
-              {
-                backgroundColor: themeBackground("#F1E8F5"),
-                paddingHorizontal: 12,
-                paddingVertical: 8,
-              },
-            ]}
+            accessibilityLabel="PRIVATE INVITATION"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+              borderRadius: 28,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              backgroundColor: themeBackground("#F3E5FA"),
+            }}
           >
-            <Icon name="lock-closed-outline" size={14} color={C.purple} />
-            <Text style={[S.small, { color: C.purple }]}>PRIVATE INVITATION</Text>
+            <Icon name="lock-closed-outline" size={17} color={C.purple} />
+            <Text style={{
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 12,
+              color: C.purple,
+            }}>
+              Private Invitation
+            </Text>
           </View>
         </View>
 
-        <Card
-          style={{
-            overflow: "hidden",
-            borderRadius: 30,
-            borderWidth: 0,
-            backgroundColor: C.deep,
-            padding: 22,
-            gap: 16,
-          }}
-        >
-          <View style={S.between}>
-            <View
-              style={{
-                width: 58,
-                height: 58,
-                borderRadius: 20,
-                backgroundColor: themeBackground("#FFFFFF18"),
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon name={presentation.icon} size={30} color={themeForeground("#F4DDFB")} />
-            </View>
-            <View
-              style={[
-                S.pill,
-                {
-                  backgroundColor: themeBackground("#FFFFFF14"),
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                },
-              ]}
-            >
-              <Text style={[S.small, { color: themeForeground("#F2E7F5") }]}>
-                {presentation.label}
+        <View style={{
+          position: "relative",
+          alignItems: "center",
+          gap: 3,
+          paddingTop: 4,
+          paddingBottom: 3,
+          overflow: "hidden",
+        }}>
+          <View style={{ position: "absolute", right: -30, top: 15, opacity: 0.7 }}>
+            <Svg width={125} height={104} viewBox="0 0 125 104" accessible={false}>
+              <Path d="M125 0V104H0C35 85 71 37 125 0Z" fill={themeTint("#F4E5FC")} />
+              <Path d="M125 44V104H50C79 89 97 65 125 44Z" fill={themeTint("#E7CCF4")} />
+            </Svg>
+          </View>
+          <InvitationFamilyArtwork />
+          <Text
+            accessibilityRole="header"
+            style={{
+              fontFamily: "DMSans_600SemiBold",
+              color: C.ink,
+              fontSize: 27,
+              lineHeight: 33,
+              letterSpacing: -0.6,
+              textAlign: "center",
+              marginTop: 1,
+            }}
+          >
+            You're invited to join
+          </Text>
+          <Text style={{
+            fontFamily: "DMSans_600SemiBold",
+            fontSize: 33,
+            lineHeight: 41,
+            color: C.purple,
+            letterSpacing: -0.7,
+            textAlign: "center",
+          }}>
+            EnVizion Life
+          </Text>
+          <Text style={{
+            fontFamily: "DMSans_400Regular",
+            fontSize: 14,
+            lineHeight: 22,
+            color: C.muted,
+            textAlign: "center",
+            marginTop: 8,
+            maxWidth: 340,
+          }}>
+            {pendingInvite.inviterName} has invited you as a {presentation.label} to be part
+            of the care team. Nothing is shared with you until you accept.
+          </Text>
+        </View>
+
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+          borderRadius: 22,
+          backgroundColor: themeBackground("#F4E7FB"),
+          paddingHorizontal: 14,
+          paddingVertical: 16,
+          gap: 8,
+        }}>
+          <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 9 }}>
+            <Icon name="person-outline" size={23} color={C.purple} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 12, color: C.ink }}>
+                INVITED BY
+              </Text>
+              <Text
+                numberOfLines={2}
+                style={{ fontFamily: "DMSans_400Regular", fontSize: 12, lineHeight: 17, color: C.ink }}
+              >
+                {pendingInvite.inviterName}
               </Text>
             </View>
           </View>
-
-          <View style={{ gap: 8 }}>
-            <Text style={[S.eyebrow, { color: themeForeground("#DCC8E3") }]}>
-              INVITED BY {pendingInvite.inviterName.toUpperCase()}
-            </Text>
-            <Text
-              style={[
-                S.h2,
-                {
-                  color: C.white,
-                  fontSize: 27,
-                  lineHeight: 33,
-                },
-              ]}
-            >
-              Join {pendingInvite.careRecipientName}’s care space.
-            </Text>
-            <Txt style={{ color: themeForeground("#E8DDEA"), fontSize: 14, lineHeight: 21 }}>
-              {pendingInvite.inviterName} invited you to EnVizion Life as a{" "}
-              {presentation.label}. Nothing is shared with you until you accept.
-            </Txt>
-          </View>
-
-          {(pendingInvite.relationship || invitedAt) && (
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                gap: 8,
-              }}
-            >
-              {Boolean(pendingInvite.relationship) && (
-                <View style={[S.pill, { backgroundColor: themeBackground("#FFFFFF12") }]}>
-                  <Icon name="heart-outline" size={14} color={themeForeground("#F0DEEF")} />
-                  <Text style={[S.small, { color: themeForeground("#F0DEEF") }]}>
-                    {pendingInvite.relationship}
+          {Boolean(invitedAt) && (
+            <>
+              <View style={{
+                width: 1, height: 39,
+                backgroundColor: themeBorder("#D8B6E9"),
+                marginHorizontal: 3,
+              }} />
+              <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 9 }}>
+                <Icon name="calendar-outline" size={22} color={C.purple} />
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{
+                    fontFamily: "DMSans_600SemiBold",
+                    fontSize: 12,
+                    color: C.ink,
+                  }}>
+                    Invitation date
+                  </Text>
+                  <Text
+                    numberOfLines={2}
+                    style={{ fontFamily: "DMSans_400Regular", fontSize: 12, lineHeight: 17, color: C.ink }}
+                  >
+                    {invitedAt}
                   </Text>
                 </View>
-              )}
-              {Boolean(invitedAt) && (
-                <View style={[S.pill, { backgroundColor: themeBackground("#FFFFFF12") }]}>
-                  <Icon name="calendar-outline" size={14} color={themeForeground("#F0DEEF")} />
-                  <Text style={[S.small, { color: themeForeground("#F0DEEF") }]}>
-                    Invited {invitedAt}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-        </Card>
-
-        <Heading
-          eyebrow="YOUR ACCESS"
-          title={"What " + presentation.label + " access means"}
-          body={presentation.summary}
-        />
-
-        <Card style={{ gap: 14 }}>
-          {presentation.permissions.map(([icon, label]) => (
-            <View
-              key={label}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 12,
-              }}
-            >
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 14,
-                  backgroundColor: themeBackground("#F4ECF8"),
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name={icon} size={20} color={C.purple} />
               </View>
-              <Text style={[S.body, { flex: 1 }]}>{label}</Text>
+            </>
+          )}
+        </View>
+
+        <View
+          accessibilityLabel={"What " + presentation.label + " access means"}
+          style={{
+            paddingHorizontal: 18,
+            paddingVertical: 20,
+            borderRadius: 27,
+            borderWidth: 1,
+            borderColor: themeBorder("#E5CDF2"),
+            backgroundColor: themeBackground("#FCF7FF"),
+            gap: 17,
+          }}
+        >
+          <Text style={{
+            fontFamily: "DMSans_600SemiBold",
+            fontSize: 20,
+            lineHeight: 26,
+            color: C.ink,
+            letterSpacing: -0.3,
+            marginBottom: 1,
+          }}>
+            As a {presentation.label}, you can:
+          </Text>
+          {presentation.permissions.map(([icon], index) => (
+            <View key={permissionTitles[index]} style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 13,
+            }}>
+              <View style={{
+                width: 48,
+                height: 48,
+                borderRadius: 15,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: themeBackground("#EEDCF8"),
+              }}>
+                <Icon name={icon} size={25} color={C.purple} />
+              </View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text style={{
+                  fontFamily: "DMSans_600SemiBold",
+                  fontSize: 14,
+                  lineHeight: 19,
+                  color: C.ink,
+                }}>
+                  {permissionTitles[index]}
+                </Text>
+                <Text style={{
+                  fontFamily: "DMSans_400Regular",
+                  fontSize: 12,
+                  lineHeight: 18,
+                  color: C.muted,
+                }}>
+                  {permissionDetails[index]}
+                </Text>
+              </View>
             </View>
           ))}
+          <Text style={{
+            marginTop: 1,
+            fontFamily: "DMSans_400Regular",
+            fontSize: 11,
+            lineHeight: 16,
+            color: C.muted,
+          }}>
+            {presentation.boundary}
+          </Text>
+        </View>
 
-          <View
-            style={{
-              marginTop: 2,
-              borderRadius: 16,
-              backgroundColor: themeBackground("#FBF7FC"),
-              padding: 13,
+        <View style={{ gap: 12, paddingTop: 1 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Accept Invitation"
+            accessibilityState={{ disabled: saving }}
+            disabled={saving}
+            onPress={() => void respondToInvite("accept")}
+            style={({ pressed }) => ({
+              minHeight: 58,
+              borderRadius: 29,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              gap: 11,
+              backgroundColor: themeAction("#7B3098"),
+              opacity: saving ? 0.55 : pressed ? 0.85 : 1,
+            })}
+          >
+            <Icon name="checkmark-circle-outline" size={23} color={themeForeground("#FFFFFF")} />
+            <Text style={{
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 16,
+              color: themeForeground("#FFFFFF"),
+            }}>
+              {saving ? "Accepting invitation…" : familyMember ? "Accept Invitation" : "Accept as " + presentation.label}
+            </Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Decline invitation"
+            accessibilityState={{ disabled: saving }}
+            disabled={saving}
+            onPress={() => void respondToInvite("decline")}
+            style={({ pressed }) => ({
+              minHeight: 58,
+              borderRadius: 29,
+              borderWidth: 1.5,
+              borderColor: themeBorder("#A14DBB"),
+              alignItems: "center",
+              justifyContent: "center",
               flexDirection: "row",
               gap: 10,
-            }}
+              backgroundColor: themeBackground("#FFFCFF"),
+              opacity: saving ? 0.55 : pressed ? 0.8 : 1,
+            })}
           >
-            <Icon name="information-circle-outline" size={20} color={C.purple} />
-            <Txt style={[S.small, { flex: 1 }]}>{presentation.boundary}</Txt>
-          </View>
-        </Card>
-
-        <Button
-          title={
-            saving
-              ? "Accepting invitation…"
-              : "Accept as " + presentation.label
-          }
-          disabled={saving}
-          icon="checkmark-circle-outline"
-          onPress={() => void respondToInvite("accept")}
-        />
-        <Button
-          title="Decline invitation"
-          secondary
-          disabled={saving}
-          onPress={() => void respondToInvite("decline")}
-        />
+            <Icon name="close-circle-outline" size={21} color={C.purple} />
+            <Text style={{
+              fontFamily: "DMSans_600SemiBold",
+              fontSize: 15,
+              color: C.purple,
+            }}>
+              Decline
+            </Text>
+          </Pressable>
+        </View>
 
         {Boolean(message) && (
           <Text accessibilityRole="alert" style={[S.body, { color: C.rose }]}>
             {message}
           </Text>
         )}
-
-        <Txt style={[S.small, { textAlign: "center" }]}>
-          You can review this invitation before joining. The Primary Advocate
-          controls care-team access and can later change or revoke it.
-        </Txt>
+        <Text style={{
+          fontFamily: "DMSans_400Regular",
+          fontSize: 11,
+          lineHeight: 17,
+          textAlign: "center",
+          color: C.muted,
+          marginTop: -6,
+        }}>
+          The Primary Advocate controls care-team access and can later change or revoke it.
+        </Text>
       </Page>
     );
   }
