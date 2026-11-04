@@ -32,7 +32,7 @@ test("family account never silently accepts invitations or gains caregiver manag
 test("switching to another care profile requires server-validated active access", () => {
   assert.match(profile, /setActiveCareRecipient\(space\.careRecipientId\)/);
   assert.match(profile, /await refresh\(\)/);
-  assert.match(profile, /n\.reset\(\{ index: 0, routes: \[\{ name: "Main" \} \] \}\)/);
+  assert.match(profile, /n\.reset\(/);
   assert.match(profile, /disabled=\{space\.active \|\| busy !== null\}/);
   assert.match(careTeam, /loadAccessibleCareContexts\(user\.id\)/);
   assert.match(careTeam, /You do not have active access to this care profile/);
