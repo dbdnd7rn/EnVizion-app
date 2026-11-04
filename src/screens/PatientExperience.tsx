@@ -492,6 +492,8 @@ export function PatientAppointmentsScreen() {
         if (!active) return;
         if (problem) setError(problem.message);
         else setItems((data ?? []) as PatientAppointment[]);
+      }).catch(reason => {
+        if (active) setError(reason instanceof Error ? reason.message : "Could not load appointments. Please try again.");
       }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [state.careRecipientId]));
