@@ -11,6 +11,7 @@ import {HomeJourneyArtwork} from "../components/HomeJourneyArtwork";
 import {HomeGlassOrb} from "../components/HomeGlassMotion";
 import {useNav} from "./MainScreens";
 import {loadFamilyCommunicationCenter,familyUpdateTypeLabels,type FamilyUpdate} from "../familyCommunication";
+import {loadApprovedFamilyReports,familyReportDateLabel,type FamilyCareReport,type FamilyReportPeriod} from "../familyReports";
 import {loadFamilyHelpOffers,offerFamilyHelp,practicalHelpLabels,practicalHelpTypes,type PracticalHelpType,type FamilyHelpOffer} from "../familyHelp";
 import {supabase} from "../supabase";
 
@@ -187,24 +188,130 @@ export function FamilyHomeScreen(){
   </Page>;
 }
 
+function FamilyReportCard({report}:{report:FamilyCareReport}){
+  const pending=Math.max(0,report.planned_count-report.completed_count);
+  const examples=Array.isArray(report.activities)?report.activities:[];
+  return <FamilyCard>
+    <View style={[S.between,{alignItems:"flex-start",gap:10}]}>
+      <View style={{flex:1,gap:5}}>
+        <Text style={[S.eyebrow,{fontSize:10,letterSpacing:1.5,
+          color:themeForeground(VIOLET)}]}>
+          {report.period==="daily"?"DAILY CARE":"WEEKLY SUMMARY"}
+        </Text>
+        <Text style={{fontFamily:"Lora_500Medium",fontSize:19.5,
+          lineHeight:27,color:themeForeground("#211838")}}>
+          {familyReportDateLabel(report.period,report.start_on)}
+        </Text>
+      </View>
+      <View style={{paddingHorizontal:10,paddingVertical:7,borderRadius:15,
+        backgroundColor:themeBackground("#EBF5EF")}}>
+        <Text style={{fontSize:11,fontFamily:SEMI,
+          color:themeForeground("#397651")}}>Shared</Text>
+      </View>
+    </View>
+    <View style={{flexDirection:"row",gap:10}}>
+      <View style={{flex:1,borderRadius:20,padding:13,
+        backgroundColor:themeBackground("#F2EAF9"),gap:4}}>
+        <Text style={[S.small,{fontSize:11}]}>Planned routines</Text>
+        <Text style={[S.h2,{fontSize:25}]}>{report.planned_count}</Text>
+      </View>
+      <View style={{flex:1,borderRadius:20,padding:13,
+        backgroundColor:themeBackground("#EDF7F2"),gap:4}}>
+        <Text style={[S.small,{fontSize:11}]}>Recorded done</Text>
+        <Text style={[S.h2,{fontSize:25}]}>{report.completed_count}</Text>
+      </View>
+    </View>
+    {report.planned_count>0&&<View style={{height:8,borderRadius:5,
+      overflow:"hidden",backgroundColor:themeBackground("#EADFF1")}}>
+      <View style={{height:8,width:`${Math.max(0,Math.min(100,
+        report.completed_count/report.planned_count*100))}%`,
+        backgroundColor:themeBackground("#9460B2"),borderRadius:5}}/>
+    </View>}
+    {Boolean(report.summary_note)&&
+      <View style={{gap:5,paddingVertical:5}}>
+        <Text style={[S.h3,{fontSize:14}]}>From the Primary Advocate</Text>
+        <Text style={[S.body,{fontSize:14,lineHeight:21}]}>{report.summary_note}</Text>
+      </View>}
+    {examples.length>0&&<View style={{gap:10}}>
+      <Text style={[S.h3,{fontSize:14}]}>Shared care activities</Text>
+      {examples.map((activity,i)=><View key={activity.date+activity.title+i}
+        style={{flexDirection:"row",alignItems:"flex-start",gap:10}}>
+        <Icon name={activity.completed?"checkmark-circle-outline":"ellipse-outline"}
+          size={19} color={activity.completed?themeForeground("#397651"):
+            themeForeground("#8C8496")}/>
+        <View style={{flex:1,gap:3}}>
+          <Text style={{fontFamily:TEXT,fontSize:13.5,lineHeight:19,
+            color:themeForeground("#25203D")}}>{activity.title}</Text>
+          <Text style={[S.small,{fontSize:11}]}>
+            {report.period==="weekly"?activity.date+" · ":""}
+            {activity.completed?"Completion recorded":"Not recorded as completed"}
+          </Text>
+        </View>
+      </View>)}
+      {report.planned_count>examples.length&&<Text style={S.small}>
+        This summary shows selected activity entries, not the entire care record.</Text>}
+    </View>}
+    {pending>0&&<Text style={[S.small,{lineHeight:18}]}>
+      {pending} planned {pending===1?"activity has":"activities have"} no completion recorded.
+      This does not necessarily mean care was missed.</Text>}
+    <Text style={[S.small,{lineHeight:18}]}>
+      Reviewed and shared by the Primary Advocate. Private clinical records are not included.
+    </Text>
+  </FamilyCard>;
+}
+
+type FamilyUpdatesTab="daily"|"weekly"|"caregiver";
 export function FamilyUpdatesScreen(){
-  const {state}=useCare(),[updates,setUpdates]=useState<FamilyUpdate[]>([]);
+  const {state}=useCare();
+  const [section,setSection]=useState<FamilyUpdatesTab>("daily");
+  const [updates,setUpdates]=useState<FamilyUpdate[]>([]);
+  const [reports,setReports]=useState<FamilyCareReport[]>([]);
   const [loading,setLoading]=useState(true),[error,setError]=useState("");
   useFocusEffect(useCallback(()=>{
-    let active=true;setLoading(true);setError("");setUpdates([]);
+    let active=true;setLoading(true);setError("");setUpdates([]);setReports([]);
     if(!state.careRecipientId){setLoading(false);return()=>{active=false;};}
-    void loadFamilyCommunicationCenter(state.careRecipientId)
-      .then(result=>{if(active)setUpdates(result.updates);})
-      .catch(e=>{if(active)setError(e instanceof Error?e.message:"Could not load approved updates.");})
+    void Promise.all([
+      loadFamilyCommunicationCenter(state.careRecipientId),
+      loadApprovedFamilyReports(state.careRecipientId),
+    ]).then(([center,shared])=>{
+      if(active){setUpdates(center.updates);setReports(shared);}
+    }).catch(e=>{if(active)setError(e instanceof Error?e.message:"Could not load family care summaries.");})
       .finally(()=>{if(active)setLoading(false);});
     return()=>{active=false;};
   },[state.careRecipientId]));
+  const selectedReports=reports.filter(x=>x.period===section);
   return <Page>
-    <FamilyHeading eyebrow="FAMILY COMMUNICATION" title="Care updates, made clear."
-      description="Only updates shared by your authorized care team appear here."/>
-    {loading||error||!updates.length?<FamilyStatus loading={loading} error={error}
-      empty="No care updates have been shared with you yet."/>:
-      updates.map(update=><FamilyUpdateCard key={update.id} update={update}/>)}
+    <FamilyHeading eyebrow="FAMILY CARE OVERVIEW" title="Stay close to their care."
+      description="Daily routines, weekly progress, and messages approved for family sharing."/>
+    <View style={{flexDirection:"row",gap:7}}>
+      {([
+        ["daily","Daily Care"],["weekly","Weekly Summary"],["caregiver","Caregiver Updates"],
+      ] as const).map(([key,label])=><Pressable key={key}
+        accessibilityRole="button" accessibilityState={{selected:section===key}}
+        onPress={()=>setSection(key)} style={{flex:1,minHeight:55,borderRadius:18,
+          backgroundColor:themeBackground(section===key?"#E8D8F4":"#FCF9FD"),
+          borderWidth:1,borderColor:themeBorder(section===key?"#CDADE3":"#E8E0EC"),
+          alignItems:"center",justifyContent:"center",paddingHorizontal:7}}>
+        <Text style={{fontFamily:SEMI,fontSize:11.5,lineHeight:17,textAlign:"center",
+          color:themeForeground(section===key?"#67348B":"#797183")}}>{label}</Text>
+      </Pressable>)}
+    </View>
+    {section!=="caregiver"&&<Text style={[S.small,{lineHeight:19}]}>
+      These are approved snapshots of everyday care routines. Medication,
+      monitoring, vitals, and private clinical notes are not included.
+      Reports appear after the Primary Advocate reviews and shares them.
+    </Text>}
+    {loading||error?<FamilyStatus loading={loading} error={error}
+      empty="No shared summaries yet."/>:
+      section==="caregiver"?
+        updates.length?updates.map(update=><FamilyUpdateCard key={update.id} update={update}/>):
+          <FamilyStatus loading={false} error="" empty="No caregiver updates have been shared yet."/>:
+        selectedReports.length?selectedReports.map(report=>
+          <FamilyReportCard key={report.id} report={report}/>):
+          <FamilyStatus loading={false} error=""
+            empty={section==="daily"?
+              "No daily care summaries have been approved yet.":
+              "No weekly care summaries have been approved yet."}/>}
   </Page>;
 }
 type SharedAppointment={
