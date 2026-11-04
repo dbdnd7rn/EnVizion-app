@@ -426,12 +426,7 @@ export async function loadAccessibleCareContexts(
 ): Promise<AccessibleCareContext[]> {
   const [recipientsResult, directMembershipResult, groupMembershipResult] =
     await Promise.all([
-      supabase
-        .from("care_recipients")
-        .select(
-          "id, display_name, relationship, owner_id, care_group_id, created_at",
-        )
-        .order("created_at", { ascending: true }),
+      supabase.rpc("care_accessible_profile_cards"),
       supabase
         .from("care_recipient_members")
         .select("care_recipient_id, role")
@@ -470,7 +465,7 @@ export async function loadAccessibleCareContexts(
         ? (groupById.get(recipient.care_group_id) ?? null)
         : null;
       const role: CareRole | null =
-        recipient.owner_id === userId
+        recipient.is_owner
           ? "owner"
           : strongerCareRole(directRole, groupRole);
 
