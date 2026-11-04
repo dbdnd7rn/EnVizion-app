@@ -327,13 +327,14 @@ export function OnboardingScreen() {
       : "";
     const familyMember = pendingInvite.role === "viewer";
     const permissionTitles = familyMember
-      ? ["View care updates", "See shared appointments & tasks", "Access shared documents"]
+      ? ["View approved care updates", "Join authorized Care Team Chat", "See shared appointments", "Offer practical help"]
       : presentation.permissions.map(([, label]) => label);
     const permissionDetails = familyMember
       ? [
-          "Stay informed on your loved one's care.",
-          "Keep track of important dates and activities.",
-          "View files and information shared with you.",
+          "See daily and weekly reports approved by the Primary Advocate.",
+          "Talk privately with your authorized care team.",
+          "See only appointments caregivers explicitly share.",
+          "Volunteer for transport, groceries or other everyday support.",
         ]
       : pendingInvite.role === "patient"
         ? [

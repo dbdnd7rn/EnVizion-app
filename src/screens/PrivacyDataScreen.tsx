@@ -326,13 +326,20 @@ export function PrivacyDataScreen() {
           Care sharing is controlled per care profile. Owners can invite,
           change roles, revoke access and review the sharing history.
         </Txt>
-        <Button
-          title="Review care team & sharing"
-          secondary
-          icon="people-outline"
-          disabled={!hasCareProfile}
-          onPress={() => n.navigate("CareTeam")}
-        />
+        {(state.accessRole === "owner" || state.accessRole === "caregiver") ? (
+          <Button
+            title="Review care team & sharing"
+            secondary
+            icon="people-outline"
+            disabled={!hasCareProfile}
+            onPress={() => n.navigate("CareTeam")}
+          />
+        ) : (
+          <Txt style={S.small}>
+            Your Primary Advocate manages care-team access.
+            Family Members can view approved information, not change sharing permissions.
+          </Txt>
+        )}
       </Card>
 
       <Card style={{ backgroundColor: C.lavender }}>

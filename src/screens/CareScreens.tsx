@@ -35,6 +35,7 @@ import { useNav } from "./MainScreens";
 import { printResource } from "../printing";
 import { medicationLines } from "../medications";
 import { addAppointmentToDeviceCalendar } from "../deviceCalendar";
+import { supabase } from "../supabase";
 import {
   addAppointmentQuestion,
   correctMedicationDose,
@@ -3062,8 +3063,48 @@ export function AppointmentScreen() {
   const [draft, setDraft] = useState(state.appointment);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [sharedWithFamily, setSharedWithFamily] = useState(false);
+  const [sharingBusy, setSharingBusy] = useState(false);
   const readOnly =
     state.accessRole === "viewer" || state.accessRole === "patient";
+
+  useEffect(() => {
+    let active = true;
+    setSharedWithFamily(false);
+    if (!state.appointmentId || !state.careRecipientId) return () => { active = false; };
+    void supabase.from("appointments").select("shared_with_family")
+      .eq("id", state.appointmentId)
+      .eq("care_recipient_id", state.careRecipientId).maybeSingle()
+      .then(({data,error}) => {
+        if (!active) return;
+        if (error) setMessage("Could not load family sharing status.");
+        else setSharedWithFamily(Boolean(data?.shared_with_family));
+      });
+    return () => { active = false; };
+  }, [state.appointmentId, state.careRecipientId]);
+
+  async function toggleFamilySharing() {
+    if (readOnly || saving || sharingBusy || !state.appointmentId || !state.careRecipientId) return;
+    setSharingBusy(true);
+    setMessage("");
+    const next = !sharedWithFamily;
+    try {
+      const { data, error } = await supabase.from("appointments")
+        .update({shared_with_family:next})
+        .eq("id", state.appointmentId)
+        .eq("care_recipient_id", state.careRecipientId)
+        .select("shared_with_family").single();
+      if (error) throw error;
+      setSharedWithFamily(Boolean(data.shared_with_family));
+      setMessage(next
+        ? "This visit's title, date, time and location are now shared with family."
+        : "This visit is no longer shared with family.");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "Could not change family sharing.");
+    } finally {
+      setSharingBusy(false);
+    }
+  }
 
   async function saveVisit() {
     const appointment = {
@@ -3157,6 +3198,24 @@ export function AppointmentScreen() {
             }
           }}
         />
+        {!readOnly && (
+          <View style={{gap:8}}>
+            <Button
+              title={sharingBusy
+                ? "Updating family sharing…"
+                : sharedWithFamily ? "Stop sharing this visit with family" : "Share visit details with family"}
+              secondary
+              icon={sharedWithFamily ? "eye-off-outline" : "people-outline"}
+              disabled={saving || sharingBusy || !state.appointmentId}
+              onPress={() => void toggleFamilySharing()}
+            />
+            <Text style={S.small}>
+              Only this visit's title, date, time and location can be seen by invited family members.
+              Preparation notes and private questions are never shared.
+              {!state.appointmentId ? " Save your visit details first." : ""}
+            </Text>
+          </View>
+        )}
       </Card>
 
       {editing && (
