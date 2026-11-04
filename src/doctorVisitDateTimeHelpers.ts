@@ -1,5 +1,5 @@
 /** Cross-platform calendar and time helpers for doctor visit scheduling. */
-import { localDateTimeToIso } from "./reminderHelpers";
+import { localDateTimeToIso } from "./reminderHelpers.ts";
 
 export function parseDoctorVisitDate(value: string): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
