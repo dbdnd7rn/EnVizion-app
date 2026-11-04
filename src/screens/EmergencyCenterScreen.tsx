@@ -515,7 +515,7 @@ export function EmergencyCenterScreen() {
     if (loadedScope === activeScope && activeScope && data.profile && careRecipientId) {
       return buildEmergencyOfflineSummary(careRecipientId, data);
     }
-    return offlineScope === activeScope && activeScope &&
+    return loadedScope !== activeScope && offlineScope === activeScope && activeScope &&
       offlineSummary?.careRecipientId === careRecipientId ? offlineSummary : null;
   }, [activeScope, loadedScope, offlineScope, careRecipientId, data, offlineSummary]);
   const showingOfflineSnapshot = !data.profile && criticalSummary !== null;
@@ -541,11 +541,13 @@ export function EmergencyCenterScreen() {
         ).toLocaleString()}.`,
       );
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not create the temporary emergency link.",
-      );
+      if (currentScopeRef.current === requestedScope) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "We could not create the temporary emergency link.",
+        );
+      }
     } finally {
       setBusy(false);
     }
