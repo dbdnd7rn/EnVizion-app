@@ -171,7 +171,9 @@ export function PilotAdminScreen() {
   }, [refresh]);
 
   const currentDocuments = useMemo(
-    () => documents.filter((item) => item.status === "published"),
+    () => documents.filter((item) =>
+      item.status === "published" &&
+      (!item.effectiveAt || Date.parse(item.effectiveAt) <= Date.now())),
     [documents],
   );
 
@@ -192,8 +194,9 @@ export function PilotAdminScreen() {
         pilot: summary,
         operations,
         publishedRequiredDocuments: currentDocuments.length,
+        publishedRequiredDocumentTypes: currentDocuments.map((item) => item.documentType),
       }),
-    [currentDocuments.length, operations, summary],
+    [currentDocuments, operations, summary],
   );
 
   async function run(
@@ -709,8 +712,10 @@ export function PilotAdminScreen() {
       {!documents.length ? (
         <AdminGlassCard>
           <Txt>
-            No program documents exist yet. Caregivers are not blocked by a
-            consent gate until an administrator publishes a document.
+            No required pilot documents exist yet. Invited or active pilot
+            participants are blocked from entering the pilot workspace until
+            all three current documents are published and accepted. Non-pilot
+            accounts retain ordinary app access.
           </Txt>
         </AdminGlassCard>
       ) : (

@@ -1,7 +1,9 @@
 import type {
   PilotOperationsSummary,
   PilotSummary,
+  ProgramDocumentType,
 } from "./pilot";
+import { missingPilotDocumentTypes, pilotDocumentLabels, requiredPilotDocumentTypes } from "./pilotConsentSafety.ts";
 
 export type LaunchReadinessLevel = "ready" | "attention" | "blocked";
 
@@ -14,6 +16,7 @@ export function launchReadiness(input: {
   pilot: PilotSummary | null;
   operations: PilotOperationsSummary | null;
   publishedRequiredDocuments: number;
+  publishedRequiredDocumentTypes?: readonly ProgramDocumentType[];
 }) : LaunchReadinessResult {
   const issues: string[] = [];
 
@@ -31,8 +34,24 @@ export function launchReadiness(input: {
     };
   }
 
-  if (input.publishedRequiredDocuments === 0) {
-    issues.push("No required participation documents are published");
+  const missingDocuments = input.publishedRequiredDocumentTypes
+    ? missingPilotDocumentTypes(input.publishedRequiredDocumentTypes)
+    : null;
+  const missingRequiredDocuments = missingDocuments !== null
+    ? missingDocuments.length > 0
+    : input.publishedRequiredDocuments < requiredPilotDocumentTypes.length;
+
+  if (missingDocuments?.length) {
+    issues.push(
+      "Required participation documents are not all published: " +
+      missingDocuments.map((type) => pilotDocumentLabels[type]).join(", "),
+    );
+  } else if (missingRequiredDocuments) {
+    issues.push("No complete set of required participation documents is published");
+  }
+
+  if (input.pilot.activePilot === 0) {
+    issues.push("No active pilot participants have been enrolled and validated");
   }
 
   if (
@@ -67,6 +86,7 @@ export function launchReadiness(input: {
   }
 
   const hardBlock =
+    missingRequiredDocuments ||
     input.operations.failedPacketExports24h > 0 ||
     (
       input.pilot.activePilot > 0 &&
