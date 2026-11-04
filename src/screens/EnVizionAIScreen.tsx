@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import { useCare } from "../store";
 import { makeMessage } from "../assistant/model";
+import { profileRequestGate } from "../assistant/profileRequestGate";
 import {
   askCareAI, validateAssistantDraft,
   type AssistantDraft, type AssistantHistory,
@@ -89,6 +90,8 @@ export function EnVizionAIScreen() {
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [draftText, setDraftText] = useState("");
   const [careDataAllowed, setCareDataAllowed] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [profilePrompt, setProfilePrompt] = useState<string | null>(null);
   const [naturalConversation, setNaturalConversation] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -96,6 +99,8 @@ export function EnVizionAIScreen() {
   const [pending, setPending] = useState<AssistantDraft | null>(null);
   const previousProfile = useRef(state.careRecipientId);
   const requestId = useRef(0);
+  const sendingRef = useRef(false);
+  const lastBlockedRequestRef = useRef<string | null>(null);
   const firstName = state.name.trim().split(/\s+/)[0] || "there";
   const canEdit = (state.accessRole === "owner" || state.accessRole === "caregiver") &&
     Boolean(state.careRecipientId);
@@ -131,19 +136,48 @@ export function EnVizionAIScreen() {
     dispatch({ type: "conversation-clear" });
     setPending(null);
     setCareDataAllowed(false);
+    setProfilePrompt(null);
+    lastBlockedRequestRef.current = null;
     setProblem("");
     setBusy(false);
   }, [dispatch, state.careRecipientId]);
 
-  const send = useCallback(async (message: string, retry = false) => {
+  const send = useCallback(async (message: string, retry = false, explicitlyApprovedProfile = false) => {
     const value = message.trim().slice(0, 1800);
-    if (!value || busy) return;
+    // The ref locks synchronously, so double-clicks before React re-renders cannot send twice.
+    if (!value || busy || sendingRef.current) return;
+    const includeCareData = explicitlyApprovedProfile || careDataAllowed;
+    const gate = profileRequestGate(value, { careRecipientId: state.careRecipientId, includeCareData });
+    if (gate !== "ready") {
+      // The same blocked shortcut must not generate another pair of chat bubbles.
+      const blockedKey = `${state.careRecipientId ?? "none"}:${gate}:${value.toLowerCase()}`;
+      if (lastBlockedRequestRef.current === blockedKey ||
+          (profilePrompt === value && messages.at(-1)?.role === "assistant")) return;
+      lastBlockedRequestRef.current = blockedKey;
+      const reply = gate === "select-profile"
+        ? "Choose a care profile first. I can only show records from a profile you are authorized to view."
+        : "Care profile access is off. Choose ‘Use profile and continue’ to answer from your authorized records. " +
+          (naturalConversation
+            ? "Natural chat is ON, so the requested summary may also be sent to the external AI provider."
+            : "Natural chat is OFF, so this uses the private toolkit service only.");
+      if (!retry) dispatch({ type: "conversation-turn", messages: [makeMessage("user", value)] });
+      dispatch({ type: "conversation-turn", messages: [makeMessage("assistant", reply)] });
+      setProfilePrompt(gate === "enable-profile" ? value : null);
+      setDraftText("");
+      setProblem("");
+      return;
+    }
+    sendingRef.current = true;
+    lastBlockedRequestRef.current = null;
+    setProfilePrompt(null);
     setProblem("");
     // Typing confirmation never saves, and leaves the editable draft available.
     const keepDraft = Boolean(pending) && /^(?:yes|ok(?:ay)?|confirm|save(?: it)?)[.!\s]*$/i.test(value);
     if (!keepDraft) setPending(null);
     const id = ++requestId.current;
-    const priorMessages = retry && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages;
+    // A new consent scope must NEVER inherit messages collected before permission was granted.
+    const priorMessages = explicitlyApprovedProfile ? [] :
+      retry && messages.at(-1)?.role === "user" ? messages.slice(0, -1) : messages;
     const history: AssistantHistory[] = priorMessages.slice(-12)
       .filter(m => m.role === "user" || m.role === "assistant")
       .map(m => ({ role: m.role as "user" | "assistant", content: m.text }));
@@ -154,7 +188,7 @@ export function EnVizionAIScreen() {
       const response = await askCareAI({
         message: value, history,
         careRecipientId: state.careRecipientId,
-        includeCareData: careDataAllowed, naturalConversation,
+        includeCareData, naturalConversation,
       });
       if (id !== requestId.current) return;
       dispatch({ type: "conversation-turn", messages: [{ ...makeMessage("assistant", response.reply), resource: response.resource, trends: response.trends, suggestions: response.suggestions }] });
@@ -163,9 +197,10 @@ export function EnVizionAIScreen() {
       if (id !== requestId.current) return;
       setProblem(error instanceof Error ? error.message : "The assistant couldn't answer. Please try again.");
     } finally {
+      sendingRef.current = false;
       if (id === requestId.current) setBusy(false);
     }
-  }, [busy, careDataAllowed, naturalConversation, dispatch, messages, pending, state.careRecipientId]);
+  }, [busy, careDataAllowed, naturalConversation, dispatch, messages, pending, profilePrompt, state.careRecipientId]);
 
   const editPending = (changes: Partial<Record<string,string>>) => {
     if (!pending) return;
@@ -240,7 +275,7 @@ export function EnVizionAIScreen() {
           disabled={busy||saving} onPress={() => {
             requestId.current += 1;
             dispatch({ type: "conversation-clear" });
-            setPending(null); setProblem("");
+            setPending(null); setProfilePrompt(null); lastBlockedRequestRef.current = null; setProblem("");
           }} style={{
             width: 44, height: 44, borderRadius: 22, backgroundColor: themeBackground("#F5EBFB"),
             alignItems: "center", justifyContent: "center",
@@ -253,16 +288,6 @@ export function EnVizionAIScreen() {
         keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive"
         onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
         contentContainerStyle={{ paddingHorizontal: 17, paddingVertical: 16, gap: 13 }}>
-        {Boolean(messages.length) && (
-          <View style={[glass(), { paddingHorizontal: 18, paddingVertical: 8, flexDirection: "row", alignItems: "center", gap: 10 }]}>
-            <AIAtmosphere variant="corner"/>
-            <View style={{ flex: 1, gap: 4 }}>
-              <Text style={{ fontFamily: "Lora_500Medium", fontSize: 21, color: themeForeground(INK) }}>A little support, anytime.</Text>
-              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 12, color: themeForeground(MUTED) }}>{naturalConversation ? "Natural conversation · Opted in" : "Private built-in toolkit guidance"}</Text>
-            </View>
-            <AIGlassOrb reducedMotion={reducedMotion} compact/>
-          </View>
-        )}
         {!messages.length && (
           <View style={[glass(), { backgroundColor: themeBackground("#F8F0FCEC"), padding: 22, gap: 15 }]}>
             <AIAtmosphere/>
@@ -297,8 +322,21 @@ export function EnVizionAIScreen() {
           </View>
         )}
 
-        <View style={[glass(), { padding: 17, gap: 12, backgroundColor: themeBackground("#FBF7FDEB") }]}>
-          <AIAtmosphere variant="corner"/>
+        <View style={[glass(), { padding: settingsOpen ? 17 : 12, gap: settingsOpen ? 12 : 0, backgroundColor: themeBackground("#FBF7FDEB") }]}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Privacy and AI settings"
+            accessibilityState={{ expanded: settingsOpen }}
+            onPress={() => setSettingsOpen(v => !v)}
+            style={{ flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44 }}>
+            <Icon name="shield-checkmark-outline" color={themeForeground(PURPLE)} size={21}/>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ fontFamily: "DMSans_600SemiBold", fontSize: 13, color: themeForeground(INK) }}>Privacy & AI settings</Text>
+              <Text style={{ fontFamily: "DMSans_400Regular", fontSize: 11, color: themeForeground(MUTED) }}>
+                Care profile: {careDataAllowed ? "On" : "Off"} · Natural chat: {naturalConversation ? "On" : "Off"}
+              </Text>
+            </View>
+            <Icon name={settingsOpen ? "chevron-up-outline" : "chevron-down-outline"} color={themeForeground(PURPLE)} size={20}/>
+          </Pressable>
+          {settingsOpen && (<>
           <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
             <AIIconBubble><Icon name="sparkles-outline" color={themeForeground(PURPLE)} size={22}/></AIIconBubble>
             <View style={{ flex: 1, gap: 3 }}>
@@ -307,12 +345,15 @@ export function EnVizionAIScreen() {
                 {naturalConversation ? "AI-powered replies and follow-up discussions" : "Turn on for thoughtful, free-form AI chat"}
               </Text>
             </View>
+            <Text style={{ color: themeForeground(naturalConversation ? "#70338F" : MUTED), fontFamily: "DMSans_600SemiBold", fontSize: 11 }}>{naturalConversation ? "ON" : "OFF"}</Text>
             <Switch value={naturalConversation} accessibilityLabel="Allow sending messages to an external AI provider for natural conversation"
               onValueChange={v => {
                 requestId.current += 1;
                 setBusy(false);
                 dispatch({ type: "conversation-clear" });
                 setNaturalConversation(v);
+                setProfilePrompt(null);
+                lastBlockedRequestRef.current = null;
                 setPending(null);
                 setProblem("");
               }}
@@ -336,6 +377,7 @@ export function EnVizionAIScreen() {
                   : "Select a care profile first"}
               </Text>
             </View>
+            <Text style={{ color: themeForeground(careDataAllowed ? "#70338F" : MUTED), fontFamily: "DMSans_600SemiBold", fontSize: 11 }}>{careDataAllowed ? "ON" : "OFF"}</Text>
             <Switch value={careDataAllowed}
               disabled={!state.careRecipientId || busy}
               accessibilityLabel="Share authorized care profile data with the AI for this conversation"
@@ -346,6 +388,8 @@ export function EnVizionAIScreen() {
                 setBusy(false);
                 dispatch({ type: "conversation-clear" });
                 setCareDataAllowed(v);
+                setProfilePrompt(null);
+                lastBlockedRequestRef.current = null;
                 setPending(null);
                 setProblem("");
               }}
@@ -357,6 +401,7 @@ export function EnVizionAIScreen() {
             requested care summaries may also be sent to the external AI provider. Switching modes clears this
             conversation. Nothing is saved to care records without your confirmation.
           </Text>
+          </>)}
         </View>
 
         {messages.map(item => (
@@ -383,6 +428,21 @@ export function EnVizionAIScreen() {
               <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
                 {item.suggestions.map(suggestion => <ActionButton key={suggestion} title={suggestion} secondary onPress={()=>void send(suggestion)}/>)}
               </View>
+            )}
+            {item.role === "assistant" && item.id === messages.at(-1)?.id && profilePrompt && state.careRecipientId && (
+              <ActionButton title="Use profile and continue" icon="shield-checkmark-outline" secondary disabled={busy}
+                onPress={() => {
+                  if (sendingRef.current || !state.careRecipientId || !profilePrompt) return;
+                  const question = profilePrompt;
+                  // Explicit one-tap consent, followed by a fresh request with empty history.
+                  requestId.current += 1;
+                  dispatch({ type: "conversation-clear" });
+                  setCareDataAllowed(true);
+                  setProfilePrompt(null);
+                  setSettingsOpen(false);
+                  setPending(null);
+                  void send(question, false, true);
+                }}/>
             )}
             {item.role === "assistant" && item.resource && (
               <ActionButton title={item.resource.label} icon="arrow-forward-outline" secondary
