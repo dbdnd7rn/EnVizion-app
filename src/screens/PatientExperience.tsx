@@ -102,23 +102,31 @@ function PatientAction({ icon, title, detail, onPress, accent = "#F2E8FA" }: {
   </Pressable>;
 }
 function PatientTile({ icon, title, detail, onPress, accent = "#F2E8FA" }: {
-  icon: string; title: string; detail: string; onPress: () => void; accent?: string;
+  icon: string; title: string; detail?: string; onPress: () => void; accent?: string;
 }) {
   return <Pressable accessibilityRole="button" accessibilityLabel={title}
-    accessibilityHint={detail} onPress={onPress}
+    accessibilityHint={detail || "Open " + title} onPress={onPress}
     style={({ pressed }) => ({
-      flexBasis: "46%", flexGrow: 1, minWidth: 130, minHeight: 142,
-      borderRadius: 23, padding: 15, gap: 9, borderWidth: 1,
-      borderColor: themeBorder("#E9DFF0"), backgroundColor: themeBackground("#FFFFFF"),
-      opacity: pressed ? 0.75 : 1,
+      flexBasis: "46%", flexGrow: 1, minWidth: 132, minHeight: 128,
+      borderRadius: 23, padding: 15, gap: 12, borderWidth: 1,
+      borderColor: themeBorder("#E8DDEE"), backgroundColor: themeBackground("#FFFEFF"),
+      overflow: "hidden", opacity: pressed ? 0.72 : 1,
     })}>
-    <View style={{ width: 44, height: 44, borderRadius: 16,
-      alignItems: "center", justifyContent: "center",
-      backgroundColor: themeBackground(accent) }}>
-      <Icon name={icon} size={22} color={themeForeground(PURPLE)}/>
+    <Svg width={95} height={92} viewBox="0 0 95 92" style={{
+      position: "absolute", top: -16, right: -19, opacity: 0.62,
+    }} pointerEvents="none">
+      <Circle cx={61} cy={31} r={36} fill={themeTint(accent)}/>
+      <Circle cx={61} cy={31} r={23} stroke={themeTint("#CBA5E1")} strokeWidth={2.5} fill="none"/>
+      <Circle cx={24} cy={62} r={6} fill={themeTint("#DEBDEC")}/>
+    </Svg>
+    <View style={{ width: 47, height: 47, borderRadius: 17,
+      alignItems: "center", justifyContent: "center", backgroundColor: themeBackground(accent) }}>
+      <Icon name={icon} size={24} color={themeForeground(PURPLE)}/>
     </View>
-    <Text style={{ color: themeForeground(INK), fontFamily: SEMI, fontSize: 14.5 }}>{title}</Text>
-    <Text style={{ color: themeForeground(MUTED), fontFamily: FONT, fontSize: 12.5, lineHeight: 18 }}>{detail}</Text>
+    <View style={{ flexDirection: "row", gap: 5, alignItems: "center" }}>
+      <Text style={{ color: themeForeground(INK), fontFamily: SEMI, fontSize: 14.5, flex: 1 }}>{title}</Text>
+      <Icon name="arrow-forward-outline" size={15} color={themeForeground(PURPLE)}/>
+    </View>
   </Pressable>;
 }
 function PatientEmpty({ icon, title, detail }: { icon: string; title: string; detail: string }) {
@@ -224,27 +232,45 @@ function todayItems(items: CarePlanItem[]) {
 type PatientPlanData = ReturnType<typeof usePatientPlan>;
 function PatientPlanContent({ plan, limit }: { plan: PatientPlanData; limit?: number }) {
   const { items, completions, error, loading } = plan;
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const today = todayItems(items);
   const completeIds = new Set(completions.filter(c => c.completedOn === dayKey(new Date())).map(c => c.itemId));
   if (loading) return <ActivityIndicator accessibilityLabel="Loading today's care plan" color={C.purple}/>;
-  if (error) return <PatientEmpty icon="cloud-offline-outline" title="Could not load today's plan" detail={error}/>;
-  if (!today.length) return <PatientEmpty icon="sunny-outline" title="A peaceful day ahead"
-    detail="When your care team adds activities to your daily plan, they will appear here."/>;
-  return <View style={{ gap: 10 }}>{today.slice(0, limit ?? today.length).map(item => (
-    <PatientGlass key={item.id}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <Icon name={completeIds.has(item.id) ? "checkmark-circle" : "ellipse-outline"}
-          size={28} color={themeForeground(completeIds.has(item.id) ? "#27956D" : PURPLE)}/>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 15 }}>{item.title}</Text>
-          <PatientText muted size={13}>
-            {item.localTime || "Flexible time"} · {item.category} · {completeIds.has(item.id) ? "Completed" : "Planned"}
-          </PatientText>
-          {item.details ? <PatientText muted size={13}>{item.details}</PatientText> : null}
+  if (error) return <PatientEmpty icon="cloud-offline-outline" title="Plan unavailable" detail={error}/>;
+  if (!today.length) return <PatientEmpty icon="sunny-outline" title="No activities today"
+    detail="Your care team has not scheduled any activities for today."/>;
+  return <View style={{ gap: 9 }}>{today.slice(0, limit ?? today.length).map(item => {
+    const completed = completeIds.has(item.id);
+    const expanded = expandedId === item.id;
+    return <PatientGlass key={item.id} compact tint={completed ? "#E8F6EF" : "#EEE5FA"}>
+      <Pressable accessibilityRole="button" accessibilityLabel={item.title}
+        accessibilityHint={item.details ? "Show or hide care activity details" : "Care activity"}
+        accessibilityState={{ expanded }} disabled={!item.details}
+        onPress={() => setExpandedId(expanded ? null : item.id)}
+        style={{ flexDirection: "row", alignItems: "center", gap: 11, minHeight: 48 }}>
+        <View style={{ width: 43, height: 43, borderRadius: 16, alignItems: "center",
+          justifyContent: "center", backgroundColor: themeBackground(completed ? "#E4F4EB" : "#F2E9FA") }}>
+          <Icon name={completed ? "checkmark-circle" : "ellipse-outline"} size={25}
+            color={themeForeground(completed ? "#24896B" : PURPLE)}/>
         </View>
-      </View>
-    </PatientGlass>
-  ))}</View>;
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={{ fontFamily: SEMI, color: themeForeground(INK), fontSize: 14.5 }}>{item.title}</Text>
+          <PatientText muted size={12}>{item.localTime || "Flexible time"}</PatientText>
+        </View>
+        <View style={{ borderRadius: 13, paddingHorizontal: 9, paddingVertical: 6,
+          backgroundColor: themeBackground(completed ? "#E3F4E9" : "#F0E4FA") }}>
+          <Text style={{ fontFamily: SEMI, color: themeForeground(completed ? "#24896B" : PURPLE),
+            fontSize: 11 }}>{completed ? "Done" : "Planned"}</Text>
+        </View>
+        {item.details && <Icon name={expanded ? "chevron-up-outline" : "chevron-down-outline"}
+          size={16} color={themeForeground(MUTED)}/>}
+      </Pressable>
+      {expanded && item.details && <View style={{ backgroundColor: themeBackground("#F8F4FB"),
+        borderRadius: 13, padding: 12 }}>
+        <PatientText muted size={12.5}>{item.details}</PatientText>
+      </View>}
+    </PatientGlass>;
+  })}</View>;
 }
 export function PatientHomeScreen() {
   const n = useNav();
