@@ -12,9 +12,10 @@ const backend = readFileSync(new URL("../src/backend.ts", import.meta.url), "utf
 test("Care Recipient Profile exposes the shared invitation and care-space panel", () => {
   assert.match(patient, /import \{ AccountCareAccessPanel \} from "\.\/FamilyProfileScreen"/);
   const profile = patient.slice(patient.indexOf("export function PatientProfileScreen()"));
-  assert.match(profile, /<AccountCareAccessPanel \/>/);
+  assert.match(profile, /careAccessOpen && <AccountCareAccessPanel\/>/);
+  assert.match(profile, /accessibilityLabel="Manage care access"/);
   assert.match(profile, /Change profile photo/);
-  assert.match(profile, /Privacy & care sharing/);
+  assert.match(profile, /n\.navigate\("PrivacyData"\)/);
   assert.match(profile, /Notifications/);
   assert.match(profile, /signOut\(\)/);
 });
