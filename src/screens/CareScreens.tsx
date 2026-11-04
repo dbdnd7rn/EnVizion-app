@@ -980,7 +980,9 @@ export function TrackerScreen({
     }
     setTemperatureUnit(unit);
     setSuccess(false);
-    void saveTemperaturePreference(unit).catch(() => {});
+    void saveTemperaturePreference(unit).catch(() => {
+      setError("Temperature unit changed for this entry, but your display preference could not be saved on this device.");
+    });
   }
 
   async function save() {
