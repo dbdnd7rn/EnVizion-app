@@ -15,6 +15,7 @@ import { loadCareTeam, type CareTeamMember } from "../careTeam";
 import { chatPeople, type ChatPerson } from "../careChat";
 import { supabase } from "../supabase";
 import { ProfileAvatar, useProfileAvatar } from "../profileAvatar";
+import { AccountCareAccessPanel } from "./FamilyProfileScreen";
 import { themeBackground, themeBorder, themeForeground, themeShadow, themeTint } from "../themeColors";
 import { Brand, C, Icon, Page } from "../ui";
 import { NotificationBell } from "../notifications";
@@ -795,6 +796,7 @@ export function PatientProfileScreen() {
       {avatar.error ? <Text accessibilityRole="alert" style={{ fontFamily: FONT,
         fontSize: 12.5, color: themeForeground("#B34761") }}>{avatar.error}</Text> : null}
     </View>
+    <AccountCareAccessPanel />
     <PatientHeading eyebrow="COMFORT" title="Display settings"/>
     <PatientAction icon="contrast-outline" title={dark ? "Switch to light mode" : "Switch to dark mode"}
       detail="Adjust the appearance for a comfortable view"
