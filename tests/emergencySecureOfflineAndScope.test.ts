@@ -121,7 +121,7 @@ test("late responses cannot cross care profiles, user sessions or newer refresh 
 });
 
 test("expired or forbidden permissions must never fall through to old cached medical records",()=>{
-  for(const error of [{status:401},{status:403},{code:"42501"},{code:"PGRST301"}]){
+  for(const error of [{status:401},{status:403},{status:406},{code:"42501"},{code:"PGRST301"},{code:"PGRST116"}]){
     assert.equal(emergencyAccessWasDenied(error),true);
   }
   assert.equal(emergencyAccessWasDenied({status:503}),false);
