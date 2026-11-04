@@ -17,8 +17,9 @@ export function isCurrentEmergencyRequest(
 export function emergencyAccessWasDenied(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
   const detail = error as { status?: unknown; code?: unknown };
-  return detail.status === 401 || detail.status === 403 ||
-    detail.code === "42501" || detail.code === "PGRST301";
+  return detail.status === 401 || detail.status === 403 || detail.status === 406 ||
+    detail.code === "42501" || detail.code === "PGRST301" ||
+    detail.code === "PGRST116";
 }
 
 export function emergencySnapshotStaleness(cachedAt: string, now = new Date()): string | null {
