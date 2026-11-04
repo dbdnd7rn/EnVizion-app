@@ -156,7 +156,10 @@ export function EnVizionAIScreen() {
       lastBlockedRequestRef.current = blockedKey;
       const reply = gate === "select-profile"
         ? "Choose a care profile first. I can only show records from a profile you are authorized to view."
-        : "Care profile access is off. To answer using real saved records, choose ‘Use profile and continue’ below. Natural conversation is a separate optional setting.";
+        : "Care profile access is off. Choose ‘Use profile and continue’ to answer from your authorized records. " +
+          (naturalConversation
+            ? "Natural chat is ON, so the requested summary may also be sent to the external AI provider."
+            : "Natural chat is OFF, so this uses the private toolkit service only.");
       if (!retry) dispatch({ type: "conversation-turn", messages: [makeMessage("user", value)] });
       dispatch({ type: "conversation-turn", messages: [makeMessage("assistant", reply)] });
       setProfilePrompt(gate === "enable-profile" ? value : null);
