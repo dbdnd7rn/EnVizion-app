@@ -45,7 +45,7 @@ export async function generateTermExplanation(
       }),
       signal: controller.signal,
     });
-    if (!response.ok) throw new Error("AI_PROVIDER_UNAVAILABLE");
+    if (!response.ok) throw new Error("AI_PROVIDER_HTTP_" + String(response.status));
     const data = await response.json();
     const content = data?.choices?.[0]?.message?.content;
     if (typeof content !== "string" || content.length > 6000) throw new Error("AI_INVALID_RESPONSE");
