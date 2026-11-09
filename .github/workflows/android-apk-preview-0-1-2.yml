@@ -1,0 +1,82 @@
+name: EnVizion Life Android APK preview (0.1.2)
+
+on:
+  push:
+    branches:
+      - build/envizion-android-preview-0-1-2
+    paths:
+      - .github/workflows/android-apk-preview-0-1-2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-android-preview:
+    name: EAS Android installable APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out EnVizion Life
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit
+
+      - name: Verify Android branding and configuration
+        run: |
+          npm run preflight:native
+          npm run typecheck
+
+      - name: Confirm Expo EAS access
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::Missing GitHub Actions secret EXPO_TOKEN; an EAS-authenticated Android preview build cannot run without it."
+            echo "Add an Expo access token for the existing EnVizion Life EAS project as repository secret EXPO_TOKEN, then rerun."
+            exit 1
+          fi
+
+      - name: Configure EAS
+        uses: expo/expo-github-action@v8
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          eas-version: latest
+          packager: npm
+
+      - name: Build signed internal Android APK with existing project credentials
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build --platform android --profile preview --non-interactive --wait --json > eas-build-result.json
+
+      - name: Print APK build details
+        if: success()
+        run: |
+          node - <<'NODE'
+          const fs = require("fs");
+          const builds = JSON.parse(fs.readFileSync("eas-build-result.json", "utf8"));
+          for (const build of Array.isArray(builds) ? builds : [builds]) {
+            console.log("Build ID:", build.id || "unknown");
+            console.log("Build page:", build.buildDetailsPageUrl || "https://expo.dev/accounts/ntonga_victor/projects/envizion-life/builds");
+            console.log("APK URL:", build.artifacts?.buildUrl || "Check the build page");
+            if (build.status && build.status !== "FINISHED") process.exitCode = 1;
+          }
+          NODE
+
+      - name: Upload build metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EnVizion-Life-0.1.2-Android-EAS-build-metadata
+          path: eas-build-result.json
+          if-no-files-found: ignore
+          retention-days: 30
