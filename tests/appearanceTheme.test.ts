@@ -40,6 +40,28 @@ test("dark mode has readable low-glare copy and soft ivory action labels", () =>
   }
 });
 
+test("dark mode preserves informative, warning, success, and urgent status colors", () => {
+  try {
+    setActiveAppearance("dark");
+    const examples = [
+      { lightText: "#C34A67", lightBg: "#FFF0F1", darkBg: "#35262F" },
+      { lightText: "#24986E", lightBg: "#E6F8EF", darkBg: "#25372F" },
+      { lightText: "#2763AC", lightBg: "#E2E6FF", darkBg: "#253449" },
+      { lightText: "#C78B25", lightBg: "#FFF4E6", darkBg: "#3D3328" },
+    ];
+    const surfaces = examples.map(({ lightText, lightBg, darkBg }) => {
+      const surface = themeBackground(lightBg);
+      assert.equal(surface, darkBg);
+      assert.ok(contrast(themeForeground(lightText), surface) >= 4.5);
+      return surface;
+    });
+    assert.equal(new Set(surfaces).size, surfaces.length);
+    assert.equal(themeBackground("#FFFFFFD4"), "#25212ED4");
+  } finally {
+    setActiveAppearance("light");
+  }
+});
+
 test("legacy styles respond to theme changes and are never mutated", () => {
   setActiveAppearance("light");
   const original = { panel: { backgroundColor: "#FFFFFF", borderColor: "#EEE8F0", padding: 12 } };
