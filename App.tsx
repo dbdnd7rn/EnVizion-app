@@ -70,6 +70,8 @@ import {
 import { EnVizionAIScreen } from "./src/screens/EnVizionAIScreen";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
+import { BrandOpeningScreen } from "./src/BrandOpeningScreen";
+import { brandOpeningHoldMs, BRAND_OPENING_FADE_MS } from "./src/brandOpeningTiming";
 import { NotificationsProvider } from "./src/notifications";
 import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsScreen";
@@ -271,15 +273,19 @@ function MainTabs() {
   );
 }
 
-function useReducedMotion() {
-  const [reduced, setReduced] = useState(true);
+function useReducedMotion(): boolean | null {
+  // A null setting prevents a reduced-motion user from seeing a stray first frame.
+  const [reduced, setReduced] = useState<boolean | null>(null);
 
   useEffect(() => {
     let active = true;
-
-    AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (active) setReduced(value);
-    });
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((value) => {
+        if (active) setReduced(value);
+      })
+      .catch(() => {
+        if (active) setReduced(true);
+      });
 
     const subscription = AccessibilityInfo.addEventListener(
       "reduceMotionChanged",
@@ -309,110 +315,6 @@ function LoadingState({ message = "Preparing your care companion…" }: { messag
       <Text style={{ marginTop: 12, color: C.deep }}>
         {message}
       </Text>
-    </View>
-  );
-}
-
-function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
-  const reveal = React.useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
-  const drift = React.useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
-
-  useEffect(() => {
-    if (reducedMotion) return;
-
-    Animated.parallel([
-      Animated.spring(reveal, {
-        toValue: 1,
-        damping: 12,
-        stiffness: 95,
-        mass: 0.8,
-        useNativeDriver: true,
-      }),
-      Animated.timing(drift, {
-        toValue: 1,
-        duration: 1500,
-        easing: Easing.inOut(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [drift, reducedMotion, reveal]);
-
-  return (
-    <View
-      accessibilityLabel="EnVizion Life is opening"
-      style={{
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-        backgroundColor: themeBackground("#FCF9F6"),
-      }}
-    >
-      <Animated.View
-        style={{
-          position: "absolute",
-          width: 290,
-          height: 290,
-          borderRadius: 145,
-          borderWidth: 1,
-          borderColor: "#7B428E24",
-          opacity: drift.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [0.2, 0.8, 0.25],
-          }),
-          transform: [
-            {
-              scale: drift.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.72, 1.18],
-              }),
-            },
-            {
-              rotate: drift.interpolate({
-                inputRange: [0, 1],
-                outputRange: ["-8deg", "8deg"],
-              }),
-            },
-          ],
-        }}
-      />
-      <Animated.View
-        style={{
-          alignItems: "center",
-          opacity: reveal,
-          transform: [
-            {
-              translateY: reveal.interpolate({
-                inputRange: [0, 1],
-                outputRange: [28, 0],
-              }),
-            },
-            {
-              scale: reveal.interpolate({
-                inputRange: [0, 0.72, 1],
-                outputRange: [0.72, 1.06, 1],
-              }),
-            },
-          ],
-        }}
-      >
-        <Animated.Image
-          source={require("./assets/envizion-original.png")}
-          resizeMode="contain"
-          style={{ width: 270, height: 168 }}
-        />
-        <Text
-          style={{
-            marginTop: 18,
-            color: C.purple,
-            fontFamily: "DMSans_700Bold",
-            fontSize: 12,
-            letterSpacing: 4,
-          }}
-        >
-          CARE IN MOTION
-        </Text>
-      </Animated.View>
     </View>
   );
 }
@@ -1104,7 +1006,9 @@ function AppShell() {
   const { dark, ready } = useAppearance();
   const reducedMotion = useReducedMotion();
   const [showLaunch, setShowLaunch] = useState(true);
+  const [introPlayed, setIntroPlayed] = useState(false);
   const [fontsTimedOut, setFontsTimedOut] = useState(false);
+  const launchOpacity = React.useRef(new Animated.Value(1)).current;
   const [loaded, error] = useFonts({
     DMSans_400Regular,
     DMSans_600SemiBold,
@@ -1120,20 +1024,36 @@ function AppShell() {
 
   const fontsReady = loaded || Boolean(error) || fontsTimedOut;
 
+  // Start the intro as soon as the OS motion preference is known. Font
+  // loading, appearance restoration and authentication proceed behind it.
   useEffect(() => {
-    if (!fontsReady) return;
+    if (reducedMotion === null) return;
     const timer = setTimeout(
-      () => setShowLaunch(false),
-      reducedMotion ? 300 : 950,
+      () => setIntroPlayed(true),
+      brandOpeningHoldMs(Platform.OS, reducedMotion),
     );
     return () => clearTimeout(timer);
-  }, [fontsReady, reducedMotion]);
+  }, [reducedMotion]);
 
-  if (!fontsReady || !ready) return <LoadingState message="Loading app resources…" />;
+  // Never fade into a blank view: keep the brand visible until resources
+  // are ready, then cross-fade to the already-mounted auth/workspace tree.
+  useEffect(() => {
+    if (!introPlayed || !fontsReady || !ready || !showLaunch || reducedMotion === null) return;
+    const animation = Animated.timing(launchOpacity, {
+      toValue: 0,
+      duration: reducedMotion ? 0 : BRAND_OPENING_FADE_MS,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    });
+    animation.start(({ finished }) => {
+      if (finished) setShowLaunch(false);
+    });
+    return () => animation.stop();
+  }, [fontsReady, introPlayed, launchOpacity, ready, reducedMotion, showLaunch]);
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={dark ? "light" : "dark"} />
+      <StatusBar style={showLaunch ? "dark" : dark ? "light" : "dark"} />
       <View
         style={{ flex: 1, backgroundColor: dark ? "#17151F" : "#EDE5EF", alignItems: "center" }}
       >
@@ -1142,19 +1062,40 @@ function AppShell() {
             width: "100%",
             maxWidth: 480,
             flex: 1,
-            backgroundColor: C.paper,
+            backgroundColor: showLaunch ? "#FCF9F6" : C.paper,
             ...(Platform.OS === "web"
               ? { boxShadow: dark ? "0 0 65px #00000055" : "0 0 80px #59306818" }
               : {}),
           }}
         >
           <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-            {showLaunch ? (
-              <AnimatedLaunchScreen reducedMotion={reducedMotion} />
-            ) : (
-              <AuthProvider>
-                <AuthGate reducedMotion={reducedMotion} />
-              </AuthProvider>
+            <View
+              style={{ flex: 1 }}
+              importantForAccessibility={showLaunch ? "no-hide-descendants" : "auto"}
+            >
+              {fontsReady && ready ? (
+                <AuthProvider>
+                  <AuthGate reducedMotion={reducedMotion ?? true} />
+                </AuthProvider>
+              ) : (
+                <LoadingState message="Loading app resources…" />
+              )}
+            </View>
+            {showLaunch && (
+              <Animated.View
+                pointerEvents="auto"
+                accessibilityViewIsModal
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  bottom: 0,
+                  left: 0,
+                  opacity: launchOpacity,
+                }}
+              >
+                <BrandOpeningScreen reducedMotion={reducedMotion} />
+              </Animated.View>
             )}
           </SafeAreaView>
         </View>
