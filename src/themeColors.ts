@@ -29,11 +29,13 @@ function withAlpha(hex: string, suffix: string) { return suffix ? hex + suffix :
 // very pale pink/green cards must not collapse into the default purple surface.
 function isRose(r: number, g: number, b: number) {
   return (r > g * 1.16 && r > b * 1.1) ||
-    (r - g >= 12 && r - b >= 7 && b >= g);
+    (r - g >= 12 && r - b >= 7 && b >= g) ||
+    // Coral/salmon warning backgrounds have a little more green than blue.
+    (r - g >= 12 && g - b >= 2 && g - b <= 12 && r - b >= 16);
 }
 function isGreen(r: number, g: number, b: number) {
   return (g > r * 1.17 && g > b * 1.08) ||
-    (g - r >= 12 && g - b >= 7 && r >= b * 0.95);
+    (g - r >= 8 && g - b >= 5 && b >= r);
 }
 function isBlue(r: number, g: number, b: number) {
   return b - r >= 12 && b - g >= 9 && g >= r * 0.98;
