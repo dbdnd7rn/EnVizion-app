@@ -72,7 +72,7 @@ export const SPECIALIST_NOTES = [
 function Symbol({ index, accent, secondary, dark }: {
   index: number; accent: string; secondary: string; dark: boolean;
 }) {
-  const white = dark ? "#2E263A" : "#FFFFFF";
+  // Art details need a visible light stroke on dark cards, not a near-black substitution.\n  const white = dark ? "#E8D8F5" : "#FFFFFF";
   switch (index) {
     case 0: return <G>
       <Rect x="76" y="34" width="108" height="137" rx="19" fill={white} opacity=".90" />
