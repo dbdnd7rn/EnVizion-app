@@ -13,7 +13,7 @@ import { chatPeople, type ChatPerson } from "../careChat";
 import { supabase } from "../supabase";
 import { ProfileAvatar, useProfileAvatar } from "../profileAvatar";
 import { AccountCareAccessPanel } from "./FamilyProfileScreen";
-import { themeBackground, themeBorder, themeForeground, themeShadow, themeTint } from "../themeColors";
+import { themeBackground, themeBorder, themeForeground, themeShadow, themeTint, artworkColor } from "../themeColors";
 import { Brand, C, Icon, Page } from "../ui";
 import { NotificationBell } from "../notifications";
 import { useNav } from "./MainScreens";
@@ -112,9 +112,9 @@ function PatientTile({ icon, title, detail, onPress, accent = "#F2E8FA" }: {
     <Svg width={95} height={92} viewBox="0 0 95 92" style={{
       position: "absolute", top: -16, right: -19, opacity: 0.62,
     }} pointerEvents="none">
-      <Circle cx={61} cy={31} r={36} fill={themeTint(accent)}/>
-      <Circle cx={61} cy={31} r={23} stroke={themeTint("#CBA5E1")} strokeWidth={2.5} fill="none"/>
-      <Circle cx={24} cy={62} r={6} fill={themeTint("#DEBDEC")}/>
+      <Circle cx={61} cy={31} r={36} fill={artworkColor(accent)}/>
+      <Circle cx={61} cy={31} r={23} stroke={artworkColor("#CBA5E1")} strokeWidth={2.5} fill="none"/>
+      <Circle cx={24} cy={62} r={6} fill={artworkColor("#DEBDEC")}/>
     </Svg>
     <View style={{ width: 47, height: 47, borderRadius: 17,
       alignItems: "center", justifyContent: "center", backgroundColor: themeBackground(accent) }}>
@@ -182,24 +182,24 @@ function PatientHeroArt() {
   return <Svg width="100%" height={122} viewBox="0 0 330 122" accessible={false}>
     <Defs>
       <LinearGradient id="patientHero" x1="0" y1="0" x2="1" y2="1">
-        <Stop offset="0" stopColor={themeTint("#F9EEFF")}/>
-        <Stop offset="1" stopColor={themeTint("#CFA8E7")}/>
+        <Stop offset="0" stopColor={artworkColor("#F9EEFF")}/>
+        <Stop offset="1" stopColor={artworkColor("#CFA8E7")}/>
       </LinearGradient>
       <LinearGradient id="patientFlow" x1="0" y1="0" x2="1" y2="0">
-        <Stop offset="0" stopColor={themeTint("#D6B1ED")}/>
-        <Stop offset="1" stopColor={themeTint("#9F72C4")}/>
+        <Stop offset="0" stopColor={artworkColor("#D6B1ED")}/>
+        <Stop offset="1" stopColor={artworkColor("#9F72C4")}/>
       </LinearGradient>
     </Defs>
     <Circle cx="266" cy="46" r="45" fill="url(#patientHero)" opacity={0.94}/>
-    <Circle cx="266" cy="46" r="29" fill="none" stroke={themeTint("#FFFFFF")} strokeWidth={2.3} opacity={0.8}/>
-    <Path d="M265 17l5 13 13 5-13 5-5 13-5-13-13-5 13-5Z" fill={themeTint("#7946A1")}/>
-    <Circle cx="215" cy="25" r="4" fill={themeTint("#C498DE")}/>
-    <Circle cx="313" cy="89" r="6" fill={themeTint("#DFC7EF")}/>
+    <Circle cx="266" cy="46" r="29" fill="none" stroke={artworkColor("#FFFFFF")} strokeWidth={2.3} opacity={0.8}/>
+    <Path d="M265 17l5 13 13 5-13 5-5 13-5-13-13-5 13-5Z" fill={artworkColor("#7946A1")}/>
+    <Circle cx="215" cy="25" r="4" fill={artworkColor("#C498DE")}/>
+    <Circle cx="313" cy="89" r="6" fill={artworkColor("#DFC7EF")}/>
     <Path d="M4 102C64 68 99 113 152 91S251 63 331 95" stroke="url(#patientFlow)" strokeWidth={20} strokeLinecap="round" opacity={0.34} fill="none"/>
-    <Path d="M0 108C69 80 106 115 154 98S254 73 330 102" stroke={themeTint("#FFFDFE")} strokeWidth={4} opacity={0.82} fill="none"/>
-    <Path d="M25 54l4-9 4 9 9 4-9 4-4 9-4-9-9-4Z" fill={themeTint("#D1A9E9")} opacity={0.76}/>
-    <Rect x="74" y="43" width="42" height="3" rx="2" fill={themeTint("#E3CEEE")}/>
-    <Rect x="89" y="55" width="61" height="3" rx="2" fill={themeTint("#E3CEEE")} opacity={0.7}/>
+    <Path d="M0 108C69 80 106 115 154 98S254 73 330 102" stroke={artworkColor("#FFFDFE")} strokeWidth={4} opacity={0.82} fill="none"/>
+    <Path d="M25 54l4-9 4 9 9 4-9 4-4 9-4-9-9-4Z" fill={artworkColor("#D1A9E9")} opacity={0.76}/>
+    <Rect x="74" y="43" width="42" height="3" rx="2" fill={artworkColor("#E3CEEE")}/>
+    <Rect x="89" y="55" width="61" height="3" rx="2" fill={artworkColor("#E3CEEE")} opacity={0.7}/>
   </Svg>;
 }
 function usePatientPlan(recipientId: string | null) {
@@ -677,8 +677,8 @@ export function PatientTeamScreen() {
       })}>
       <Svg width={99} height={105} viewBox="0 0 99 105" pointerEvents="none"
         style={{ position: "absolute", right: -14, top: -14, opacity: 0.7 }}>
-        <Circle cx={64} cy={37} r={47} fill={themeTint("#E4CDF3")}/>
-        <Circle cx={64} cy={37} r={30} stroke={themeTint("#BB94D6")} strokeWidth={2} fill="none"/>
+        <Circle cx={64} cy={37} r={47} fill={artworkColor("#E4CDF3")}/>
+        <Circle cx={64} cy={37} r={30} stroke={artworkColor("#BB94D6")} strokeWidth={2} fill="none"/>
       </Svg>
       <View style={{ width: 55, height: 55, borderRadius: 20,
         backgroundColor: themeBackground("#E0C9F0"), alignItems: "center", justifyContent: "center" }}>
