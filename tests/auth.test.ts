@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   MIN_PASSWORD_LENGTH,
   AuthTimeoutError,
@@ -49,4 +50,50 @@ test("stalled auth requests fail instead of spinning indefinitely", async () => 
 
 test("auth errors are not suppressed by timeout protection", async () => {
   await assert.rejects(withAuthTimeout(Promise.reject(new Error("test failure")), 100), /test failure/);
+});
+
+test("auth screens use one low-glare dark form palette with accessible copy", () => {
+  const source = readFileSync(new URL("../src/auth.tsx", import.meta.url), "utf8");
+  const darkSection = source.split("const AUTH_DARK = {")[1]?.split("} as const;")[0] ?? "";
+  const getColor = (key: string) => {
+    const match = darkSection.match(new RegExp("^\\s*" + key + ': "(#[0-9A-Fa-f]{6})"', "m"));
+    assert.ok(match, "Missing dark auth token: " + key);
+    return match[1];
+  };
+  const luminance = (value: string) => {
+    const channels = [1, 3, 5].map(i => parseInt(value.slice(i, i + 2), 16) / 255);
+    const rgb = channels.map(x => x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4);
+    return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722;
+  };
+  const contrast = (a: string, b: string) => {
+    const la = luminance(a), lb = luminance(b);
+    return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+  };
+  for (const [foreground, background] of [
+    ["heading", "panel"], ["label", "panel"], ["inputText", "input"],
+    ["placeholder", "input"], ["googleText", "google"],
+  ]) {
+    assert.ok(contrast(getColor(foreground), getColor(background)) >= 4.5,
+      foreground + " on " + background + " must meet WCAG AA");
+  }
+  assert.ok(luminance(getColor("panel")) < 0.05, "dark mode panel must not become pale");
+  assert.ok(luminance(getColor("google")) < 0.08, "Google button must not become white");
+});
+
+test("sign in, sign up, forgot, and password recovery reuse dark surfaces without altering auth flow", () => {
+  const source = readFileSync(new URL("../src/auth.tsx", import.meta.url), "utf8");
+  const form = source.split("export function AuthScreen()")[1] ?? "";
+  const recovery = source.split("export function PasswordRecoveryScreen()")[1]?.split("function AuthBrandStatic()")[0] ?? "";
+  assert.match(form, /const \{ dark \} = useAppearance\(\)/);
+  assert.match(form, /backgroundColor: dark \? AUTH_DARK\.panel/);
+  assert.match(form, /style=\{\[S\.input, authInputStyle/);
+  assert.match(form, /backgroundColor: dark \? \(pressed \? AUTH_DARK\.googlePressed/);
+  assert.match(form, /placeholderTextColor=\{authPlaceholderColor\}/);
+  assert.match(recovery, /recoveryInputStyle/);
+  assert.match(recovery, /AUTH_DARK\.panel/);
+  for (const essential of [
+    "signIn(email, password)", "signUp(fullName, email, password)", 
+    "requestPasswordReset(email)", "signInWithGoogle()", "switchMode(\"signup\")",
+    "switchMode(\"forgot\")", "resendConfirmation(pendingConfirmationEmail)",
+  ]) assert.ok(form.includes(essential), essential);
 });
