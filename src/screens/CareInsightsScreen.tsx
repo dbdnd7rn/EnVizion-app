@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, themeTint, artworkColor } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
@@ -304,20 +304,20 @@ function ProfileCardBackground() {
     >
       <Defs>
         <LinearGradient id="profileBg" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#8C4FC3")} />
-          <Stop offset="0.52" stopColor={themeTint("#6A2B94")} />
-          <Stop offset="1" stopColor={themeTint("#9557C8")} />
+          <Stop offset="0" stopColor={artworkColor("#8C4FC3")} />
+          <Stop offset="0.52" stopColor={artworkColor("#6A2B94")} />
+          <Stop offset="1" stopColor={artworkColor("#9557C8")} />
         </LinearGradient>
         <LinearGradient id="profileGlass" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity={0.5} />
-          <Stop offset="1" stopColor={themeTint("#E0C9F8")} stopOpacity={0.14} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} stopOpacity={0.5} />
+          <Stop offset="1" stopColor={artworkColor("#E0C9F8")} stopOpacity={0.14} />
         </LinearGradient>
       </Defs>
       <Rect x="0" y="0" width="420" height="154" rx="28" fill="url(#profileBg)" />
       <Path
         d="M-12 49C72-8 166-2 258 36C329 65 374 55 435 10"
         fill="none"
-        stroke={themeTint("#FFFFFF")}
+        stroke={artworkColor("#FFFFFF")}
         strokeWidth="1.2"
         opacity={0.36}
       />
@@ -326,8 +326,8 @@ function ProfileCardBackground() {
         fill="url(#profileGlass)"
         opacity={0.35}
       />
-      <Circle cx="47" cy="18" r="59" fill={themeTint("#FFFFFF")} opacity={0.045} />
-      <Circle cx="385" cy="144" r="72" fill={themeTint("#FFFFFF")} opacity={0.04} />
+      <Circle cx="47" cy="18" r="59" fill={artworkColor("#FFFFFF")} opacity={0.045} />
+      <Circle cx="385" cy="144" r="72" fill={artworkColor("#FFFFFF")} opacity={0.04} />
     </Svg>
   );
 }
