@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, themeShadow, themedStyles } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeShadow, themedStyles, themeSurface } from "../themeColors";
 import React, {
   useEffect,
   useMemo,
@@ -639,7 +639,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 29,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.95)",
-    backgroundColor: "rgba(255,255,255,0.68)",
+    backgroundColor: themeSurface("rgba(255,255,255,0.68)"),
     alignItems: "center",
     justifyContent: "center",
     shadowColor: themeShadow("#613486"),
@@ -707,7 +707,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 32,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.95)",
-    backgroundColor: "rgba(255,255,255,0.62)",
+    backgroundColor: themeSurface("rgba(255,255,255,0.62)"),
     shadowColor: themeShadow("#6D3E8A"),
     shadowOpacity: 0.07,
     shadowRadius: 16,
@@ -764,7 +764,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 31,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.95)",
-    backgroundColor: "rgba(255,255,255,0.68)",
+    backgroundColor: themeSurface("rgba(255,255,255,0.68)"),
     alignItems: "center",
     justifyContent: "center",
     shadowColor: themeShadow("#613486"),
@@ -790,7 +790,7 @@ const styles = themedStyles(StyleSheet.create({
     gap: 8,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.95)",
-    backgroundColor: "rgba(248,237,255,0.74)",
+    backgroundColor: themeSurface("rgba(248,237,255,0.74)"),
   },
   markButtonText: {
     color: themeForeground("#6C2A98"),
@@ -810,7 +810,7 @@ const styles = themedStyles(StyleSheet.create({
     gap: 9,
     borderWidth: 1,
     borderColor: themeBorder("#F2D6E0"),
-    backgroundColor: "rgba(255,244,248,0.88)",
+    backgroundColor: themeSurface("rgba(255,244,248,0.88)"),
   },
   errorText: {
     flex: 1,
@@ -834,7 +834,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 27,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.96)",
-    backgroundColor: "rgba(255,255,255,0.70)",
+    backgroundColor: themeSurface("rgba(255,255,255,0.70)"),
     paddingHorizontal: 16,
     paddingVertical: 17,
     flexDirection: "row",
@@ -847,7 +847,7 @@ const styles = themedStyles(StyleSheet.create({
     elevation: 3,
   },
   cardUnread: {
-    backgroundColor: "rgba(251,245,255,0.80)",
+    backgroundColor: themeSurface("rgba(251,245,255,0.80)"),
     borderColor: "rgba(255,255,255,0.98)",
   },
   cardIcon: {
@@ -856,7 +856,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(245,232,255,0.88)",
+    backgroundColor: themeSurface("rgba(245,232,255,0.88)"),
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.90)",
   },
@@ -902,7 +902,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 28,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.96)",
-    backgroundColor: "rgba(255,255,255,0.70)",
+    backgroundColor: themeSurface("rgba(255,255,255,0.70)"),
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
@@ -917,7 +917,7 @@ const styles = themedStyles(StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 18,
-    backgroundColor: "rgba(245,232,255,0.90)",
+    backgroundColor: themeSurface("rgba(245,232,255,0.90)"),
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 3,
@@ -961,7 +961,7 @@ const styles = themedStyles(StyleSheet.create({
     width: 450,
     height: 450,
     borderRadius: 225,
-    backgroundColor: "rgba(231, 213, 255, 0.30)",
+    backgroundColor: themeSurface("rgba(231, 213, 255, 0.30)"),
   },
   ringTop: {
     position: "absolute",
@@ -981,6 +981,6 @@ const styles = themedStyles(StyleSheet.create({
     width: 520,
     height: 520,
     borderRadius: 260,
-    backgroundColor: "rgba(226, 211, 255, 0.30)",
+    backgroundColor: themeSurface("rgba(226, 211, 255, 0.30)"),
   },
 }));

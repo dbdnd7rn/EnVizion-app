@@ -1,4 +1,4 @@
-import { themeBorder, artworkColor } from "../themeColors";
+import { themeBorder, artworkColor, themeSurface } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction, themeIconSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -432,7 +432,7 @@ function StatTile({
         minHeight: 128,
         borderRadius: 20,
         padding: 12,
-        backgroundColor: background,
+        backgroundColor: themeSurface(background),
         justifyContent: "space-between",
       }}
     >
@@ -441,7 +441,7 @@ function StatTile({
           width: 38,
           height: 38,
           borderRadius: 19,
-          backgroundColor: iconBackground,
+          backgroundColor: themeIconSurface(iconBackground),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -486,7 +486,7 @@ function QuickAddTile({
         alignItems: "center",
         justifyContent: "center",
         gap: 10,
-        backgroundColor: background,
+        backgroundColor: themeSurface(background),
         opacity: pressed ? 0.72 : 1,
         transform: [{ scale: pressed ? 0.985 : 1 }],
       })}

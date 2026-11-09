@@ -1,4 +1,4 @@
-import { themeTint, artworkColor, artworkBackdrop } from "../themeColors";
+import { themeTint, artworkColor, artworkBackdrop, themeSurface } from "../themeColors";
 import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction, themeIconSurface } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
@@ -519,7 +519,7 @@ export function HomeScreen() {
                           flexDirection: "row",
                           alignItems: "center",
                           gap: 10,
-                          backgroundColor: selected ? "#F4EBF8" : "transparent",
+                          backgroundColor: selected ? themeSurface("#F4EBF8") : "transparent",
                           opacity:
                             switchingCareId === space.careRecipientId
                               ? 0.55
@@ -533,7 +533,7 @@ export function HomeScreen() {
                             width: 36,
                             height: 36,
                             borderRadius: 13,
-                            backgroundColor: selected ? "#E8D8F0" : "#F4F0F5",
+                            backgroundColor: themeSurface(selected ? "#E8D8F0" : "#F4F0F5"),
                             alignItems: "center",
                             justifyContent: "center",
                           }}
@@ -614,12 +614,12 @@ export function HomeScreen() {
                       : recertificationAttention.due > 0
                         ? "#E4D3B1"
                         : "#D9D1E4",
-                  backgroundColor:
+                  backgroundColor: themeSurface(
                     recertificationAttention.overdue14 > 0
                       ? "#FFF5F1"
                       : recertificationAttention.due > 0
                         ? "#FFFAF0"
-                        : "#FAF7FC",
+                        : "#FAF7FC"),
                   paddingHorizontal: 15,
                   paddingVertical: 14,
                   flexDirection: "row",
@@ -633,12 +633,12 @@ export function HomeScreen() {
                     width: 42,
                     height: 42,
                     borderRadius: 15,
-                    backgroundColor:
+                    backgroundColor: themeSurface(
                       recertificationAttention.overdue14 > 0
                         ? "#FBE3DA"
                         : recertificationAttention.due > 0
                           ? "#F7ECD7"
-                          : "#EFE7F5",
+                          : "#EFE7F5"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -712,9 +712,9 @@ export function HomeScreen() {
                   borderColor: invitationAttention.expired
                     ? "#F2C7B7"
                     : "#E3D2B8",
-                  backgroundColor: invitationAttention.expired
+                  backgroundColor: themeSurface(invitationAttention.expired
                     ? "#FFF7F2"
-                    : "#FFFAF1",
+                    : "#FFFAF1"),
                   paddingHorizontal: 15,
                   paddingVertical: 14,
                   flexDirection: "row",
@@ -728,9 +728,9 @@ export function HomeScreen() {
                     width: 42,
                     height: 42,
                     borderRadius: 15,
-                    backgroundColor: invitationAttention.expired
+                    backgroundColor: themeSurface(invitationAttention.expired
                       ? "#FCE5DA"
-                      : "#F8ECD9",
+                      : "#F8ECD9"),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -1550,7 +1550,7 @@ function ToolItemRow({
           borderLeftColor: themeBorder("#EEE8F1"),
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: pinned ? "#FBF7FD" : "transparent",
+          backgroundColor: pinned ? themeSurface("#FBF7FD") : "transparent",
           opacity: pressed ? 0.6 : 1,
         })}
       >
@@ -2141,7 +2141,7 @@ export function ToolkitScreen() {
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: filtersOpen || scope !== "all" || sort !== "relevance"
-                ? "#F5ECFB" : "transparent",
+                ? themeSurface("#F5ECFB") : "transparent",
               borderTopRightRadius: 23,
               borderBottomRightRadius: 23,
               opacity: pressed ? 0.6 : 1,

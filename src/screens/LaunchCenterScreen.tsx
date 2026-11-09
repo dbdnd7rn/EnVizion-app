@@ -1,4 +1,4 @@
-import { themeAction } from "../themeColors";
+import { themeAction, themeSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -246,9 +246,7 @@ export function LaunchCenterScreen() {
           <Section title="Pilot foundation" />
           <Card
             style={{
-              backgroundColor: dashboard.foundation.foundationReady
-                ? "#E8F1ED"
-                : "#FFF9F2",
+              backgroundColor: themeSurface(dashboard.foundation.foundationReady ? "#E8F1ED" : "#FFF9F2"),
             }}
           >
             <View style={S.between}>
@@ -358,9 +356,7 @@ export function LaunchCenterScreen() {
                       style={[
                         S.pill,
                         {
-                          backgroundColor: item.activationReady
-                            ? "#E8F1ED"
-                            : "#FFF1E5",
+                          backgroundColor: themeSurface(item.activationReady ? "#E8F1ED" : "#FFF1E5"),
                         },
                       ]}
                     >
@@ -393,7 +389,7 @@ export function LaunchCenterScreen() {
             />
           </Card>
 
-          <Card style={{ backgroundColor: C.lavender }}>
+          <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Text style={S.eyebrow}>CURRENT OPERATIONS</Text>
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
             <Metric
@@ -544,9 +540,7 @@ export function LaunchCenterScreen() {
                     style={[
                       S.pill,
                       {
-                        backgroundColor: gate.ready
-                          ? "#E8F1ED"
-                          : "#FFF1E5",
+                        backgroundColor: themeSurface(gate.ready ? "#E8F1ED" : "#FFF1E5"),
                       },
                     ]}
                   >
@@ -609,7 +603,7 @@ export function LaunchCenterScreen() {
                   </Card>
 
                   {gate.blockers.length > 0 && (
-                    <Card style={{ backgroundColor: "#FFF9F2" }}>
+                    <Card style={{ backgroundColor: themeSurface("#FFF9F2") }}>
                       <Text style={S.h3}>Launch blockers</Text>
                       {gate.blockers.map((blocker) => (
                         <Txt key={blocker} style={S.small}>
@@ -622,10 +616,7 @@ export function LaunchCenterScreen() {
                   {gate.signoff && (
                     <Card
                       style={{
-                        backgroundColor:
-                          gate.signoff.status === "approved"
-                            ? "#E8F1ED"
-                            : "#FFF9F2",
+                        backgroundColor: themeSurface(gate.signoff.status === "approved" ? "#E8F1ED" : "#FFF9F2"),
                       }}
                     >
                       <Text style={S.h3}>

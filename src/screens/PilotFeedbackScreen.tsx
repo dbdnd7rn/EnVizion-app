@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder } from "../themeColors";
+import { themeBackground, themeBorder, themeSurface } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -116,7 +116,7 @@ export function PilotFeedbackScreen() {
       />
 
       {!consent && !consentError && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <ActivityIndicator color={C.purple} />
           <Txt>Checking pilot feedback access…</Txt>
         </Card>
@@ -165,7 +165,7 @@ export function PilotFeedbackScreen() {
               S.card,
               {
                 borderColor: selected ? C.purple : C.line,
-                backgroundColor: selected ? "#F4E9FA" : "#FFFFFF",
+                backgroundColor: themeSurface(selected ? "#F4E9FA" : "#FFFFFF"),
                 opacity: eligible ? 1 : 0.55,
                 minHeight: 85,
                 justifyContent: "center",
@@ -175,7 +175,7 @@ export function PilotFeedbackScreen() {
             <View style={S.row}>
               <View style={{
                 width: 46, height: 46, borderRadius: 16,
-                backgroundColor: selected ? "#E8D4F5" : "#F3EAF9",
+                backgroundColor: themeSurface(selected ? "#E8D4F5" : "#F3EAF9"),
                 alignItems: "center", justifyContent: "center",
               }}>
                 <Icon name={item.icon} color={C.purple} size={23} />

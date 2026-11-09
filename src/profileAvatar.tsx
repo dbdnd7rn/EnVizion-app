@@ -1,3 +1,4 @@
+import { themeSurface } from "./themeColors";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AppState, Image, Platform, Text, View } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
@@ -188,7 +189,7 @@ export function ProfileAvatar({
     <View style={{
       width: size, height: size, borderRadius: size / 2,
       overflow: "hidden", borderWidth: 3, borderColor: "#FFFFFF",
-      backgroundColor: "#F0E3F8", alignItems: "center",
+      backgroundColor: themeSurface("#F0E3F8"), alignItems: "center",
       justifyContent: "center",
       shadowColor: "#672B8B", shadowOpacity: 0.12,
       shadowRadius: 10, elevation: 2,

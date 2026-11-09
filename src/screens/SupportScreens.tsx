@@ -1,4 +1,4 @@
-import { themeBorder, artworkColor } from "../themeColors";
+import { themeBorder, artworkColor, themeSurface } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, Switch, Text, View, useWindowDimensions } from "react-native";
@@ -834,7 +834,7 @@ export function OnboardingScreen() {
                       S.pill,
                       {
                         padding: 14,
-                        backgroundColor: r === relationship ? themeAction(C.purple) : C.lavender,
+                        backgroundColor: r === relationship ? themeAction(C.purple) : themeSurface(C.lavender),
                       },
                     ]}
                   >
@@ -977,7 +977,7 @@ export function GuideScreen({
           title="This guide is not published yet."
           body="EnVizion Life only shows caregiver education here after it has completed clinical review, approval, and publication."
         />
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="shield-checkmark-outline" size={30} />
           <Text style={S.h3}>Why you’re seeing this</Text>
           <Txt>
@@ -1011,7 +1011,7 @@ export function GuideScreen({
         </View>
       ))}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.h3}>Bring it into the conversation</Text>
         <Txt>
           What is one question you want to ask your loved one or healthcare team
@@ -1334,7 +1334,7 @@ export function CoachingScreen() {
         title="You deserve someone in your corner."
         body="Request support from EnVizion Life for the part of care that feels hardest right now."
       />
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="people-outline" size={34} />
         <Text style={S.h2}>Clarity, with compassion.</Text>
         <Txt>
@@ -1417,7 +1417,7 @@ export function WellnessScreen() {
       </View>
       <Card
         style={{
-          backgroundColor: C.lavender,
+          backgroundColor: themeSurface(C.lavender),
           alignItems: "center",
           paddingVertical: 30,
         }}

@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, artworkColor } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, artworkColor, themeSurface } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -486,7 +486,7 @@ function Shortcut({
           width: 39,
           height: 39,
           borderRadius: 15,
-          backgroundColor: LAVENDER,
+          backgroundColor: themeSurface(LAVENDER),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -975,7 +975,7 @@ export function CarePlanScreen() {
                   width: 46,
                   height: 46,
                   borderRadius: 17,
-                  backgroundColor: LAVENDER,
+                  backgroundColor: themeSurface(LAVENDER),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
@@ -1424,7 +1424,7 @@ export function CarePlanScreen() {
                           width: 40,
                           height: 40,
                           borderRadius: 15,
-                          backgroundColor: LAVENDER,
+                          backgroundColor: themeSurface(LAVENDER),
                           alignItems: "center",
                           justifyContent: "center",
                         }}
@@ -1476,7 +1476,7 @@ export function CarePlanScreen() {
                             flex: 1,
                             minHeight: 42,
                             borderRadius: 21,
-                            backgroundColor: LAVENDER,
+                            backgroundColor: themeSurface(LAVENDER),
                             alignItems: "center",
                             justifyContent: "center",
                             flexDirection: "row",

@@ -1,4 +1,4 @@
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Switch, Text, View } from "react-native";
@@ -78,7 +78,7 @@ function Choice({
           minWidth: 145,
           padding: 15,
           borderColor: selected ? C.purple : C.line,
-          backgroundColor: selected ? C.lavender : C.white,
+          backgroundColor: themeSurface(selected ? C.lavender : C.white),
         },
       ]}
     >
@@ -528,7 +528,7 @@ export function CarePacketScreen() {
       )}
 
       {viewer && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access cannot create portable packets.</Text>
           <Txt>
@@ -630,7 +630,7 @@ export function CarePacketScreen() {
       {selectedSet.has("care_contacts") && (
         <>
           <Section title="Care contacts to include" />
-          <Card style={{ backgroundColor: C.lavender }}>
+          <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
             <Txt>
               Select only the providers relevant to this visit or handoff. The
               rest of the directory stays private to the care profile.
@@ -651,7 +651,7 @@ export function CarePacketScreen() {
                     S.card,
                     {
                       borderColor: selected ? C.purple : C.line,
-                      backgroundColor: selected ? "#F6F0F8" : C.white,
+                      backgroundColor: themeSurface(selected ? "#F6F0F8" : C.white),
                       opacity: exporting ? 0.6 : 1,
                     },
                   ]}
@@ -698,7 +698,7 @@ export function CarePacketScreen() {
       {selectedSet.has("communication_log") && (
         <>
           <Section title="Communication entries to include" />
-          <Card style={{ backgroundColor: C.lavender }}>
+          <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
             <Txt>
               Choose only the conversations that matter for this handoff or
               visit. Unselected notes stay inside the care profile.
@@ -725,7 +725,7 @@ export function CarePacketScreen() {
                     S.card,
                     {
                       borderColor: selected ? C.purple : C.line,
-                      backgroundColor: selected ? "#F6F0F8" : C.white,
+                      backgroundColor: themeSurface(selected ? "#F6F0F8" : C.white),
                       opacity: exporting ? 0.6 : 1,
                     },
                   ]}
@@ -789,7 +789,7 @@ export function CarePacketScreen() {
       {selectedSet.has("vault_documents") && (
         <>
           <Section title="Documents to bring or share separately" />
-          <Card style={{ backgroundColor: C.lavender }}>
+          <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
             <Txt>
               Selected documents are listed in the packet as an attachment
               checklist. Their private file contents are not copied into the
@@ -911,7 +911,7 @@ export function CarePacketScreen() {
         />
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="shield-checkmark-outline" />
         <Text style={S.h3}>Portable copies need extra care.</Text>
         <Txt>

@@ -1,4 +1,4 @@
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import { useAppearance } from "../appearance";
 import { supabase } from "../supabase";
@@ -55,7 +55,7 @@ function StatusPill({ status }: { status: string }) {
         borderRadius: 999,
         paddingHorizontal: 10,
         paddingVertical: 6,
-        backgroundColor: complete ? "#E8F1ED" : C.lavender,
+        backgroundColor: themeSurface(complete ? "#E8F1ED" : C.lavender),
       }}
     >
       <Text
@@ -920,7 +920,7 @@ export function StaffSupportThreadScreen({
         body={`Care recipient: ${request.careRecipientName}`}
       />
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <View style={S.between}>
           <StatusPill status={request.status} />
           <Text style={S.small}>{request.preferredChannel}</Text>
@@ -948,7 +948,7 @@ export function StaffSupportThreadScreen({
                 {
                   alignSelf: staff ? "flex-end" : "flex-start",
                   maxWidth: "94%",
-                  backgroundColor: staff ? C.deep : C.white,
+                  backgroundColor: staff ? themeAction(C.deep) : themeSurface(C.white),
                 },
               ]}
             >

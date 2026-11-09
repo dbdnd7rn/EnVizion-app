@@ -1,4 +1,4 @@
-import { themeShadow } from "./themeColors";
+import { themeShadow, themeSurface } from "./themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { createPalette, themedStyles, themeBackground, themeForeground, themeBorder, themeAction, artworkColor, artworkBackdrop } from "./themeColors";
 import { useAppearance } from "./appearance";
@@ -115,7 +115,7 @@ export const S = themedStyles(StyleSheet.create({
     elevation: 1,
   },
   pill: {
-    backgroundColor: C.lavender,
+    backgroundColor: themeSurface(C.lavender),
     borderRadius: 999,
     paddingHorizontal: 14,
     paddingVertical: 7,

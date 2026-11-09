@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder } from "../themeColors";
+import { themeBackground, themeBorder, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -302,7 +302,7 @@ function WorkflowPanel({
               : "Unassigned"}
           </Txt>
         </View>
-        <View style={[S.pill, { backgroundColor: C.lavender }]}>
+        <View style={[S.pill, { backgroundColor: themeSurface(C.lavender) }]}>
           <Txt style={S.small}>
             {activeSnooze
               ? `Snoozed until ${new Date(
@@ -926,7 +926,7 @@ export function CareCoordinationInboxScreen() {
       )}
 
       {readOnly && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
@@ -1163,7 +1163,7 @@ export function CareCoordinationInboxScreen() {
         </>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="information-circle-outline" />
         <Text style={S.h3}>How EnVizion decides what appears here</Text>
         <Txt>

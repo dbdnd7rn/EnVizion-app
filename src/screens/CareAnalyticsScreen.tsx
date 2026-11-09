@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, themeTint, artworkColor } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeTint, artworkColor, themeSurface } from "../themeColors";
 import { themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -388,7 +388,7 @@ function CountPill({
         minWidth: 95,
         minHeight: 44,
         borderRadius: 22,
-        backgroundColor: background,
+        backgroundColor: themeSurface(background),
         paddingHorizontal: 10,
         flexDirection: "row",
         alignItems: "center",

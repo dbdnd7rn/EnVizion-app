@@ -1,4 +1,4 @@
-import { themeForeground, themeBorder } from "../themeColors";
+import { themeForeground, themeBorder, themeSurface } from "../themeColors";
 import { themeBackground, themeShadow, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -84,7 +84,7 @@ function Picker<T extends string>({
                 minHeight: 42,
                 justifyContent: "center",
                 paddingHorizontal: 14,
-                backgroundColor: selected ? themeAction(C.purple) : C.lavender,
+                backgroundColor: selected ? themeAction(C.purple) : themeSurface(C.lavender),
                 opacity: disabled ? 0.55 : 1,
               },
             ]}
@@ -131,7 +131,7 @@ function SmallAction({
           alignItems: "center",
           justifyContent: "center",
           gap: 7,
-          backgroundColor: C.lavender,
+          backgroundColor: themeSurface(C.lavender),
           opacity: pressed ? 0.72 : 1,
         },
       ]}

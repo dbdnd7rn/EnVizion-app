@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -163,7 +163,7 @@ function SmallAction({
         alignItems: "center",
         justifyContent: "center",
         gap: 7,
-        backgroundColor: C.lavender,
+        backgroundColor: themeSurface(C.lavender),
         opacity: pressed ? 0.72 : 1,
       })}
     >
@@ -436,7 +436,7 @@ export function CareCommunicationLogScreen() {
       )}
 
       {viewer && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
@@ -841,7 +841,7 @@ export function CareCommunicationLogScreen() {
                         S.pill,
                         {
                           alignSelf: "flex-start",
-                          backgroundColor: C.lavender,
+                          backgroundColor: themeSurface(C.lavender),
                         },
                       ]}
                     >
@@ -984,7 +984,7 @@ export function CareCommunicationLogScreen() {
         </Card>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.h3}>A caregiver communication record, not a clinical record.</Text>
         <Txt>
           Use this log to remember conversations and follow-ups. Verify medical

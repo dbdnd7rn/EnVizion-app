@@ -1,4 +1,4 @@
-import { themeAction } from "../themeColors";
+import { themeAction, themeSurface } from "../themeColors";
 import { useAppearance } from "../appearance";
 import { AdminGlassHero, AdminGlassCard, AdminGlassSection, AdminGlassMetric, AdminGlassTabs } from "../components/AdminGlassUi";
 import React, { useCallback, useEffect, useState } from "react";
@@ -224,7 +224,7 @@ export function StaffManagementScreen() {
       </>)}
 
       {Boolean(message) && (
-        <AdminGlassCard style={{ backgroundColor: message.toLowerCase().includes("could not") ? C.redBg : C.white }}>
+        <AdminGlassCard style={{ backgroundColor: themeSurface(message.toLowerCase().includes("could not") ? C.redBg : C.white) }}>
           <Text
             accessibilityRole="alert"
             style={[
@@ -284,7 +284,7 @@ export function StaffManagementScreen() {
                 style={[
                   S.pill,
                   {
-                    backgroundColor: item.active ? "#E8F1ED" : C.redBg,
+                    backgroundColor: themeSurface(item.active ? "#E8F1ED" : C.redBg),
                   },
                 ]}
               >

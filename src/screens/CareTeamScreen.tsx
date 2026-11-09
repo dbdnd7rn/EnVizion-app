@@ -1,4 +1,5 @@
-import { themeBorder, themeShadow } from "../themeColors";
+import { themeAction } from "../themeColors";
+import { themeBorder, themeShadow, themeSurface } from "../themeColors";
 import { themeBackground, themeForeground, themeIconSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
@@ -109,7 +110,7 @@ function RolePicker({
               minHeight: 42,
               justifyContent: "center",
               paddingHorizontal: 14,
-              backgroundColor: value === role ? C.purple : C.lavender,
+              backgroundColor: value === role ? themeAction(C.purple) : themeSurface(C.lavender),
               opacity: disabled ? 0.55 : 1,
             },
           ]}
@@ -405,7 +406,7 @@ export function CareTeamScreen() {
             <Card
               key={invitation.careRecipientId}
               style={{
-                backgroundColor: C.lavender,
+                backgroundColor: themeSurface(C.lavender),
                 borderColor: themeBorder("#DCCBE4"),
                 gap: 12,
               }}

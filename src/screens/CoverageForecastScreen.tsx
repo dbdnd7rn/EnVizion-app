@@ -1,4 +1,4 @@
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeSurface } from "../themeColors";
 import { themeBackground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -314,7 +314,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
           title="Coverage forecasting is owner-only."
           body="The forecast combines future care requirements with team availability and historical coverage patterns."
         />
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="lock-closed-outline" color={C.purple} />
           <Text style={S.h3}>Protected planning view</Text>
           <Txt>
@@ -525,7 +525,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
               <View
                 style={[
                   S.pill,
-                  { backgroundColor: riskBackground(item.risk) },
+                  { backgroundColor: themeSurface(riskBackground(item.risk)) },
                 ]}
               >
                 <View style={S.row}>
@@ -579,7 +579,7 @@ export function CoverageForecastScreen({ navigation }: Props) {
             {(item.risk === "high" || item.risk === "elevated") && (
               <>
                 {snooze ? (
-                  <Card style={{ backgroundColor: C.lavender }}>
+                  <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
                     <View style={S.row}>
                       <Icon name="notifications-off-outline" color={C.purple} />
                       <View style={{ flex: 1, gap: 2 }}>

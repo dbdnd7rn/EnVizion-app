@@ -1,4 +1,4 @@
-import { themeBackground } from "../themeColors";
+import { themeBackground, themeSurface } from "../themeColors";
 import { useAppearance } from "../appearance";
 import { AdminGlassHero, AdminGlassCard, AdminGlassSection, AdminGlassMetric, AdminGlassTabs } from "../components/AdminGlassUi";
 import React, { useEffect, useState } from "react";
@@ -489,7 +489,7 @@ export function NotificationSettingsScreen() {
 
       </>)}
 
-      <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+      <AdminGlassCard style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="shield-checkmark-outline" />
         <Text style={S.h3}>Important</Text>
         <Txt>

@@ -1,4 +1,4 @@
-import { themeBorder } from "../themeColors";
+import { themeBorder, themeSurface } from "../themeColors";
 import { themeBackground, themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -388,7 +388,7 @@ export function CareContinuityScreen() {
         </Card>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="information-circle-outline" />
         <Text style={S.h3}>Online is not the same as physically present.</Text>
         <Txt>
@@ -735,7 +735,7 @@ export function CareContinuityScreen() {
                   borderRadius: 13,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: C.lavender,
+                  backgroundColor: themeSurface(C.lavender),
                 }}
               >
                 <Icon name={eventIcon(event.kind)} size={21} />

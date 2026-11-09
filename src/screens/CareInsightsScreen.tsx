@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, themeTint, artworkColor } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, themeTint, artworkColor, themeSurface } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
@@ -596,7 +596,7 @@ function RecordedValueCard({
             width: 46,
             height: 46,
             borderRadius: 18,
-            backgroundColor: SOFT_LAVENDER,
+            backgroundColor: themeSurface(SOFT_LAVENDER),
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -724,7 +724,7 @@ function PreparationRow({
           borderRadius: 22,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: SOFT_LAVENDER,
+          backgroundColor: themeSurface(SOFT_LAVENDER),
         }}
       >
         <Icon name={icon} size={25} color={themeForeground("#4E398E")} />
@@ -1066,7 +1066,7 @@ export function CareInsightsScreen() {
             <View
               style={{
                 height: 1,
-                backgroundColor: "rgba(255,255,255,0.42)",
+                backgroundColor: themeSurface("rgba(255,255,255,0.42)"),
               }}
             />
 
@@ -1086,7 +1086,7 @@ export function CareInsightsScreen() {
                   Active days
                 </Text>
               </View>
-              <View style={{ width: 1, height: 41, backgroundColor: "rgba(255,255,255,0.4)" }} />
+              <View style={{ width: 1, height: 41, backgroundColor: themeSurface("rgba(255,255,255,0.4)") }} />
               <View style={{ flex: 1, alignItems: "center", gap: 2 }}>
                 <MetricNumber
                   value={sevenDayEvents}
@@ -1410,7 +1410,7 @@ export function CareInsightsScreen() {
                         width: 42,
                         height: 42,
                         borderRadius: 18,
-                        backgroundColor: item.corrected ? "#FFF0F3" : SOFT_LAVENDER,
+                        backgroundColor: themeSurface(item.corrected ? "#FFF0F3" : SOFT_LAVENDER),
                         alignItems: "center",
                         justifyContent: "center",
                       }}

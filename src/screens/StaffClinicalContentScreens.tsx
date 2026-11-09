@@ -1,4 +1,4 @@
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeSurface } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { useFocusEffect, usePreventRemove } from "@react-navigation/native";
 import { useAppearance } from "../appearance";
@@ -50,7 +50,7 @@ function StatusPill({ status }: { status: ClinicalStatus }) {
       style={[
         S.pill,
         {
-          backgroundColor: published || approved ? "#E8F1ED" : C.lavender,
+          backgroundColor: themeSurface(published || approved ? "#E8F1ED" : C.lavender),
           alignSelf: "flex-start",
         },
       ]}
@@ -223,7 +223,7 @@ function GlassContentCard({
       }}>
         <View style={{
           flexDirection: "row", alignItems: "center", gap: 6,
-          backgroundColor: status.background, paddingHorizontal: 10,
+          backgroundColor: themeSurface(status.background), paddingHorizontal: 10,
           paddingVertical: 7, borderRadius: 999,
         }}>
           <Icon name={status.icon} size={14} color={status.color} />
@@ -386,7 +386,7 @@ export function StaffClinicalContentScreen() {
       </View>
 
       <View style={{
-        backgroundColor: panel, borderWidth: 1, borderColor: stroke,
+        backgroundColor: themeSurface(panel), borderWidth: 1, borderColor: stroke,
         borderRadius: 28, padding: 15, gap: 15,
       }}>
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
@@ -577,7 +577,7 @@ export function StaffClinicalContentScreen() {
       {loading ? (
         <View style={{
           minHeight: 140, alignItems: "center", justifyContent: "center",
-          backgroundColor: panel, borderRadius: 23, gap: 12,
+          backgroundColor: themeSurface(panel), borderRadius: 23, gap: 12,
         }}>
           <ActivityIndicator color={C.purple} />
           <Text style={{ fontFamily: "DMSans_400Regular", color: muted }}>Loading governed content…</Text>
@@ -596,7 +596,7 @@ export function StaffClinicalContentScreen() {
       ) : (
         <View style={{
           padding: 27, alignItems: "center", gap: 10,
-          backgroundColor: panel, borderRadius: 23, borderWidth: 1, borderColor: stroke,
+          backgroundColor: themeSurface(panel), borderRadius: 23, borderWidth: 1, borderColor: stroke,
         }}>
           <View style={{
             width: 58, height: 58, borderRadius: 21,

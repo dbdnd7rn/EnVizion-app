@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -377,7 +377,7 @@ export function SmartCoveragePlannerScreen() {
       )}
 
       {!owner && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name={viewer ? "eye-outline" : "people-outline"} />
           <Text style={S.h3}>
             {viewer
@@ -535,9 +535,7 @@ export function SmartCoveragePlannerScreen() {
                           padding: 13,
                           borderColor:
                             canSelect && isSelected ? C.purple : C.line,
-                          backgroundColor: isSelected
-                            ? "#F7F1F8"
-                            : C.white,
+                          backgroundColor: themeSurface(isSelected ? "#F7F1F8" : C.white),
                         },
                       ]}
                     >
@@ -575,9 +573,7 @@ export function SmartCoveragePlannerScreen() {
                           style={[
                             S.pill,
                             {
-                              backgroundColor: candidate.declined
-                                ? C.redBg
-                                : fitBackground(candidate.fit),
+                              backgroundColor: themeSurface(candidate.declined ? C.redBg : fitBackground(candidate.fit)),
                             },
                           ]}
                         >
@@ -721,7 +717,7 @@ export function SmartCoveragePlannerScreen() {
         })
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="information-circle-outline" />
         <Text style={S.h3}>Planning support, not emergency monitoring.</Text>
         <Txt>

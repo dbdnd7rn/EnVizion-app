@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
@@ -547,7 +547,7 @@ export function CareDocumentsScreen() {
                     width: 46,
                     height: 46,
                     borderRadius: 14,
-                    backgroundColor: C.lavender,
+                    backgroundColor: themeSurface(C.lavender),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -690,7 +690,7 @@ export function CareDocumentsScreen() {
       )}
 
       {readOnly && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>
             {state.accessRole === "patient"
@@ -866,7 +866,7 @@ export function CareDocumentsScreen() {
                     width: 46,
                     height: 46,
                     borderRadius: 14,
-                    backgroundColor: C.lavender,
+                    backgroundColor: themeSurface(C.lavender),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -1000,7 +1000,7 @@ export function CareDocumentsScreen() {
         })
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="shield-checkmark-outline" />
         <Text style={S.h3}>Private by design</Text>
         <Txt>

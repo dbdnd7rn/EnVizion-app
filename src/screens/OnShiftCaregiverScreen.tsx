@@ -1,4 +1,4 @@
-import { themeAction } from "../themeColors";
+import { themeAction, themeSurface } from "../themeColors";
 import { themeBackground, themeForeground, themeBorder } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -191,12 +191,7 @@ function TaskCard({
           style={[
             S.pill,
             {
-              backgroundColor:
-                bucket === "overdue"
-                  ? C.redBg
-                  : bucket === "due_soon"
-                    ? "#FFF1E5"
-                    : C.lavender,
+              backgroundColor: themeSurface(bucket === "overdue" ? C.redBg : bucket === "due_soon" ? "#FFF1E5" : C.lavender),
             },
           ]}
         >

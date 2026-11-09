@@ -1,4 +1,4 @@
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeSurface } from "../themeColors";
 import { themeBackground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -852,7 +852,7 @@ export function WeeklyCoveragePlanScreen() {
       )}
 
       {viewer && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
@@ -891,7 +891,7 @@ export function WeeklyCoveragePlanScreen() {
       ) : selectedPlan && selectedPlan.status !== "draft" ? (
         <>
           <Section title="Published weekly plan" />
-          <Card style={{ backgroundColor: planStatusBackground(selectedPlan.status) }}>
+          <Card style={{ backgroundColor: themeSurface(planStatusBackground(selectedPlan.status)) }}>
             <View style={S.between}>
               <View style={{ flex: 1, gap: 4 }}>
                 <Text style={S.h2}>{planStatusLabel(selectedPlan.status)}</Text>
@@ -1048,7 +1048,7 @@ export function WeeklyCoveragePlanScreen() {
                   <View
                     style={[
                       S.pill,
-                      { backgroundColor: slotStatusBackground(slot.status) },
+                      { backgroundColor: themeSurface(slotStatusBackground(slot.status)) },
                     ]}
                   >
                     <Text
@@ -1315,10 +1315,7 @@ export function WeeklyCoveragePlanScreen() {
                 {owner && backupRequest && (
                   <Card
                     style={{
-                      backgroundColor:
-                        backupRequest.status === "filled"
-                          ? "#EAF4EF"
-                          : "#F7F1F8",
+                      backgroundColor: themeSurface(backupRequest.status === "filled" ? "#EAF4EF" : "#F7F1F8"),
                     }}
                   >
                     <View style={S.between}>
@@ -1614,8 +1611,7 @@ export function WeeklyCoveragePlanScreen() {
                             padding: 12,
                             borderColor:
                               selectedId === null ? C.purple : C.line,
-                            backgroundColor:
-                              selectedId === null ? "#F7F1F8" : C.white,
+                            backgroundColor: themeSurface(selectedId === null ? "#F7F1F8" : C.white),
                           },
                         ]}
                       >
@@ -1664,9 +1660,7 @@ export function WeeklyCoveragePlanScreen() {
                               {
                                 padding: 12,
                                 borderColor: chosen ? C.purple : C.line,
-                                backgroundColor: chosen
-                                  ? "#F7F1F8"
-                                  : C.white,
+                                backgroundColor: themeSurface(chosen ? "#F7F1F8" : C.white),
                               },
                             ]}
                           >
@@ -1692,10 +1686,7 @@ export function WeeklyCoveragePlanScreen() {
                                 style={[
                                   S.pill,
                                   {
-                                    backgroundColor:
-                                      candidate.fit === "preferred"
-                                        ? "#EAF4EF"
-                                        : C.lavender,
+                                    backgroundColor: themeSurface(candidate.fit === "preferred" ? "#EAF4EF" : C.lavender),
                                   },
                                 ]}
                               >
@@ -1724,7 +1715,7 @@ export function WeeklyCoveragePlanScreen() {
               })}
 
               {owner && (
-                <Card style={{ backgroundColor: C.lavender }}>
+                <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
                   <Text style={S.h3}>
                     {selectedPlan?.status === "draft"
                       ? "Draft saved"
@@ -1767,7 +1758,7 @@ export function WeeklyCoveragePlanScreen() {
         </>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="information-circle-outline" />
         <Text style={S.h3}>Family coordination, not emergency monitoring.</Text>
         <Txt>

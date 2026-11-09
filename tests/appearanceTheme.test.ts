@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import {
   activeAppearance, appearanceColor, darkPalette, setActiveAppearance,
-  themeAction, themeBackground, themeForeground, themeIconSurface, themedStyles, artworkColor, artworkBackdrop,
+  themeAction, themeBackground, themeForeground, themeIconSurface, themeSurface, themedStyles, artworkColor, artworkBackdrop,
 } from "../src/themeColors.ts";
 
 function luminance(color: string) {
@@ -156,6 +156,63 @@ test("hero and shared SVG artwork use artwork colors, not UI background tint", (
   const patient = readFileSync(new URL("../src/screens/PatientExperience.tsx", import.meta.url), "utf8");
   assert.match(patient, /backgroundColor: themeTint\(tint\)/);
   assert.match(patient, /fill=\{artworkColor\(accent\)\}/);
+});
+
+test("dark surfaces dim the previously white emergency, clinical, family and admin tiles", () => {
+  setActiveAppearance("light");
+  const original = ["#FCFAFF", "#F4ECFF", "#EEF7FF", "#FFF0F4", "#EEF9F5", "#FFF9F2", "#EFE9F4"];
+  for (const color of original) assert.equal(themeSurface(color), color);
+  try {
+    setActiveAppearance("dark");
+    for (const color of original) {
+      const surface = themeSurface(color);
+      assert.ok(luminance(surface) < 0.13, `Pale background leaked into dark mode: ${color} => ${surface}`);
+    }
+    assert.notEqual(themeSurface("#F4ECFF"), themeSurface("#EEF7FF"));
+    assert.notEqual(themeSurface("#EEF7FF"), themeSurface("#EEF9F5"));
+    assert.notEqual(themeSurface("#EEF9F5"), themeSurface("#FFF9F2"));
+    assert.ok(contrast(themeForeground("#7D35B5"), themeSurface("#FCFAFF")) >= 4.5);
+    assert.ok(contrast(themeForeground("#238ED0"), themeSurface("#EEF7FF")) >= 4.5);
+    assert.equal(themeSurface("#7B35A8"), "#7B35A8", "Saturated actions keep their paint");
+    assert.equal(artworkColor("#FFFFFF"), "#FFFFFF", "Illustrations stay independent of UI surfaces");
+    assert.equal(themeSurface("rgba(255,255,255,0.8)"), "rgba(37, 33, 46, 0.8)");
+  } finally {
+    setActiveAppearance("light");
+  }
+});
+
+test("emergency center contact/profile tiles convert dynamic backgrounds and icon colors", () => {
+  const source = readFileSync(new URL("../src/screens/EmergencyCenterScreen.tsx", import.meta.url), "utf8");
+  assert.equal((source.match(/backgroundColor: themeSurface\(background\)/g) ?? []).length, 3);
+  assert.match(source, /backgroundColor: themeIconSurface\(background\)/);
+  assert.match(source, /backgroundColor: themeIconSurface\(bg\)/);
+  assert.match(source, /color=\{themeForeground\(accent\)\}/);
+  for (const label of ["Add primary contact", "Care team", "Family", "Medication & transition"]) {
+    assert.ok(source.includes(label), `Keep emergency action ${label}`);
+  }
+});
+
+test("screen backgrounds never use direct opaque pastel literals", () => {
+  const directory = new URL("../src/screens/", import.meta.url);
+  const failures: string[] = [];
+  for (const name of readdirSync(directory).filter(file => file.endsWith(".tsx"))) {
+    const content = readFileSync(new URL(name, directory), "utf8");
+    const hexMatches = content.matchAll(/backgroundColor\s*:\s*["'](#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?)["']/g);
+    for (const match of hexMatches) {
+      const value = match[1];
+      const alpha = value.length === 9 ? parseInt(value.slice(7), 16) / 255 : 1;
+      if (alpha > 0.3 && luminance(value.slice(0, 7)) > 0.66)
+        failures.push(`${name}: ${value}`);
+    }
+    const rgbaMatches = content.matchAll(/backgroundColor\s*:\s*["']rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(0?\.\d+|1(?:\.0+)?)\s*\)["']/g);
+    for (const match of rgbaMatches) {
+      const rgb = match.slice(1,4).map(Number);
+      const brightness = (rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722) / 255;
+      if (Number(match[4]) > 0.3 && brightness > 0.7)
+        failures.push(`${name}: ${match[0]}`);
+    }
+  }
+  assert.deepEqual(failures, [], "Bright unthemed screen backgrounds should be routed through themeSurface");
 });
 
 test("legacy styles respond to theme changes and are never mutated", () => {

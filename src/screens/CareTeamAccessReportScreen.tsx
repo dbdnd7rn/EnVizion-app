@@ -1,4 +1,4 @@
-import { themeAction, themeBackground, themeBorder } from "../themeColors";
+import { themeAction, themeBackground, themeBorder, themeSurface } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
 import {
@@ -247,9 +247,7 @@ export function CareTeamAccessReportScreen() {
                         minHeight: 42,
                         justifyContent: "center",
                         paddingHorizontal: 13,
-                        backgroundColor: selected
-                          ? themeAction(C.purple)
-                          : C.lavender,
+                        backgroundColor: selected ? themeAction(C.purple) : themeSurface(C.lavender),
                         opacity: loading || exporting ? 0.65 : 1,
                       },
                     ]}
@@ -341,12 +339,7 @@ export function CareTeamAccessReportScreen() {
                     style={[
                       S.pill,
                       {
-                        backgroundColor:
-                          member.status === "active"
-                            ? "#EAF3EE"
-                            : member.isExpired
-                              ? "#FFF3E6"
-                              : "#F3ECF6",
+                        backgroundColor: themeSurface(member.status === "active" ? "#EAF3EE" : member.isExpired ? "#FFF3E6" : "#F3ECF6"),
                       },
                     ]}
                   >
