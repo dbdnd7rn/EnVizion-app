@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 
 const config = JSON.parse(
   fs.readFileSync("security/advisory-exceptions.json", "utf8"),
@@ -19,9 +20,15 @@ for (const item of exceptions.values()) {
   }
 }
 
+// Windows cannot execute npm.cmd with shell-free spawnSync. Invoke npm's JS
+// entry point through Node instead; keep shell interpolation out of this gate.
+const npmCli = process.env.npm_execpath || (process.platform === "win32"
+  ? path.join(path.dirname(process.execPath), "node_modules/npm/bin/npm-cli.js")
+  : null);
+const auditArgs = ["audit", "--json", "--audit-level=moderate"];
 const result = spawnSync(
-  process.platform === "win32" ? "npm.cmd" : "npm",
-  ["audit", "--json", "--audit-level=moderate"],
+  npmCli ? process.execPath : "npm",
+  npmCli ? [npmCli, ...auditArgs] : auditArgs,
   {
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
@@ -39,7 +46,16 @@ try {
   throw new Error("npm audit did not return valid JSON.");
 }
 
-const vulnerabilities = report.vulnerabilities ?? {};
+// A registry/network error or empty report must never look like a clean audit.
+if (![0, 1].includes(result.status) || report.error ||
+    report.auditReportVersion !== 2 || !report.vulnerabilities ||
+    typeof report.vulnerabilities !== "object" || Array.isArray(report.vulnerabilities) ||
+    !Number.isInteger(report.metadata?.vulnerabilities?.total)) {
+  console.error("npm audit failed or returned an incomplete report; dependency safety is unverified.");
+  process.exit(1);
+}
+
+const vulnerabilities = report.vulnerabilities;
 
 function advisoryId(value) {
   const text = [value?.url, value?.name, value?.title]

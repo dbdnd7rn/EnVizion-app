@@ -1,5 +1,7 @@
 # EnVizion Life Release Handoff
 
+Step 10: [Installable mobile beta, signing evidence and physical-device test matrix](docs/STEP10_INSTALLABLE_MOBILE_BETA_2026-11-09.md).
+
 Date: 24 September 2026
 
 ## Production endpoints
