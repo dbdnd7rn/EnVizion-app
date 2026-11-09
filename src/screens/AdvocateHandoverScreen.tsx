@@ -1,4 +1,4 @@
-import { themeForeground, themeShadow } from "../themeColors";
+import { themeForeground, themeShadow, themeBackground, themeBorder, themeIconSurface } from "../themeColors";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator, Pressable, ScrollView, Text, View,
@@ -33,8 +33,8 @@ function Glass({
     <View style={[{
       borderRadius: 25,
       borderWidth: 1,
-      borderColor: "#E9E2F3",
-      backgroundColor: "#FFFDFFEE",
+      borderColor: themeBorder("#E9E2F3"),
+      backgroundColor: themeBackground("#FFFDFFEE"),
       padding: 17,
       gap: 12,
       overflow: "hidden",
@@ -46,11 +46,11 @@ function Glass({
     }, style]}>
       <View pointerEvents="none" style={{
         position: "absolute", right: -70, top: -83, width: 169, height: 169,
-        borderRadius: 90, backgroundColor: tint, opacity: 0.44,
+        borderRadius: 90, backgroundColor: themeIconSurface(tint), opacity: 0.44,
       }} />
       <View pointerEvents="none" style={{
         position: "absolute", left: -55, bottom: -72, width: 124, height: 124,
-        borderRadius: 68, backgroundColor: "#E4D5F7", opacity: 0.22,
+        borderRadius: 68, backgroundColor: themeIconSurface("#E4D5F7"), opacity: 0.22,
       }} />
       {children}
     </View>
@@ -61,7 +61,7 @@ function Tile({ name, size = 48 }: { name: string; size?: number }) {
   return (
     <View style={{
       height: size, width: size, borderRadius: 16,
-      backgroundColor: "#F1E7FB",
+      backgroundColor: themeIconSurface("#F1E7FB"),
       alignItems: "center", justifyContent: "center",
     }}>
       <Icon name={name} size={Math.round(size * 0.48)} color={themeForeground(PURPLE)} />
@@ -118,8 +118,8 @@ function PillButton({
         alignItems: "center", justifyContent: "center",
         flexDirection: "row", gap: 10,
         overflow: "hidden",
-        borderWidth: 1, borderColor: secondary ? "#FFFFFF" : "#9253CC",
-        backgroundColor: secondary ? "#EBE1FA" : "#7136AE",
+        borderWidth: 1, borderColor: secondary ? themeBorder("#FFFFFF") : "#9253CC",
+        backgroundColor: secondary ? themeBackground("#EBE1FA") : "#7136AE",
         opacity: disabled ? 0.45 : pressed ? 0.76 : 1,
         shadowColor: secondary ? "#BAA4D0" : "#6B33A4",
         shadowOpacity: secondary ? 0.06 : 0.16,
@@ -196,7 +196,7 @@ export function AdvocateHandoverScreen() {
   const nav = useNav();
   if (!state.careRecipientId) {
     return (
-      <View style={{ backgroundColor: "#FCF9FF", flex: 1, padding: 22, gap: 14 }}>
+      <View style={{ backgroundColor: themeBackground("#FCF9FF"), flex: 1, padding: 22, gap: 14 }}>
         <BlockTitle>Select a care profile</BlockTitle>
         <Text style={{ color: themeForeground(MUTED), fontFamily: FAMILY }}>
           Select a care profile to review its handover.
@@ -335,7 +335,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: "#FCF9FF" }}
+      style={{ flex: 1, backgroundColor: themeBackground("#FCF9FF") }}
       contentContainerStyle={{ paddingHorizontal: 18, paddingTop: 17, paddingBottom: 55 }}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled">
@@ -344,8 +344,8 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
           <Pressable accessibilityRole="button" accessibilityLabel="Go back"
             onPress={() => n.canGoBack() ? n.goBack() : n.navigate("CareTeam")}
             style={({ pressed }) => ({
-              width: 44, height: 44, borderRadius: 22, backgroundColor: "#F2E9FA",
-              borderColor: "#FFFFFF", borderWidth: 1, alignItems: "center",
+              width: 44, height: 44, borderRadius: 22, backgroundColor: themeIconSurface("#F2E9FA"),
+              borderColor: themeBorder("#FFFFFF"), borderWidth: 1, alignItems: "center",
               justifyContent: "center", opacity: pressed ? 0.75 : 1,
             })}>
             <Icon name="arrow-back-outline" size={24} color={themeForeground(PURPLE)} />
@@ -360,7 +360,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
         <View style={{ gap: 9, overflow: "hidden" }}>
           <View pointerEvents="none" style={{
             position: "absolute", right: -56, top: -10, width: 220, height: 215,
-            borderRadius: 125, backgroundColor: "#F1EAFE",
+            borderRadius: 125, backgroundColor: themeIconSurface("#F1EAFE"),
           }} />
           <Text style={{
             fontFamily: BOLD, color: themeForeground(PURPLE), fontSize: 10.5,
@@ -396,7 +396,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
               </Text>
             </View>
           </View>
-          <View style={{ height: 1, backgroundColor: "#E8DAF2" }}/>
+          <View style={{ height: 1, backgroundColor: themeBorder("#E8DAF2") }}/>
           <View style={{ flexDirection: "row", gap: 10, alignItems: "stretch" }}>
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
               <Tile name="people-outline" size={37}/>
@@ -405,7 +405,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                 Both people must confirm the handover.
               </Text>
             </View>
-            <View style={{ width: 1, backgroundColor: "#E6D9F2" }}/>
+            <View style={{ width: 1, backgroundColor: themeBorder("#E6D9F2") }}/>
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
               <Tile name="time-outline" size={37}/>
               <Text style={{ flex: 1, fontSize: 11.5, lineHeight: 16.5,
@@ -427,8 +427,8 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
         )}
 
         {Boolean(loadError) && (
-          <Glass tint="#FCE9E9" style={{ borderColor: "#EFD8DC" }}>
-            <Text accessibilityRole="alert" style={{ color: "#A3485B",
+          <Glass tint="#FCE9E9" style={{ borderColor: themeBorder("#EFD8DC") }}>
+            <Text accessibilityRole="alert" style={{ color: themeForeground("#A3485B"),
               fontFamily: SEMI, fontSize: 13 }}>{loadError}</Text>
             <PillButton title="Try again" icon="refresh-outline" secondary
               disabled={loading || busy} onPress={() => void refresh()}/>
@@ -467,7 +467,7 @@ function HandoverContent({ recipientId }: { recipientId: string }) {
                       </Text>
                     </View>
                     <View style={{ borderRadius: 18, paddingHorizontal: 10,
-                      paddingVertical: 7, backgroundColor: "#F6EDF9" }}>
+                      paddingVertical: 7, backgroundColor: themeBackground("#F6EDF9") }}>
                       <Text style={{ color: themeForeground(PURPLE), fontFamily: SEMI, fontSize: 11 }}>
                         Pending
                       </Text>
