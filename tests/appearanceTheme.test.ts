@@ -126,11 +126,10 @@ test("dark appearance preserves SVG paint colors without restoring pale UI cards
 
 test("hero and shared SVG artwork use artwork colors, not UI background tint", () => {
   const files = [
-    "screens/MainScreens.tsx", "screens/CareScreens.tsx", "screens/CarePlanScreen.tsx",
+    "screens/CareScreens.tsx", "screens/CarePlanScreen.tsx",
     "screens/CareCalendarScreen.tsx", "screens/CareShiftBoardScreen.tsx",
-    "screens/CareAnalyticsScreen.tsx", "screens/MedicationManagementScreen.tsx",
-    "screens/HospitalToHomeScreen.tsx", "screens/SummaryScreen.tsx",
-    "screens/SupportScreens.tsx", "components/SpiritualLandscapeArt.tsx",
+    "screens/HospitalToHomeScreen.tsx", "screens/SupportScreens.tsx",
+    "components/SpiritualLandscapeArt.tsx",
     "components/OnboardingWelcomeStep.tsx", "ui.tsx",
   ];
   for (const file of files) {
@@ -141,6 +140,17 @@ test("hero and shared SVG artwork use artwork colors, not UI background tint", (
   const home = readFileSync(new URL("../src/screens/MainScreens.tsx", import.meta.url), "utf8");
   const reader = home.split("function LearnHeroGraphic()")[1]?.split("function LearnFeaturedGraphic()")[0] ?? "";
   assert.match(reader, /artworkColor\("#F0C8B5"\)/);
+  assert.doesNotMatch(reader, /themeTint\(/);
+  for (const [path, begin, end] of [
+    ["screens/CareAnalyticsScreen.tsx", "function CalendarGraphic(", "function formatWeekLabel("],
+    ["screens/MedicationManagementScreen.tsx", "function MedicationHeroGraphic()", "function FloatingMedicationHero("],
+    ["screens/SummaryScreen.tsx", "function FolderGraphic()", "function FloatingFolder("],
+  ]) {
+    const content = readFileSync(new URL("../src/" + path, import.meta.url), "utf8");
+    const artwork = content.split(begin)[1]?.split(end)[0] ?? "";
+    assert.match(artwork, /artworkColor\(/, path);
+    assert.doesNotMatch(artwork, /themeTint\(/, path);
+  }
   assert.match(reader, /artworkColor\("#7A45A0"\)/);
   assert.match(reader, /artworkBackdrop\("#F7F1FC", "#3D2D50"\)/);
   const patient = readFileSync(new URL("../src/screens/PatientExperience.tsx", import.meta.url), "utf8");
