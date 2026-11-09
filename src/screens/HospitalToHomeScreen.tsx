@@ -1,5 +1,5 @@
 import { themeBorder, themeShadow } from "../themeColors";
-import { themeBackground, themeForeground, themeTint } from "../themeColors";
+import { themeBackground, themeForeground, artworkColor } from "../themeColors";
 import React, {
   useCallback,
   useEffect,
@@ -261,33 +261,33 @@ function HospitalToHomeArtwork({ reducedMotion }: { reducedMotion: boolean }) {
       >
         <Defs>
           <LinearGradient id="transitionGround" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#FFF9F4")} />
-            <Stop offset="0.55" stopColor={themeTint("#F5ECFB")} />
-            <Stop offset="1" stopColor={themeTint("#E9DCF8")} />
+            <Stop offset="0" stopColor={artworkColor("#FFF9F4")} />
+            <Stop offset="0.55" stopColor={artworkColor("#F5ECFB")} />
+            <Stop offset="1" stopColor={artworkColor("#E9DCF8")} />
           </LinearGradient>
           <LinearGradient id="transitionHospital" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-            <Stop offset="1" stopColor={themeTint("#E4D4F1")} />
+            <Stop offset="0" stopColor={artworkColor("#FFFFFF")} />
+            <Stop offset="1" stopColor={artworkColor("#E4D4F1")} />
           </LinearGradient>
           <LinearGradient id="transitionHome" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#F4E7FF")} />
-            <Stop offset="1" stopColor={themeTint("#B386D0")} />
+            <Stop offset="0" stopColor={artworkColor("#F4E7FF")} />
+            <Stop offset="1" stopColor={artworkColor("#B386D0")} />
           </LinearGradient>
           <LinearGradient id="transitionPath" x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0" stopColor={themeTint("#FFE8A7")} />
-            <Stop offset="0.5" stopColor={themeTint("#FFF8E9")} />
-            <Stop offset="1" stopColor={themeTint("#F1D8FF")} />
+            <Stop offset="0" stopColor={artworkColor("#FFE8A7")} />
+            <Stop offset="0.5" stopColor={artworkColor("#FFF8E9")} />
+            <Stop offset="1" stopColor={artworkColor("#F1D8FF")} />
           </LinearGradient>
         </Defs>
 
         <Rect x="0" y="0" width="440" height="190" rx="28" fill="url(#transitionGround)" />
-        <Circle cx="356" cy="48" r="44" fill={themeTint("#F7EEFF")} opacity={0.75} />
-        <Ellipse cx="216" cy="167" rx="194" ry="17" fill={themeTint("#AF8BC7")} opacity={0.11} />
+        <Circle cx="356" cy="48" r="44" fill={artworkColor("#F7EEFF")} opacity={0.75} />
+        <Ellipse cx="216" cy="167" rx="194" ry="17" fill={artworkColor("#AF8BC7")} opacity={0.11} />
 
         <Path
           d="M146 151C190 136 198 118 237 118C281 118 291 143 337 137"
           fill="none"
-          stroke={themeTint("#DABEFF")}
+          stroke={artworkColor("#DABEFF")}
           strokeWidth="15"
           strokeLinecap="round"
           opacity={0.22}
@@ -302,43 +302,43 @@ function HospitalToHomeArtwork({ reducedMotion }: { reducedMotion: boolean }) {
         <Path
           d="M145 151C190 136 198 118 237 118C281 118 291 143 337 137"
           fill="none"
-          stroke={themeTint("#FFFFFF")}
+          stroke={artworkColor("#FFFFFF")}
           strokeWidth="2"
           strokeLinecap="round"
           opacity={0.9}
         />
 
         <G transform="translate(28 63)">
-          <Ellipse cx="74" cy="96" rx="66" ry="12" fill={themeTint("#704490")} opacity={0.12} />
-          <Rect x="16" y="28" width="94" height="72" rx="7" fill="url(#transitionHospital)" stroke={themeTint("#CBB2DE")} />
-          <Rect x="0" y="48" width="28" height="52" rx="5" fill={themeTint("#EFE6F5")} stroke={themeTint("#CFB9DE")} />
-          <Rect x="99" y="45" width="30" height="55" rx="5" fill={themeTint("#EADCF3")} stroke={themeTint("#C8AEDB")} />
-          <Rect x="51" y="70" width="25" height="30" rx="3" fill={themeTint("#D5B6E8")} />
-          <Rect x="31" y="42" width="12" height="12" rx="2" fill={themeTint("#FFEFC2")} />
-          <Rect x="82" y="42" width="12" height="12" rx="2" fill={themeTint("#FFEFC2")} />
-          <Rect x="31" y="61" width="12" height="12" rx="2" fill={themeTint("#F4ECFF")} />
-          <Rect x="82" y="61" width="12" height="12" rx="2" fill={themeTint("#F4ECFF")} />
-          <Circle cx="63" cy="49" r="16" fill={themeTint("#F8F1FF")} stroke={themeTint("#C8ACDA")} />
-          <Path d="M58 39H68V45H74V55H68V61H58V55H52V45H58Z" fill={themeTint("#8040B0")} />
+          <Ellipse cx="74" cy="96" rx="66" ry="12" fill={artworkColor("#704490")} opacity={0.12} />
+          <Rect x="16" y="28" width="94" height="72" rx="7" fill="url(#transitionHospital)" stroke={artworkColor("#CBB2DE")} />
+          <Rect x="0" y="48" width="28" height="52" rx="5" fill={artworkColor("#EFE6F5")} stroke={artworkColor("#CFB9DE")} />
+          <Rect x="99" y="45" width="30" height="55" rx="5" fill={artworkColor("#EADCF3")} stroke={artworkColor("#C8AEDB")} />
+          <Rect x="51" y="70" width="25" height="30" rx="3" fill={artworkColor("#D5B6E8")} />
+          <Rect x="31" y="42" width="12" height="12" rx="2" fill={artworkColor("#FFEFC2")} />
+          <Rect x="82" y="42" width="12" height="12" rx="2" fill={artworkColor("#FFEFC2")} />
+          <Rect x="31" y="61" width="12" height="12" rx="2" fill={artworkColor("#F4ECFF")} />
+          <Rect x="82" y="61" width="12" height="12" rx="2" fill={artworkColor("#F4ECFF")} />
+          <Circle cx="63" cy="49" r="16" fill={artworkColor("#F8F1FF")} stroke={artworkColor("#C8ACDA")} />
+          <Path d="M58 39H68V45H74V55H68V61H58V55H52V45H58Z" fill={artworkColor("#8040B0")} />
         </G>
 
         <G transform="translate(307 74)">
-          <Ellipse cx="55" cy="81" rx="52" ry="10" fill={themeTint("#704490")} opacity={0.11} />
-          <Path d="M8 42L55 7L104 42V89H8Z" fill={themeTint("#F8F1FF")} stroke={themeTint("#C7ADD9")} />
+          <Ellipse cx="55" cy="81" rx="52" ry="10" fill={artworkColor("#704490")} opacity={0.11} />
+          <Path d="M8 42L55 7L104 42V89H8Z" fill={artworkColor("#F8F1FF")} stroke={artworkColor("#C7ADD9")} />
           <Path d="M1 43L55 2L111 43L99 51L55 19L12 51Z" fill="url(#transitionHome)" />
-          <Rect x="44" y="58" width="22" height="31" rx="3" fill={themeTint("#E1C8F0")} />
-          <Rect x="18" y="51" width="18" height="17" rx="3" fill={themeTint("#FFF0B8")} />
-          <Rect x="77" y="51" width="18" height="17" rx="3" fill={themeTint("#FFF0B8")} />
+          <Rect x="44" y="58" width="22" height="31" rx="3" fill={artworkColor("#E1C8F0")} />
+          <Rect x="18" y="51" width="18" height="17" rx="3" fill={artworkColor("#FFF0B8")} />
+          <Rect x="77" y="51" width="18" height="17" rx="3" fill={artworkColor("#FFF0B8")} />
         </G>
 
         <G opacity={0.82}>
-          <Path d="M283 126V78" stroke={themeTint("#84629A")} strokeWidth="3" strokeLinecap="round" />
-          <Circle cx="283" cy="73" r="15" fill={themeTint("#C3ACD1")} />
-          <Circle cx="273" cy="87" r="12" fill={themeTint("#B99DC9")} />
-          <Circle cx="293" cy="89" r="11" fill={themeTint("#D1C0DC")} />
-          <Path d="M405 132V91" stroke={themeTint("#84629A")} strokeWidth="3" strokeLinecap="round" />
-          <Circle cx="405" cy="87" r="13" fill={themeTint("#BFA5CF")} />
-          <Circle cx="397" cy="99" r="10" fill={themeTint("#D4C3DE")} />
+          <Path d="M283 126V78" stroke={artworkColor("#84629A")} strokeWidth="3" strokeLinecap="round" />
+          <Circle cx="283" cy="73" r="15" fill={artworkColor("#C3ACD1")} />
+          <Circle cx="273" cy="87" r="12" fill={artworkColor("#B99DC9")} />
+          <Circle cx="293" cy="89" r="11" fill={artworkColor("#D1C0DC")} />
+          <Path d="M405 132V91" stroke={artworkColor("#84629A")} strokeWidth="3" strokeLinecap="round" />
+          <Circle cx="405" cy="87" r="13" fill={artworkColor("#BFA5CF")} />
+          <Circle cx="397" cy="99" r="10" fill={artworkColor("#D4C3DE")} />
         </G>
       </Svg>
     </Animated.View>
