@@ -1,4 +1,4 @@
-import { themeBorder, themeTint } from "../themeColors";
+import { themeBorder, artworkColor } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Linking, Pressable, Switch, Text, View, useWindowDimensions } from "react-native";
@@ -93,28 +93,28 @@ function InvitationFamilyArtwork() {
     <Svg width={192} height={148} viewBox="0 0 220 160" accessible={false}>
       <Defs>
         <LinearGradient id="invitationFamilyGlow" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F6E9FF")} />
-          <Stop offset="1" stopColor={themeTint("#EED7FA")} />
+          <Stop offset="0" stopColor={artworkColor("#F6E9FF")} />
+          <Stop offset="1" stopColor={artworkColor("#EED7FA")} />
         </LinearGradient>
         <LinearGradient id="invitationFamilyPurple" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#AE72CF")} />
-          <Stop offset="1" stopColor={themeTint("#70338F")} />
+          <Stop offset="0" stopColor={artworkColor("#AE72CF")} />
+          <Stop offset="1" stopColor={artworkColor("#70338F")} />
         </LinearGradient>
       </Defs>
       <Path
         d="M27 119C12 100 23 75 42 67C59 61 58 38 78 36C93 36 98 20 116 27C136 35 143 22 156 37C169 50 176 45 188 63C202 84 196 100 207 118C217 141 170 144 128 144H69C46 144 33 135 27 119Z"
         fill="url(#invitationFamilyGlow)"
       />
-      <Circle cx={57} cy={79} r={17} fill={themeTint("#AB6CCD")} />
-      <Circle cx={163} cy={79} r={17} fill={themeTint("#AC6CCF")} />
-      <Path d="M29 122C29 101 40 96 57 96S85 101 85 122V131H29Z" fill={themeTint("#A463C5")} />
-      <Path d="M135 122C135 101 146 96 163 96S191 101 191 122V131H135Z" fill={themeTint("#A463C5")} />
+      <Circle cx={57} cy={79} r={17} fill={artworkColor("#AB6CCD")} />
+      <Circle cx={163} cy={79} r={17} fill={artworkColor("#AC6CCF")} />
+      <Path d="M29 122C29 101 40 96 57 96S85 101 85 122V131H29Z" fill={artworkColor("#A463C5")} />
+      <Path d="M135 122C135 101 146 96 163 96S191 101 191 122V131H135Z" fill={artworkColor("#A463C5")} />
       <Circle cx={110} cy={57} r={22} fill="url(#invitationFamilyPurple)" />
       <Path d="M70 131V109C70 88 86 81 110 81S150 88 150 109V131Z" fill="url(#invitationFamilyPurple)" />
-      <Circle cx={110} cy={124} r={24} fill={themeTint("#FDF8FF")} />
+      <Circle cx={110} cy={124} r={24} fill={artworkColor("#FDF8FF")} />
       <Path
         d="M110 137L98 125C91 118 97 109 104 113L110 118L116 113C123 109 129 118 122 125Z"
-        fill={themeTint("#8138A0")}
+        fill={artworkColor("#8138A0")}
       />
     </Svg>
   );
@@ -385,8 +385,8 @@ export function OnboardingScreen() {
         }}>
           <View style={{ position: "absolute", right: -30, top: 15, opacity: 0.7 }}>
             <Svg width={125} height={104} viewBox="0 0 125 104" accessible={false}>
-              <Path d="M125 0V104H0C35 85 71 37 125 0Z" fill={themeTint("#F4E5FC")} />
-              <Path d="M125 44V104H50C79 89 97 65 125 44Z" fill={themeTint("#E7CCF4")} />
+              <Path d="M125 0V104H0C35 85 71 37 125 0Z" fill={artworkColor("#F4E5FC")} />
+              <Path d="M125 44V104H50C79 89 97 65 125 44Z" fill={artworkColor("#E7CCF4")} />
             </Svg>
           </View>
           <InvitationFamilyArtwork />
