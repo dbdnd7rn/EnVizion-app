@@ -1,4 +1,4 @@
-import { themeForeground, themeTint } from "./themeColors";
+import { themeAction, themeBackground, themeBorder, themeForeground, themeTint } from "./themeColors";
 import React, {
   createContext,
   useCallback,
@@ -8,11 +8,9 @@ import React, {
   useState,
 } from "react";
 import {
-  AccessibilityInfo,
-  Animated,
-  Easing,
   ActivityIndicator,
   AppState,
+  Image,
   Linking,
   Platform,
   Pressable,
@@ -545,45 +543,27 @@ export function PasswordRecoveryScreen() {
 }
 
 
-function AuthBrandMotion() {
-  const phase = React.useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    let active = true;
-    let animation: Animated.CompositeAnimation | undefined;
-    function configure(reduced: boolean) {
-      animation?.stop();
-      phase.setValue(0);
-      if (!active || reduced) return;
-      animation = Animated.loop(Animated.timing(phase, {
-        toValue: 1, duration: 9000, easing: Easing.linear,
-        useNativeDriver: true, isInteraction: false,
-      }));
-      animation.start();
-    }
-    AccessibilityInfo.isReduceMotionEnabled().then(value => { if (active) configure(value); }).catch(() => {});
-    const listener = AccessibilityInfo.addEventListener("reduceMotionChanged", configure);
-    return () => { active = false; animation?.stop(); listener.remove(); };
-  }, [phase]);
+function AuthBrandStatic() {
+  // Login decoration stays motionless on mobile and web.
   return (
-    <View style={{ alignItems: "center", paddingTop: 12, paddingBottom: 6, gap: 14 }}>
-      <View style={{ width: 204, height: 154, alignItems: "center", justifyContent: "center" }}>
-        <View style={{ position: "absolute", width: 148, height: 148, borderRadius: 74, backgroundColor: C.lavender, opacity: 0.65 }} />
-        <Animated.View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
-          style={{ position: "absolute", width: 180, height: 140, borderRadius: 90, borderWidth: 1,
-            borderColor: C.line, transform: [{ rotate: phase.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "360deg"] }) }] }}>
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: C.purple, position: "absolute", top: 17, left: 22 }} />
-          <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: C.rose, position: "absolute", bottom: 15, right: 22 }} />
-        </Animated.View>
-        <Animated.Image source={require("../assets/envizion-original.png")} resizeMode="contain"
-          accessibilityLabel="EnVizion Life"
-          style={{ width: 154, height: 102, transform: [{ translateY: phase.interpolate({
-            inputRange: [0, 0.25, 0.5, 0.75, 1], outputRange: [0, -5, 0, 5, 0],
-          }) }] }} />
+    <View style={{ alignItems: "center", gap: 9, paddingTop: 26, paddingBottom: 8, overflow: "hidden" }}>
+      <View pointerEvents="none" style={{ position: "absolute", top: -28, left: -20, width: 176, height: 98 }}>
+        <Svg width="100%" height="100%" viewBox="0 0 176 98" preserveAspectRatio="none">
+          <Path d="M0 0H176C155 24 137 35 103 37C65 40 59 81 0 98Z" fill={themeBackground("#F0DDF9")} />
+          <Path d="M0 0H139C106 41 74 24 44 68C30 85 18 90 0 96Z" fill={themeBackground("#E9C9F5")} />
+        </Svg>
       </View>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 7, borderWidth: 1, borderColor: C.line,
-        borderRadius: 30, paddingHorizontal: 12, paddingVertical: 6, backgroundColor: C.white }}>
-        <Icon name="shield-checkmark-outline" size={13} />
-        <Text style={[S.eyebrow, { fontSize: 9, letterSpacing: 1.4 }]}>YOUR CARE. CONNECTED.</Text>
+      <Image source={require("../assets/envizion-original.png")} resizeMode="contain"
+        accessibilityLabel="EnVizion Life logo" style={{ width: 218, height: 116 }} />
+      <View style={{
+        flexDirection: "row", alignItems: "center", gap: 8,
+        paddingHorizontal: 15, paddingVertical: 8, borderRadius: 30,
+        backgroundColor: themeBackground("#F5E9FA"), borderColor: themeBorder("#E9D8F0"), borderWidth: 1,
+      }}>
+        <Icon name="shield-checkmark-outline" size={14} color={C.purple} />
+        <Text style={[S.eyebrow, { fontSize: 10, letterSpacing: 1.6, color: C.purple }]}>
+          YOUR CARE. CONNECTED.
+        </Text>
       </View>
     </View>
   );
@@ -747,24 +727,55 @@ export function AuthScreen() {
 
   return (
     <Page>
-      <AuthBrandMotion />
+      <AuthBrandStatic />
 
-      <View style={{ alignItems: "center", gap: 7, paddingBottom: 4 }}>
-      <Text style={[S.eyebrow, { fontSize: 9, letterSpacing: 2.5 }]}>ENVIZION LIFE WORKSPACE</Text>
-      <Text accessibilityRole="header" style={[S.title, { fontSize: 34, lineHeight: 40, textAlign: "center", letterSpacing: -1.2 }]}>{mode === "signin" ? "Care starts here." : mode === "signup" ? "A little closer. Together." : "Let’s get you back."}</Text>
-      <Text style={[S.body, { textAlign: "center", maxWidth: 300 }]}>{mode === "signin" ? "Your people. Your care. One connected space." : mode === "signup" ? "Create your account to join your care circle." : "We’ll email you a secure recovery link."}</Text>
+      <View style={{ alignItems: "center", paddingBottom: 5 }}>
+        <Text accessibilityRole="header" style={{
+          fontFamily: "Lora_500Medium", fontSize: 33, lineHeight: 46,
+          textAlign: "center", letterSpacing: -1, color: C.ink,
+        }}>
+          {mode === "signin" ? (
+            <>Care starts <Text style={{ color: C.purple }}>here.</Text></>
+          ) : mode === "signup" ? (
+            <>Join your <Text style={{ color: C.purple }}>care circle.</Text></>
+          ) : (
+            <>Welcome <Text style={{ color: C.purple }}>back.</Text></>
+          )}
+        </Text>
       </View>
-      <Card style={{ gap: 17, padding: 22, borderRadius: 28, backgroundColor: C.white, shadowOpacity: 0.07, shadowRadius: 28, shadowOffset: { width: 0, height: 12 } }}>
-        <View style={[S.between, { marginBottom: 1 }]}><Text style={[S.h3, { fontSize: 18 }]}>{mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Account recovery"}</Text><Icon name="lock-closed-outline" size={17} color={C.muted} /></View>
+      <Card style={{
+        gap: 18, padding: 22, paddingTop: 30, borderRadius: 34,
+        backgroundColor: themeBackground("#FFFCFF"),
+        borderColor: themeBorder("#EBD7F3"),
+        shadowOpacity: 0.10, shadowRadius: 26, shadowOffset: { width: 0, height: 12 },
+        elevation: 3,
+      }}>
+        <View pointerEvents="none" style={{ position: "absolute", right: 0, top: 0, width: 240, height: 118 }}>
+          <Svg width="100%" height="100%" viewBox="0 0 240 118" preserveAspectRatio="none">
+            <Path d="M36 0H240V116C205 78 174 84 150 66C113 39 90 0 36 0Z" fill={themeBackground("#F3E5FA")} />
+            <Path d="M136 0H240V66C205 58 193 34 177 23C166 15 151 7 136 0Z" fill={themeBackground("#ECD5F8")} />
+          </Svg>
+        </View>
+        <View style={[S.between, { marginBottom: 4 }]}>
+          <Text style={[S.h3, { fontSize: 23, lineHeight: 29, letterSpacing: -0.6 }]}>
+            {mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Account recovery"}
+          </Text>
+          <View style={{
+            width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center",
+            backgroundColor: themeBackground("#F0DAFA"),
+          }}>
+            <Icon name="lock-closed-outline" size={20} color={C.purple} />
+          </View>
+        </View>
         {mode === "signup" && (
           <View style={{ gap: 8 }}>
-            <Text style={[S.h3, { fontSize: 13 }]}>Your name</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="person-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14 }]}>Your name</Text></View>
             <TextInput
               accessibilityLabel="Your name"
               value={fullName}
               onChangeText={setFullName}
               autoComplete="name"
-              style={[S.input, { borderRadius: 14, backgroundColor: C.paper, shadowOpacity: 0, fontSize: 16 }]}
+              style={[S.input, { borderRadius: 23, minHeight: 56, backgroundColor: themeBackground("#FFFAFF"), borderColor: themeBorder("#E2CDEB"), shadowOpacity: 0.025, fontSize: 16, paddingHorizontal: 18 }]}
               placeholder="Your name"
               placeholderTextColor={themeForeground("#AAA0AF")}
             />
@@ -772,7 +783,7 @@ export function AuthScreen() {
         )}
 
         <View style={{ gap: 8 }}>
-          <Text style={[S.h3, { fontSize: 13 }]}>Email address</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="mail-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14 }]}>Email address</Text></View>
           <TextInput
             accessibilityLabel="Email address"
             value={email}
@@ -781,7 +792,7 @@ export function AuthScreen() {
             autoCorrect={false}
             autoComplete="email"
             keyboardType="email-address"
-            style={[S.input, { borderRadius: 14, backgroundColor: C.paper, shadowOpacity: 0, fontSize: 16 }]}
+            style={[S.input, { borderRadius: 23, minHeight: 56, backgroundColor: themeBackground("#FFFAFF"), borderColor: themeBorder("#E2CDEB"), shadowOpacity: 0.025, fontSize: 16, paddingHorizontal: 18 }]}
             placeholder="you@example.com"
             placeholderTextColor={themeForeground("#AAA0AF")}
           />
@@ -789,7 +800,7 @@ export function AuthScreen() {
 
         {mode !== "forgot" && (
           <View style={{ gap: 8 }}>
-            <Text style={[S.h3, { fontSize: 13 }]}>Password</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="lock-closed-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14 }]}>Password</Text></View>
             <View style={{ position: "relative" }}>
             <TextInput
               accessibilityLabel="Password"
@@ -799,7 +810,7 @@ export function AuthScreen() {
               autoCorrect={false}
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
               secureTextEntry={!showPassword}
-              style={[S.input, { borderRadius: 14, backgroundColor: C.paper, shadowOpacity: 0, fontSize: 16, paddingRight: 56 }]}
+              style={[S.input, { borderRadius: 23, minHeight: 56, backgroundColor: themeBackground("#FFFAFF"), borderColor: themeBorder("#E2CDEB"), shadowOpacity: 0.025, fontSize: 16, paddingHorizontal: 18, paddingRight: 56 }]}
               returnKeyType="go"
               onSubmitEditing={() => void submit()}
               placeholder={
@@ -827,24 +838,34 @@ export function AuthScreen() {
           </Text>
         )}
 
-        <Button
-          title={
-            busy
-              ? mode === "signin"
-                ? "Signing in…"
-                : mode === "signup"
-                  ? "Creating account…"
-                  : "Sending recovery link…"
-              : mode === "signin"
-                ? "Sign in"
-                : mode === "signup"
-                  ? "Create account"
-                  : "Send recovery link"
-          }
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send recovery link"}
+          accessibilityState={{ disabled: busy || googleBusy }}
           disabled={busy || googleBusy}
-          icon="arrow-forward"
           onPress={() => void submit()}
-        />
+          style={({ pressed }) => ({
+            minHeight: 58, borderRadius: 30, overflow: "hidden",
+            flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 11,
+            backgroundColor: themeAction("#7D218E"),
+            opacity: busy || googleBusy ? 0.5 : pressed ? 0.82 : 1,
+            shadowColor: themeForeground("#70338F"), shadowOpacity: 0.14,
+            shadowOffset: { width: 0, height: 6 }, shadowRadius: 10, elevation: 2,
+          })}
+        >
+          <View pointerEvents="none" style={{ position: "absolute", top: 0, right: 0, left: 0, bottom: 0 }}>
+            <Svg width="100%" height="100%" viewBox="0 0 360 58" preserveAspectRatio="none">
+              <Path d="M0 0H360V58H0Z" fill={themeAction("#791787")} />
+              <Path d="M0 0H150C117 14 107 32 62 35C35 37 24 48 0 58Z" fill={themeAction("#8B34A2")} />
+              <Path d="M260 58C305 27 330 44 360 12V58Z" fill={themeAction("#9B38B0")} />
+            </Svg>
+          </View>
+          <Icon name="arrow-forward" size={21} color={themeForeground("#FFFFFF")} />
+          <Text style={[S.h3, { fontSize: 16, color: themeForeground("#FFFFFF") }]}>
+            {busy ? mode === "signin" ? "Signing in…" : mode === "signup" ? "Creating account…" : "Sending recovery link…"
+              : mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Send recovery link"}
+          </Text>
+        </Pressable>
 
         {mode !== "forgot" && (
           <>
@@ -864,11 +885,11 @@ export function AuthScreen() {
               disabled={busy || googleBusy}
               onPress={() => void continueWithGoogle()}
               style={({ pressed }) => ({
-                minHeight: 52,
-                borderRadius: 15,
+                minHeight: 56,
+                borderRadius: 26,
                 borderWidth: 1,
-                borderColor: C.line,
-                backgroundColor: pressed ? "#F7F1F8" : C.white,
+                borderColor: themeBorder("#DFC4EE"),
+                backgroundColor: pressed ? themeBackground("#F5E9FA") : themeBackground("#FFFAFF"),
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
@@ -918,9 +939,7 @@ export function AuthScreen() {
               alignItems: "center",
             }}
           >
-            <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-              Forgot your password?
-            </Text>
+            <Text style={[S.h3, { color: C.purple, fontSize: 14 }]}>Forgot your password?</Text>
           </Pressable>
 
           <Pressable
@@ -932,8 +951,8 @@ export function AuthScreen() {
               alignItems: "center",
             }}
           >
-            <Text style={[S.h3, { color: C.purple, fontSize: 13 }]}>
-              New to EnVizion Life? Create an account
+            <Text style={[S.body, { color: C.ink, fontSize: 14 }]}>
+              New to EnVizion Life? <Text style={{ color: C.purple, fontFamily: "DMSans_700Bold" }}>Create an account</Text>
             </Text>
           </Pressable>
         </>
@@ -973,9 +992,6 @@ export function AuthScreen() {
 
       {(busy || googleBusy) && <ActivityIndicator color={C.purple} />}
 
-      <Txt style={[S.small, { textAlign: "center" }]}>
-        Care feels better, together.{"\n"}EnVizion Life supports care coordination and does not replace medical care.
-      </Txt>
     </Page>
   );
 }
