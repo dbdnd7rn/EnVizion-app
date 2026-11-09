@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, artworkColor } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeTint, artworkColor } from "../themeColors";
 import { themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -139,17 +139,17 @@ function WeekCardBackground() {
     >
       <Defs>
         <LinearGradient id="weekBg" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={artworkColor("#9B5DCA")} />
-          <Stop offset="0.55" stopColor={artworkColor("#7D3CAF")} />
-          <Stop offset="1" stopColor={artworkColor("#A06BCD")} />
+          <Stop offset="0" stopColor={themeTint("#9B5DCA")} />
+          <Stop offset="0.55" stopColor={themeTint("#7D3CAF")} />
+          <Stop offset="1" stopColor={themeTint("#A06BCD")} />
         </LinearGradient>
       </Defs>
       <Rect x="0" y="0" width="420" height="122" rx="28" fill="url(#weekBg)" />
-      <Circle cx="74" cy="29" r="66" fill={artworkColor("#FFFFFF")} opacity="0.075" />
-      <Circle cx="351" cy="100" r="86" fill={artworkColor("#FFFFFF")} opacity="0.05" />
+      <Circle cx="74" cy="29" r="66" fill={themeTint("#FFFFFF")} opacity="0.075" />
+      <Circle cx="351" cy="100" r="86" fill={themeTint("#FFFFFF")} opacity="0.05" />
       <Path
         d="M220 122C251 73 310 51 420 54V122H220Z"
-        fill={artworkColor("#FFFFFF")}
+        fill={themeTint("#FFFFFF")}
         opacity="0.045"
       />
     </Svg>
