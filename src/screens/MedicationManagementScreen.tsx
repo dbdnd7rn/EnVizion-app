@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, themeShadow, artworkColor } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeShadow, themeTint, artworkColor } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, TextInput, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Line, Path, Rect, Stop } from "react-native-svg";
@@ -776,14 +776,14 @@ export function MedicationManagementScreen() {
         >
           <Defs>
             <LinearGradient id="medPageTop" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={artworkColor("#FFFDFC")} />
-              <Stop offset="0.62" stopColor={artworkColor("#FFFDFC")} />
-              <Stop offset="1" stopColor={artworkColor("#F8F0FD")} />
+              <Stop offset="0" stopColor={themeTint("#FFFDFC")} />
+              <Stop offset="0.62" stopColor={themeTint("#FFFDFC")} />
+              <Stop offset="1" stopColor={themeTint("#F8F0FD")} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="480" height="520" fill="url(#medPageTop)" />
-          <Circle cx="454" cy="22" r="112" fill={artworkColor("#F3E7FD")} opacity={0.48} />
-          <Circle cx="414" cy="180" r="118" fill={artworkColor("#EEDAFB")} opacity={0.24} />
+          <Circle cx="454" cy="22" r="112" fill={themeTint("#F3E7FD")} opacity={0.48} />
+          <Circle cx="414" cy="180" r="118" fill={themeTint("#EEDAFB")} opacity={0.24} />
         </Svg>
 
         <MotionBlock reducedMotion={reducedMotion}>
@@ -881,9 +881,9 @@ export function MedicationManagementScreen() {
           >
             <Defs>
               <LinearGradient id="addMedicationGradient" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor={artworkColor("#8541B5")} />
-                <Stop offset="0.5" stopColor={artworkColor("#9743C9")} />
-                <Stop offset="1" stopColor={artworkColor("#7132A2")} />
+                <Stop offset="0" stopColor={themeTint("#8541B5")} />
+                <Stop offset="0.5" stopColor={themeTint("#9743C9")} />
+                <Stop offset="1" stopColor={themeTint("#7132A2")} />
               </LinearGradient>
             </Defs>
             <Rect x="0" y="0" width="440" height="60" rx="30" fill="url(#addMedicationGradient)" />
@@ -1268,9 +1268,9 @@ export function MedicationManagementScreen() {
               >
                 <Defs>
                   <LinearGradient id="reviewGradient" x1="0" y1="0" x2="1" y2="0">
-                    <Stop offset="0" stopColor={artworkColor("#8841B6")} />
-                    <Stop offset="0.52" stopColor={artworkColor("#9844C7")} />
-                    <Stop offset="1" stopColor={artworkColor("#7332A4")} />
+                    <Stop offset="0" stopColor={themeTint("#8841B6")} />
+                    <Stop offset="0.52" stopColor={themeTint("#9844C7")} />
+                    <Stop offset="1" stopColor={themeTint("#7332A4")} />
                   </LinearGradient>
                 </Defs>
                 <Rect x="0" y="0" width="420" height="58" rx="29" fill="url(#reviewGradient)" />
