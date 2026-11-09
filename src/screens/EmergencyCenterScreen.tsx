@@ -14,6 +14,8 @@ import {
   emergencyProfileCompleteness,
   emergencyReviewLabel,
 } from "../emergencyCenterHelpers";
+import { emergencyPreparednessItems, type EmergencyPreparednessItem } from "../emergencyGuidanceHelpers";
+import { EmergencyGuidanceModal } from "./EmergencyGuidanceModal";
 import {
   buildEmergencyOfflineSummary,
   buildEmergencyOnePageHtml,
@@ -81,12 +83,6 @@ const emptyData = (): EmergencyCenterData => ({
   transitionFollowUps: [],
 });
 
-async function callNumber(value: string) {
-  const normalized = value.replace(/[^+0-9*#]/g, "");
-  if (!normalized) throw new Error("No phone number is recorded.");
-  await Linking.openURL("tel:" + normalized);
-}
-
 function EmergencyHeroArt() {
   return (
     <Svg width="100%" height="100%" viewBox="0 0 230 190" accessibilityElementsHidden>
@@ -132,59 +128,79 @@ function SmallStatusCard({
   value,
   accent,
   background,
+  progress,
+  onPress,
 }: {
   icon: string;
   eyebrow: string;
   value: string;
   accent: string;
   background: string;
+  progress?: number;
+  onPress: () => void;
 }) {
+  const shownProgress = typeof progress === "number"
+    ? Math.min(100, Math.max(0, Math.round(progress * 100)))
+    : null;
   return (
-    <View
-      style={{
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={eyebrow + ": " + value}
+      accessibilityHint="Open the emergency preparation details"
+      onPress={onPress}
+      style={({ pressed }) => ({
         flex: 1,
-        minHeight: 124,
+        minHeight: 128,
         borderRadius: 24,
-        padding: 15,
-        backgroundColor: background,
+        padding: 14,
+        backgroundColor: themeBackground(background),
         borderWidth: 1,
         borderColor: themeBorder("#EAE4F2"),
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-      }}
+        gap: 9,
+        opacity: pressed ? 0.75 : 1,
+      })}
     >
-      <View
-        style={{
-          width: 52,
-          height: 52,
-          borderRadius: 26,
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+        <View style={{
+          width: 34, height: 34, borderRadius: 17,
           backgroundColor: themeBackground("#FFFFFFB8"),
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Icon name={icon} size={24} color={accent} />
-      </View>
-      <View style={{ flex: 1, gap: 4 }}>
-        <Text style={[S.eyebrow, { color: accent, letterSpacing: 1.8 }]}>{eyebrow}</Text>
+          alignItems: "center", justifyContent: "center",
+        }}>
+          <Icon name={icon} size={19} color={themeForeground(accent)} />
+        </View>
         <Text
           numberOfLines={2}
-          style={{
-            fontFamily: "DMSans_700Bold",
-            fontSize: 18,
-            lineHeight: 22,
-            color: C.ink,
-          }}
+          style={[S.eyebrow, {
+            flex: 1, color: themeForeground(accent),
+            letterSpacing: 0.5, fontSize: 9.5, lineHeight: 13,
+          }]}
         >
-          {value}
+          {eyebrow}
         </Text>
-        <View style={{ height: 7, borderRadius: 4, backgroundColor: themeBackground("#FFFFFF9C"), overflow: "hidden", marginTop: 4 }}>
-          <View style={{ width: "18%", height: 7, borderRadius: 4, backgroundColor: accent + "30" }} />
-        </View>
+        <Icon name="chevron-forward-outline" size={16} color={themeForeground(accent)} />
       </View>
-      <Icon name="chevron-forward-outline" size={18} color={accent} />
-    </View>
+      <Text numberOfLines={2} style={{
+        fontFamily: "DMSans_700Bold",
+        fontSize: 17,
+        lineHeight: 23,
+        color: themeForeground("#241B53"),
+      }}>
+        {value}
+      </Text>
+      {shownProgress !== null && (
+        <View style={{
+          height: 6, borderRadius: 4,
+          backgroundColor: themeBackground("#D8D2DF"),
+          overflow: "hidden",
+        }}>
+          <View style={{
+            width: `${shownProgress}%` as `${number}%`,
+            height: 6, borderRadius: 4,
+            backgroundColor: themeForeground(accent),
+          }} />
+        </View>
+      )}
+    </Pressable>
   );
 }
 
@@ -360,6 +376,8 @@ export function EmergencyCenterScreen() {
   const [createdShare, setCreatedShare] =
     useState<CreatedEmergencyShareLink | null>(null);
   const [shareMinutes, setShareMinutes] = useState(60);
+  const [emergencyGuideOpen, setEmergencyGuideOpen] = useState(false);
+  const [readinessPanel, setReadinessPanel] = useState<"checklist" | "review" | null>(null);
 
   const [localEmergencyNumber, setLocalEmergencyNumber] = useState("");
   const [preferredHospital, setPreferredHospital] = useState("");
@@ -480,6 +498,11 @@ export function EmergencyCenterScreen() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+  useEffect(() => {
+    // Close previously opened care-profile guidance when the account/profile changes.
+    setEmergencyGuideOpen(false);
+    setReadinessPanel(null);
+  }, [activeScope]);
 
   useEffect(() => {
     if (!careRecipientId) return;
@@ -510,6 +533,22 @@ export function EmergencyCenterScreen() {
     () => emergencyProfileCompleteness(data),
     [data],
   );
+  const preparednessItems = useMemo(
+    () => emergencyPreparednessItems(data),
+    [data],
+  );
+
+  function openPreparednessItem(key: EmergencyPreparednessItem["key"]) {
+    setReadinessPanel(null);
+    switch (key) {
+      case "emergency_number": openProfileDetail("hospital"); break;
+      case "primary_contact": n.navigate("CareContacts"); break;
+      case "allergies": openProfileDetail("allergies"); break;
+      case "conditions": openProfileDetail("conditions"); break;
+      case "medication_review": n.navigate("Medications"); break;
+      case "key_documents": n.navigate("CareDocuments"); break;
+    }
+  }
 
   const criticalSummary = useMemo(() => {
     if (loadedScope === activeScope && activeScope && data.profile && careRecipientId) {
@@ -755,6 +794,21 @@ export function EmergencyCenterScreen() {
   return (
     <Page>
 
+      <EmergencyGuidanceModal
+        visible={emergencyGuideOpen}
+        emergencyNumber={data.profile?.localEmergencyNumber ||
+          criticalSummary?.localEmergencyNumber || ""}
+        canEdit={!readOnly}
+        onClose={() => setEmergencyGuideOpen(false)}
+        onEditNumber={() => {
+          setEmergencyGuideOpen(false);
+          openProfileDetail("hospital");
+        }}
+        onViewContacts={() => {
+          setEmergencyGuideOpen(false);
+          n.navigate("CareContacts");
+        }}
+      />
       <Modal visible={activeDetail !== null} animationType="slide"
         presentationStyle="fullScreen" onRequestClose={closeProfileDetail}>
         <SafeAreaView style={{ flex: 1, backgroundColor: themeBackground(C.paper) }}>
@@ -1041,21 +1095,8 @@ export function EmergencyCenterScreen() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Emergency alert"
-        onPress={async () => {
-          const emergencyNumber =
-            data.profile?.localEmergencyNumber ||
-            criticalSummary?.localEmergencyNumber ||
-            "";
-          if (emergencyNumber) {
-            try {
-              await callNumber(emergencyNumber);
-            } catch (error) {
-              setMessage(error instanceof Error ? error.message : "Could not start the call.");
-            }
-          } else if (!readOnly) {
-            setEditing(true);
-          }
-        }}
+        accessibilityHint="Open emergency warning-sign guidance. EnVizion does not automatically notify responders."
+        onPress={() => setEmergencyGuideOpen(true)}
         style={({ pressed }) => ({
           minHeight: 110,
           borderRadius: 26,
@@ -1119,18 +1160,80 @@ export function EmergencyCenterScreen() {
         <SmallStatusCard
           icon="document-text-outline"
           eyebrow="PREPAREDNESS"
-          value={completeness.completed + "/" + completeness.total}
+          value={loading ? "Checking…" : showingOfflineSnapshot
+            ? "Offline snapshot" : completeness.completed + "/" + completeness.total}
           accent="#7B3ACA"
           background="#F7F1FF"
+          progress={!loading && !showingOfflineSnapshot
+            ? completeness.completed / completeness.total : undefined}
+          onPress={() => setReadinessPanel(
+            readinessPanel === "checklist" ? null : "checklist")}
         />
         <SmallStatusCard
           icon="time-outline"
           eyebrow="LAST REVIEW"
-          value={emergencyReviewLabel(data.profile?.lastReviewedAt)}
+          value={loading ? "Checking…" : showingOfflineSnapshot
+            ? "Verify when online" : emergencyReviewLabel(data.profile?.lastReviewedAt)}
           accent="#3265E8"
           background="#F2F6FF"
+          onPress={() => setReadinessPanel(
+            readinessPanel === "review" ? null : "review")}
         />
       </View>
+
+      {readinessPanel === "checklist" && (
+        <Card style={{
+          borderRadius: 25, gap: 12,
+          backgroundColor: themeBackground("#F9F5FD"),
+        }}>
+          <Text accessibilityRole="header" style={[S.h2, { fontSize: 18 }]}>
+            Emergency preparedness · 6 essentials
+          </Text>
+          <Txt style={S.small}>
+            Only information actually saved for this care profile is counted.
+            "Not recorded" does not mean the person has no medical needs.
+          </Txt>
+          {loading || showingOfflineSnapshot ? (
+            <Txt>Connect and refresh to check current preparedness.</Txt>
+          ) : preparednessItems.map((item) => (
+            <Pressable key={item.key} accessibilityRole="button"
+              accessibilityLabel={item.label + (item.complete ? ", recorded" : ", not recorded")}
+              accessibilityHint="Open the related care information"
+              onPress={() => openPreparednessItem(item.key)}
+              style={({ pressed }) => ({
+                flexDirection: "row", alignItems: "center", gap: 11,
+                minHeight: 49, borderRadius: 15, padding: 9,
+                backgroundColor: themeBackground("#FFFFFF"),
+                opacity: pressed ? 0.7 : 1,
+              })}>
+              <Icon name={item.complete ? "checkmark-circle-outline" : "ellipse-outline"}
+                size={21} color={themeForeground(item.complete ? "#27845D" : "#8847AD")}/>
+              <Text style={[S.body, { flex: 1 }]}>{item.label}</Text>
+              <Icon name="chevron-forward-outline" size={17} color={themeForeground("#7438B2")}/>
+            </Pressable>
+          ))}
+        </Card>
+      )}
+
+      {readinessPanel === "review" && (
+        <Card style={{ borderRadius: 25, gap: 10,
+          backgroundColor: themeBackground("#F4F7FF") }}>
+          <Text accessibilityRole="header" style={[S.h2, { fontSize: 18 }]}>
+            Review the saved emergency profile
+          </Text>
+          <Txt>
+            {emergencyReviewLabel(data.profile?.lastReviewedAt)}
+          </Txt>
+          <Txt style={S.small}>
+            Check contacts, medicines, allergies, care directives and other
+            recorded details below. An authorized caregiver can then select
+            "Confirm information reviewed". A review is not clinical certification.
+          </Txt>
+          {readOnly && <Txt style={S.small}>
+            Ask an authorized caregiver to review or correct this information.
+          </Txt>}
+        </Card>
+      )}
 
       {criticalSummary && (
         <Card
