@@ -12,11 +12,14 @@ project `947baaf0-54d1-44c2-86c5-86c57c6aa11a`. VAC HMS is outside this work.
 - Used a clean checkout, preserving the separate local checkout's unfinished work.
 - Expo owner remains `ntonga_victor`; slug remains `envizion-life`; both native
   identifiers remain `com.envizionlife.caregiver`. No ownership transfer occurred.
-- EAS history already contained Android build 3. This release advances only
-  `android.versionCode` from 2 to **4**, retaining marketing version **0.1.1** and
-  iOS build number **2**. This avoids producing a downgrade for earlier testers.
-- The separate branding PR #58 is not included. Its versionCode 3 must be
-  reconciled with build 4 or a higher number before a later APK is built.
+- EAS history already contained Android build 3. The first verified APK advanced
+  `android.versionCode` from 2 to **4**, retaining marketing version **0.1.1**.
+- While that build waited in EAS, `main` advanced to
+  `a365f36573ca0a273a87715401f6bf9fc289d5cc` with branding PR #60 and theme PR #59.
+  Their app changes are preserved in this release branch. Its next APK uses
+  marketing version **0.1.2**, Android build **5**, and unchanged iOS build **2**.
+  Build 4 does not contain those later branding/theme changes. Build 5 is tracked
+  separately below so its result cannot be confused with the earlier artifact.
 - No production credential rotation, database writes, clinical approvals, patient
   data changes, store submission, or web deployment was performed by this step.
 
@@ -73,6 +76,18 @@ profile, version and project with the intended release. Wait for `FINISHED` and
 verify the actual APK download before sharing an installation link. Do not run
 `eas init`, rotate a keystore, change ownership, or submit to stores as part of
 this repeat-preview procedure.
+
+## Updated-main beta candidate — Android build 5
+
+The initial documentation push conflicted with the concurrent branding release's
+Android versionCode 3, preventing the final PR CI run. The branch integrates main
+`a365f36`, keeps all its branding/theme work, and advances Android versionCode to
+**5** so it can update verified build 4. No other native identifier or signing
+configuration is changed. This is the fixed source baseline for the second build.
+
+**Status: pending submission and verification.** Record its real EAS ID, terminal
+status, exact source commit, APK size/hash and CI result before calling this
+updated beta available. The successful build 4 above is not evidence for build 5.
 
 ## iPhone signing blocker
 

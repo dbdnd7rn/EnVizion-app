@@ -25,8 +25,24 @@ function parseHex(source: string) {
 }
 
 function withAlpha(hex: string, suffix: string) { return suffix ? hex + suffix : hex; }
-function isRose(r: number, g: number, b: number) { return r > g * 1.16 && r > b * 1.1; }
-function isGreen(r: number, g: number, b: number) { return g > r * 1.17 && g > b * 1.08; }
+// Recognize both saturated accents and pastel status surfaces. In particular,
+// very pale pink/green cards must not collapse into the default purple surface.
+function isRose(r: number, g: number, b: number) {
+  return (r > g * 1.16 && r > b * 1.1) ||
+    (r - g >= 12 && r - b >= 7 && b >= g) ||
+    // Coral/salmon warning backgrounds have a little more green than blue.
+    (r - g >= 12 && g - b >= 2 && g - b <= 12 && r - b >= 16);
+}
+function isGreen(r: number, g: number, b: number) {
+  return (g > r * 1.17 && g > b * 1.08) ||
+    (g - r >= 8 && g - b >= 5 && b >= r);
+}
+function isBlue(r: number, g: number, b: number) {
+  return b - r >= 12 && b - g >= 9 && g >= r * 0.98;
+}
+function isAmber(r: number, g: number, b: number) {
+  return r - b >= 14 && g - b >= 10 && r >= g * 1.02;
+}
 function isPurple(r: number, g: number, b: number) { return b > g * 1.09 && r > g * 1.08; }
 
 /** Semantic mapping for existing legacy inline colors. No colors change in light mode. */
@@ -52,27 +68,41 @@ export function appearanceColor(source: string, role: ColorRole = "foreground") 
   const result = (() => {
     if (role === "shadow") return "#000000";
     if (role === "border") {
-      if (isRose(r, g, b) && v < 0.8) return "#704457";
+      if (isRose(r, g, b)) return "#704457";
+      if (isGreen(r, g, b)) return "#3F6B57";
+      if (isBlue(r, g, b)) return "#48627D";
+      if (isAmber(r, g, b)) return "#705B41";
       return v > 0.70 ? "#44394D" : "#584769";
     }
     if (role === "foreground") {
       // Soft ivory on actions prevents pure-white glare but still meets AA.
+      if (isRose(r, g, b)) return "#EFA6B8";
+      if (isGreen(r, g, b)) return "#89D6B5";
+      if (isBlue(r, g, b)) return "#A3CAFA";
+      if (isAmber(r, g, b)) return "#F1CD8D";
       if (v > 0.86) return "#EFE9F4";
-      if (isRose(r, g, b) && v < 0.70) return "#EFA6B8";
-      if (isGreen(r, g, b) && v < 0.70) return "#89D6B5";
       if (isPurple(r, g, b) && v < 0.73) return "#CBA6E7";
       return v < 0.34 ? "#E0D9E8" : v < 0.60 ? "#B9B1C6" : "#ACA4BB";
     }
     if (role === "tint" && v > 0.90) return "#302839";
-    if (v > 0.96) return "#25212E";
+    // Almost-white status tints still carry meaning; only neutral whites use the base surface.
+    if (v > 0.96 && !isRose(r, g, b) && !isGreen(r, g, b) && !isBlue(r, g, b) && !isAmber(r, g, b)) return "#25212E";
     if (v > 0.84) {
       if (isRose(r, g, b)) return "#35262F";
       if (isGreen(r, g, b)) return "#25372F";
+      if (isBlue(r, g, b)) return "#253449";
+      if (isAmber(r, g, b)) return "#3D3328";
       return "#2D2739";
     }
-    if (v > 0.65) return "#332C40";
+    if (v > 0.65) {
+      if (isBlue(r, g, b)) return "#2A3B51";
+      if (isAmber(r, g, b)) return "#44382B";
+      return "#332C40";
+    }
     if (isRose(r, g, b)) return "#6C3D53";
     if (isGreen(r, g, b)) return "#2C6F58";
+    if (isBlue(r, g, b)) return "#31587D";
+    if (isAmber(r, g, b)) return "#755A35";
     if (isPurple(r, g, b)) return "#65418A";
     return v < 0.27 ? "#292334" : "#3B3049";
   })();
