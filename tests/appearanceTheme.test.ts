@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   activeAppearance, appearanceColor, darkPalette, setActiveAppearance,
-  themeAction, themeBackground, themeForeground, themedStyles,
+  themeAction, themeBackground, themeForeground, themeIconSurface, themedStyles,
 } from "../src/themeColors.ts";
 
 function luminance(color: string) {
@@ -63,6 +63,46 @@ test("dark mode preserves informative, warning, success, and urgent status color
   } finally {
     setActiveAppearance("light");
   }
+});
+
+test("dark quick actions, topic icons, and care-team badges never use near-white surfaces", () => {
+  setActiveAppearance("light");
+  assert.equal(themeIconSurface("#F1E5FA"), "#F1E5FA");
+  assert.equal(themeBackground("#FFF1F5"), "#FFF1F5");
+  try {
+    setActiveAppearance("dark");
+    const surfaces = [
+      themeBackground("#F6F0FB"),
+      themeBackground("#FFF1F5"),
+      themeBackground("#FFFFFFE8").slice(0, 7),
+      themeIconSurface("#F1E5FA"),
+      themeIconSurface("#FFE4EC"),
+      themeIconSurface("#E9EEFF"),
+      themeIconSurface("#E4F3EC"),
+    ];
+    for (const background of surfaces) {
+      assert.ok(luminance(background) < 0.13, `Unexpected bright dark-mode surface: ${background}`);
+    }
+    assert.notEqual(themeIconSurface("#F1E5FA"), themeIconSurface("#FFE4EC"));
+    assert.notEqual(themeIconSurface("#E9EEFF"), themeIconSurface("#E4F3EC"));
+    assert.ok(contrast(themeForeground("#70338F"), themeIconSurface("#F1E5FA")) >= 4.5);
+    assert.ok(contrast(themeForeground("#15966B"), themeIconSurface("#E4F3EC")) >= 4.5);
+  } finally {
+    setActiveAppearance("light");
+  }
+});
+
+test("reported pale card regressions are routed through dark-mode tokens", () => {
+  const home = readFileSync(new URL("../src/screens/MainScreens.tsx", import.meta.url), "utf8");
+  const team = readFileSync(new URL("../src/screens/CareTeamScreen.tsx", import.meta.url), "utf8");
+  const schedule = readFileSync(new URL("../src/screens/CareScheduleDesign.tsx", import.meta.url), "utf8");
+  assert.match(home, /backgroundColor: themeBackground\(background\)/);
+  assert.match(home, /backgroundColor: themeIconSurface\(iconBackground\)/);
+  assert.match(home, /backgroundColor: themeIconSurface\(item\.bg\)/);
+  assert.match(team, /backgroundColor:themeIconSurface\(tint\)/);
+  assert.match(team, /backgroundColor:themeIconSurface\(active\?/);
+  assert.match(schedule, /backgroundColor: themeBackground\(tint\)/);
+  assert.match(schedule, /const glass = \(\) =>/);
 });
 
 test("legacy styles respond to theme changes and are never mutated", () => {
