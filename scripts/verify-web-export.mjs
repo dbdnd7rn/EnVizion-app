@@ -28,6 +28,32 @@ if (/localhost:\d+/i.test(html)) {
   fail("Production HTML contains a localhost origin.");
 }
 
+const manifestPath = path.join(dist, "manifest.webmanifest");
+const iconPath = path.join(dist, "icons", "envizion-app-icon.png");
+if (!fs.existsSync(manifestPath)) fail("iPhone web app manifest is missing.");
+if (!fs.existsSync(iconPath)) fail("EnVizion iPhone Home Screen icon is missing.");
+if (!html.includes('rel="manifest" href="/manifest.webmanifest"')) {
+  fail("iPhone web app manifest link is missing.");
+}
+if (!html.includes('rel="apple-touch-icon" href="/icons/envizion-app-icon.png"')) {
+  fail("iPhone Home Screen icon link is missing.");
+}
+if (!html.includes('name="apple-mobile-web-app-capable" content="yes"')) {
+  fail("iPhone standalone web app capability is missing.");
+}
+const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+if (
+  manifest.name !== "EnVizion Life" ||
+  manifest.display !== "standalone" ||
+  manifest.start_url !== "/" ||
+  manifest.scope !== "/"
+) {
+  fail("EnVizion iPhone web app manifest is invalid.");
+}
+if (!manifest.icons?.some((icon) => icon.src === "/icons/envizion-app-icon.png")) {
+  fail("Manifest does not use the official EnVizion app icon.");
+}
+
 const files = walk(dist);
 const jsFiles = files.filter((file) => file.endsWith(".js"));
 if (!jsFiles.length) fail("No production JavaScript bundles were exported.");
