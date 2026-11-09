@@ -184,8 +184,8 @@ function DirectoryCategoryTile({
         minHeight: 78,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: selected ? "#DCC8E8" : "#EEE7F0",
-        backgroundColor: selected ? "#F6EEFC" : C.white,
+        borderColor: themeBorder(selected ? "#DCC8E8" : "#EEE7F0"),
+        backgroundColor: themeBackground(selected ? "#F6EEFC" : C.white),
         paddingHorizontal: 12,
         paddingVertical: 12,
         flexDirection: "row",
@@ -205,7 +205,7 @@ function DirectoryCategoryTile({
           width: 40,
           height: 40,
           borderRadius: 14,
-          backgroundColor: iconBackground,
+          backgroundColor: themeBackground(iconBackground),
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -1007,7 +1007,7 @@ export function CareContactsScreen() {
                         width: 46,
                         height: 46,
                         borderRadius: 16,
-                        backgroundColor: visual.background,
+                        backgroundColor: themeBackground(visual.background),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
