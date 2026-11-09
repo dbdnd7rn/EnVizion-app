@@ -1,4 +1,4 @@
-import { artworkColor, artworkBackdrop } from "../themeColors";
+import { themeTint, artworkColor, artworkBackdrop } from "../themeColors";
 import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction, themeIconSurface } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
@@ -1205,7 +1205,7 @@ function ToolkitWave({ tint = "#F4ECFB" }: { tint?: string }) {
         />
         <Path
           d="M54 118 C99 91 113 66 190 48 L190 118 Z"
-          fill={artworkColor("#FBF8FE")}
+          fill={themeTint("#FBF8FE")}
           opacity="0.88"
         />
       </Svg>
