@@ -688,7 +688,7 @@ export function WellnessScreen() {
                 borderRadius: 28,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: reflection.trim() ? "#F0E8F6" : "#F5F0F7",
+                backgroundColor: themeBackground(reflection.trim() ? "#F0E8F6" : "#F5F0F7"),
                 borderWidth: 1,
                 borderColor: themeBorder("#F3ECF6"),
                 opacity: !reflection.trim() ? 0.5 : pressed ? 0.74 : 1,
