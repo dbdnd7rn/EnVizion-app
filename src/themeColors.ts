@@ -83,7 +83,8 @@ export function appearanceColor(source: string, role: ColorRole = "foreground") 
       return v < 0.34 ? "#E0D9E8" : v < 0.60 ? "#B9B1C6" : "#ACA4BB";
     }
     if (role === "tint" && v > 0.90) return "#302839";
-    if (v > 0.96) return "#25212E";
+    // Almost-white status tints still carry meaning; only neutral whites use the base surface.
+    if (v > 0.96 && !isRose(r, g, b) && !isGreen(r, g, b) && !isBlue(r, g, b) && !isAmber(r, g, b)) return "#25212E";
     if (v > 0.84) {
       if (isRose(r, g, b)) return "#35262F";
       if (isGreen(r, g, b)) return "#25372F";
