@@ -1,20 +1,10 @@
 import type { EmergencyCenterData } from "./emergencyCenter";
+import { emergencyPreparednessItems } from "./emergencyGuidanceHelpers.ts";
 
 export function emergencyProfileCompleteness(data: EmergencyCenterData) {
-  const checks = [
-    Boolean(data.profile?.localEmergencyNumber),
-    Boolean(
-      data.recipient.emergencyContactName &&
-        data.recipient.emergencyContactPhone,
-    ),
-    Boolean(data.profile?.allergies),
-    Boolean(data.profile?.importantConditions),
-    Boolean(data.latestReconciliation),
-    Boolean(data.keyDocuments.length),
-  ];
-
+  const checks = emergencyPreparednessItems(data);
   return {
-    completed: checks.filter(Boolean).length,
+    completed: checks.filter((item) => item.complete).length,
     total: checks.length,
   };
 }
