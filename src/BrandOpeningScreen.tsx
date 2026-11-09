@@ -212,8 +212,7 @@ const styles = StyleSheet.create({
     height: 170,
   },
   taglineContainer: {
-    position: "absolute",
-    top: "65%",
+    marginTop: 18,
     alignItems: "center",
     gap: 12,
   },
