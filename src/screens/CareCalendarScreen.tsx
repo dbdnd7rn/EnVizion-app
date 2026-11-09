@@ -1,5 +1,5 @@
 import { themeBorder, themeTint } from "../themeColors";
-import { themeBackground, themeForeground, themeShadow } from "../themeColors";
+import { themeBackground, themeForeground, themeShadow, themeAction, themeIconSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Svg, { Circle, Defs, G, Line, LinearGradient, Path, Rect, Stop } from "react-native-svg";
@@ -120,7 +120,7 @@ function Choice<T extends string>({
               minHeight: 42,
               justifyContent: "center",
               paddingHorizontal: 13,
-              backgroundColor: value === item ? C.purple : C.lavender,
+              backgroundColor: value === item ? themeAction(C.purple) : C.lavender,
               opacity: disabled ? 0.55 : 1,
             },
           ]}
@@ -178,7 +178,7 @@ function ReminderCard({
     <Card
       style={{
         borderColor: status === "due" ? "#E8BDC3" : C.line,
-        backgroundColor: status === "due" ? "#FFF7F6" : C.white,
+        backgroundColor: themeBackground(status === "due" ? "#FFF7F6" : C.white),
       }}
     >
       <View style={{ flexDirection: "row", gap: 13 }}>
@@ -535,7 +535,7 @@ function AgendaFilter({
         alignItems: "center",
         justifyContent: "center",
         gap: 6,
-        backgroundColor: selected ? C.purple : "#F6F2FB",
+        backgroundColor: selected ? themeAction(C.purple) : themeBackground("#F6F2FB"),
         borderWidth: selected ? 0 : 1,
         borderColor: themeBorder("#ECE5F2"),
         opacity: pressed ? 0.75 : 1,
@@ -1175,7 +1175,7 @@ const categoryCounts = useMemo(
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 9,
-                backgroundColor: selected ? C.purple : "transparent",
+                backgroundColor: selected ? themeAction(C.purple) : "transparent",
                 opacity: pressed ? 0.72 : 1,
               })}
             >
@@ -1251,7 +1251,7 @@ const categoryCounts = useMemo(
       <Card
         style={{
           borderRadius: 26,
-          backgroundColor: usingOfflineCache ? "#FFF8E9" : "#F5F0FA",
+          backgroundColor: themeBackground(usingOfflineCache ? "#FFF8E9" : "#F5F0FA"),
           borderColor: usingOfflineCache ? "#EBD9A5" : "#E6DAEC",
         }}
       >
@@ -1261,7 +1261,7 @@ const categoryCounts = useMemo(
               width: 48,
               height: 48,
               borderRadius: 16,
-              backgroundColor: usingOfflineCache ? "#F8EBC5" : "#E8DDF0",
+              backgroundColor: themeIconSurface(usingOfflineCache ? "#F8EBC5" : "#E8DDF0"),
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -1456,7 +1456,7 @@ const categoryCounts = useMemo(
                       borderRadius: 23,
                       borderWidth: 1,
                       borderColor: themeBorder("#EAE4EF"),
-                      backgroundColor: event.completed ? "#F7F4F8" : C.white,
+                      backgroundColor: themeBackground(event.completed ? "#F7F4F8" : C.white),
                       padding: 16,
                       flexDirection: "row",
                       alignItems: "center",
