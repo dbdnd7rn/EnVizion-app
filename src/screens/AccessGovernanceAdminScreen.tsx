@@ -1,5 +1,5 @@
 import { themeAction } from "../themeColors";
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -245,8 +245,8 @@ export function AccessGovernanceAdminScreen() {
 
       <Card
         style={{
-          backgroundColor: status.background,
-          borderColor: status.background,
+          backgroundColor: themeBackground(status.background),
+          borderColor: themeBorder(status.background),
           gap: 11,
         }}
       >
@@ -261,14 +261,14 @@ export function AccessGovernanceAdminScreen() {
               justifyContent: "center",
             }}
           >
-            <Icon name={status.icon} size={26} color={status.color} />
+            <Icon name={status.icon} size={26} color={themeForeground(status.color)} />
           </View>
           <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
             <Text
               style={[
                 S.small,
                 {
-                  color: status.color,
+                  color: themeForeground(status.color),
                   fontFamily: "DMSans_600SemiBold",
                 },
               ]}
@@ -279,7 +279,7 @@ export function AccessGovernanceAdminScreen() {
         </View>
 
         <View style={{ gap: 5 }}>
-          <Text style={[S.h2, { color: status.color }]}>
+          <Text style={[S.h2, { color: themeForeground(status.color) }]}>
             {status.title}
           </Text>
           <Txt>{status.body}</Txt>
@@ -341,13 +341,13 @@ export function AccessGovernanceAdminScreen() {
               flexGrow: 1,
               gap: 4,
               alignItems: "center",
-              backgroundColor: String(background),
+              backgroundColor: themeBackground(String(background)),
             }}
           >
             <Text
               style={[
                 S.h2,
-                { fontSize: 24, color: String(color) },
+                { fontSize: 24, color: themeForeground(String(color)) },
               ]}
             >
               {String(value)}
@@ -363,7 +363,7 @@ export function AccessGovernanceAdminScreen() {
         ))}
       </View>
 
-      <Card style={{ backgroundColor: "#FAF7FB", gap: 10 }}>
+      <Card style={{ backgroundColor: themeBackground("#FAF7FB"), gap: 10 }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Icon name="lock-closed-outline" size={21} color={C.purple} />
           <View style={{ flex: 1, gap: 4 }}>
@@ -391,7 +391,7 @@ export function AccessGovernanceAdminScreen() {
             minHeight: 46,
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: "#DDD2E1",
+            borderColor: themeBorder("#DDD2E1"),
             backgroundColor: themeBackground(C.white),
             paddingHorizontal: 13,
             color: C.deep,
@@ -478,14 +478,14 @@ export function AccessGovernanceAdminScreen() {
                 <View
                   style={[
                     S.pill,
-                    { backgroundColor: tone.background },
+                    { backgroundColor: themeBackground(tone.background) },
                   ]}
                 >
                   <Text
                     style={[
                       S.small,
                       {
-                        color: tone.color,
+                        color: themeForeground(tone.color),
                         fontFamily: "DMSans_600SemiBold",
                       },
                     ]}
@@ -498,7 +498,7 @@ export function AccessGovernanceAdminScreen() {
               <View
                 style={{
                   borderRadius: 16,
-                  backgroundColor: "#FAF7FB",
+                  backgroundColor: themeBackground("#FAF7FB"),
                   padding: 12,
                   gap: 5,
                 }}
@@ -510,7 +510,7 @@ export function AccessGovernanceAdminScreen() {
                   Due: {new Date(item.dueAt).toLocaleString()}
                 </Txt>
                 {item.overdueDays > 0 && (
-                  <Txt style={[S.small, { color: "#A75235" }]}>
+                  <Txt style={[S.small, { color: themeForeground("#A75235") }]}>
                     Overdue by {item.overdueDays} day
                     {item.overdueDays === 1 ? "" : "s"}
                   </Txt>
@@ -528,17 +528,17 @@ export function AccessGovernanceAdminScreen() {
                   }}
                 >
                   {item.advanceNotifiedAt && (
-                    <View style={[S.pill, { backgroundColor: "#F1E8F5" }]}>
+                    <View style={[S.pill, { backgroundColor: themeBackground("#F1E8F5") }]}>
                       <Text style={S.small}>Upcoming reminder sent</Text>
                     </View>
                   )}
                   {item.overdue7NotifiedAt && (
-                    <View style={[S.pill, { backgroundColor: "#FFF3DE" }]}>
+                    <View style={[S.pill, { backgroundColor: themeBackground("#FFF3DE") }]}>
                       <Text style={S.small}>7-day escalation sent</Text>
                     </View>
                   )}
                   {item.overdue14NotifiedAt && (
-                    <View style={[S.pill, { backgroundColor: "#FBE8E3" }]}>
+                    <View style={[S.pill, { backgroundColor: themeBackground("#FBE8E3") }]}>
                       <Text style={S.small}>14-day escalation sent</Text>
                     </View>
                   )}
@@ -551,7 +551,7 @@ export function AccessGovernanceAdminScreen() {
 
       <Section title="Coverage gaps" />
       {!dashboard.coverageGaps.length ? (
-        <Card style={{ backgroundColor: "#F4FAF6" }}>
+        <Card style={{ backgroundColor: themeBackground("#F4FAF6") }}>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <Icon name="shield-checkmark-outline" size={22} color={C.green} />
             <Txt style={{ flex: 1 }}>
@@ -565,15 +565,15 @@ export function AccessGovernanceAdminScreen() {
           <Card
             key={item.careRecipientId + ":" + item.subjectUserId}
             style={{
-              backgroundColor: "#FFF7F2",
-              borderColor: "#EBCFBE",
+              backgroundColor: themeBackground("#FFF7F2"),
+              borderColor: themeBorder("#EBCFBE"),
               gap: 8,
             }}
           >
             <View style={S.between}>
               <Text style={S.h3}>{item.memberName}</Text>
-              <View style={[S.pill, { backgroundColor: "#FBE7DA" }]}>
-                <Text style={[S.small, { color: "#A65334" }]}>
+              <View style={[S.pill, { backgroundColor: themeBackground("#FBE7DA") }]}>
+                <Text style={[S.small, { color: themeForeground("#A65334") }]}>
                   Missing review
                 </Text>
               </View>
@@ -619,7 +619,7 @@ export function AccessGovernanceAdminScreen() {
         ))
       )}
 
-      <Card style={{ backgroundColor: "#FAF7FB", gap: 8 }}>
+      <Card style={{ backgroundColor: themeBackground("#FAF7FB"), gap: 8 }}>
         <Text style={S.h3}>Governance policy</Text>
         <Txt style={S.small}>
           Access is recertified every {dashboard.policy.cadenceDays} days.
@@ -631,7 +631,7 @@ export function AccessGovernanceAdminScreen() {
       </Card>
 
       <Section title="Governance evidence export" />
-      <Card style={{ backgroundColor: "#FAF7FB", gap: 10 }}>
+      <Card style={{ backgroundColor: themeBackground("#FAF7FB"), gap: 10 }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Icon name="document-text-outline" size={22} color={C.purple} />
           <View style={{ flex: 1, gap: 4 }}>
