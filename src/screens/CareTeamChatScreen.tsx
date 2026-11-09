@@ -4,6 +4,7 @@ import { ActivityIndicator, AppState, Image, KeyboardAvoidingView, Platform, Pre
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, type RouteProp } from "@react-navigation/native";
 import { useAppearance } from "../appearance";
+import { themeBackground, themeForeground } from "../themeColors";
 import { useCare } from "../store";
 import { useNav } from "./MainScreens";
 import { Icon } from "../ui";
@@ -28,8 +29,8 @@ function Avatar({ person, name, size = 38 }: { person?: ChatPerson; name: string
     return <Image source={{ uri: path }} style={{ width: size, height: size, borderRadius: size/2 }} />;
   }
   return <View style={{ width: size, height: size, borderRadius: size/2,
-    backgroundColor: "#DCC8EF", alignItems: "center", justifyContent: "center" }}>
-    <Text style={{ color: "#58277C", fontSize: size*0.31, fontWeight: "700" }}>{abbreviated(name)}</Text>
+    backgroundColor: themeBackground("#DCC8EF"), alignItems: "center", justifyContent: "center" }}>
+    <Text style={{ color: themeForeground("#58277C"), fontSize: size*0.31, fontWeight: "700" }}>{abbreviated(name)}</Text>
   </View>;
 }
 
