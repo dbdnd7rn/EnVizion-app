@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, artworkColor } from "../themeColors";
+import { themeBackground, themeBorder, themeTint, artworkColor } from "../themeColors";
 import { themeForeground, themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -410,9 +410,9 @@ function SummaryAction({
               x2="1"
               y2="0"
             >
-              <Stop offset="0" stopColor={artworkColor("#8A43BC")} />
-              <Stop offset="0.5" stopColor={artworkColor("#9844CC")} />
-              <Stop offset="1" stopColor={artworkColor("#7431A7")} />
+              <Stop offset="0" stopColor={themeTint("#8A43BC")} />
+              <Stop offset="0.5" stopColor={themeTint("#9844CC")} />
+              <Stop offset="1" stopColor={themeTint("#7431A7")} />
             </LinearGradient>
           </Defs>
           <Rect
