@@ -29,6 +29,9 @@ jobs:
       - name: Domain tests
         run: npm test
 
+      - name: Native release preflight
+        run: npm run preflight:native
+
       - name: Expo web export
         run: npm run build:web
 

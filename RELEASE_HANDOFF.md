@@ -118,3 +118,12 @@ A zero-document or partial-document set is **not** completed consent. Edge Funct
 deployment and the Render web deployment are independently versioned and require
 separate verification. See the linked checklist for pending clinical review, real
 device evidence and final client sign-off.
+
+
+## Step 9 mobile preview and client pilot acceptance — 9 November 2026
+
+Read [Step 9 Mobile Release & Pilot Acceptance](docs/STEP9_MOBILE_RELEASE_PILOT_ACCEPTANCE_2026-11-09.md) before producing an Android APK, iPhone internal build or store submission.
+
+The Expo native configuration is present; this alone does **not** establish a real signed/installable build. Run \`npm run preflight:native\` for config checks (or \`npm run preflight:native -- --require-env\` when validating the selected build environment). The current Expo project owner is \`ntonga_victor\`; the client must confirm permanent ownership and relevant Apple/Google team credentials before any production submission. iPhone ad hoc preview requires a paid Apple Developer account and registered devices. The four temporary dependency advisory exceptions must be revisited by **11 November 2026**; do not silently renew.
+
+The launch remains **pre-pilot** pending clinical review, actual consent documents, real native QA and client sign-off.
