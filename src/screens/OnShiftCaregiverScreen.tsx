@@ -132,7 +132,7 @@ function MemberChoice({
         {
           padding: 13,
           borderColor: selected ? C.purple : C.line,
-          backgroundColor: selected ? "#F6F0F8" : C.white,
+          backgroundColor: themeBackground(selected ? "#F6F0F8" : C.white),
           opacity: disabled ? 0.55 : 1,
         },
       ]}
@@ -175,8 +175,8 @@ function TaskCard({
   return (
     <Card
       style={{
-        borderColor: urgent ? "#E8BDC3" : C.line,
-        backgroundColor: urgent ? "#FFF9F8" : C.white,
+        borderColor: themeBorder(urgent ? "#E8BDC3" : C.line),
+        backgroundColor: themeBackground(urgent ? "#FFF9F8" : C.white),
       }}
     >
       <View style={S.between}>
@@ -785,7 +785,7 @@ export function OnShiftCaregiverScreen() {
         body="Work from live shared care data, record what changes during your shift, then hand over cleanly to the next caregiver."
       />
 
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
+      <Card style={{ backgroundColor: themeAction(C.deep), borderWidth: 0 }}>
         <View style={S.between}>
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={[S.eyebrow, { color: themeForeground("#E7CFEF") }]}>ACTIVE SHIFT</Text>
