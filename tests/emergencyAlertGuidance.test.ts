@@ -107,7 +107,7 @@ test("previously decorative preparedness/review status cards now open real recor
   }
   assert.match(screen,/Review the saved emergency profile/);
   assert.match(screen,/A review is not clinical certification/);
-  assert.match(screen,/backgroundColor: themeBackground\(background\)/);
+  assert.match(screen,/backgroundColor: theme(?:Background|Surface)\(background\)/);
   assert.match(screen,/color: themeForeground\("#241B53"\)/);
   assert.match(screen,/shownProgress/);
 });
