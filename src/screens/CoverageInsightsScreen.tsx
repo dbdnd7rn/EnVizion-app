@@ -1,4 +1,4 @@
-import { themeBackground } from "../themeColors";
+import { themeBackground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -90,7 +90,7 @@ export function CoverageInsightsScreen({ navigation }: Props) {
           title="Operational coverage insights are owner-only."
           body="Caregivers can manage their own availability and coverage responses without seeing another caregiver's response history."
         />
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="lock-closed-outline" color={C.purple} />
           <Text style={S.h3}>Protected coordination data</Text>
           <Txt>
@@ -192,7 +192,7 @@ export function CoverageInsightsScreen({ navigation }: Props) {
           </View>
 
           <Section title="Caregiver response activity" />
-          <Card style={{ backgroundColor: C.lavender }}>
+          <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
             <View style={S.row}>
               <Icon name="information-circle-outline" color={C.purple} />
               <Txt style={{ flex: 1 }}>
@@ -224,7 +224,7 @@ export function CoverageInsightsScreen({ navigation }: Props) {
                         {item.respondedRequests} responded
                       </Txt>
                     </View>
-                    <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                    <View style={[S.pill, { backgroundColor: themeSurface(C.lavender) }]}>
                       <Txt style={S.small}>
                         {item.responseRatePct == null
                           ? "No rate yet"
@@ -268,7 +268,7 @@ export function CoverageInsightsScreen({ navigation }: Props) {
                         {item.declinedRequests} declined
                       </Txt>
                     </View>
-                    <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                    <View style={[S.pill, { backgroundColor: themeSurface(C.lavender) }]}>
                       <Txt style={S.small}>
                         {item.savedRequests} backup saves
                       </Txt>

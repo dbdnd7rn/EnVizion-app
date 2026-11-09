@@ -1,4 +1,4 @@
-import { themeBorder, artworkColor } from "../themeColors";
+import { themeBorder, artworkColor, themeSurface, themeIconSurface } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
@@ -51,7 +51,7 @@ import {
 
 function ReadOnlyCareNotice() {
   return (
-    <Card style={{ backgroundColor: C.lavender }}>
+    <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
       <Icon name="eye-outline" />
       <Text style={S.h3}>Viewer access is read-only.</Text>
       <Txt>
@@ -171,12 +171,12 @@ function VitalMetricField({
             width: 44,
             height: 44,
             borderRadius: 22,
-            backgroundColor: iconBackground,
+            backgroundColor: themeIconSurface(iconBackground),
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Icon name={icon} size={23} color={iconColor} />
+          <Icon name={icon} size={23} color={themeForeground(iconColor)} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text
@@ -2829,7 +2829,7 @@ export function MedicationScreen() {
         body="Keep your list, record each dose, and bring your notes to the care team."
       />
       {readOnly && <ReadOnlyCareNotice />}
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.eyebrow}>YOUR MEDICATION RECORD</Text>
         <Text style={S.h2}>{activeRecords.length} active dose records</Text>
         <Txt>
@@ -3150,7 +3150,7 @@ export function AppointmentScreen() {
         body="Keep the important things together for your next appointment."
       />
       {readOnly && <ReadOnlyCareNotice />}
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <View style={S.row}>
           <Icon name="calendar-outline" size={28} />
           <View style={{ flex: 1, gap: 5 }}>
@@ -3411,7 +3411,7 @@ export function TransitionScreen() {
         body="You don’t need to remember everything. Take it one step at a time."
       />
       {readOnly && <ReadOnlyCareNotice />}
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.h2}>
           {state.transition.length} of {transitionSteps.length} steps prepared
         </Text>

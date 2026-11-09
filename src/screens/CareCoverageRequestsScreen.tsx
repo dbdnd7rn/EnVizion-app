@@ -1,4 +1,4 @@
-import { themeBackground } from "../themeColors";
+import { themeBackground, themeSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -478,7 +478,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
       )}
 
       {viewer && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
@@ -674,7 +674,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                 <View
                   style={[
                     S.pill,
-                    { backgroundColor: statusBackground(request, now) },
+                    { backgroundColor: themeSurface(statusBackground(request, now)) },
                   ]}
                 >
                   <Text style={S.small}>{statusCopy(request, now)}</Text>
@@ -700,7 +700,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                 <>
                   <Card
                     style={{
-                      backgroundColor: escalationBackground(escalationLevel),
+                      backgroundColor: themeSurface(escalationBackground(escalationLevel)),
                       borderColor: escalationAccent(escalationLevel),
                     }}
                   >
@@ -792,7 +792,7 @@ export function CareCoverageRequestsScreen({ route }: Props) {
                             <View
                               style={[
                                 S.pill,
-                                { backgroundColor: fitBackground(match.fit) },
+                                { backgroundColor: themeSurface(fitBackground(match.fit)) },
                               ]}
                             >
                               <Text style={S.small}>

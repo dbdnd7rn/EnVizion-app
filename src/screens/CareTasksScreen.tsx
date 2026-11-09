@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -258,7 +258,7 @@ function SmallAction({
         alignItems: "center",
         justifyContent: "center",
         gap: 7,
-        backgroundColor: C.lavender,
+        backgroundColor: themeSurface(C.lavender),
         opacity: pressed ? 0.72 : 1,
       })}
     >
@@ -883,7 +883,7 @@ export function CareTasksScreen() {
       )}
 
       {readOnly && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>
             {state.accessRole === "patient"
@@ -1377,12 +1377,7 @@ export function CareTasksScreen() {
                   S.pill,
                   {
                     alignSelf: "flex-start",
-                    backgroundColor:
-                      assignment?.status === "pending"
-                        ? "#FFF1E5"
-                        : assignment?.status === "accepted"
-                          ? "#EAF4EF"
-                          : C.lavender,
+                    backgroundColor: themeSurface(assignment?.status === "pending" ? "#FFF1E5" : assignment?.status === "accepted" ? "#EAF4EF" : C.lavender),
                   },
                 ]}
               >
@@ -1503,7 +1498,7 @@ export function CareTasksScreen() {
               {!readOnly && task.status === "open" && !pendingMine && (
                 <>
                   {completingId === task.id ? (
-                    <Card style={{ backgroundColor: C.lavender }}>
+                    <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
                       <Text style={S.h3}>Complete this occurrence</Text>
                       <Field
                         label="Completion note (optional)"
@@ -1629,7 +1624,7 @@ export function CareTasksScreen() {
         </Card>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.h3}>Shared responsibility, not medical instruction.</Text>
         <Txt>
           Care tasks help the family coordinate responsibilities. Medication

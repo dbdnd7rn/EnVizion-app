@@ -1,3 +1,4 @@
+import { themeSurface } from "./themeColors";
 import React, {
   createContext,
   useCallback,
@@ -253,7 +254,7 @@ export function NotificationBell({ onPress }: { onPress: () => void }) {
         width: 43,
         height: 43,
         borderRadius: 22,
-        backgroundColor: C.lavender,
+        backgroundColor: themeSurface(C.lavender),
         alignItems: "center",
         justifyContent: "center",
       }}

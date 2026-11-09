@@ -1,4 +1,4 @@
-import { themeForeground, themeBorder } from "../themeColors";
+import { themeForeground, themeBorder, themeSurface } from "../themeColors";
 import { useAppearance } from "../appearance";
 import { AdminGlassHero, AdminGlassCard, AdminGlassSection, AdminGlassMetric, AdminGlassTabs } from "../components/AdminGlassUi";
 import { themeBackground, themeAction } from "../themeColors";
@@ -76,7 +76,7 @@ function StatusPill({ status }: { status: string }) {
     <View
       style={[
         S.pill,
-        { backgroundColor: good ? "#E8F1ED" : C.lavender },
+        { backgroundColor: themeSurface(good ? "#E8F1ED" : C.lavender) },
       ]}
     >
       <Text
@@ -292,7 +292,7 @@ export function PilotAdminScreen() {
             </View>
           </AdminGlassCard>
 
-          <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+          <AdminGlassCard style={{ backgroundColor: themeSurface(C.lavender) }}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric
                 value={summary.activeConsentComplete}
@@ -324,7 +324,7 @@ export function PilotAdminScreen() {
             </View>
           </AdminGlassCard>
 
-          <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+          <AdminGlassCard style={{ backgroundColor: themeSurface(C.lavender) }}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric
                 value={summary.stalledParticipants}
@@ -371,8 +371,7 @@ export function PilotAdminScreen() {
                 style={[
                   S.pill,
                   {
-                    backgroundColor:
-                      cohort.stalled > 0 ? "#FFF1E5" : "#E8F1ED",
+                    backgroundColor: themeSurface(cohort.stalled > 0 ? "#FFF1E5" : "#E8F1ED"),
                   },
                 ]}
               >
@@ -413,12 +412,7 @@ export function PilotAdminScreen() {
           <AdminGlassSection title="Launch readiness" />
           <AdminGlassCard
             style={{
-              backgroundColor:
-                readiness.level === "ready"
-                  ? "#E8F1ED"
-                  : readiness.level === "blocked"
-                    ? C.redBg
-                    : "#FFF9F2",
+              backgroundColor: themeSurface(readiness.level === "ready" ? "#E8F1ED" : readiness.level === "blocked" ? C.redBg : "#FFF9F2"),
             }}
           >
             <View style={S.between}>
@@ -469,7 +463,7 @@ export function PilotAdminScreen() {
           </AdminGlassCard>
 
           <AdminGlassSection title="Production operations" />
-          <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+          <AdminGlassCard style={{ backgroundColor: themeSurface(C.lavender) }}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
               <Metric
                 value={operations.openDiagnostics}
@@ -619,7 +613,7 @@ export function PilotAdminScreen() {
       </AdminGlassCard>
 
       <AdminGlassSection title="Launch validation" />
-      <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+      <AdminGlassCard style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="flag-outline" size={28} />
         <Text style={S.h3}>Final launch evidence & sign-off</Text>
         <Txt>
@@ -980,7 +974,7 @@ export function PilotAdminScreen() {
 
       <AdminGlassSection title="Activation command center" />
       {!readyToActivate.length ? (
-        <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+        <AdminGlassCard style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="lock-closed-outline" size={26} />
           <Text style={S.h3}>No participant is ready for activation yet.</Text>
           <Txt style={S.small}>
@@ -1062,11 +1056,7 @@ export function PilotAdminScreen() {
                   style={[
                     S.pill,
                     {
-                      backgroundColor: participant.launchTestingReady
-                        ? "#E8F1ED"
-                        : participant.readyForActivation
-                          ? C.lavender
-                          : "#FFF1E5",
+                      backgroundColor: themeSurface(participant.launchTestingReady ? "#E8F1ED" : participant.readyForActivation ? C.lavender : "#FFF1E5"),
                     },
                   ]}
                 >
@@ -1299,10 +1289,7 @@ export function PilotAdminScreen() {
               {participant.status === "exited" && participant.completion && (
                 <AdminGlassCard
                   style={{
-                    backgroundColor:
-                      participant.completion.outcome === "completed"
-                        ? "#E8F1ED"
-                        : "#FFF9F2",
+                    backgroundColor: themeSurface(participant.completion.outcome === "completed" ? "#E8F1ED" : "#FFF9F2"),
                   }}
                 >
                   <Text style={S.h3}>
@@ -1325,7 +1312,7 @@ export function PilotAdminScreen() {
 
       </>)}
 
-      <AdminGlassCard style={{ backgroundColor: C.lavender }}>
+      <AdminGlassCard style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.h3}>Privacy boundary</Text>
         <Txt>
           This dashboard shows pilot operations, consent completion and support

@@ -1,4 +1,4 @@
-import { themeBackground } from "../themeColors";
+import { themeBackground, themeSurface } from "../themeColors";
 import React, { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
@@ -55,7 +55,7 @@ function AttentionRow({
       style={{
         borderWidth: 1,
         borderColor: urgent ? "#E8BDC3" : C.line,
-        backgroundColor: urgent ? "#FFF8F7" : C.white,
+        backgroundColor: themeSurface(urgent ? "#FFF8F7" : C.white),
         borderRadius: 16,
         padding: 15,
         gap: 6,
@@ -178,7 +178,7 @@ export function FamilyCareDashboard({
 
   if (!careRecipientId) {
     return (
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="people-outline" size={28} />
         <Text style={S.h2}>Set up a care profile to unlock the live dashboard.</Text>
         <Txt>
@@ -313,7 +313,7 @@ export function FamilyCareDashboard({
             : "Open today’s care work"
         }
         style={{
-          backgroundColor: attentionCount ? "#FFF8F7" : "#EAF4EF",
+          backgroundColor: themeSurface(attentionCount ? "#FFF8F7" : "#EAF4EF"),
           borderColor: attentionCount ? "#E8BDC3" : "#D4E8DE",
           padding: 16,
         }}
@@ -325,7 +325,7 @@ export function FamilyCareDashboard({
                 width: 40,
                 height: 40,
                 borderRadius: 13,
-                backgroundColor: attentionCount ? C.redBg : "#DDEFE6",
+                backgroundColor: themeSurface(attentionCount ? C.redBg : "#DDEFE6"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -415,7 +415,7 @@ export function FamilyCareDashboard({
                         <View style={S.between}>
                           <Icon name="git-compare-outline" size={23} />
                           {snapshot.ownerSummary.medication.reconciliationNeedsReview && (
-                            <View style={[S.pill, { backgroundColor: "#FFF1E5" }]}>
+                            <View style={[S.pill, { backgroundColor: themeSurface("#FFF1E5") }]}>
                               <Text style={[S.small, { color: C.rose }]}>Review</Text>
                             </View>
                           )}
@@ -543,7 +543,7 @@ export function FamilyCareDashboard({
                     ))}
                   </View>
                 ) : (
-                  <Card style={{ backgroundColor: "#EAF4EF" }}>
+                  <Card style={{ backgroundColor: themeSurface("#EAF4EF") }}>
                     <View style={S.row}>
                       <Icon name="checkmark-circle-outline" color={C.green} size={24} />
                       <View style={{ flex: 1, gap: 3 }}>
@@ -707,7 +707,7 @@ export function FamilyCareDashboard({
                             {communication.summary}
                           </Text>
                           {communication.followUpNeeded && (
-                            <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                            <View style={[S.pill, { backgroundColor: themeSurface(C.lavender) }]}>
                               <Txt style={S.small}>Follow-up</Txt>
                             </View>
                           )}

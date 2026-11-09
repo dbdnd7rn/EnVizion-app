@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, artworkColor, themedStyles } from "../themeColors";
+import { themeBackground, themeForeground, artworkColor, themedStyles, themeSurface, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -76,7 +76,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: C.lavender,
+    backgroundColor: themeSurface(C.lavender),
   },
   bubble: {
     maxWidth: "94%",
@@ -124,7 +124,7 @@ const styles = themedStyles(StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: themeSurface("#FFFFFF"),
   },
   assistantBack: {
     width: 42,
@@ -132,7 +132,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 21,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F8F5FB",
+    backgroundColor: themeSurface("#F8F5FB"),
   },
   assistantTopTitle: {
     fontFamily: "DMSans_700Bold",
@@ -154,7 +154,7 @@ const styles = themedStyles(StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 7,
-    backgroundColor: "#F1EAFE",
+    backgroundColor: themeSurface("#F1EAFE"),
   },
   assistantGuideText: {
     fontFamily: "DMSans_600SemiBold",
@@ -167,7 +167,7 @@ const styles = themedStyles(StyleSheet.create({
     minHeight: 320,
     padding: 22,
     overflow: "hidden",
-    backgroundColor: "#F0EEFF",
+    backgroundColor: themeSurface("#F0EEFF"),
     borderWidth: 1,
     borderColor: "#ECE8FF",
   },
@@ -178,7 +178,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 130,
     right: -72,
     top: -76,
-    backgroundColor: "#E4E8FF",
+    backgroundColor: themeSurface("#E4E8FF"),
     opacity: 0.9,
   },
   assistantHeroGlowTwo: {
@@ -188,7 +188,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 110,
     right: -4,
     bottom: -128,
-    backgroundColor: "#E9DEFB",
+    backgroundColor: themeSurface("#E9DEFB"),
     opacity: 0.78,
   },
   assistantGreeting: {
@@ -229,7 +229,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 78,
     top: 13,
     right: 6,
-    backgroundColor: "#DCE2FF",
+    backgroundColor: themeSurface("#DCE2FF"),
   },
   assistantRobotWaveArm: {
     position: "absolute",
@@ -254,7 +254,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.88)",
+    backgroundColor: themeSurface("rgba(255,255,255,0.88)"),
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.95)",
   },
@@ -289,7 +289,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.68)",
+    backgroundColor: themeSurface("rgba(255,255,255,0.68)"),
   },
   assistantQuickLabel: {
     marginTop: 9,
@@ -329,7 +329,7 @@ const styles = themedStyles(StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: themeSurface("#FFFFFF"),
     borderWidth: 1,
     borderColor: "#E9E4EE",
   },
@@ -339,7 +339,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F1EBFC",
+    backgroundColor: themeSurface("#F1EBFC"),
   },
   assistantQuestionTitle: {
     fontFamily: "DMSans_600SemiBold",
@@ -384,7 +384,7 @@ const styles = themedStyles(StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 10,
     paddingBottom: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: themeSurface("#FFFFFF"),
     borderTopWidth: 1,
     borderTopColor: "#F3EEF4",
   },
@@ -396,7 +396,7 @@ const styles = themedStyles(StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: themeSurface("#FFFFFF"),
     borderWidth: 1,
     borderColor: "#E6DFEB",
     shadowColor: "#2E2135",
@@ -411,7 +411,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F6F2FB",
+    backgroundColor: themeSurface("#F6F2FB"),
   },
   assistantSend: {
     width: 48,
@@ -419,7 +419,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#713BA0",
+    backgroundColor: themeSurface("#713BA0"),
   },
   assistantDisclaimer: {
     marginTop: 8,
@@ -442,7 +442,7 @@ const styles = themedStyles(StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    backgroundColor: "#F3EFFF",
+    backgroundColor: themeSurface("#F3EFFF"),
     borderWidth: 1,
     borderColor: "#E8E1F4",
   },
@@ -452,7 +452,7 @@ const styles = themedStyles(StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#713BA0",
+    backgroundColor: themeSurface("#713BA0"),
   },
 }));
 
@@ -477,7 +477,7 @@ function Bubble({ message }: { message: Message }) {
         styles.bubble,
         {
           alignSelf: own ? "flex-end" : "flex-start",
-          backgroundColor: own ? C.deep : C.white,
+          backgroundColor: own ? themeAction(C.deep) : themeSurface(C.white),
           borderBottomRightRadius: own ? 6 : 20,
           borderBottomLeftRadius: own ? 20 : 6,
         },
@@ -612,7 +612,7 @@ function AssistantFeaturePill({
     <View
       style={[
         styles.assistantHeroPill,
-        active && { borderColor: tint, backgroundColor: "#FFFFFF" },
+        active && { borderColor: tint, backgroundColor: themeSurface("#FFFFFF") },
       ]}
     >
       <Icon name={icon} color={tint} size={20} />
@@ -919,7 +919,7 @@ function AssistantQuickCard({
       onPress={onPress}
       style={({ pressed }) => [
         styles.assistantQuickCard,
-        { backgroundColor: background, opacity: pressed ? 0.75 : 1 },
+        { backgroundColor: themeSurface(background), opacity: pressed ? 0.75 : 1 },
       ]}
     >
       <View style={styles.assistantQuickIcon}>
@@ -981,7 +981,7 @@ function AssistantResourceCard({
       onPress={onPress}
       style={({ pressed }) => [
         styles.assistantResourceCard,
-        { backgroundColor: background, opacity: pressed ? 0.75 : 1 },
+        { backgroundColor: themeSurface(background), opacity: pressed ? 0.75 : 1 },
       ]}
     >
       <View style={[styles.assistantQuickIcon, { width: 42, height: 42 }]}>
@@ -1014,7 +1014,7 @@ export function AssistantScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      style={{ flex: 1, backgroundColor: themeSurface("#FFFFFF") }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={0}
     >
@@ -1270,7 +1270,7 @@ export function HandoffScreen() {
         title="Let’s bring in the team."
         body="Some questions deserve a conversation. Tell the EnVizion Life team what you would like help with."
       />
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.h3}>Your request is securely saved</Text>
         <Txt>
           Requests are stored with your account so the support team can review
@@ -1294,7 +1294,7 @@ export function HandoffScreen() {
             style={[
               styles.chip,
               topic === value && {
-                backgroundColor: C.lavender,
+                backgroundColor: themeSurface(C.lavender),
                 borderColor: C.purple,
               },
             ]}
@@ -1323,7 +1323,7 @@ export function HandoffScreen() {
             style={[
               styles.chip,
               channel === value && {
-                backgroundColor: C.lavender,
+                backgroundColor: themeSurface(C.lavender),
                 borderColor: C.purple,
               },
             ]}

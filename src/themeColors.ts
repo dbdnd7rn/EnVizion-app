@@ -35,13 +35,13 @@ function isRose(r: number, g: number, b: number) {
 }
 function isGreen(r: number, g: number, b: number) {
   return (g > r * 1.17 && g > b * 1.08) ||
-    (g - r >= 8 && g - b >= 5 && b >= r);
+    (g - r >= 8 && g - b >= 4 && b >= r);
 }
 function isBlue(r: number, g: number, b: number) {
-  return b - r >= 12 && b - g >= 9 && g >= r * 0.98;
+  return b - r >= 12 && b - g >= 7 && g >= r + 4;
 }
 function isAmber(r: number, g: number, b: number) {
-  return r - b >= 14 && g - b >= 10 && r >= g * 1.02;
+  return r - b >= 12 && g - b >= 5 && r >= g * 1.02;
 }
 function isPurple(r: number, g: number, b: number) { return b > g * 1.09 && r > g * 1.08; }
 
@@ -141,6 +141,19 @@ export function artworkColor(source: string) { return source; }
  */
 export function artworkBackdrop(light: string, dark: string) {
   return activeMode === "dark" ? dark : light;
+}
+
+/**
+ * Convert colors supplied to React Native View/Card backgrounds. Unlike text
+ * or authored illustration colors, even a palette-proxied C.white becomes a
+ * charcoal surface in dark mode. Saturated action fills remain vivid.
+ * Use at the boundary of reusable components that receive a light tile color.
+ */
+export function themeSurface(source: string) {
+  if (activeMode !== "dark") return source;
+  const parsed = parseHex(source);
+  if (parsed && parsed.brightness < 0.66) return source;
+  return appearanceColor(source, "background");
 }
 
 export const themeBackground = (value: string) => appearanceColor(value, "background");

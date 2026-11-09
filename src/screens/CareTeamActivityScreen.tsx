@@ -1,4 +1,4 @@
-import { themeAction } from "../themeColors";
+import { themeAction, themeSurface } from "../themeColors";
 import { themeForeground, themeBackground, themeIconSurface } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -43,18 +43,18 @@ function roleLabel(role: CareRole) {
 
 function toneStyle(tone: CareTeamActivityItem["tone"]) {
   if (tone === "green") {
-    return { backgroundColor: "#EAF3EE", color: C.green };
+    return { backgroundColor: themeSurface("#EAF3EE"), color: C.green };
   }
   if (tone === "amber") {
-    return { backgroundColor: "#FFF4E2", color: themeForeground("#956824") };
+    return { backgroundColor: themeSurface("#FFF4E2"), color: themeForeground("#956824") };
   }
   if (tone === "rose") {
-    return { backgroundColor: "#FBE8E4", color: C.rose };
+    return { backgroundColor: themeSurface("#FBE8E4"), color: C.rose };
   }
   if (tone === "purple") {
-    return { backgroundColor: "#F3EAF7", color: C.purple };
+    return { backgroundColor: themeSurface("#F3EAF7"), color: C.purple };
   }
-  return { backgroundColor: "#F4F1F5", color: "#746C78" };
+  return { backgroundColor: themeSurface("#F4F1F5"), color: "#746C78" };
 }
 
 function filterLabel(
@@ -308,8 +308,7 @@ export function CareTeamActivityScreen() {
               {
                 minHeight: 40,
                 justifyContent: "center",
-                backgroundColor:
-                  memberUserId === null ? themeAction(C.purple) : C.lavender,
+                backgroundColor: memberUserId === null ? themeAction(C.purple) : themeSurface(C.lavender),
                 paddingHorizontal: 13,
               },
             ]}

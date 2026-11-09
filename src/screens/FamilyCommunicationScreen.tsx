@@ -1,4 +1,4 @@
-import { themeAction } from "../themeColors";
+import { themeAction, themeSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -347,7 +347,7 @@ export function FamilyCommunicationScreen() {
       )}
 
       {viewer && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>
             {state.accessRole === "patient"
@@ -537,11 +537,7 @@ export function FamilyCommunicationScreen() {
             <Card
               key={update.id}
               style={{
-                backgroundColor:
-                  update.priority === "important" ||
-                  update.requiresAcknowledgement
-                    ? "#FFF9F2"
-                    : C.white,
+                backgroundColor: themeSurface(update.priority === "important" || update.requiresAcknowledgement ? "#FFF9F2" : C.white),
               }}
             >
               <View style={S.between}>
@@ -571,7 +567,7 @@ export function FamilyCommunicationScreen() {
               <Txt>{update.body}</Txt>
 
               {update.requiresAcknowledgement && (
-                <Card style={{ backgroundColor: C.lavender }}>
+                <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
                   <Text style={S.h3}>Acknowledgements</Text>
                   <Txt style={S.small}>
                     {acks.length} care-team member

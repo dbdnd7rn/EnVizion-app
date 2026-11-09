@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -137,7 +137,7 @@ export function PilotIntelligenceScreen() {
                   style={{
                     height: 8,
                     borderRadius: 8,
-                    backgroundColor: C.lavender,
+                    backgroundColor: themeSurface(C.lavender),
                     overflow: "hidden",
                   }}
                 >
@@ -155,7 +155,7 @@ export function PilotIntelligenceScreen() {
           })}
 
           <Section title="Pilot outcomes" />
-          <Card style={{ backgroundColor: C.lavender }}>
+          <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 16 }}>
               <Metric value={data.outcomes.completed} label="completed" />
               <Metric value={data.outcomes.withdrawn} label="withdrawn" />

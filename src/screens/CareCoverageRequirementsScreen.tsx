@@ -1,4 +1,4 @@
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -348,7 +348,7 @@ export function CareCoverageRequirementsScreen() {
       )}
 
       {readOnly && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
@@ -569,7 +569,7 @@ export function CareCoverageRequirementsScreen() {
                     {overnight ? " next day" : ""}
                   </Txt>
                 </View>
-                <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                <View style={[S.pill, { backgroundColor: themeSurface(C.lavender) }]}>
                   <Text style={[S.small, { color: C.deep }]}>
                     Required care
                   </Text>
@@ -623,7 +623,7 @@ export function CareCoverageRequirementsScreen() {
         </Card>
       )}
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="information-circle-outline" />
         <Text style={S.h3}>Planning information, not a clinical prescription.</Text>
         <Txt>

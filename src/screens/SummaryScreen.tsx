@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeTint, artworkColor } from "../themeColors";
+import { themeBackground, themeBorder, themeTint, artworkColor, themeSurface } from "../themeColors";
 import { themeForeground, themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -379,7 +379,7 @@ function SummaryAction({
         overflow: "hidden",
         borderWidth: primary ? 0 : 1.3,
         borderColor: themeBorder("#B98CDA"),
-        backgroundColor: primary ? "#7B35A8" : "#FFFFFFA6",
+        backgroundColor: primary ? "#7B35A8" : themeSurface("#FFFFFFA6"),
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",

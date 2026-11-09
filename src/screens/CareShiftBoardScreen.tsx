@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, artworkColor, themeIconSurface } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, artworkColor, themeIconSurface, themeSurface } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, View } from "react-native";
@@ -1867,7 +1867,7 @@ export function CareShiftBoardScreen() {
                                 S.pill,
                                 {
                                   alignSelf: "flex-start",
-                                  backgroundColor: bucketBackground(bucket),
+                                  backgroundColor: themeSurface(bucketBackground(bucket)),
                                 },
                               ]}
                             >

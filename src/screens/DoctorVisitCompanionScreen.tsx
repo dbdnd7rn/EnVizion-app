@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -907,7 +907,7 @@ export function DoctorVisitCompanionScreen() {
                     <View
                       style={[
                         S.pill,
-                        { backgroundColor: statusColor(bundle.visit.status) },
+                        { backgroundColor: themeSurface(statusColor(bundle.visit.status)) },
                       ]}
                     >
                       <Text style={[S.small, { fontFamily: "DMSans_600SemiBold" }]}>
@@ -1443,8 +1443,7 @@ export function DoctorVisitCompanionScreen() {
             {activeSummary && (
               <Card
                 style={{
-                  backgroundColor:
-                    activeSummary.status === "approved" ? "#EDF5F1" : "#F7F1FA",
+                  backgroundColor: themeSurface(activeSummary.status === "approved" ? "#EDF5F1" : "#F7F1FA"),
                 }}
               >
                 <View style={S.between}>

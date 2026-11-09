@@ -1,4 +1,4 @@
-import { themeAction, themeBackground, themeBorder } from "../themeColors";
+import { themeAction, themeBackground, themeBorder, themeSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -861,7 +861,7 @@ export function CareScheduleScreen() {
       )}
 
       {readOnly && (
-        <Card style={{ backgroundColor: C.lavender }}>
+        <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
           <Icon name="eye-outline" />
           <Text style={S.h3}>Viewer access is read-only.</Text>
           <Txt>
@@ -1193,7 +1193,7 @@ export function CareScheduleScreen() {
               )}
 
               {checkoutAttendance?.shiftId === shift.id && canEnd && (
-                <Card style={{ backgroundColor: C.lavender }}>
+                <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
                   <Text style={S.h3}>End shift & hand off care</Text>
                   <Txt style={S.small}>
                     Your clock-out time is stamped by EnVizion. This note is
@@ -1253,7 +1253,7 @@ export function CareScheduleScreen() {
               )}
 
               {swapShift?.id === shift.id && canSwap && (
-                <Card style={{ backgroundColor: C.lavender }}>
+                <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
                   <Text style={S.h3}>Ask another caregiver to take this shift</Text>
                   {members
                     .filter((member) => member.userId !== currentUserId)
@@ -1321,8 +1321,7 @@ export function CareScheduleScreen() {
                   style={[
                     S.pill,
                     {
-                      backgroundColor:
-                        item.status === "active" ? "#EAF4EF" : C.lavender,
+                      backgroundColor: themeSurface(item.status === "active" ? "#EAF4EF" : C.lavender),
                     },
                   ]}
                 >
@@ -1380,7 +1379,7 @@ export function CareScheduleScreen() {
       </View>
       {detailPanel === "weekly" && (
         <ScheduleReveal>
-          <Card style={{ backgroundColor: C.lavender }}>
+          <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
             <Text style={S.h3}>Weekly patterns and exceptions</Text>
             <Txt style={S.small}>
               Save normal weekly routines once. Unavailable time always takes
@@ -1620,12 +1619,7 @@ export function CareScheduleScreen() {
                   style={[
                     S.pill,
                     {
-                      backgroundColor:
-                        rule.status === "unavailable"
-                          ? C.redBg
-                          : rule.status === "preferred"
-                            ? "#EAF4EF"
-                            : C.lavender,
+                      backgroundColor: themeSurface(rule.status === "unavailable" ? C.redBg : rule.status === "preferred" ? "#EAF4EF" : C.lavender),
                     },
                   ]}
                 >
@@ -1809,12 +1803,7 @@ export function CareScheduleScreen() {
                   style={[
                     S.pill,
                     {
-                      backgroundColor:
-                        item.status === "unavailable"
-                          ? C.redBg
-                          : item.status === "preferred"
-                            ? "#EAF4EF"
-                            : C.lavender,
+                      backgroundColor: themeSurface(item.status === "unavailable" ? C.redBg : item.status === "preferred" ? "#EAF4EF" : C.lavender),
                     },
                   ]}
                 >
@@ -1879,7 +1868,7 @@ export function CareScheduleScreen() {
                     {memberName(swap.requestedTo)}
                   </Txt>
                 </View>
-                <View style={[S.pill, { backgroundColor: C.lavender }]}>
+                <View style={[S.pill, { backgroundColor: themeSurface(C.lavender) }]}>
                   <Text style={[S.small, { color: C.deep }]}>
                     {swap.status}
                   </Text>

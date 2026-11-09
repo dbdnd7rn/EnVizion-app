@@ -1,4 +1,4 @@
-import { themeBackground } from "../themeColors";
+import { themeBackground, themeSurface } from "../themeColors";
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import {
@@ -176,7 +176,7 @@ export function PrivacyDataScreen() {
       </Card>
 
       <Section title="Technical diagnostics" />
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="pulse-outline" size={28} />
         <Text style={S.h3}>Send privacy-minimized diagnostics</Text>
         <Txt>
@@ -263,7 +263,7 @@ export function PrivacyDataScreen() {
           style={({ pressed }) => ({
             minHeight: 45, flexDirection: "row", alignItems: "center",
             justifyContent: "space-between", paddingHorizontal: 13,
-            borderRadius: 16, backgroundColor: "#F5EBFA", opacity: pressed ? 0.7 : 1,
+            borderRadius: 16, backgroundColor: themeSurface("#F5EBFA"), opacity: pressed ? 0.7 : 1,
           })}
         >
           <Text style={[S.h3, { fontSize: 12.5, color: C.purple }]}>
@@ -342,7 +342,7 @@ export function PrivacyDataScreen() {
         )}
       </Card>
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Icon name="people-outline" />
         <Text style={S.h3}>Live care workspace presence</Text>
         <Txt>
@@ -373,7 +373,7 @@ export function PrivacyDataScreen() {
           style={({ pressed }) => ({
             minHeight: 45, flexDirection: "row", alignItems: "center",
             justifyContent: "space-between", paddingHorizontal: 13,
-            borderRadius: 16, backgroundColor: "#FFF0F3", opacity: pressed ? 0.7 : 1,
+            borderRadius: 16, backgroundColor: themeSurface("#FFF0F3"), opacity: pressed ? 0.7 : 1,
           })}
         >
           <Text style={[S.h3, { fontSize: 12.5, color: C.rose }]}>
@@ -510,7 +510,7 @@ export function PrivacyDataScreen() {
         />
       </Card>
 
-      <Card style={{ backgroundColor: C.lavender }}>
+      <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
         <Text style={S.h3}>Important</Text>
         <Txt>
           These controls manage data stored by EnVizion Life. They do not

@@ -1,5 +1,5 @@
 import { themeForeground, themeBorder, themeShadow, themeTint } from "../themeColors";
-import { themeBackground, themeAction } from "../themeColors";
+import { themeBackground, themeAction, themeSurface, themeIconSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-native-qrcode-svg";
 import { ActivityIndicator, Linking, Modal, Platform, Pressable, Text, View } from "react-native";
@@ -153,7 +153,7 @@ function SmallStatusCard({
         minHeight: 128,
         borderRadius: 24,
         padding: 14,
-        backgroundColor: themeBackground(background),
+        backgroundColor: themeSurface(background),
         borderWidth: 1,
         borderColor: themeBorder("#EAE4F2"),
         gap: 9,
@@ -163,7 +163,7 @@ function SmallStatusCard({
       <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
         <View style={{
           width: 34, height: 34, borderRadius: 17,
-          backgroundColor: themeBackground("#FFFFFFB8"),
+          backgroundColor: themeIconSurface(background),
           alignItems: "center", justifyContent: "center",
         }}>
           <Icon name={icon} size={19} color={themeForeground(accent)} />
@@ -228,10 +228,10 @@ function ContactTile({
         flex: 1,
         minHeight: 128,
         borderRadius: 22,
-        backgroundColor: background,
+        backgroundColor: themeSurface(background),
         borderWidth: dashed ? 1.5 : 0,
         borderStyle: dashed ? "dashed" : "solid",
-        borderColor: dashed ? "#B98AE3" : "transparent",
+        borderColor: dashed ? themeBorder("#B98AE3") : "transparent",
         alignItems: "center",
         justifyContent: "center",
         gap: 10,
@@ -243,17 +243,17 @@ function ContactTile({
           width: 50,
           height: 50,
           borderRadius: 25,
-          backgroundColor: themeBackground("#FFFFFFA8"),
+          backgroundColor: themeIconSurface(background),
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={24} color={accent} />
+        <Icon name={icon} size={24} color={themeForeground(accent)} />
       </View>
       <Text
         style={[
           S.h3,
-          { fontSize: 13, lineHeight: 17, textAlign: "center", color: accent },
+          { fontSize: 13, lineHeight: 17, textAlign: "center", color: themeForeground(accent) },
         ]}
       >
         {title}
@@ -286,7 +286,7 @@ function ProfileTile({
         width: "48.5%",
         minHeight: 104,
         borderRadius: 22,
-        backgroundColor: background,
+        backgroundColor: themeSurface(background),
         padding: 14,
         flexDirection: "row",
         alignItems: "center",
@@ -299,12 +299,12 @@ function ProfileTile({
           width: 48,
           height: 48,
           borderRadius: 24,
-          backgroundColor: themeBackground("#FFFFFFA8"),
+          backgroundColor: themeIconSurface(background),
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={23} color={accent} />
+        <Icon name={icon} size={23} color={themeForeground(accent)} />
       </View>
       <View style={{ flex: 1, gap: 4 }}>
         <Text style={[S.h3, { fontSize: 13, lineHeight: 17 }]}>{title}</Text>
@@ -312,7 +312,7 @@ function ProfileTile({
           {value || "Not set"}
         </Text>
       </View>
-      <Icon name="chevron-forward-outline" size={17} color={accent} />
+      <Icon name="chevron-forward-outline" size={17} color={themeForeground(accent)} />
     </Pressable>
   );
 }
@@ -1067,12 +1067,12 @@ export function EmergencyCenterScreen() {
                   width: 48,
                   height: 48,
                   borderRadius: 24,
-                  backgroundColor: bg,
+                  backgroundColor: themeIconSurface(bg),
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Icon name={icon} size={22} color={color} />
+                <Icon name={icon} size={22} color={themeForeground(color)} />
               </View>
             ))}
           </View>

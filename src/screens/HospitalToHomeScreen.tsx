@@ -1,4 +1,4 @@
-import { themeBorder, themeShadow } from "../themeColors";
+import { themeBorder, themeShadow, themeSurface } from "../themeColors";
 import { themeBackground, themeForeground, artworkColor } from "../themeColors";
 import React, {
   useCallback,
@@ -375,7 +375,7 @@ function ActionButton({
         gap: 9,
         borderWidth: secondary ? 1 : 0,
         borderColor: secondary ? "#E4D7EC" : "transparent",
-        backgroundColor: secondary ? "#F8F3FB" : PURPLE,
+        backgroundColor: themeSurface(secondary ? "#F8F3FB" : PURPLE),
         opacity: disabled ? 0.45 : pressed ? 0.82 : 1,
         transform: [{ scale: pressed && !disabled ? 0.988 : 1 }],
         shadowColor: secondary ? "#5B3967" : PURPLE,
@@ -1813,7 +1813,7 @@ export function HospitalToHomeScreen() {
                         borderRadius: 21,
                         alignItems: "center",
                         justifyContent: "center",
-                        backgroundColor: completed ? "#DFF1E8" : "#F2E7FA",
+                        backgroundColor: themeSurface(completed ? "#DFF1E8" : "#F2E7FA"),
                       }}
                     >
                       <Icon

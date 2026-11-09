@@ -1,4 +1,4 @@
-import { themeBackground } from "../themeColors";
+import { themeBackground, themeSurface } from "../themeColors";
 import { themeAction } from "../themeColors";
 import Constants from "expo-constants";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
@@ -93,7 +93,7 @@ function CheckRow({
           minHeight: 58,
           borderWidth: 1,
           borderColor: checked ? C.purple : C.line,
-          backgroundColor: checked ? C.lavender : C.white,
+          backgroundColor: themeSurface(checked ? C.lavender : C.white),
           borderRadius: 16,
           padding: 12,
           opacity: disabled ? 0.6 : pressed ? 0.85 : 1,
@@ -123,7 +123,7 @@ function ResultPill({ status }: { status: string }) {
       style={[
         S.pill,
         {
-          backgroundColor: good ? "#E8F1ED" : bad ? "#FFF1E5" : C.lavender,
+          backgroundColor: themeSurface(good ? "#E8F1ED" : bad ? "#FFF1E5" : C.lavender),
         },
       ]}
     >
@@ -446,7 +446,7 @@ export function LaunchValidationScreen() {
           </View>
 
           {selectedWave && (
-            <Card style={{ backgroundColor: C.lavender }}>
+            <Card style={{ backgroundColor: themeSurface(C.lavender) }}>
               <Text style={S.eyebrow}>
                 {selectedWave.cohort.toUpperCase()} ·{" "}
                 {selectedWave.requiredPlatforms.join(" / ").toUpperCase()}
