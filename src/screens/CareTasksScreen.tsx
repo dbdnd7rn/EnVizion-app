@@ -216,7 +216,7 @@ function SelectCard({
         {
           padding: 14,
           borderColor: selected ? C.purple : C.line,
-          backgroundColor: selected ? "#F6F0F8" : C.white,
+          backgroundColor: themeBackground(selected ? "#F6F0F8" : C.white),
           opacity: disabled ? 0.55 : 1,
         },
       ]}
@@ -840,7 +840,7 @@ export function CareTasksScreen() {
         body="Assign care tasks, keep follow-ups visible, and maintain a shared completion history without relying on memory or scattered messages."
       />
 
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
+      <Card style={{ backgroundColor: themeAction(C.deep), borderWidth: 0 }}>
         <Text style={[S.eyebrow, { color: themeForeground("#E7CFEF") }]}>ACTIVE CARE PROFILE</Text>
         <Text style={[S.h2, { color: C.white }]}>
           {state.careRecipientName || "Care profile"}
@@ -1297,7 +1297,7 @@ export function CareTasksScreen() {
               key={task.id}
               style={{
                 borderColor: status === "overdue" ? "#E8BDC3" : C.line,
-                backgroundColor: status === "overdue" ? "#FFF9F8" : C.white,
+                backgroundColor: themeBackground(status === "overdue" ? "#FFF9F8" : C.white),
               }}
             >
               <View style={S.between}>
@@ -1312,7 +1312,7 @@ export function CareTasksScreen() {
                     <View
                       style={[
                         S.pill,
-                        { backgroundColor: statusBackground(status) },
+                        { backgroundColor: themeBackground(statusBackground(status)) },
                       ]}
                     >
                       <Text
@@ -1330,7 +1330,7 @@ export function CareTasksScreen() {
                     <View
                       style={[
                         S.pill,
-                        { backgroundColor: priorityBackground(task.priority) },
+                        { backgroundColor: themeBackground(priorityBackground(task.priority)) },
                       ]}
                     >
                       <Text style={[S.small, { color: C.deep }]}>
