@@ -271,15 +271,21 @@ function MainTabs() {
   );
 }
 
-function useReducedMotion() {
-  const [reduced, setReduced] = useState(true);
+function useReducedMotion(): boolean | null {
+  // Resolve the user's setting before starting any decorative animation.
+  const [reduced, setReduced] = useState<boolean | null>(null);
 
   useEffect(() => {
     let active = true;
 
-    AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (active) setReduced(value);
-    });
+    void AccessibilityInfo.isReduceMotionEnabled()
+      .then((value) => {
+        if (active) setReduced(value);
+      })
+      .catch(() => {
+        // Prefer less motion if the operating system cannot report a preference.
+        if (active) setReduced(true);
+      });
 
     const subscription = AccessibilityInfo.addEventListener(
       "reduceMotionChanged",
@@ -313,41 +319,141 @@ function LoadingState({ message = "Preparing your care companion…" }: { messag
   );
 }
 
-function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
-  const reveal = React.useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
-  const drift = React.useRef(new Animated.Value(reducedMotion ? 1 : 0)).current;
+function AnimatedLaunchScreen({
+  reducedMotion,
+  onFinish,
+}: {
+  reducedMotion: boolean;
+  onFinish: () => void;
+}) {
+  const reveal = React.useRef(new Animated.Value(0)).current;
+  const halo = React.useRef(new Animated.Value(0)).current;
+  const tagline = React.useRef(new Animated.Value(0)).current;
+  const exitOpacity = React.useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion) {
+      reveal.setValue(1);
+      halo.setValue(1);
+      tagline.setValue(1);
+      exitOpacity.setValue(1);
+      const quietExit = Animated.sequence([
+        Animated.delay(120),
+        Animated.timing(exitOpacity, {
+          toValue: 0,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+      ]);
+      quietExit.start(({ finished }) => {
+        if (finished) onFinish();
+      });
+      return () => quietExit.stop();
+    }
 
-    Animated.parallel([
-      Animated.spring(reveal, {
+    reveal.setValue(0);
+    halo.setValue(0);
+    tagline.setValue(0);
+    exitOpacity.setValue(1);
+
+    const sequence = Animated.parallel([
+      Animated.timing(reveal, {
         toValue: 1,
-        damping: 12,
-        stiffness: 95,
-        mass: 0.8,
+        duration: 1350,
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
-      Animated.timing(drift, {
+      Animated.timing(halo, {
         toValue: 1,
-        duration: 1500,
-        easing: Easing.inOut(Easing.cubic),
+        duration: 2450,
+        delay: 180,
+        easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
-    ]).start();
-  }, [drift, reducedMotion, reveal]);
+      Animated.timing(tagline, {
+        toValue: 1,
+        duration: 850,
+        delay: 850,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.sequence([
+        Animated.delay(2550),
+        Animated.timing(exitOpacity, {
+          toValue: 0,
+          duration: 450,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]),
+    ]);
+    sequence.start(({ finished }) => {
+      if (finished) onFinish();
+    });
+    return () => sequence.stop();
+  }, [exitOpacity, halo, onFinish, reducedMotion, reveal, tagline]);
 
   return (
-    <View
+    <Animated.View
+      accessible
       accessibilityLabel="EnVizion Life is opening"
+      pointerEvents="auto"
       style={{
-        flex: 1,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 20,
         alignItems: "center",
         justifyContent: "center",
         overflow: "hidden",
-        backgroundColor: themeBackground("#FCF9F6"),
+        backgroundColor: "#FCF9F6",
+        opacity: exitOpacity,
       }}
     >
+      <Animated.View
+        style={{
+          position: "absolute",
+          width: 370,
+          height: 370,
+          borderRadius: 185,
+          top: -140,
+          right: -200,
+          backgroundColor: "#EADCF266",
+          opacity: halo.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.3, 0.8],
+          }),
+          transform: [{
+            scale: halo.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.86, 1.16],
+            }),
+          }],
+        }}
+      />
+      <Animated.View
+        style={{
+          position: "absolute",
+          width: 320,
+          height: 320,
+          borderRadius: 160,
+          bottom: -165,
+          left: -160,
+          backgroundColor: "#E5D2EC88",
+          opacity: halo.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.25, 0.67],
+          }),
+          transform: [{
+            scale: halo.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.9, 1.22],
+            }),
+          }],
+        }}
+      />
       <Animated.View
         style={{
           position: "absolute",
@@ -355,42 +461,56 @@ function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
           height: 290,
           borderRadius: 145,
           borderWidth: 1,
-          borderColor: "#7B428E24",
-          opacity: drift.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [0.2, 0.8, 0.25],
+          borderColor: "#A574BD55",
+          opacity: halo.interpolate({
+            inputRange: [0, 0.35, 1],
+            outputRange: [0.06, 0.44, 0],
           }),
-          transform: [
-            {
-              scale: drift.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.72, 1.18],
-              }),
-            },
-            {
-              rotate: drift.interpolate({
-                inputRange: [0, 1],
-                outputRange: ["-8deg", "8deg"],
-              }),
-            },
-          ],
+          transform: [{
+            scale: halo.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.7, 1.53],
+            }),
+          }],
+        }}
+      />
+      <Animated.View
+        style={{
+          position: "absolute",
+          width: 255,
+          height: 255,
+          borderRadius: 128,
+          borderWidth: 1,
+          borderColor: "#C6A4D877",
+          opacity: halo.interpolate({
+            inputRange: [0, 0.65, 1],
+            outputRange: [0.08, 0.35, 0.05],
+          }),
+          transform: [{
+            scale: halo.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.73, 1.3],
+            }),
+          }],
         }}
       />
       <Animated.View
         style={{
           alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
           opacity: reveal,
           transform: [
             {
               translateY: reveal.interpolate({
                 inputRange: [0, 1],
-                outputRange: [28, 0],
+                outputRange: [24, -3],
               }),
             },
             {
               scale: reveal.interpolate({
-                inputRange: [0, 0.72, 1],
-                outputRange: [0.72, 1.06, 1],
+                inputRange: [0, 1],
+                outputRange: [0.88, 1],
               }),
             },
           ],
@@ -399,21 +519,28 @@ function AnimatedLaunchScreen({ reducedMotion }: { reducedMotion: boolean }) {
         <Animated.Image
           source={require("./assets/envizion-original.png")}
           resizeMode="contain"
-          style={{ width: 270, height: 168 }}
+          style={{ width: 304, height: 190, maxWidth: "88%" }}
         />
-        <Text
+        <Animated.Text
           style={{
-            marginTop: 18,
-            color: C.purple,
-            fontFamily: "DMSans_700Bold",
-            fontSize: 12,
-            letterSpacing: 4,
+            marginTop: 12,
+            color: "#70338F",
+            fontFamily: "DMSans_600SemiBold",
+            fontSize: 11,
+            letterSpacing: 3.6,
+            opacity: tagline,
+            transform: [{
+              translateY: tagline.interpolate({
+                inputRange: [0, 1],
+                outputRange: [10, 0],
+              }),
+            }],
           }}
         >
           CARE IN MOTION
-        </Text>
+        </Animated.Text>
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -1102,7 +1229,8 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
 
 function AppShell() {
   const { dark, ready } = useAppearance();
-  const reducedMotion = useReducedMotion();
+  const motionPreference = useReducedMotion();
+  const reducedMotion = motionPreference ?? true;
   const [showLaunch, setShowLaunch] = useState(true);
   const [fontsTimedOut, setFontsTimedOut] = useState(false);
   const [loaded, error] = useFonts({
@@ -1111,6 +1239,7 @@ function AppShell() {
     DMSans_700Bold,
     Lora_500Medium,
   });
+  const finishLaunch = React.useCallback(() => setShowLaunch(false), []);
 
   useEffect(() => {
     if (loaded || error) return;
@@ -1119,21 +1248,13 @@ function AppShell() {
   }, [loaded, error]);
 
   const fontsReady = loaded || Boolean(error) || fontsTimedOut;
-
-  useEffect(() => {
-    if (!fontsReady) return;
-    const timer = setTimeout(
-      () => setShowLaunch(false),
-      reducedMotion ? 300 : 950,
-    );
-    return () => clearTimeout(timer);
-  }, [fontsReady, reducedMotion]);
-
-  if (!fontsReady || !ready) return <LoadingState message="Loading app resources…" />;
+  if (!fontsReady || !ready || motionPreference === null) {
+    return <LoadingState message="Loading app resources…" />;
+  }
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={dark ? "light" : "dark"} />
+      <StatusBar style={showLaunch ? "dark" : dark ? "light" : "dark"} />
       <View
         style={{ flex: 1, backgroundColor: dark ? "#17151F" : "#EDE5EF", alignItems: "center" }}
       >
@@ -1142,19 +1263,27 @@ function AppShell() {
             width: "100%",
             maxWidth: 480,
             flex: 1,
-            backgroundColor: C.paper,
+            backgroundColor: showLaunch ? "#FCF9F6" : C.paper,
             ...(Platform.OS === "web"
               ? { boxShadow: dark ? "0 0 65px #00000055" : "0 0 80px #59306818" }
               : {}),
           }}
         >
           <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-            {showLaunch ? (
-              <AnimatedLaunchScreen reducedMotion={reducedMotion} />
-            ) : (
+            <View
+              style={{ flex: 1 }}
+              importantForAccessibility={showLaunch ? "no-hide-descendants" : "auto"}
+            >
+              {/* Prepare authentication while the opening visual is playing. */}
               <AuthProvider>
                 <AuthGate reducedMotion={reducedMotion} />
               </AuthProvider>
+            </View>
+            {showLaunch && (
+              <AnimatedLaunchScreen
+                reducedMotion={reducedMotion}
+                onFinish={finishLaunch}
+              />
             )}
           </SafeAreaView>
         </View>
