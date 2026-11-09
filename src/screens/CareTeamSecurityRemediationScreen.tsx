@@ -1,3 +1,4 @@
+import { themeAction, themeBackground, themeForeground, themeBorder } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -221,7 +222,7 @@ export function CareTeamSecurityRemediationScreen() {
 
       <Card
         style={{
-          backgroundColor: C.deep,
+          backgroundColor: themeAction(C.deep),
           borderWidth: 0,
           gap: 11,
         }}
@@ -269,7 +270,7 @@ export function CareTeamSecurityRemediationScreen() {
             alignItems: "center",
             gap: 10,
             paddingVertical: 26,
-            backgroundColor: "#F3FAF6",
+            backgroundColor: themeBackground("#F3FAF6"),
           }}
         >
           <Icon name="shield-checkmark-outline" size={34} color={C.green} />
@@ -294,14 +295,14 @@ export function CareTeamSecurityRemediationScreen() {
                   <View
                     style={[
                       S.pill,
-                      { backgroundColor: severity.background },
+                      { backgroundColor: themeBackground(severity.background) },
                     ]}
                   >
                     <Text
                       style={[
                         S.small,
                         {
-                          color: severity.color,
+                          color: themeForeground(severity.color),
                           fontFamily: "DMSans_600SemiBold",
                         },
                       ]}
@@ -339,8 +340,8 @@ export function CareTeamSecurityRemediationScreen() {
           <Section title="Before & after preview" />
           <Card
             style={{
-              backgroundColor: "#FAF7FB",
-              borderColor: "#E1D6E5",
+              backgroundColor: themeBackground("#FAF7FB"),
+              borderColor: themeBorder("#E1D6E5"),
               gap: 13,
             }}
           >
@@ -371,10 +372,10 @@ export function CareTeamSecurityRemediationScreen() {
                         style={{
                           borderRadius: 17,
                           borderWidth: 1,
-                          borderColor: selected ? C.purple : tone.border,
-                          backgroundColor: selected
+                          borderColor: selected ? C.purple : themeBorder(tone.border),
+                          backgroundColor: themeBackground(selected
                             ? "#F3EAF7"
-                            : tone.background,
+                            : tone.background),
                           padding: 13,
                           gap: 5,
                         }}
@@ -400,7 +401,7 @@ export function CareTeamSecurityRemediationScreen() {
                 <View
                   style={{
                     borderRadius: 17,
-                    backgroundColor: "#F2EEF4",
+                    backgroundColor: themeBackground("#F2EEF4"),
                     padding: 13,
                     gap: 6,
                   }}
@@ -421,9 +422,9 @@ export function CareTeamSecurityRemediationScreen() {
                 <View
                   style={{
                     borderRadius: 17,
-                    backgroundColor: selectedOption.destructive
+                    backgroundColor: themeBackground(selectedOption.destructive
                       ? "#FFF2ED"
-                      : "#EDF7F1",
+                      : "#EDF7F1"),
                     padding: 13,
                     gap: 6,
                   }}
@@ -436,7 +437,7 @@ export function CareTeamSecurityRemediationScreen() {
                   <Icon
                     name={optionTone(selectedOption).icon}
                     size={20}
-                    color={optionTone(selectedOption).color}
+                    color={themeForeground(optionTone(selectedOption).color)}
                   />
                   <Txt style={[S.small, { flex: 1 }]}>
                     {selectedOption.impact}
@@ -451,7 +452,7 @@ export function CareTeamSecurityRemediationScreen() {
                     borderRadius: 17,
                     borderWidth: 1,
                     borderColor: confirmed ? C.purple : "#DCCFDF",
-                    backgroundColor: confirmed ? "#F3EAF7" : C.white,
+                    backgroundColor: themeBackground(confirmed ? "#F3EAF7" : C.white),
                     padding: 13,
                     flexDirection: "row",
                     gap: 11,
@@ -498,7 +499,7 @@ export function CareTeamSecurityRemediationScreen() {
         </>
       )}
 
-      <Card style={{ backgroundColor: "#FAF7FB", gap: 8 }}>
+      <Card style={{ backgroundColor: themeBackground("#FAF7FB"), gap: 8 }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Icon name="information-circle-outline" size={21} color={C.purple} />
           <View style={{ flex: 1, gap: 4 }}>

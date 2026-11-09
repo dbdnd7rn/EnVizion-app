@@ -1348,7 +1348,7 @@ export function MedicationManagementScreen() {
                       width: 46,
                       height: 46,
                       borderRadius: 23,
-                      backgroundColor: item.type === "reconciliation" ? "#EFE4FB" : "#F5ECFA",
+                      backgroundColor: themeBackground(item.type === "reconciliation" ? "#EFE4FB" : "#F5ECFA"),
                       alignItems: "center",
                       justifyContent: "center",
                     }}

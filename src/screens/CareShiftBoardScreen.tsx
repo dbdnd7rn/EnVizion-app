@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, themeTint, themeIconSurface } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, View } from "react-native";
@@ -142,7 +142,7 @@ function MemberChoice({
         {
           padding: 13,
           borderColor: selected ? C.purple : C.line,
-          backgroundColor: selected ? "#F6F0F8" : C.white,
+          backgroundColor: themeBackground(selected ? "#F6F0F8" : C.white),
           opacity: disabled ? 0.55 : 1,
         },
       ]}
@@ -431,7 +431,7 @@ function ShiftTab({
         borderRadius: 25,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: active ? "#7D36B0" : "#F4F1F6",
+        backgroundColor: active ? "#7D36B0" : themeBackground("#F4F1F6"),
         opacity: pressed ? 0.76 : 1,
       })}
     >
@@ -1423,7 +1423,7 @@ export function CareShiftBoardScreen() {
                     width: 40,
                     height: 40,
                     borderRadius: 20,
-                    backgroundColor: item.bg,
+                    backgroundColor: themeIconSurface(item.bg),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -2071,9 +2071,9 @@ export function CareShiftBoardScreen() {
                   minHeight: 128,
                   borderRadius: 25,
                   padding: 17,
-                  backgroundColor: allClear ? "#EAF8EE" : "#FFF6E9",
+                  backgroundColor: themeBackground(allClear ? "#EAF8EE" : "#FFF6E9"),
                   borderWidth: 1,
-                  borderColor: allClear ? "#D8EEDD" : "#F2E0C1",
+                  borderColor: themeBorder(allClear ? "#D8EEDD" : "#F2E0C1"),
                   flexDirection: "row",
                   alignItems: "center",
                   overflow: "hidden",
@@ -2085,7 +2085,7 @@ export function CareShiftBoardScreen() {
                       width: 46,
                       height: 46,
                       borderRadius: 23,
-                      backgroundColor: allClear ? "#D7F2E0" : "#FFE8C8",
+                      backgroundColor: themeIconSurface(allClear ? "#D7F2E0" : "#FFE8C8"),
                       alignItems: "center",
                       justifyContent: "center",
                     }}

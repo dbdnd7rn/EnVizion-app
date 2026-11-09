@@ -411,7 +411,7 @@ export function CareCommunicationLogScreen() {
         body="Keep calls, messages, hospital updates, pharmacy conversations, insurance discussions, and provider follow-ups together."
       />
 
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0 }}>
+      <Card style={{ backgroundColor: themeAction(C.deep), borderWidth: 0 }}>
         <Text style={[S.eyebrow, { color: themeForeground("#E7CFEF") }]}>ACTIVE CARE PROFILE</Text>
         <Text style={[S.h2, { color: C.white }]}>
           {state.careRecipientName || "Care profile"}
@@ -533,7 +533,7 @@ export function CareCommunicationLogScreen() {
                     {
                       padding: 14,
                       borderColor: selected ? C.purple : C.line,
-                      backgroundColor: selected ? "#F6F0F8" : C.white,
+                      backgroundColor: themeBackground(selected ? "#F6F0F8" : C.white),
                     },
                   ]}
                 >
@@ -801,7 +801,7 @@ export function CareCommunicationLogScreen() {
           {
             padding: 15,
             borderColor: followUpOnly ? C.purple : C.line,
-            backgroundColor: followUpOnly ? "#F6F0F8" : C.white,
+            backgroundColor: themeBackground(followUpOnly ? "#F6F0F8" : C.white),
           },
         ]}
       >
@@ -854,7 +854,7 @@ export function CareCommunicationLogScreen() {
                         S.pill,
                         {
                           alignSelf: "flex-start",
-                          backgroundColor: priorityBackground(item.priority),
+                          backgroundColor: themeBackground(priorityBackground(item.priority)),
                         },
                       ]}
                     >

@@ -100,8 +100,8 @@ function ConflictCard({
   return (
     <Card
       style={{
-        borderColor: urgent ? "#E8BDC3" : C.line,
-        backgroundColor: urgent ? "#FFF8F7" : C.white,
+        borderColor: themeBorder(urgent ? "#E8BDC3" : C.line),
+        backgroundColor: themeBackground(urgent ? "#FFF8F7" : C.white),
       }}
     >
       <View style={{ flexDirection: "row", gap: 12 }}>

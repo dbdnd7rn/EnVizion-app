@@ -16,7 +16,7 @@ test("caregiver schedule defaults to the first-reference compact glass overview"
   }
   assert.match(design, /Plan caregiver coverage with clarity/);
   assert.match(design, /CalendarArtwork/);
-  assert.match(design, /backgroundColor: "#FAF4FDEB"/);
+  assert.match(design, /backgroundColor: themeBackground\("#FAF4FDEB"\)/);
 });
 
 test("all schedule details remain reachable via named expandable cards", () => {

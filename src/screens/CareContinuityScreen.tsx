@@ -322,8 +322,8 @@ export function CareContinuityScreen() {
             <Card
               key={item.userId}
               style={{
-                borderColor: onShift ? "#B8D8C6" : C.line,
-                backgroundColor: onShift ? "#F4FBF7" : C.white,
+                borderColor: themeBorder(onShift ? "#B8D8C6" : C.line),
+                backgroundColor: themeBackground(onShift ? "#F4FBF7" : C.white),
               }}
             >
               <View style={S.between}>
@@ -360,7 +360,7 @@ export function CareContinuityScreen() {
                   style={[
                     S.pill,
                     {
-                      backgroundColor: onShift ? "#E3F3EA" : C.lavender,
+                      backgroundColor: themeBackground(onShift ? "#E3F3EA" : C.lavender),
                     },
                   ]}
                 >
@@ -425,7 +425,7 @@ export function CareContinuityScreen() {
       <Section title="Coverage bridge" />
       <Card
         style={{
-          backgroundColor: bridgeBackground(coverageBridge.state),
+          backgroundColor: themeBackground(bridgeBackground(coverageBridge.state)),
           borderColor: bridgeAccent(coverageBridge.state),
         }}
       >

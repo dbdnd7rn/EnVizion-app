@@ -1,5 +1,5 @@
 import { themeAction } from "../themeColors";
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeIconSurface } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -149,7 +149,7 @@ export function CareTeamSecurityReviewScreen() {
         />
         <Card
           style={{
-            backgroundColor: "#FFF8F3",
+            backgroundColor: themeBackground("#FFF8F3"),
             borderColor: "#EACDBE",
             gap: 10,
           }}
@@ -194,8 +194,8 @@ export function CareTeamSecurityReviewScreen() {
 
       <Card
         style={{
-          backgroundColor: status.background,
-          borderColor: status.background,
+          backgroundColor: themeBackground(status.background),
+          borderColor: themeBorder(status.background),
           gap: 12,
         }}
       >
@@ -210,7 +210,7 @@ export function CareTeamSecurityReviewScreen() {
               justifyContent: "center",
             }}
           >
-            <Icon name={status.icon} size={26} color={status.color} />
+            <Icon name={status.icon} size={26} color={themeForeground(status.color)} />
           </View>
           {review && (
             <View style={[S.pill, { backgroundColor: themeBackground(C.white) }]}>
@@ -218,7 +218,7 @@ export function CareTeamSecurityReviewScreen() {
                 style={[
                   S.small,
                   {
-                    color: status.color,
+                    color: themeForeground(status.color),
                     fontFamily: "DMSans_600SemiBold",
                   },
                 ]}
@@ -231,7 +231,7 @@ export function CareTeamSecurityReviewScreen() {
         </View>
 
         <View style={{ gap: 5 }}>
-          <Text style={[S.h2, { color: status.color }]}>{status.label}</Text>
+          <Text style={[S.h2, { color: themeForeground(status.color) }]}>{status.label}</Text>
           <Txt>{status.body}</Txt>
         </View>
 
@@ -255,7 +255,7 @@ export function CareTeamSecurityReviewScreen() {
           onPress={() => n.navigate("CareTeamSecurityRemediation")}
           label="Open Security Remediation Center"
           style={{
-            backgroundColor: "#FAF7FB",
+            backgroundColor: themeBackground("#FAF7FB"),
             borderColor: "#E4D9E8",
             gap: 11,
           }}
@@ -266,7 +266,7 @@ export function CareTeamSecurityReviewScreen() {
                 width: 46,
                 height: 46,
                 borderRadius: 17,
-                backgroundColor: "#F1E7F5",
+                backgroundColor: themeIconSurface("#F1E7F5"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -302,13 +302,13 @@ export function CareTeamSecurityReviewScreen() {
                   padding: 12,
                   gap: 4,
                   alignItems: "center",
-                  backgroundColor: String(background),
+                  backgroundColor: themeBackground(String(background)),
                 }}
               >
                 <Text
                   style={[
                     S.h2,
-                    { fontSize: 23, color: String(color) },
+                    { fontSize: 23, color: themeForeground(String(color)) },
                   ]}
                 >
                   {String(value)}
@@ -316,7 +316,7 @@ export function CareTeamSecurityReviewScreen() {
                 <Text
                   numberOfLines={1}
                   adjustsFontSizeToFit
-                  style={[S.small, { color: String(color) }]}
+                  style={[S.small, { color: themeForeground(String(color)) }]}
                 >
                   {String(label)}
                 </Text>
@@ -375,7 +375,7 @@ export function CareTeamSecurityReviewScreen() {
                 alignItems: "center",
                 gap: 10,
                 paddingVertical: 24,
-                backgroundColor: "#F7FBF8",
+                backgroundColor: themeBackground("#F7FBF8"),
               }}
             >
               <Icon
@@ -397,19 +397,19 @@ export function CareTeamSecurityReviewScreen() {
                     <View
                       style={[
                         S.pill,
-                        { backgroundColor: severity.background },
+                        { backgroundColor: themeBackground(severity.background) },
                       ]}
                     >
                       <Icon
                         name={severity.icon}
                         size={14}
-                        color={severity.color}
+                        color={themeForeground(severity.color)}
                       />
                       <Text
                         style={[
                           S.small,
                           {
-                            color: severity.color,
+                            color: themeForeground(severity.color),
                             fontFamily: "DMSans_600SemiBold",
                           },
                         ]}
@@ -435,7 +435,7 @@ export function CareTeamSecurityReviewScreen() {
                   <View
                     style={{
                       borderRadius: 16,
-                      backgroundColor: "#FAF7FB",
+                      backgroundColor: themeBackground("#FAF7FB"),
                       padding: 12,
                       gap: 5,
                     }}
@@ -482,7 +482,7 @@ export function CareTeamSecurityReviewScreen() {
             ))}
           </Card>
 
-          <Card style={{ backgroundColor: "#FAF7FB", gap: 8 }}>
+          <Card style={{ backgroundColor: themeBackground("#FAF7FB"), gap: 8 }}>
             <View style={{ flexDirection: "row", gap: 10 }}>
               <Icon
                 name="information-circle-outline"

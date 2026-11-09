@@ -109,6 +109,24 @@ export function appearanceColor(source: string, role: ColorRole = "foreground") 
   return withAlpha(result, alpha);
 }
 
+/**
+ * Small icon wells and decorative highlights need a visible separation from
+ * dark cards. Never let a pastel icon background remain almost white.
+ * This helper is deliberately for surfaces, not text or brand-filled buttons.
+ */
+export function themeIconSurface(source: string) {
+  if (activeMode !== "dark") return source;
+  const parsed = parseHex(source);
+  if (!parsed) return appearanceColor(source, "background");
+  const { r, g, b, alpha } = parsed;
+  const color = isRose(r, g, b) ? "#4A2E3D"
+    : isGreen(r, g, b) ? "#294638"
+    : isBlue(r, g, b) ? "#303D59"
+    : isAmber(r, g, b) ? "#45382D"
+    : "#40324F";
+  return withAlpha(color, alpha);
+}
+
 export const themeBackground = (value: string) => appearanceColor(value, "background");
 /** Filled primary actions stay deep enough for white labels in dark mode. */
 export const themeAction = (value: string) => activeMode === "dark" ? "#774A9F" : value;

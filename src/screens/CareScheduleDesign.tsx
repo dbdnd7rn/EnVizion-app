@@ -1,4 +1,4 @@
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeBackground, themeBorder, themeIconSurface } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo, Animated, Easing, Pressable, Text, View,
@@ -12,17 +12,17 @@ const PURPLE = "#70338F";
 const INK = "#16123B";
 const MUTED = "#77718B";
 
-const glass = {
+const glass = () => ({
   borderRadius: 24,
   borderWidth: 1,
-  borderColor: "#E8DDF1",
-  backgroundColor: "#FFFFFFEB",
+  borderColor: themeBorder("#E8DDF1"),
+  backgroundColor: themeBackground("#FFFFFFEB"),
   shadowColor: "#633A7A",
   shadowOpacity: 0.055,
   shadowRadius: 12,
   shadowOffset: { width: 0, height: 6 },
   elevation: 2,
-} as const;
+});
 
 /** Rendered SVG, not an image of the interface. */
 function CalendarArtwork() {
@@ -63,9 +63,9 @@ function CalendarArtwork() {
 
 export function ScheduleHero() {
   return (
-    <View style={[glass, {
+    <View style={[glass(), {
       paddingHorizontal: 18, paddingVertical: 22, minHeight: 223,
-      backgroundColor: "#FAF4FDEB", overflow: "hidden",
+      backgroundColor: themeBackground("#FAF4FDEB"), overflow: "hidden",
     }]}>
       <View pointerEvents="none" style={{ position: "absolute", right: -23, top: -40 }}>
         <CircleDecoration/>
@@ -115,7 +115,7 @@ export function CurrentCoverageCard({
       accessibilityLabel="Open current caregiver coverage and scheduled shifts"
       disabled={busy}
       onPress={onPress}
-      style={({ pressed }) => [glass, {
+      style={({ pressed }) => [glass(), {
         paddingHorizontal: 16, paddingVertical: 18,
         flexDirection: "row", alignItems: "center", gap: 13,
         opacity: pressed ? 0.78 : 1,
@@ -123,7 +123,7 @@ export function CurrentCoverageCard({
       }]}
     >
       <View style={{
-        width: 52, height: 52, borderRadius: 26, backgroundColor: "#F2E8FA",
+        width: 52, height: 52, borderRadius: 26, backgroundColor: themeIconSurface("#F2E8FA"),
         justifyContent: "center", alignItems: "center",
       }}>
         <Icon name="calendar-outline" size={25} color={themeForeground(PURPLE)}/>
@@ -158,16 +158,16 @@ export function ScheduleQuickAction({
       accessibilityState={{ disabled }}
       onPress={onPress}
       disabled={disabled}
-      style={({ pressed }) => [glass, {
+      style={({ pressed }) => [glass(), {
         width: "48.4%", minHeight: 104, padding: 12,
         justifyContent: "space-between", gap: 7,
-        backgroundColor: tint, opacity: disabled ? 0.44 : pressed ? 0.75 : 1,
+        backgroundColor: themeBackground(tint), opacity: disabled ? 0.44 : pressed ? 0.75 : 1,
         transform: [{ scale: pressed ? 0.985 : 1 }],
       }]}
     >
       <View style={{
         width: 37, height: 37, borderRadius: 18,
-        backgroundColor: "#FFFFFFBC",
+        backgroundColor: themeIconSurface("#FFFFFFBC"),
         alignItems: "center", justifyContent: "center",
       }}>
         <Icon name={icon} size={22} color={themeForeground(PURPLE)} />
@@ -195,18 +195,18 @@ export function ScheduleOverviewTile({
       accessibilityLabel={`${title}: ${detail}`}
       accessibilityState={{ expanded }}
       onPress={onPress}
-      style={({ pressed }) => [glass, {
+      style={({ pressed }) => [glass(), {
         paddingHorizontal: 13, paddingVertical: 15,
         flexDirection: "row", alignItems: "flex-start",
         gap: 11, minHeight: 105,
-        backgroundColor: tint || (expanded ? "#F7EFFD" : "#FFFFFFF0"),
+        backgroundColor: themeBackground(tint || (expanded ? "#F7EFFD" : "#FFFFFFF0")),
         opacity: pressed ? 0.78 : 1,
         transform: [{ scale: pressed ? 0.992 : 1 }],
       }]}
     >
       <View style={{
         width: 40, height: 40, borderRadius: 20,
-        backgroundColor: "#F2E8FB",
+        backgroundColor: themeIconSurface("#F2E8FB"),
         alignItems: "center", justifyContent: "center",
       }}>
         <Icon name={icon} size={22} color={tint === "#EAF7F1" ? "#228269" : PURPLE}/>

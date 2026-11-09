@@ -1,5 +1,5 @@
 import { themeAction } from "../themeColors";
-import { themeForeground } from "../themeColors";
+import { themeForeground, themeBackground, themeIconSurface } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -159,7 +159,7 @@ export function CareTeamActivityScreen() {
         body="Review invitations, acceptance, reminders, role changes, revocations and recorded shared-workspace activity in one timeline."
       />
 
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0, gap: 10 }}>
+      <Card style={{ backgroundColor: themeAction(C.deep), borderWidth: 0, gap: 10 }}>
         <View style={S.between}>
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={[S.eyebrow, { color: "#DDC8E5" }]}>
@@ -202,7 +202,7 @@ export function CareTeamActivityScreen() {
           onPress={() => n.navigate("CareTeamAccessReport")}
           label="Create Care Team Access Report"
           style={{
-            backgroundColor: "#FAF7FB",
+            backgroundColor: themeBackground("#FAF7FB"),
             borderColor: "#E4D9E8",
             gap: 11,
           }}
@@ -213,7 +213,7 @@ export function CareTeamActivityScreen() {
                 width: 46,
                 height: 46,
                 borderRadius: 17,
-                backgroundColor: "#F1E7F5",
+                backgroundColor: themeIconSurface("#F1E7F5"),
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -247,7 +247,7 @@ export function CareTeamActivityScreen() {
               minWidth: 145,
               flexGrow: 1,
               gap: 8,
-              backgroundColor: String(background),
+              backgroundColor: themeBackground(String(background)),
             }}
           >
             <View style={S.between}>
@@ -410,7 +410,7 @@ export function CareTeamActivityScreen() {
                     width: 42,
                     height: 42,
                     borderRadius: 15,
-                    backgroundColor: tone.backgroundColor,
+                    backgroundColor: themeIconSurface(tone.backgroundColor),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -424,7 +424,7 @@ export function CareTeamActivityScreen() {
                       width: 2,
                       minHeight: 24,
                       marginTop: 5,
-                      backgroundColor: "#E8E0EA",
+                      backgroundColor: themeBackground("#E8E0EA"),
                     }}
                   />
                 )}
@@ -447,14 +447,14 @@ export function CareTeamActivityScreen() {
                   <View
                     style={[
                       S.pill,
-                      { backgroundColor: tone.backgroundColor },
+                      { backgroundColor: themeBackground(tone.backgroundColor) },
                     ]}
                   >
                     <Text
                       style={[
                         S.small,
                         {
-                          color: tone.color,
+                          color: themeForeground(tone.color),
                           fontFamily: "DMSans_600SemiBold",
                         },
                       ]}
@@ -473,12 +473,12 @@ export function CareTeamActivityScreen() {
                     gap: 7,
                   }}
                 >
-                  <View style={[S.pill, { backgroundColor: "#F6F2F7" }]}>
+                  <View style={[S.pill, { backgroundColor: themeBackground("#F6F2F7") }]}>
                     <Icon name="person-outline" size={13} color={C.purple} />
                     <Text style={S.small}>{actorName}</Text>
                   </View>
                   {subjectName && subjectName !== actorName && (
-                    <View style={[S.pill, { backgroundColor: "#F6F2F7" }]}>
+                    <View style={[S.pill, { backgroundColor: themeBackground("#F6F2F7") }]}>
                       <Icon
                         name="person-circle-outline"
                         size={13}
@@ -494,7 +494,7 @@ export function CareTeamActivityScreen() {
         })
       )}
 
-      <Card style={{ backgroundColor: "#FAF7FB", gap: 8 }}>
+      <Card style={{ backgroundColor: themeBackground("#FAF7FB"), gap: 8 }}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Icon name="information-circle-outline" size={21} color={C.purple} />
           <View style={{ flex: 1, gap: 4 }}>

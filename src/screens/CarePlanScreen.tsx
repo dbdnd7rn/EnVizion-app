@@ -1015,7 +1015,7 @@ export function CarePlanScreen() {
                         : item.priority === "important"
                           ? "#E8D3C2"
                           : LINE,
-                      backgroundColor: completion ? "#F8FCFA" : "#FFFFFF",
+                      backgroundColor: themeBackground(completion ? "#F8FCFA" : "#FFFFFF"),
                       padding: 17,
                       gap: 13,
                       shadowColor: themeShadow("#3B2149"),
@@ -1037,7 +1037,7 @@ export function CarePlanScreen() {
                           width: 43,
                           height: 43,
                           borderRadius: 16,
-                          backgroundColor: completion ? "#E8F4ED" : LAVENDER,
+                          backgroundColor: completion ? themeBackground("#E8F4ED") : themeBackground(LAVENDER),
                           alignItems: "center",
                           justifyContent: "center",
                         }}
@@ -1104,7 +1104,7 @@ export function CarePlanScreen() {
                       style={({ pressed }) => ({
                         minHeight: 46,
                         borderRadius: 23,
-                        backgroundColor: completion ? "#EEF7F2" : LAVENDER,
+                        backgroundColor: completion ? themeBackground("#EEF7F2") : themeBackground(LAVENDER),
                         alignItems: "center",
                         justifyContent: "center",
                         flexDirection: "row",
@@ -1242,7 +1242,7 @@ export function CarePlanScreen() {
                         borderRadius: 999,
                         borderWidth: 1,
                         borderColor: selected ? PURPLE : "#E2D8E6",
-                        backgroundColor: selected ? PURPLE : "#FFFFFF",
+                        backgroundColor: selected ? PURPLE : themeBackground("#FFFFFF"),
                         paddingHorizontal: 13,
                         paddingVertical: 8,
                         flexDirection: "row",
@@ -1293,7 +1293,7 @@ export function CarePlanScreen() {
                         borderRadius: 19,
                         borderWidth: 1,
                         borderColor: selected ? PURPLE : "#E2D8E6",
-                        backgroundColor: selected ? PURPLE : "#FFFFFF",
+                        backgroundColor: selected ? PURPLE : themeBackground("#FFFFFF"),
                         alignItems: "center",
                         justifyContent: "center",
                         paddingHorizontal: 9,
@@ -1331,7 +1331,7 @@ export function CarePlanScreen() {
                         borderRadius: 23,
                         borderWidth: 1,
                         borderColor: selected ? PURPLE : "#E2D8E6",
-                        backgroundColor: selected ? LAVENDER : "#FFFFFF",
+                        backgroundColor: selected ? themeBackground(LAVENDER) : themeBackground("#FFFFFF"),
                         alignItems: "center",
                         justifyContent: "center",
                       }}
