@@ -461,6 +461,7 @@ export function PasswordRecoveryScreen() {
     completePasswordRecovery,
     cancelPasswordRecovery,
   } = useAuth();
+  const { dark } = useAppearance();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
@@ -489,6 +490,12 @@ export function PasswordRecoveryScreen() {
     }
   }
 
+  const recoveryInputStyle = dark ? {
+    backgroundColor: AUTH_DARK.input,
+    borderColor: AUTH_DARK.inputBorder,
+    color: AUTH_DARK.inputText,
+  } : undefined;
+
   return (
     <Page>
       <View style={{ alignItems: "flex-start" }}>
@@ -501,9 +508,10 @@ export function PasswordRecoveryScreen() {
         body="Use a new password you have not used for this account before."
       />
 
-      <Card style={{ gap: 15 }}>
+      <Card style={{ gap: 15, backgroundColor: dark ? AUTH_DARK.panel : undefined,
+        borderColor: dark ? AUTH_DARK.panelBorder : undefined }}>
         <View style={{ gap: 8 }}>
-          <Text style={[S.h3, { fontSize: 13 }]}>New password</Text>
+          <Text style={[S.h3, { fontSize: 13, color: dark ? AUTH_DARK.label : C.ink }]}>New password</Text>
           <TextInput
             accessibilityLabel="New password"
             value={password}
@@ -512,14 +520,14 @@ export function PasswordRecoveryScreen() {
             autoCorrect={false}
             autoComplete="new-password"
             secureTextEntry
-            style={S.input}
+            style={[S.input, recoveryInputStyle]}
             placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
-            placeholderTextColor={themeForeground("#AAA0AF")}
+            placeholderTextColor={dark ? AUTH_DARK.placeholder : themeForeground("#AAA0AF")}
           />
         </View>
 
         <View style={{ gap: 8 }}>
-          <Text style={[S.h3, { fontSize: 13 }]}>Confirm new password</Text>
+          <Text style={[S.h3, { fontSize: 13, color: dark ? AUTH_DARK.label : C.ink }]}>Confirm new password</Text>
           <TextInput
             accessibilityLabel="Confirm new password"
             value={confirm}
@@ -528,9 +536,9 @@ export function PasswordRecoveryScreen() {
             autoCorrect={false}
             autoComplete="new-password"
             secureTextEntry
-            style={S.input}
+            style={[S.input, recoveryInputStyle]}
             placeholder="Re-enter your password"
-            placeholderTextColor={themeForeground("#AAA0AF")}
+            placeholderTextColor={dark ? AUTH_DARK.placeholder : themeForeground("#AAA0AF")}
           />
         </View>
 
