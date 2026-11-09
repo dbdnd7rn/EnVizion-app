@@ -1,4 +1,4 @@
-import { themeAction } from "../themeColors";
+import { themeAction, themeBackground, themeBorder } from "../themeColors";
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Platform, Pressable, Text, View } from "react-native";
 import {
@@ -162,7 +162,7 @@ export function CareTeamAccessReportScreen() {
         body="Choose a reporting period, review the current access roster, then create a PDF that contains sharing history without clinical details."
       />
 
-      <Card style={{ backgroundColor: C.deep, borderWidth: 0, gap: 12 }}>
+      <Card style={{ backgroundColor: themeAction(C.deep), borderWidth: 0, gap: 12 }}>
         <View style={S.between}>
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={[S.eyebrow, { color: "#DECBE5" }]}>
@@ -203,8 +203,8 @@ export function CareTeamAccessReportScreen() {
       {!canManage && !loading ? (
         <Card
           style={{
-            backgroundColor: "#FFF8F3",
-            borderColor: "#EBCDBD",
+            backgroundColor: themeBackground("#FFF8F3"),
+            borderColor: themeBorder("#EBCDBD"),
             gap: 10,
           }}
         >
@@ -297,7 +297,7 @@ export function CareTeamAccessReportScreen() {
                   minWidth: 145,
                   flexGrow: 1,
                   gap: 5,
-                  backgroundColor: String(background),
+                  backgroundColor: themeBackground(String(background)),
                 }}
               >
                 <Text style={[S.h2, { fontSize: 25 }]}>
@@ -311,7 +311,7 @@ export function CareTeamAccessReportScreen() {
           <Card style={{ gap: 9 }}>
             <View style={S.between}>
               <Text style={S.h3}>Recorded access events</Text>
-              <View style={[S.pill, { backgroundColor: "#F1E7F5" }]}>
+              <View style={[S.pill, { backgroundColor: themeBackground("#F1E7F5") }]}>
                 <Text style={[S.small, { color: C.purple }]}>
                   {summary.totalEvents}
                 </Text>
@@ -371,7 +371,7 @@ export function CareTeamAccessReportScreen() {
           )}
 
           <Section title="4. Create accountability PDF" />
-          <Card style={{ backgroundColor: "#FAF7FB", gap: 12 }}>
+          <Card style={{ backgroundColor: themeBackground("#FAF7FB"), gap: 12 }}>
             <View style={{ flexDirection: "row", gap: 11 }}>
               <Icon name="lock-closed-outline" size={21} color={C.purple} />
               <View style={{ flex: 1, gap: 4 }}>
