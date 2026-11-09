@@ -1,5 +1,5 @@
 import { themeBorder, themeShadow } from "../themeColors";
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeIconSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import {
@@ -141,19 +141,19 @@ function Glass({children,style,tint="#F1E4FB"}:{
     shadowColor:themeShadow("#59356B"),shadowOpacity:0.09,shadowRadius:17,
     shadowOffset:{width:0,height:8},elevation:2},style]}>
    <View pointerEvents="none" style={{position:"absolute",right:-70,top:-85,
-     width:175,height:175,borderRadius:100,backgroundColor:tint,opacity:0.66}}/>
+     width:175,height:175,borderRadius:100,backgroundColor:themeIconSurface(tint),opacity:0.66}}/>
    <View pointerEvents="none" style={{position:"absolute",left:-55,bottom:-75,
      width:120,height:120,borderRadius:70,backgroundColor:themeBackground("#EEDDF8"),opacity:0.42}}/>
    {children}
  </View>;
 }
 function Chip({text,active=false}:{text:string;active?:boolean}){
- return <View style={{backgroundColor:active?"#E4F3EC":"#F1EDF5",
+ return <View style={{backgroundColor:themeIconSurface(active?"#E4F3EC":"#F1EDF5"),
    borderRadius:30,paddingHorizontal:10,paddingVertical:7,
    flexDirection:"row",gap:5,alignItems:"center"}}>
-   {active&&<View style={{height:7,width:7,borderRadius:4,backgroundColor:themeBackground("#15986B")}}/>}
+   {active&&<View style={{height:7,width:7,borderRadius:4,backgroundColor:themeForeground("#15986B")}}/>}
    <Text numberOfLines={1} style={{fontFamily:"DMSans_600SemiBold",
-     fontSize:11,color:active?"#15966B":"#706584"}}>{text}</Text>
+     fontSize:11,color:themeForeground(active?"#15966B":"#706584")}}>{text}</Text>
  </View>;
 }
 function MemberFace({member}:{member:CareTeamMember}){
@@ -172,7 +172,7 @@ function ToolLink({title,detail,icon,onPress,tint="#F1E6FB"}:{
    <Glass tint={tint} style={{padding:15}}>
      <View style={{flexDirection:"row",alignItems:"center",gap:12}}>
        <View style={{width:44,height:44,borderRadius:16,alignItems:"center",
-       justifyContent:"center",backgroundColor:tint}}>
+       justifyContent:"center",backgroundColor:themeIconSurface(tint)}}>
        <Icon name={icon} size={22} color={themeForeground(P)}/></View>
        <View style={{flex:1,gap:3}}>
          <Text style={{fontFamily:"DMSans_700Bold",fontSize:15,color:themeForeground(INK)}}>{title}</Text>
@@ -515,7 +515,7 @@ export function CareTeamScreen() {
             <View
               style={{
                 borderRadius: 16,
-                backgroundColor: member.isExpired ? "#FFF7ED" : "#F8F3FA",
+                backgroundColor: themeBackground(member.isExpired ? "#FFF7ED" : "#F8F3FA"),
                 padding: 12,
                 gap: 5,
               }}
