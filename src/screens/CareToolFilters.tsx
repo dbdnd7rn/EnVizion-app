@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground } from "../themeColors";
+import { themeBackground, themeForeground, themeIconSurface, themeAction } from "../themeColors";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { Icon } from "../ui";
@@ -32,7 +32,7 @@ function Choice({
         borderRadius: 15,
         borderWidth: 1,
         borderColor: selected ? "#70338F" : "#E6D9F0",
-        backgroundColor: selected ? "#70338F" : "#FFFFFFE8",
+        backgroundColor: selected ? themeAction("#70338F") : themeBackground("#FFFFFFE8"),
         flexDirection: "row",
         alignItems: "center",
         gap: 5,
@@ -93,7 +93,7 @@ export function CareToolFilters({
         borderWidth: 1,
         borderColor: "#E4D6ED",
         borderRadius: 23,
-        backgroundColor: "#F8F3FDEB",
+        backgroundColor: themeBackground("#F8F3FDEB"),
         padding: 15,
         gap: 16,
         shadowColor: "#512D6A",
@@ -109,7 +109,7 @@ export function CareToolFilters({
             width: 35,
             height: 35,
             borderRadius: 12,
-            backgroundColor: "#EDE0F9",
+            backgroundColor: themeIconSurface("#EDE0F9"),
             alignItems: "center",
             justifyContent: "center",
           }}
