@@ -1,5 +1,5 @@
 import { themeTint } from "../themeColors";
-import { themeBackground, themeForeground, themeBorder, themeShadow } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeShadow, themeIconSurface } from "../themeColors";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo, ActivityIndicator, Animated, Easing,
@@ -35,7 +35,7 @@ function Glass({
     }, style]}>
       <View pointerEvents="none" style={{ position: "absolute", right: -1, bottom: -1, opacity: 0.9 }}>
         <Svg width="142" height="66" viewBox="0 0 142 66" accessibilityElementsHidden>
-          <Path d="M0 66C31 44 48 9 142 0V66Z" fill={tint} />
+          <Path d="M0 66C31 44 48 9 142 0V66Z" fill={themeIconSurface(tint)} />
           <Path d="M40 66C89 46 97 34 142 29V66Z" fill={themeTint("#FFFFFF")} opacity={0.48}/>
         </Svg>
       </View>
@@ -48,7 +48,7 @@ function IconTile({ name, tint = "#F1E6FB" }: { name: string; tint?: string }) {
   return (
     <View style={{
       width: 47, height: 47, borderRadius: 17,
-      backgroundColor: tint, alignItems: "center", justifyContent: "center",
+      backgroundColor: themeIconSurface(tint), alignItems: "center", justifyContent: "center",
     }}>
       <Icon name={name} size={23} color={themeForeground(PURPLE)} />
     </View>
