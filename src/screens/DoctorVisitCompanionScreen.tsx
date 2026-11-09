@@ -890,7 +890,7 @@ export function DoctorVisitCompanionScreen() {
                     {
                       padding: 14,
                       borderColor: active ? C.purple : C.line,
-                      backgroundColor: active ? "#F7F1FA" : C.white,
+                      backgroundColor: themeBackground(active ? "#F7F1FA" : C.white),
                     },
                   ]}
                 >
@@ -1004,7 +1004,7 @@ export function DoctorVisitCompanionScreen() {
               <Card
                 key={question.id}
                 style={{
-                  backgroundColor: question.isAnswered ? "#F0F6F3" : "#FAF7FC",
+                  backgroundColor: themeBackground(question.isAnswered ? "#F0F6F3" : "#FAF7FC"),
                 }}
               >
                 <Pressable
@@ -1128,7 +1128,7 @@ export function DoctorVisitCompanionScreen() {
             {!readOnly && (
               <Card
                 style={{
-                  backgroundColor: recorderState.isRecording ? "#FFF1F3" : "#F8F3FB",
+                  backgroundColor: themeBackground(recorderState.isRecording ? "#FFF1F3" : "#F8F3FB"),
                   borderColor: recorderState.isRecording ? "#F2C8D2" : "#E7DCEF",
                 }}
               >
@@ -1138,7 +1138,7 @@ export function DoctorVisitCompanionScreen() {
                       width: 54,
                       height: 54,
                       borderRadius: 27,
-                      backgroundColor: recorderState.isRecording ? "#E84E6B" : "#E8DCF0",
+                      backgroundColor: recorderState.isRecording ? "#E84E6B" : themeBackground("#E8DCF0"),
                       alignItems: "center",
                       justifyContent: "center",
                     }}
