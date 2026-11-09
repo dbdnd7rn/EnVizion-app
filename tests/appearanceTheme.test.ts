@@ -55,6 +55,9 @@ test("dark mode preserves informative, warning, success, and urgent status color
       assert.ok(contrast(themeForeground(lightText), surface) >= 4.5);
       return surface;
     });
+    assert.equal(themeBackground("#FBE8E3"), "#35262F");
+    assert.equal(themeBackground("#FFF1EC"), "#35262F");
+    assert.equal(themeBackground("#ECF6F0"), "#25372F");
     assert.equal(new Set(surfaces).size, surfaces.length);
     assert.equal(themeBackground("#FFFFFFD4"), "#25212ED4");
   } finally {
