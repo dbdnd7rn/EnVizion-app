@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, artworkColor, artworkBackdrop } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, {
   useCallback,
@@ -136,17 +136,17 @@ function QuietTimerRing({
       >
         <Defs>
           <LinearGradient id="quietRing" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#DCC5EB")} />
-            <Stop offset="1" stopColor={themeTint("#B986D7")} />
+            <Stop offset="0" stopColor={artworkColor("#DCC5EB")} />
+            <Stop offset="1" stopColor={artworkColor("#B986D7")} />
           </LinearGradient>
         </Defs>
         <Circle
           cx="80"
           cy="80"
           r={radius}
-          fill={themeTint("#FFFFFF")}
+          fill={artworkBackdrop("#FFFFFF", "#302640")}
           fillOpacity="0.45"
-          stroke={themeTint("#E4D5EE")}
+          stroke={artworkColor("#E4D5EE")}
           strokeWidth={strokeWidth}
         />
         <Circle
@@ -165,7 +165,7 @@ function QuietTimerRing({
           cx={dotX}
           cy={dotY}
           r="5.5"
-          fill={themeTint("#8D43B6")}
+          fill={artworkColor("#8D43B6")}
         />
       </Svg>
 

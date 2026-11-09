@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeTint } from "../themeColors";
+import { themeBackground, themeBorder, themeTint, artworkColor } from "../themeColors";
 import { themeForeground, themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -125,22 +125,22 @@ function FolderGraphic() {
     >
       <Defs>
         <LinearGradient id="summaryFolderBack" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#E9C8FF")} />
-          <Stop offset="0.55" stopColor={themeTint("#AE70ED")} />
-          <Stop offset="1" stopColor={themeTint("#7136B5")} />
+          <Stop offset="0" stopColor={artworkColor("#E9C8FF")} />
+          <Stop offset="0.55" stopColor={artworkColor("#AE70ED")} />
+          <Stop offset="1" stopColor={artworkColor("#7136B5")} />
         </LinearGradient>
         <LinearGradient id="summaryFolderFront" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F6E9FF")} />
-          <Stop offset="0.43" stopColor={themeTint("#D8B7F7")} />
-          <Stop offset="1" stopColor={themeTint("#9C63DE")} />
+          <Stop offset="0" stopColor={artworkColor("#F6E9FF")} />
+          <Stop offset="0.43" stopColor={artworkColor("#D8B7F7")} />
+          <Stop offset="1" stopColor={artworkColor("#9C63DE")} />
         </LinearGradient>
         <LinearGradient id="summaryFolderPaper" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-          <Stop offset="1" stopColor={themeTint("#F4EBFA")} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} />
+          <Stop offset="1" stopColor={artworkColor("#F4EBFA")} />
         </LinearGradient>
         <LinearGradient id="summaryFolderGlass" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity="0.72" />
-          <Stop offset="1" stopColor={themeTint("#FFFFFF")} stopOpacity="0.06" />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} stopOpacity="0.72" />
+          <Stop offset="1" stopColor={artworkColor("#FFFFFF")} stopOpacity="0.06" />
         </LinearGradient>
       </Defs>
 
@@ -149,7 +149,7 @@ function FolderGraphic() {
         cy="184"
         rx="92"
         ry="14"
-        fill={themeTint("#7136B5")}
+        fill={artworkColor("#7136B5")}
         opacity={0.14}
       />
 
@@ -157,7 +157,7 @@ function FolderGraphic() {
         <Path
           d="M13 31c0-12 9-22 21-22h50c8 0 13 3 18 9l11 14h72c12 0 21 9 21 21v91c0 13-10 23-23 23H34c-13 0-23-10-23-23Z"
           fill="url(#summaryFolderBack)"
-          stroke={themeTint("#EEDBFF")}
+          stroke={artworkColor("#EEDBFF")}
           strokeWidth="2"
         />
 
@@ -169,19 +169,19 @@ function FolderGraphic() {
             height="133"
             rx="17"
             fill="url(#summaryFolderPaper)"
-            stroke={themeTint("#FFFFFF")}
+            stroke={artworkColor("#FFFFFF")}
             strokeWidth="2"
           />
-          <Rect x="22" y="29" width="58" height="7" rx="3.5" fill={themeTint("#B493DB")} />
-          <Rect x="22" y="49" width="76" height="7" rx="3.5" fill={themeTint("#9E76CC")} />
-          <Rect x="22" y="69" width="62" height="7" rx="3.5" fill={themeTint("#B493DB")} />
-          <Rect x="22" y="89" width="43" height="7" rx="3.5" fill={themeTint("#C6ACE4")} />
+          <Rect x="22" y="29" width="58" height="7" rx="3.5" fill={artworkColor("#B493DB")} />
+          <Rect x="22" y="49" width="76" height="7" rx="3.5" fill={artworkColor("#9E76CC")} />
+          <Rect x="22" y="69" width="62" height="7" rx="3.5" fill={artworkColor("#B493DB")} />
+          <Rect x="22" y="89" width="43" height="7" rx="3.5" fill={artworkColor("#C6ACE4")} />
         </G>
 
         <Path
           d="M2 72c0-12 10-22 22-22h157c12 0 22 10 22 22l-8 81c-1 12-11 21-23 21H34c-12 0-22-9-23-21Z"
           fill="url(#summaryFolderFront)"
-          stroke={themeTint("#D6B2F6")}
+          stroke={artworkColor("#D6B2F6")}
           strokeWidth="2"
         />
         <Path
@@ -192,7 +192,7 @@ function FolderGraphic() {
         <Path
           d="M21 151c37 17 99 22 163 4"
           fill="none"
-          stroke={themeTint("#FFFFFF")}
+          stroke={artworkColor("#FFFFFF")}
           strokeWidth="4"
           strokeLinecap="round"
           opacity={0.33}
@@ -825,17 +825,17 @@ export function SummaryScreen() {
         >
           <Defs>
             <LinearGradient id="summaryPageBg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={themeTint("#FCF9FF")} />
-              <Stop offset="0.36" stopColor={themeTint("#F7EEFE")} />
-              <Stop offset="0.7" stopColor={themeTint("#FFFDFE")} />
-              <Stop offset="1" stopColor={themeTint("#F0E2FC")} />
+              <Stop offset="0" stopColor={artworkColor("#FCF9FF")} />
+              <Stop offset="0.36" stopColor={artworkColor("#F7EEFE")} />
+              <Stop offset="0.7" stopColor={artworkColor("#FFFDFE")} />
+              <Stop offset="1" stopColor={artworkColor("#F0E2FC")} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="480" height="2100" fill="url(#summaryPageBg)" />
-          <Circle cx="430" cy="-5" r="150" fill={themeTint("#FFFFFF")} opacity={0.48} />
-          <Circle cx="486" cy="220" r="155" fill={themeTint("#E6CCF9")} opacity={0.33} />
-          <Circle cx="-38" cy="730" r="118" fill={themeTint("#F4E4FE")} opacity={0.34} />
-          <Circle cx="450" cy="1710" r="140" fill={themeTint("#ECD8FB")} opacity={0.35} />
+          <Circle cx="430" cy="-5" r="150" fill={artworkColor("#FFFFFF")} opacity={0.48} />
+          <Circle cx="486" cy="220" r="155" fill={artworkColor("#E6CCF9")} opacity={0.33} />
+          <Circle cx="-38" cy="730" r="118" fill={artworkColor("#F4E4FE")} opacity={0.34} />
+          <Circle cx="450" cy="1710" r="140" fill={artworkColor("#ECD8FB")} opacity={0.35} />
         </Svg>
 
         <Entrance reducedMotion={reducedMotion}>

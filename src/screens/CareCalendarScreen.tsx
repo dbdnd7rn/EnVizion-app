@@ -1,4 +1,4 @@
-import { themeBorder, themeTint } from "../themeColors";
+import { themeBorder, artworkColor } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction, themeIconSurface } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
@@ -358,34 +358,34 @@ function HeroCalendarArt() {
     <Svg width={154} height={154} viewBox="0 0 160 160" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="heroCalendarTop" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#8B4BD8")} />
-          <Stop offset="1" stopColor={themeTint("#6D2FC3")} />
+          <Stop offset="0" stopColor={artworkColor("#8B4BD8")} />
+          <Stop offset="1" stopColor={artworkColor("#6D2FC3")} />
         </LinearGradient>
         <LinearGradient id="heroClock" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#A975F2")} />
-          <Stop offset="1" stopColor={themeTint("#6E35C8")} />
+          <Stop offset="0" stopColor={artworkColor("#A975F2")} />
+          <Stop offset="1" stopColor={artworkColor("#6E35C8")} />
         </LinearGradient>
       </Defs>
-      <Circle cx="82" cy="78" r="69" fill={themeTint("#F1E9FF")} />
-      <Circle cx="126" cy="38" r="24" fill={themeTint("#E7D9FF")} opacity={0.9} />
-      <Path d="M22 117C32 89 48 75 72 67C96 59 117 66 137 83C145 90 148 103 144 117C138 137 116 148 86 147C54 145 18 137 22 117Z" fill={themeTint("#EDE5FF")} />
+      <Circle cx="82" cy="78" r="69" fill={artworkColor("#F1E9FF")} />
+      <Circle cx="126" cy="38" r="24" fill={artworkColor("#E7D9FF")} opacity={0.9} />
+      <Path d="M22 117C32 89 48 75 72 67C96 59 117 66 137 83C145 90 148 103 144 117C138 137 116 148 86 147C54 145 18 137 22 117Z" fill={artworkColor("#EDE5FF")} />
       <G>
-        <Rect x="33" y="34" width="92" height="92" rx="18" fill={themeTint("#FFFFFF")} stroke={themeTint("#E2D8F6")} strokeWidth="2" />
+        <Rect x="33" y="34" width="92" height="92" rx="18" fill={artworkColor("#FFFFFF")} stroke={artworkColor("#E2D8F6")} strokeWidth="2" />
         <Path d="M33 52C33 42.06 41.06 34 51 34H107C116.94 34 125 42.06 125 52V61H33V52Z" fill="url(#heroCalendarTop)" />
-        <Rect x="47" y="25" width="8" height="23" rx="4" fill={themeTint("#7D49CA")} />
-        <Rect x="101" y="25" width="8" height="23" rx="4" fill={themeTint("#7D49CA")} />
-        <Rect x="47" y="72" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
-        <Rect x="70" y="72" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
-        <Rect x="93" y="72" width="18" height="16" rx="4" fill={themeTint("#A46CEE")} />
-        <Rect x="47" y="93" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
-        <Rect x="70" y="93" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
-        <Rect x="93" y="93" width="18" height="16" rx="4" fill={themeTint("#F0EAFE")} />
+        <Rect x="47" y="25" width="8" height="23" rx="4" fill={artworkColor("#7D49CA")} />
+        <Rect x="101" y="25" width="8" height="23" rx="4" fill={artworkColor("#7D49CA")} />
+        <Rect x="47" y="72" width="18" height="16" rx="4" fill={artworkColor("#F0EAFE")} />
+        <Rect x="70" y="72" width="18" height="16" rx="4" fill={artworkColor("#F0EAFE")} />
+        <Rect x="93" y="72" width="18" height="16" rx="4" fill={artworkColor("#A46CEE")} />
+        <Rect x="47" y="93" width="18" height="16" rx="4" fill={artworkColor("#F0EAFE")} />
+        <Rect x="70" y="93" width="18" height="16" rx="4" fill={artworkColor("#F0EAFE")} />
+        <Rect x="93" y="93" width="18" height="16" rx="4" fill={artworkColor("#F0EAFE")} />
       </G>
-      <Circle cx="118" cy="119" r="28" fill={themeTint("#F5F1FF")} />
+      <Circle cx="118" cy="119" r="28" fill={artworkColor("#F5F1FF")} />
       <Circle cx="118" cy="119" r="23" fill="url(#heroClock)" />
-      <Line x1="118" y1="119" x2="118" y2="107" stroke={themeTint("#FFFFFF")} strokeWidth="3.6" strokeLinecap="round" />
-      <Line x1="118" y1="119" x2="127" y2="125" stroke={themeTint("#FFFFFF")} strokeWidth="3.6" strokeLinecap="round" />
-      <Circle cx="118" cy="119" r="2.6" fill={themeTint("#FFFFFF")} />
+      <Line x1="118" y1="119" x2="118" y2="107" stroke={artworkColor("#FFFFFF")} strokeWidth="3.6" strokeLinecap="round" />
+      <Line x1="118" y1="119" x2="127" y2="125" stroke={artworkColor("#FFFFFF")} strokeWidth="3.6" strokeLinecap="round" />
+      <Circle cx="118" cy="119" r="2.6" fill={artworkColor("#FFFFFF")} />
     </Svg>
   );
 }
@@ -393,18 +393,18 @@ function HeroCalendarArt() {
 function EmptyCalendarArt() {
   return (
     <Svg width={150} height={94} viewBox="0 0 160 100" accessibilityElementsHidden>
-      <Circle cx="52" cy="48" r="25" fill={themeTint("#F3ECFF")} />
-      <Circle cx="111" cy="49" r="31" fill={themeTint("#EEE6FD")} />
-      <Circle cx="79" cy="36" r="34" fill={themeTint("#F6F1FF")} />
-      <Rect x="58" y="24" width="55" height="54" rx="12" fill={themeTint("#FFFFFF")} stroke={themeTint("#DDD1F3")} strokeWidth="2" />
-      <Rect x="58" y="24" width="55" height="15" rx="12" fill={themeTint("#8350CB")} />
-      <Rect x="66" y="47" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
-      <Rect x="81" y="47" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
-      <Rect x="96" y="47" width="11" height="9" rx="2" fill={themeTint("#B687EE")} />
-      <Rect x="66" y="60" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
-      <Rect x="81" y="60" width="11" height="9" rx="2" fill={themeTint("#E8DEFA")} />
-      <Circle cx="111" cy="72" r="20" fill={themeTint("#7440C4")} />
-      <Path d="M102 72L109 79L121 65" fill="none" stroke={themeTint("#FFFFFF")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <Circle cx="52" cy="48" r="25" fill={artworkColor("#F3ECFF")} />
+      <Circle cx="111" cy="49" r="31" fill={artworkColor("#EEE6FD")} />
+      <Circle cx="79" cy="36" r="34" fill={artworkColor("#F6F1FF")} />
+      <Rect x="58" y="24" width="55" height="54" rx="12" fill={artworkColor("#FFFFFF")} stroke={artworkColor("#DDD1F3")} strokeWidth="2" />
+      <Rect x="58" y="24" width="55" height="15" rx="12" fill={artworkColor("#8350CB")} />
+      <Rect x="66" y="47" width="11" height="9" rx="2" fill={artworkColor("#E8DEFA")} />
+      <Rect x="81" y="47" width="11" height="9" rx="2" fill={artworkColor("#E8DEFA")} />
+      <Rect x="96" y="47" width="11" height="9" rx="2" fill={artworkColor("#B687EE")} />
+      <Rect x="66" y="60" width="11" height="9" rx="2" fill={artworkColor("#E8DEFA")} />
+      <Rect x="81" y="60" width="11" height="9" rx="2" fill={artworkColor("#E8DEFA")} />
+      <Circle cx="111" cy="72" r="20" fill={artworkColor("#7440C4")} />
+      <Path d="M102 72L109 79L121 65" fill="none" stroke={artworkColor("#FFFFFF")} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
@@ -1088,14 +1088,14 @@ const categoryCounts = useMemo(
         >
           <Defs>
             <LinearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={themeTint("#FBF8FF")} />
-              <Stop offset="0.48" stopColor={themeTint("#F4EEFF")} />
-              <Stop offset="1" stopColor={themeTint("#EEE4FB")} />
+              <Stop offset="0" stopColor={artworkColor("#FBF8FF")} />
+              <Stop offset="0.48" stopColor={artworkColor("#F4EEFF")} />
+              <Stop offset="1" stopColor={artworkColor("#EEE4FB")} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="400" height="250" rx="30" fill="url(#heroBg)" />
-          <Circle cx="346" cy="52" r="78" fill={themeTint("#F8F4FF")} opacity={0.8} />
-          <Circle cx="360" cy="205" r="92" fill={themeTint("#EADDFC")} opacity={0.62} />
+          <Circle cx="346" cy="52" r="78" fill={artworkColor("#F8F4FF")} opacity={0.8} />
+          <Circle cx="360" cy="205" r="92" fill={artworkColor("#EADDFC")} opacity={0.62} />
         </Svg>
 
         <View style={{ gap: 11 }}>

@@ -127,6 +127,22 @@ export function themeIconSurface(source: string) {
   return withAlpha(color, alpha);
 }
 
+/**
+ * Preserve authored SVG artwork colors in both appearance modes.
+ * UI backgrounds should use themeBackground/themeIconSurface instead.
+ * Illustrations contain skin, clothing, faces, books and other semantic art
+ * layers that must not be remapped as if each were a card background.
+ */
+export function artworkColor(source: string) { return source; }
+
+/**
+ * Large illustration backdrop shapes may be quieter in dark mode, while
+ * foreground artwork retains its original colors and tonal separation.
+ */
+export function artworkBackdrop(light: string, dark: string) {
+  return activeMode === "dark" ? dark : light;
+}
+
 export const themeBackground = (value: string) => appearanceColor(value, "background");
 /** Filled primary actions stay deep enough for white labels in dark mode. */
 export const themeAction = (value: string) => activeMode === "dark" ? "#774A9F" : value;

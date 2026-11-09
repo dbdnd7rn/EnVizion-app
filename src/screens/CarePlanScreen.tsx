@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, themeTint } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, artworkColor } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -148,27 +148,27 @@ function ChecklistGraphic() {
     >
       <Defs>
         <LinearGradient id="planBoard" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F9F2FF")} />
-          <Stop offset="0.48" stopColor={themeTint("#C995F2")} />
-          <Stop offset="1" stopColor={themeTint("#7B3AAF")} />
+          <Stop offset="0" stopColor={artworkColor("#F9F2FF")} />
+          <Stop offset="0.48" stopColor={artworkColor("#C995F2")} />
+          <Stop offset="1" stopColor={artworkColor("#7B3AAF")} />
         </LinearGradient>
         <LinearGradient id="planPaper" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-          <Stop offset="1" stopColor={themeTint("#F3E8FC")} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} />
+          <Stop offset="1" stopColor={artworkColor("#F3E8FC")} />
         </LinearGradient>
         <LinearGradient id="planGlass" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity={0.8} />
-          <Stop offset="1" stopColor={themeTint("#FFFFFF")} stopOpacity={0.08} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} stopOpacity={0.8} />
+          <Stop offset="1" stopColor={artworkColor("#FFFFFF")} stopOpacity={0.08} />
         </LinearGradient>
         <LinearGradient id="planClip" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#E3C5FA")} />
-          <Stop offset="1" stopColor={themeTint("#6D2AA2")} />
+          <Stop offset="0" stopColor={artworkColor("#E3C5FA")} />
+          <Stop offset="1" stopColor={artworkColor("#6D2AA2")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="143" cy="104" r="92" fill={themeTint("#F6EEFC")} />
-      <Circle cx="210" cy="58" r="44" fill={themeTint("#E8D5F8")} opacity={0.7} />
-      <Ellipse cx="139" cy="193" rx="74" ry="12" fill={themeTint("#6F2D9C")} opacity={0.13} />
+      <Circle cx="143" cy="104" r="92" fill={artworkColor("#F6EEFC")} />
+      <Circle cx="210" cy="58" r="44" fill={artworkColor("#E8D5F8")} opacity={0.7} />
+      <Ellipse cx="139" cy="193" rx="74" ry="12" fill={artworkColor("#6F2D9C")} opacity={0.13} />
 
       <G transform="translate(49 16) rotate(5 83 91)">
         <Rect
@@ -177,7 +177,7 @@ function ChecklistGraphic() {
           width="162"
           height="177"
           rx="28"
-          fill={themeTint("#6D2D9B")}
+          fill={artworkColor("#6D2D9B")}
           opacity={0.15}
         />
         <Rect
@@ -187,7 +187,7 @@ function ChecklistGraphic() {
           height="177"
           rx="28"
           fill="url(#planBoard)"
-          stroke={themeTint("#D9BAF3")}
+          stroke={artworkColor("#D9BAF3")}
           strokeWidth="2"
         />
         <Rect
@@ -197,7 +197,7 @@ function ChecklistGraphic() {
           height="136"
           rx="21"
           fill="url(#planPaper)"
-          stroke={themeTint("#FFFFFF")}
+          stroke={artworkColor("#FFFFFF")}
           strokeWidth="2"
         />
         <Path
@@ -222,7 +222,7 @@ function ChecklistGraphic() {
               <Path
                 d={`M${39} ${y + 10}l4 4 8-9`}
                 fill="none"
-                stroke={themeTint("#FFFFFF")}
+                stroke={artworkColor("#FFFFFF")}
                 strokeWidth="2.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -234,7 +234,7 @@ function ChecklistGraphic() {
               width={index === 1 ? 54 : 61}
               height="6"
               rx="3"
-              fill={themeTint("#76508F")}
+              fill={artworkColor("#76508F")}
               opacity={0.72}
             />
             <Rect
@@ -243,7 +243,7 @@ function ChecklistGraphic() {
               width={index === 0 ? 45 : 37}
               height="5"
               rx="2.5"
-              fill={themeTint("#C9B3D8")}
+              fill={artworkColor("#C9B3D8")}
             />
           </G>
         ))}
@@ -256,10 +256,10 @@ function ChecklistGraphic() {
             height="31"
             rx="15.5"
             fill="url(#planClip)"
-            stroke={themeTint("#EEDFFF")}
+            stroke={artworkColor("#EEDFFF")}
             strokeWidth="2"
           />
-          <Rect x="20" y="7" width="27" height="7" rx="3.5" fill={themeTint("#FFFFFF")} opacity={0.58} />
+          <Rect x="20" y="7" width="27" height="7" rx="3.5" fill={artworkColor("#FFFFFF")} opacity={0.58} />
         </G>
       </G>
     </Svg>

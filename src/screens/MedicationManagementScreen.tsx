@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, themeShadow, themeTint } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeShadow, themeTint, artworkColor } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, TextInput, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Line, Path, Rect, Stop } from "react-native-svg";
@@ -134,45 +134,45 @@ function MedicationHeroGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 260 210" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="heroCapsulePurple" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#BE8AF6")} />
-          <Stop offset="0.48" stopColor={themeTint("#8B4AD0")} />
-          <Stop offset="1" stopColor={themeTint("#6327A0")} />
+          <Stop offset="0" stopColor={artworkColor("#BE8AF6")} />
+          <Stop offset="0.48" stopColor={artworkColor("#8B4AD0")} />
+          <Stop offset="1" stopColor={artworkColor("#6327A0")} />
         </LinearGradient>
         <LinearGradient id="heroCapsuleLight" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-          <Stop offset="0.52" stopColor={themeTint("#F1E5FF")} />
-          <Stop offset="1" stopColor={themeTint("#CFB0F3")} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} />
+          <Stop offset="0.52" stopColor={artworkColor("#F1E5FF")} />
+          <Stop offset="1" stopColor={artworkColor("#CFB0F3")} />
         </LinearGradient>
         <LinearGradient id="heroCapsulePink" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F6DEFF")} />
-          <Stop offset="1" stopColor={themeTint("#C99AEF")} />
+          <Stop offset="0" stopColor={artworkColor("#F6DEFF")} />
+          <Stop offset="1" stopColor={artworkColor("#C99AEF")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="143" cy="101" r="92" fill={themeTint("#F4EAFE")} />
-      <Circle cx="206" cy="55" r="50" fill={themeTint("#E8D6FB")} opacity={0.72} />
-      <Ellipse cx="165" cy="185" rx="72" ry="12" fill={themeTint("#B98BDA")} opacity={0.16} />
+      <Circle cx="143" cy="101" r="92" fill={artworkColor("#F4EAFE")} />
+      <Circle cx="206" cy="55" r="50" fill={artworkColor("#E8D6FB")} opacity={0.72} />
+      <Ellipse cx="165" cy="185" rx="72" ry="12" fill={artworkColor("#B98BDA")} opacity={0.16} />
 
       <G transform="translate(83 27) rotate(39 44 68)">
-        <Rect x="0" y="0" width="88" height="136" rx="44" fill={themeTint("#6530A4")} opacity={0.14} />
+        <Rect x="0" y="0" width="88" height="136" rx="44" fill={artworkColor("#6530A4")} opacity={0.14} />
         <Rect x="-2" y="-3" width="88" height="136" rx="44" fill="url(#heroCapsulePurple)" />
         <Path d="M0 67H86V89C86 113 67 133 43 133C19 133 0 113 0 89V67Z" fill="url(#heroCapsuleLight)" />
-        <Path d="M17 13C31 2 49 1 61 8" stroke={themeTint("#E9D2FF")} strokeWidth="7" strokeLinecap="round" opacity={0.55} />
-        <Path d="M8 72H78" stroke={themeTint("#D9BEF2")} strokeWidth="2" opacity={0.6} />
+        <Path d="M17 13C31 2 49 1 61 8" stroke={artworkColor("#E9D2FF")} strokeWidth="7" strokeLinecap="round" opacity={0.55} />
+        <Path d="M8 72H78" stroke={artworkColor("#D9BEF2")} strokeWidth="2" opacity={0.6} />
       </G>
 
       <G transform="translate(132 93) rotate(101 34 58)">
-        <Rect x="0" y="0" width="68" height="116" rx="34" fill={themeTint("#6A31A5")} opacity={0.12} />
+        <Rect x="0" y="0" width="68" height="116" rx="34" fill={artworkColor("#6A31A5")} opacity={0.12} />
         <Rect x="-2" y="-3" width="68" height="116" rx="34" fill="url(#heroCapsuleLight)" />
         <Path d="M0 57H66V80C66 100 51 116 33 116C15 116 0 100 0 80V57Z" fill="url(#heroCapsulePurple)" />
-        <Path d="M13 12C25 5 38 5 48 9" stroke={themeTint("#FFFFFF")} strokeWidth="6" strokeLinecap="round" opacity={0.72} />
+        <Path d="M13 12C25 5 38 5 48 9" stroke={artworkColor("#FFFFFF")} strokeWidth="6" strokeLinecap="round" opacity={0.72} />
       </G>
 
       <G transform="translate(74 105) rotate(-46 30 50)">
-        <Rect x="0" y="0" width="60" height="100" rx="30" fill={themeTint("#7240B0")} opacity={0.10} />
+        <Rect x="0" y="0" width="60" height="100" rx="30" fill={artworkColor("#7240B0")} opacity={0.10} />
         <Rect x="-2" y="-3" width="60" height="100" rx="30" fill="url(#heroCapsulePink)" />
         <Path d="M0 49H58V70C58 87 45 100 29 100C13 100 0 87 0 70V49Z" fill="url(#heroCapsulePurple)" />
-        <Path d="M11 10C20 4 33 4 42 8" stroke={themeTint("#FFFFFF")} strokeWidth="5" strokeLinecap="round" opacity={0.6} />
+        <Path d="M11 10C20 4 33 4 42 8" stroke={artworkColor("#FFFFFF")} strokeWidth="5" strokeLinecap="round" opacity={0.6} />
       </G>
     </Svg>
   );
@@ -238,18 +238,18 @@ function MedicationEmptyGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 190 130" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="emptyMedOrb" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F1DFFF")} />
-          <Stop offset="1" stopColor={themeTint("#F9E9FA")} />
+          <Stop offset="0" stopColor={artworkColor("#F1DFFF")} />
+          <Stop offset="1" stopColor={artworkColor("#F9E9FA")} />
         </LinearGradient>
       </Defs>
       <Circle cx="95" cy="64" r="53" fill="url(#emptyMedOrb)" />
-      <Ellipse cx="95" cy="117" rx="42" ry="7" fill={themeTint("#9A5BC6")} opacity={0.10} />
+      <Ellipse cx="95" cy="117" rx="42" ry="7" fill={artworkColor("#9A5BC6")} opacity={0.10} />
       <G transform="translate(58 27) rotate(-42 37 37)">
-        <Rect x="0" y="0" width="74" height="38" rx="19" fill={themeTint("#FFFFFF")} stroke={themeTint("#8D3FBD")} strokeWidth="4" />
-        <Path d="M37 1V37" stroke={themeTint("#8D3FBD")} strokeWidth="4" />
-        <Path d="M1 19C1 9 9 1 19 1H37V37H19C9 37 1 29 1 19Z" fill={themeTint("#F2E5FF")} />
+        <Rect x="0" y="0" width="74" height="38" rx="19" fill={artworkColor("#FFFFFF")} stroke={artworkColor("#8D3FBD")} strokeWidth="4" />
+        <Path d="M37 1V37" stroke={artworkColor("#8D3FBD")} strokeWidth="4" />
+        <Path d="M1 19C1 9 9 1 19 1H37V37H19C9 37 1 29 1 19Z" fill={artworkColor("#F2E5FF")} />
       </G>
-      <Path d="M29 43V57M22 50H36M153 41V59M144 50H162M42 83V93M37 88H47" stroke={themeTint("#C89AEE")} strokeWidth="4" strokeLinecap="round" />
+      <Path d="M29 43V57M22 50H36M153 41V59M144 50H162M42 83V93M37 88H47" stroke={artworkColor("#C89AEE")} strokeWidth="4" strokeLinecap="round" />
     </Svg>
   );
 }

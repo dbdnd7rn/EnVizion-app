@@ -1,4 +1,4 @@
-import { themeBorder, themeTint } from "../themeColors";
+import { themeBorder, artworkColor } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
@@ -68,19 +68,19 @@ function VitalsHeroGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 230 180">
       <Defs>
         <LinearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F58BB0")} />
-          <Stop offset="0.52" stopColor={themeTint("#D56ABE")} />
-          <Stop offset="1" stopColor={themeTint("#8C4FC2")} />
+          <Stop offset="0" stopColor={artworkColor("#F58BB0")} />
+          <Stop offset="0.52" stopColor={artworkColor("#D56ABE")} />
+          <Stop offset="1" stopColor={artworkColor("#8C4FC2")} />
         </LinearGradient>
         <LinearGradient id="paperGradient" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFDFE")} />
-          <Stop offset="1" stopColor={themeTint("#EEE5F7")} />
+          <Stop offset="0" stopColor={artworkColor("#FFFDFE")} />
+          <Stop offset="1" stopColor={artworkColor("#EEE5F7")} />
         </LinearGradient>
       </Defs>
 
       <Path
         d="M85 171C45 139 39 92 56 52C77 4 142-3 190 27C223 48 241 89 221 126C196 170 139 187 85 171Z"
-        fill={themeTint("#F4ECFA")}
+        fill={artworkColor("#F4ECFA")}
       />
       <Rect
         x="139"
@@ -91,27 +91,27 @@ function VitalsHeroGraphic() {
         fill="url(#paperGradient)"
         transform="rotate(8 139 30)"
       />
-      <Rect x="160" y="48" width="22" height="22" rx="5" fill={themeTint("#9A62BC")} />
-      <Path d="M166 59h4l3 5 5-8 3 3" stroke={themeTint("#FFF")} strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <Rect x="187" y="51" width="18" height="4" rx="2" fill={themeTint("#C9B3DE")} />
-      <Rect x="185" y="64" width="22" height="4" rx="2" fill={themeTint("#D7C7E5")} />
-      <Rect x="183" y="77" width="26" height="4" rx="2" fill={themeTint("#D7C7E5")} />
-      <Path d="M175 112c10-2 13-14 22-15 8-1 10 9 15 7 7-3 8-17 16-18" stroke={themeTint("#A379C0")} strokeWidth="3" fill="none" strokeLinecap="round" />
+      <Rect x="160" y="48" width="22" height="22" rx="5" fill={artworkColor("#9A62BC")} />
+      <Path d="M166 59h4l3 5 5-8 3 3" stroke={artworkColor("#FFF")} strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <Rect x="187" y="51" width="18" height="4" rx="2" fill={artworkColor("#C9B3DE")} />
+      <Rect x="185" y="64" width="22" height="4" rx="2" fill={artworkColor("#D7C7E5")} />
+      <Rect x="183" y="77" width="26" height="4" rx="2" fill={artworkColor("#D7C7E5")} />
+      <Path d="M175 112c10-2 13-14 22-15 8-1 10 9 15 7 7-3 8-17 16-18" stroke={artworkColor("#A379C0")} strokeWidth="3" fill="none" strokeLinecap="round" />
 
       <Path
         d="M69 77C69 54 86 42 105 42c16 0 27 9 33 22 6-13 18-22 33-22 20 0 36 13 36 35 0 35-36 61-69 84-33-23-69-49-69-84Z"
         fill="url(#heartGradient)"
       />
-      <Path d="M92 95h27l11-25 14 49 12-27 9 14h26" stroke={themeTint("#FFF")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M92 95h27l11-25 14 49 12-27 9 14h26" stroke={artworkColor("#FFF")} strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
 
-      <Path d="M118 39v-20" stroke={themeTint("#8055B0")} strokeWidth="3" strokeLinecap="round" />
-      <Path d="M118 28c-9-9-14-19-8-27 10 3 15 14 8 27Z" fill={themeTint("#9D76C4")} />
-      <Path d="M121 29c10-7 18-14 17-23-11 0-19 8-17 23Z" fill={themeTint("#7650AD")} />
-      <Path d="M115 34c-10-5-19-9-23-17 10-3 20 3 23 17Z" fill={themeTint("#B698D4")} />
+      <Path d="M118 39v-20" stroke={artworkColor("#8055B0")} strokeWidth="3" strokeLinecap="round" />
+      <Path d="M118 28c-9-9-14-19-8-27 10 3 15 14 8 27Z" fill={artworkColor("#9D76C4")} />
+      <Path d="M121 29c10-7 18-14 17-23-11 0-19 8-17 23Z" fill={artworkColor("#7650AD")} />
+      <Path d="M115 34c-10-5-19-9-23-17 10-3 20 3 23 17Z" fill={artworkColor("#B698D4")} />
 
-      <Circle cx="54" cy="107" r="4" fill={themeTint("#B984D0")} />
-      <Circle cx="137" cy="154" r="3" fill={themeTint("#A87AC9")} />
-      <Path d="M47 80c-5 10-5 19 0 28" stroke={themeTint("#A06EC4")} strokeWidth="2.5" strokeLinecap="round" />
+      <Circle cx="54" cy="107" r="4" fill={artworkColor("#B984D0")} />
+      <Circle cx="137" cy="154" r="3" fill={artworkColor("#A87AC9")} />
+      <Path d="M47 80c-5 10-5 19 0 28" stroke={artworkColor("#A06EC4")} strokeWidth="2.5" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -119,18 +119,18 @@ function VitalsHeroGraphic() {
 function VitalsEmptyGraphic() {
   return (
     <Svg width="100%" height="100%" viewBox="0 0 150 100">
-      <Circle cx="64" cy="55" r="41" fill={themeTint("#F1E8FA")} />
-      <Path d="M38 88c4-18 8-28 20-39" stroke={themeTint("#8260A2")} strokeWidth="2" fill="none" />
-      <Path d="M46 69c-9-3-15-1-18 6 8 2 14 0 18-6Z" fill={themeTint("#9B79BA")} />
-      <Path d="M52 57c-8-4-15-3-18 3 7 4 13 3 18-3Z" fill={themeTint("#C0A7D7")} />
+      <Circle cx="64" cy="55" r="41" fill={artworkColor("#F1E8FA")} />
+      <Path d="M38 88c4-18 8-28 20-39" stroke={artworkColor("#8260A2")} strokeWidth="2" fill="none" />
+      <Path d="M46 69c-9-3-15-1-18 6 8 2 14 0 18-6Z" fill={artworkColor("#9B79BA")} />
+      <Path d="M52 57c-8-4-15-3-18 3 7 4 13 3 18-3Z" fill={artworkColor("#C0A7D7")} />
       <G transform="translate(60 14) rotate(-7 32 38)">
-        <Rect x="0" y="0" width="62" height="76" rx="9" fill={themeTint("#FFF")} stroke={themeTint("#E8DCF1")} strokeWidth="2" />
-        <Rect x="13" y="17" width="36" height="6" rx="3" fill={themeTint("#C8AFE0")} />
-        <Rect x="13" y="31" width="31" height="5" rx="2.5" fill={themeTint("#D9C8E8")} />
-        <Rect x="13" y="44" width="35" height="5" rx="2.5" fill={themeTint("#D9C8E8")} />
-        <Rect x="13" y="57" width="26" height="5" rx="2.5" fill={themeTint("#D9C8E8")} />
+        <Rect x="0" y="0" width="62" height="76" rx="9" fill={artworkColor("#FFF")} stroke={artworkColor("#E8DCF1")} strokeWidth="2" />
+        <Rect x="13" y="17" width="36" height="6" rx="3" fill={artworkColor("#C8AFE0")} />
+        <Rect x="13" y="31" width="31" height="5" rx="2.5" fill={artworkColor("#D9C8E8")} />
+        <Rect x="13" y="44" width="35" height="5" rx="2.5" fill={artworkColor("#D9C8E8")} />
+        <Rect x="13" y="57" width="26" height="5" rx="2.5" fill={artworkColor("#D9C8E8")} />
       </G>
-      <Path d="M125 19l4-9M134 26l9-3M128 31l5 7" stroke={themeTint("#F0B85D")} strokeWidth="2.4" strokeLinecap="round" />
+      <Path d="M125 19l4-9M134 26l9-3M128 31l5 7" stroke={artworkColor("#F0B85D")} strokeWidth="2.4" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -299,50 +299,50 @@ function BloodSugarHeroGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 230 190">
       <Defs>
         <LinearGradient id="meterBody" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#A66CE8")} />
-          <Stop offset="0.55" stopColor={themeTint("#7940C5")} />
-          <Stop offset="1" stopColor={themeTint("#5B2AA7")} />
+          <Stop offset="0" stopColor={artworkColor("#A66CE8")} />
+          <Stop offset="0.55" stopColor={artworkColor("#7940C5")} />
+          <Stop offset="1" stopColor={artworkColor("#5B2AA7")} />
         </LinearGradient>
         <LinearGradient id="meterGlow" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FBF9FF")} />
-          <Stop offset="1" stopColor={themeTint("#EADFFD")} />
+          <Stop offset="0" stopColor={artworkColor("#FBF9FF")} />
+          <Stop offset="1" stopColor={artworkColor("#EADFFD")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="115" cy="96" r="84" fill={themeTint("#F4EEFF")} />
-      <Circle cx="175" cy="41" r="42" fill={themeTint("#EEE4FD")} opacity={0.88} />
-      <Path d="M16 163C30 128 50 105 78 91C103 79 132 80 156 90C188 104 214 131 223 162H16Z" fill={themeTint("#F1E8FC")} />
-      <Path d="M27 158C34 133 49 119 61 111" stroke={themeTint("#DCCAF3")} strokeWidth="6" strokeLinecap="round" />
-      <Path d="M196 160C188 131 176 116 162 105" stroke={themeTint("#D6C2F0")} strokeWidth="6" strokeLinecap="round" />
+      <Circle cx="115" cy="96" r="84" fill={artworkColor("#F4EEFF")} />
+      <Circle cx="175" cy="41" r="42" fill={artworkColor("#EEE4FD")} opacity={0.88} />
+      <Path d="M16 163C30 128 50 105 78 91C103 79 132 80 156 90C188 104 214 131 223 162H16Z" fill={artworkColor("#F1E8FC")} />
+      <Path d="M27 158C34 133 49 119 61 111" stroke={artworkColor("#DCCAF3")} strokeWidth="6" strokeLinecap="round" />
+      <Path d="M196 160C188 131 176 116 162 105" stroke={artworkColor("#D6C2F0")} strokeWidth="6" strokeLinecap="round" />
 
       <G transform="translate(72 23) rotate(7 55 75)">
-        <Rect x="8" y="6" width="104" height="130" rx="31" fill={themeTint("#6E43B8")} opacity={0.16} />
+        <Rect x="8" y="6" width="104" height="130" rx="31" fill={artworkColor("#6E43B8")} opacity={0.16} />
         <Rect x="0" y="0" width="104" height="130" rx="31" fill="url(#meterBody)" />
         <Rect x="19" y="18" width="66" height="63" rx="16" fill="url(#meterGlow)" />
-        <Rect x="27" y="27" width="50" height="46" rx="12" fill={themeTint("#FBFAFF")} />
-        <SvgText x="52" y="53" textAnchor="middle" fontSize="25" fontWeight="700" fill={themeTint("#3B3174")}>
+        <Rect x="27" y="27" width="50" height="46" rx="12" fill={artworkColor("#FBFAFF")} />
+        <SvgText x="52" y="53" textAnchor="middle" fontSize="25" fontWeight="700" fill={artworkColor("#3B3174")}>
           98
         </SvgText>
-        <SvgText x="52" y="67" textAnchor="middle" fontSize="8.5" fontWeight="600" fill={themeTint("#6D6590")}>
+        <SvgText x="52" y="67" textAnchor="middle" fontSize="8.5" fontWeight="600" fill={artworkColor("#6D6590")}>
           mg/dL
         </SvgText>
-        <Circle cx="25" cy="99" r="8" fill={themeTint("#C0A6E9")} />
-        <Circle cx="52" cy="101" r="13" fill={themeTint("#D8C7F3")} />
-        <Circle cx="52" cy="101" r="7" fill={themeTint("#F5F0FE")} />
-        <Circle cx="79" cy="99" r="8" fill={themeTint("#C0A6E9")} />
-        <Rect x="44" y="120" width="16" height="39" rx="8" fill={themeTint("#6C35B8")} />
-        <Rect x="49" y="145" width="6" height="13" rx="3" fill={themeTint("#9C67E3")} />
+        <Circle cx="25" cy="99" r="8" fill={artworkColor("#C0A6E9")} />
+        <Circle cx="52" cy="101" r="13" fill={artworkColor("#D8C7F3")} />
+        <Circle cx="52" cy="101" r="7" fill={artworkColor("#F5F0FE")} />
+        <Circle cx="79" cy="99" r="8" fill={artworkColor("#C0A6E9")} />
+        <Rect x="44" y="120" width="16" height="39" rx="8" fill={artworkColor("#6C35B8")} />
+        <Rect x="49" y="145" width="6" height="13" rx="3" fill={artworkColor("#9C67E3")} />
       </G>
 
       <G transform="translate(164 34) rotate(7 30 26)">
-        <Rect x="0" y="0" width="58" height="48" rx="13" fill={themeTint("#FFFFFF")} opacity={0.96} />
-        <Path d="M9 33C17 26 22 17 30 20C38 23 42 35 51 25" fill="none" stroke={themeTint("#8E4FE0")} strokeWidth="3" strokeLinecap="round" />
-        <Circle cx="50" cy="24" r="5" fill={themeTint("#7C40CE")} />
+        <Rect x="0" y="0" width="58" height="48" rx="13" fill={artworkColor("#FFFFFF")} opacity={0.96} />
+        <Path d="M9 33C17 26 22 17 30 20C38 23 42 35 51 25" fill="none" stroke={artworkColor("#8E4FE0")} strokeWidth="3" strokeLinecap="round" />
+        <Circle cx="50" cy="24" r="5" fill={artworkColor("#7C40CE")} />
       </G>
 
       <G transform="translate(166 98) rotate(-6 24 22)">
-        <Rect x="0" y="0" width="48" height="44" rx="12" fill={themeTint("#FFFFFF")} opacity={0.96} />
-        <Path d="M24 33S12 26 12 18C12 12 17 9 21 12C22 13 23 14 24 16C25 14 26 13 27 12C31 9 36 12 36 18C36 26 24 33 24 33Z" fill={themeTint("#9855DF")} />
+        <Rect x="0" y="0" width="48" height="44" rx="12" fill={artworkColor("#FFFFFF")} opacity={0.96} />
+        <Path d="M24 33S12 26 12 18C12 12 17 9 21 12C22 13 23 14 24 16C25 14 26 13 27 12C31 9 36 12 36 18C36 26 24 33 24 33Z" fill={artworkColor("#9855DF")} />
       </G>
     </Svg>
   );
@@ -353,24 +353,24 @@ function BloodSugarEmptyGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 155 95">
       <Defs>
         <LinearGradient id="emptyBubble" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F8F4FF")} />
-          <Stop offset="1" stopColor={themeTint("#E9DEFC")} />
+          <Stop offset="0" stopColor={artworkColor("#F8F4FF")} />
+          <Stop offset="1" stopColor={artworkColor("#E9DEFC")} />
         </LinearGradient>
       </Defs>
       <Rect x="8" y="12" width="139" height="72" rx="24" fill="url(#emptyBubble)" />
       <G transform="translate(19 17)">
-        <Rect x="6" y="5" width="40" height="50" rx="9" fill={themeTint("#FFFFFF")} stroke={themeTint("#E2D7F3")} strokeWidth="2" />
-        <Rect x="12" y="13" width="23" height="5" rx="2.5" fill={themeTint("#B89BE4")} />
-        <Rect x="12" y="25" width="27" height="4" rx="2" fill={themeTint("#D6C5EF")} />
-        <Rect x="12" y="35" width="22" height="4" rx="2" fill={themeTint("#D6C5EF")} />
-        <Path d="M39 50C35 43 39 36 45 36C52 36 55 43 51 50C48 55 45 58 45 58C45 58 42 55 39 50Z" fill={themeTint("#8044C7")} />
+        <Rect x="6" y="5" width="40" height="50" rx="9" fill={artworkColor("#FFFFFF")} stroke={artworkColor("#E2D7F3")} strokeWidth="2" />
+        <Rect x="12" y="13" width="23" height="5" rx="2.5" fill={artworkColor("#B89BE4")} />
+        <Rect x="12" y="25" width="27" height="4" rx="2" fill={artworkColor("#D6C5EF")} />
+        <Rect x="12" y="35" width="22" height="4" rx="2" fill={artworkColor("#D6C5EF")} />
+        <Path d="M39 50C35 43 39 36 45 36C52 36 55 43 51 50C48 55 45 58 45 58C45 58 42 55 39 50Z" fill={artworkColor("#8044C7")} />
       </G>
       <G transform="translate(93 28)">
-        <Rect x="0" y="0" width="38" height="43" rx="10" fill={themeTint("#FFFFFF")} opacity={0.95} />
-        <Path d="M8 28L14 22L19 25L26 14L31 19" fill="none" stroke={themeTint("#9B55DE")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        <Circle cx="30" cy="19" r="4" fill={themeTint("#7F3FD0")} />
+        <Rect x="0" y="0" width="38" height="43" rx="10" fill={artworkColor("#FFFFFF")} opacity={0.95} />
+        <Path d="M8 28L14 22L19 25L26 14L31 19" fill="none" stroke={artworkColor("#9B55DE")} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        <Circle cx="30" cy="19" r="4" fill={artworkColor("#7F3FD0")} />
       </G>
-      <Path d="M59 14L62 8M68 16L73 12M65 22L71 24" stroke={themeTint("#A87AE1")} strokeWidth="2.2" strokeLinecap="round" />
+      <Path d="M59 14L62 8M68 16L73 12M65 22L71 24" stroke={artworkColor("#A87AE1")} strokeWidth="2.2" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -615,27 +615,27 @@ function CHFGlassHeartGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 230 190" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="chfHeartGlass" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity={0.95} />
-          <Stop offset="0.18" stopColor={themeTint("#F4E7FF")} stopOpacity={0.96} />
-          <Stop offset="0.58" stopColor={themeTint("#CDA8F8")} stopOpacity={0.98} />
-          <Stop offset="1" stopColor={themeTint("#8C55D8")} stopOpacity={0.96} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} stopOpacity={0.95} />
+          <Stop offset="0.18" stopColor={artworkColor("#F4E7FF")} stopOpacity={0.96} />
+          <Stop offset="0.58" stopColor={artworkColor("#CDA8F8")} stopOpacity={0.98} />
+          <Stop offset="1" stopColor={artworkColor("#8C55D8")} stopOpacity={0.96} />
         </LinearGradient>
         <LinearGradient id="chfHeartGlow" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity={0.92} />
-          <Stop offset="1" stopColor={themeTint("#E5D2FF")} stopOpacity={0.35} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} stopOpacity={0.92} />
+          <Stop offset="1" stopColor={artworkColor("#E5D2FF")} stopOpacity={0.35} />
         </LinearGradient>
         <LinearGradient id="chfOrb" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-          <Stop offset="1" stopColor={themeTint("#C49AF1")} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} />
+          <Stop offset="1" stopColor={artworkColor("#C49AF1")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="135" cy="92" r="82" fill={themeTint("#F1E7FF")} opacity={0.72} />
-      <Ellipse cx="135" cy="164" rx="69" ry="11" fill={themeTint("#8154BA")} opacity={0.10} />
+      <Circle cx="135" cy="92" r="82" fill={artworkColor("#F1E7FF")} opacity={0.72} />
+      <Ellipse cx="135" cy="164" rx="69" ry="11" fill={artworkColor("#8154BA")} opacity={0.10} />
 
       <Path
         d="M116 159C94 140 62 112 62 78C62 55 79 40 99 40C115 40 127 49 135 62C143 49 155 40 172 40C193 40 209 55 209 78C209 113 177 140 135 169C128 165 122 162 116 159Z"
-        fill={themeTint("#7345B3")}
+        fill={artworkColor("#7345B3")}
         opacity={0.15}
       />
       <Path
@@ -645,7 +645,7 @@ function CHFGlassHeartGraphic() {
       <Path
         d="M93 63C108 50 121 51 130 61"
         fill="none"
-        stroke={themeTint("#FFFFFF")}
+        stroke={artworkColor("#FFFFFF")}
         strokeWidth="10"
         strokeLinecap="round"
         opacity={0.58}
@@ -653,7 +653,7 @@ function CHFGlassHeartGraphic() {
       <Path
         d="M102 53C116 48 125 51 132 58"
         fill="none"
-        stroke={themeTint("#FFFFFF")}
+        stroke={artworkColor("#FFFFFF")}
         strokeWidth="4"
         strokeLinecap="round"
         opacity={0.72}
@@ -675,18 +675,18 @@ function CHFGlassHeartGraphic() {
         rx="94"
         ry="29"
         fill="none"
-        stroke={themeTint("#B997E9")}
+        stroke={artworkColor("#B997E9")}
         strokeWidth="1.5"
         opacity={0.55}
         transform="rotate(11 135 102)"
       />
 
       <Circle cx="190" cy="24" r="14" fill="url(#chfOrb)" opacity={0.88} />
-      <Circle cx="197" cy="20" r="5" fill={themeTint("#FFFFFF")} opacity={0.72} />
+      <Circle cx="197" cy="20" r="5" fill={artworkColor("#FFFFFF")} opacity={0.72} />
       <Circle cx="218" cy="87" r="10" fill="url(#chfOrb)" opacity={0.88} />
-      <Circle cx="216" cy="84" r="3.5" fill={themeTint("#FFFFFF")} opacity={0.75} />
+      <Circle cx="216" cy="84" r="3.5" fill={artworkColor("#FFFFFF")} opacity={0.75} />
       <Circle cx="54" cy="122" r="12" fill="url(#chfOrb)" opacity={0.82} />
-      <Circle cx="50" cy="117" r="4" fill={themeTint("#FFFFFF")} opacity={0.75} />
+      <Circle cx="50" cy="117" r="4" fill={artworkColor("#FFFFFF")} opacity={0.75} />
     </Svg>
   );
 }
@@ -918,13 +918,13 @@ function CHFEmptyStateGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 74 74" accessibilityElementsHidden>
       <Defs>
         <LinearGradient id="chfEmptyOrb" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F8F2FF")} />
-          <Stop offset="1" stopColor={themeTint("#E9D8FB")} />
+          <Stop offset="0" stopColor={artworkColor("#F8F2FF")} />
+          <Stop offset="1" stopColor={artworkColor("#E9D8FB")} />
         </LinearGradient>
       </Defs>
       <Circle cx="37" cy="37" r="31" fill="url(#chfEmptyOrb)" />
-      <Rect x="24" y="21" width="26" height="31" rx="4" fill={themeTint("#FFFFFF")} stroke={themeTint("#7440AD")} strokeWidth="2.3" />
-      <Path d="M36 21v31" stroke={themeTint("#7440AD")} strokeWidth="2" opacity={0.62} />
+      <Rect x="24" y="21" width="26" height="31" rx="4" fill={artworkColor("#FFFFFF")} stroke={artworkColor("#7440AD")} strokeWidth="2.3" />
+      <Path d="M36 21v31" stroke={artworkColor("#7440AD")} strokeWidth="2" opacity={0.62} />
     </Svg>
   );
 }
@@ -1581,15 +1581,15 @@ export function TrackerScreen({
           >
             <Defs>
               <LinearGradient id="chfPageHeroBg" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0" stopColor={themeTint("#FBF8FF")} />
-                <Stop offset="0.48" stopColor={themeTint("#F6EDFF")} />
-                <Stop offset="1" stopColor={themeTint("#EEE2FC")} />
+                <Stop offset="0" stopColor={artworkColor("#FBF8FF")} />
+                <Stop offset="0.48" stopColor={artworkColor("#F6EDFF")} />
+                <Stop offset="1" stopColor={artworkColor("#EEE2FC")} />
               </LinearGradient>
             </Defs>
             <Rect x="0" y="0" width="480" height="355" fill="url(#chfPageHeroBg)" />
-            <Path d="M0 92C73 85 115 128 175 130C261 132 308 76 480 86V0H0Z" fill={themeTint("#FFFFFF")} opacity={0.35} />
-            <Path d="M0 318C88 267 161 282 242 313C314 340 382 322 480 288V355H0Z" fill={themeTint("#FFFFFF")} opacity={0.48} />
-            <Circle cx="435" cy="44" r="92" fill={themeTint("#FFFFFF")} opacity={0.35} />
+            <Path d="M0 92C73 85 115 128 175 130C261 132 308 76 480 86V0H0Z" fill={artworkColor("#FFFFFF")} opacity={0.35} />
+            <Path d="M0 318C88 267 161 282 242 313C314 340 382 322 480 288V355H0Z" fill={artworkColor("#FFFFFF")} opacity={0.48} />
+            <Circle cx="435" cy="44" r="92" fill={artworkColor("#FFFFFF")} opacity={0.35} />
           </Svg>
 
           <CHFReveal reducedMotion={reducedMotion}>
@@ -1907,9 +1907,9 @@ export function TrackerScreen({
               >
                 <Defs>
                   <LinearGradient id="chfSaveGradient" x1="0" y1="0" x2="1" y2="0">
-                    <Stop offset="0" stopColor={themeTint("#6F2C9C")} />
-                    <Stop offset="0.5" stopColor={themeTint("#8D3DBC")} />
-                    <Stop offset="1" stopColor={themeTint("#A54AD0")} />
+                    <Stop offset="0" stopColor={artworkColor("#6F2C9C")} />
+                    <Stop offset="0.5" stopColor={artworkColor("#8D3DBC")} />
+                    <Stop offset="1" stopColor={artworkColor("#A54AD0")} />
                   </LinearGradient>
                 </Defs>
                 <Rect x="0" y="0" width="430" height="58" rx="29" fill="url(#chfSaveGradient)" />
@@ -2163,13 +2163,13 @@ export function TrackerScreen({
           >
             <Defs>
               <LinearGradient id="bloodHeroBg" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-                <Stop offset="0.64" stopColor={themeTint("#FCFAFF")} />
-                <Stop offset="1" stopColor={themeTint("#F1E8FD")} />
+                <Stop offset="0" stopColor={artworkColor("#FFFFFF")} />
+                <Stop offset="0.64" stopColor={artworkColor("#FCFAFF")} />
+                <Stop offset="1" stopColor={artworkColor("#F1E8FD")} />
               </LinearGradient>
             </Defs>
             <Rect x="0" y="0" width="440" height="250" fill="url(#bloodHeroBg)" />
-            <Circle cx="410" cy="58" r="92" fill={themeTint("#F4EEFF")} opacity={0.84} />
+            <Circle cx="410" cy="58" r="92" fill={artworkColor("#F4EEFF")} opacity={0.84} />
           </Svg>
 
           <View style={{ maxWidth: 245, gap: 9, paddingTop: 4 }}>
@@ -2461,9 +2461,9 @@ export function TrackerScreen({
             >
               <Defs>
                 <LinearGradient id="saveGradient" x1="0" y1="0" x2="1" y2="0">
-                  <Stop offset="0" stopColor={themeTint("#8B3FC7")} />
-                  <Stop offset="0.5" stopColor={themeTint("#9C45D2")} />
-                  <Stop offset="1" stopColor={themeTint("#7130A8")} />
+                  <Stop offset="0" stopColor={artworkColor("#8B3FC7")} />
+                  <Stop offset="0.5" stopColor={artworkColor("#9C45D2")} />
+                  <Stop offset="1" stopColor={artworkColor("#7130A8")} />
                 </LinearGradient>
               </Defs>
               <Rect x="0" y="0" width="400" height="58" rx="29" fill="url(#saveGradient)" />

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
   activeAppearance, appearanceColor, darkPalette, setActiveAppearance,
-  themeAction, themeBackground, themeForeground, themeIconSurface, themedStyles,
+  themeAction, themeBackground, themeForeground, themeIconSurface, themedStyles, artworkColor, artworkBackdrop,
 } from "../src/themeColors.ts";
 
 function luminance(color: string) {
@@ -103,6 +103,59 @@ test("reported pale card regressions are routed through dark-mode tokens", () =>
   assert.match(team, /backgroundColor:themeIconSurface\(active\?/);
   assert.match(schedule, /backgroundColor: themeBackground\(tint\)/);
   assert.match(schedule, /const glass = \(\) =>/);
+});
+
+test("dark appearance preserves SVG paint colors without restoring pale UI cards", () => {
+  setActiveAppearance("light");
+  assert.equal(artworkColor("#F0C8B5"), "#F0C8B5");
+  assert.equal(artworkBackdrop("#F7F1FC", "#3D2D50"), "#F7F1FC");
+  try {
+    setActiveAppearance("dark");
+    for (const color of ["#F0C8B5", "#EDC0AC", "#51375F", "#75408F", "#FFFFFF", "#C7AFE3"]) {
+      assert.equal(artworkColor(color), color, `Artwork must retain authored paint ${color}`);
+    }
+    assert.equal(artworkBackdrop("#F7F1FC", "#3D2D50"), "#3D2D50");
+    assert.ok(contrast(artworkColor("#F0C8B5"), artworkColor("#51375F")) >= 5);
+    assert.ok(contrast(artworkColor("#F0C8B5"), artworkBackdrop("#F7F1FC", "#3D2D50")) >= 5);
+    assert.equal(themeBackground("#FFFFFF"), "#25212E");
+    assert.equal(themeIconSurface("#F1E5FA"), "#40324F");
+  } finally {
+    setActiveAppearance("light");
+  }
+});
+
+test("hero and shared SVG artwork use artwork colors, not UI background tint", () => {
+  const files = [
+    "screens/CareScreens.tsx", "screens/CarePlanScreen.tsx",
+    "screens/CareCalendarScreen.tsx", "screens/CareShiftBoardScreen.tsx",
+    "screens/HospitalToHomeScreen.tsx", "screens/SupportScreens.tsx",
+    "components/SpiritualLandscapeArt.tsx",
+    "components/OnboardingWelcomeStep.tsx", "ui.tsx",
+  ];
+  for (const file of files) {
+    const content = readFileSync(new URL("../src/" + file, import.meta.url), "utf8");
+    assert.match(content, /artworkColor\(/, file);
+    assert.doesNotMatch(content, /themeTint\(/, file);
+  }
+  const home = readFileSync(new URL("../src/screens/MainScreens.tsx", import.meta.url), "utf8");
+  const reader = home.split("function LearnHeroGraphic()")[1]?.split("function LearnFeaturedGraphic()")[0] ?? "";
+  assert.match(reader, /artworkColor\("#F0C8B5"\)/);
+  assert.doesNotMatch(reader, /themeTint\(/);
+  for (const [path, begin, end] of [
+    ["screens/CareAnalyticsScreen.tsx", "function CalendarGraphic(", "function formatWeekLabel("],
+    ["screens/MedicationManagementScreen.tsx", "function MedicationHeroGraphic()", "function FloatingMedicationHero("],
+    ["screens/SummaryScreen.tsx", "function FolderGraphic()", "function FloatingFolder("],
+  ]) {
+    const content = readFileSync(new URL("../src/" + path, import.meta.url), "utf8");
+    const artwork = content.split(begin)[1]?.split(end)[0] ?? "";
+    assert.match(artwork, /artworkColor\(/, path);
+    assert.doesNotMatch(artwork, /themeTint\(/, path);
+  }
+  assert.match(reader, /artworkColor\("#7A45A0"\)/);
+  assert.match(reader, /artworkBackdrop\("#F7F1FC", "#3D2D50"\)/);
+  const patient = readFileSync(new URL("../src/screens/PatientExperience.tsx", import.meta.url), "utf8");
+  assert.match(patient, /backgroundColor: themeTint\(tint\)/);
+  assert.match(patient, /fill=\{artworkColor\(accent\)\}/);
 });
 
 test("legacy styles respond to theme changes and are never mutated", () => {
