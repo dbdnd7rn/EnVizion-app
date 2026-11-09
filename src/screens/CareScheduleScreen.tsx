@@ -1,4 +1,4 @@
-import { themeAction } from "../themeColors";
+import { themeAction, themeBackground, themeBorder } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
@@ -204,7 +204,7 @@ function Choice({
         {
           padding: 13,
           borderColor: selected ? C.purple : C.line,
-          backgroundColor: selected ? "#F6F0F8" : C.white,
+          backgroundColor: themeBackground(selected ? "#F6F0F8" : C.white),
           opacity: disabled ? 0.55 : 1,
         },
       ]}
@@ -933,7 +933,7 @@ export function CareScheduleScreen() {
           <Section title="Tasks needing coverage" />
       <Section title="Coverage gaps · next 7 days" />
       {!coverageGaps.length ? (
-        <Card style={{ backgroundColor: "#EAF4EF" }}>
+        <Card style={{ backgroundColor: themeBackground("#EAF4EF") }}>
           <Icon name="shield-checkmark-outline" />
           <Text style={S.h3}>Every upcoming task has scheduled coverage.</Text>
           <Txt style={S.small}>
@@ -943,7 +943,7 @@ export function CareScheduleScreen() {
         </Card>
       ) : (
         coverageGaps.slice(0, 12).map((task) => (
-          <Card key={task.id} style={{ borderColor: "#E8BDC3" }}>
+          <Card key={task.id} style={{ borderColor: themeBorder("#E8BDC3") }}>
             <View style={S.row}>
               <Icon name="warning-outline" color={C.rose} />
               <View style={{ flex: 1, gap: 4 }}>
@@ -1089,7 +1089,7 @@ export function CareScheduleScreen() {
                   </Txt>
                 </View>
                 <View
-                  style={[S.pill, { backgroundColor: fitBackground(fit) }]}
+                  style={[S.pill, { backgroundColor: themeBackground(fitBackground(fit)) }]}
                 >
                   <Text
                     style={[
@@ -1114,7 +1114,7 @@ export function CareScheduleScreen() {
                 <View
                   style={[
                     S.pill,
-                    { backgroundColor: attendanceBackground(attendanceState) },
+                    { backgroundColor: themeBackground(attendanceBackground(attendanceState)) },
                   ]}
                 >
                   <Text
@@ -1133,7 +1133,7 @@ export function CareScheduleScreen() {
                   </Text>
                 </View>
                 {attendanceItem?.lateMinutes ? (
-                  <View style={[S.pill, { backgroundColor: "#FFF1E5" }]}>
+                  <View style={[S.pill, { backgroundColor: themeBackground("#FFF1E5") }]}>
                     <Text style={[S.small, { color: C.deep }]}>
                       {attendanceItem.lateMinutes} min late
                     </Text>
@@ -1932,7 +1932,7 @@ export function CareScheduleScreen() {
 
         </ScheduleReveal>
       )}
-      <Card style={{ backgroundColor: "#F4EAFB", borderColor: "#E7D7F0", gap: 8 }}>
+      <Card style={{ backgroundColor: themeBackground("#F4EAFB"), borderColor: themeBorder("#E7D7F0"), gap: 8 }}>
         <Icon name="information-circle-outline" color={C.purple} size={23}/>
         <Text style={[S.h3, { fontSize: 13.5 }]}>Coverage planning is coordination support.</Text>
         <Txt>
