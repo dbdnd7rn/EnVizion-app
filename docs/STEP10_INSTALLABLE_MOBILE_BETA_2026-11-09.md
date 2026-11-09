@@ -30,19 +30,49 @@ project `947baaf0-54d1-44c2-86c5-86c57c6aa11a`. VAC HMS is outside this work.
   exist. The URL matches the existing EnVizion Supabase project, and the key was
   verified as publishable/anonymous, not a service-role secret. Values are omitted.
 - EAS selected the existing remote Android keystore; changes were frozen.
-- Build source: `8abd09e` (reviewed main plus the versionCode increment).
+- Build ID: `78b15c30-3eaa-4ebb-afd3-f5ee16880a4e`.
+- [EAS build record](https://expo.dev/accounts/ntonga_victor/projects/envizion-life/builds/78b15c30-3eaa-4ebb-afd3-f5ee16880a4e).
+- EAS-recorded Git revision: `ba6c4b3ddbd336c8ae4d925ad68d1cad910b745a`.
+  The upload began at `8abd09e`; the documentation/audit-tooling commit was made
+  while the archive uploaded, before EAS captured Git metadata. App source,
+  assets, entry points, app/EAS configuration and dependency manifests were
+  verified identical between those revisions. Do not claim the uploaded archive
+  contains the later documentation/audit changes.
 - Build command:
 
 ```sh
 npx eas-cli@27.5.0 build --platform android --profile preview --non-interactive --freeze-credentials --no-wait --message "Step 10 Android beta build 4; physical QA pending"
 ```
 
-**Build outcome:** awaiting EAS completion verification. No successful artifact or
-physical install is asserted by this line. Replace it only with observed build
-ID, terminal status, source commit, artifact check and completion time.
+**Build outcome: FINISHED.** EAS completed the internal Android APK build on
+9 November 2026 at **23:36:44 Africa/Blantyre** (21:36:44 UTC), with no build error.
+EAS confirms version **0.1.1**, Android build **4**, profile **preview**, internal
+distribution, and the authorized project ID. The native `assembleRelease` and
+artifact-upload phases completed.
+
+Artifact verification on 9 November 2026 at 23:41 Africa/Blantyre:
+
+- The actual EAS APK URL returned **HTTP 200**.
+- Full download size: **82,057,362 bytes**, matching the response content length.
+- APK ZIP opens successfully and contains `AndroidManifest.xml`, `classes.dex`
+  and `resources.arsc`. This is an artifact-structure check, not a physical install
+  or independent cryptographic signature verification.
+- SHA-256: `04cb521cfd1296260b96dbfe17d0b56eaf78bc1e9888d73b64f1802e47f23585`.
+- Obtain the installation/download link from the EAS build record above. EAS lists
+  artifact expiration as **23 November 2026 at 21:08:29 UTC**.
+- **Physical installation and all real-device tests: NOT RUN.**
 
 The old APK files committed under `artifacts/` and older EAS builds are historical
 artifacts. They are not evidence that Step 10's current code has been built.
+
+For the next build, use a dedicated clean checkout and keep its HEAD and files
+unchanged until submission returns a build ID. Run native preflight and the
+quality gate first; verify project identity and preview environment, then submit
+with frozen credentials. Record the returned build ID and compare EAS's commit,
+profile, version and project with the intended release. Wait for `FINISHED` and
+verify the actual APK download before sharing an installation link. Do not run
+`eas init`, rotate a keystore, change ownership, or submit to stores as part of
+this repeat-preview procedure.
 
 ## iPhone signing blocker
 
@@ -122,6 +152,18 @@ Four existing advisory exceptions expire **11 November 2026**. They were not
 extended. Resolve or obtain explicit security review before expiry; retain the
 preflight's expiry enforcement. This step also repairs Windows execution of the
 existing audit gate and fails closed on incomplete/failed audit responses.
+
+Local validation passed: locked dependency installation, TypeScript, 551 tests,
+native preflight, Expo web export and production artifact smoke. The repaired
+audit passed with 13 vulnerable dependency paths covered by existing exceptions;
+this is not a vulnerability-free result. A first registry attempt returned an
+incomplete response and correctly failed; the subsequent complete report passed
+the unchanged exception policy.
+
+[PR #61](https://github.com/dbdnd7rn/EnVizion-app/pull/61)'s
+[GitHub quality gate](https://github.com/dbdnd7rn/EnVizion-app/actions/runs/42699696566)
+completed successfully for revision `ba6c4b3`. Final documentation-only revisions
+must have their own checks verified before this PR is reported ready.
 
 The [Step 8 handover](STEP8_PREPILOT_QA_HANDOVER_2026-11-04.md) and Step 9 ownership,
 privacy and clinical requirements continue to apply. A documentation or build
