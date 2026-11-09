@@ -1,4 +1,4 @@
-import { themeBackground, themeBorder, themeShadow, themeTint, themeIconSurface } from "../themeColors";
+import { themeBackground, themeBorder, themeShadow, artworkColor, themeIconSurface } from "../themeColors";
 import { themeForeground } from "../themeColors";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, ActivityIndicator, Animated, Easing, Platform, Pressable, Text, View } from "react-native";
@@ -266,62 +266,62 @@ function ShiftHeroGraphic() {
       <Svg width="100%" height="100%" viewBox="0 0 190 176">
         <Defs>
           <LinearGradient id="boardPurple" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#9D5BDC")} />
-            <Stop offset="1" stopColor={themeTint("#6530A2")} />
+            <Stop offset="0" stopColor={artworkColor("#9D5BDC")} />
+            <Stop offset="1" stopColor={artworkColor("#6530A2")} />
           </LinearGradient>
           <LinearGradient id="boardRed" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#FF777D")} />
-            <Stop offset="1" stopColor={themeTint("#F43E56")} />
+            <Stop offset="0" stopColor={artworkColor("#FF777D")} />
+            <Stop offset="1" stopColor={artworkColor("#F43E56")} />
           </LinearGradient>
         </Defs>
 
         <Path
           d="M61 19 C94 -7 155 6 179 45 C200 80 183 129 150 150 C117 172 65 158 45 127 C23 93 28 45 61 19 Z"
-          fill={themeTint("#F0E8FD")}
+          fill={artworkColor("#F0E8FD")}
         />
-        <Circle cx="169" cy="42" r="2.8" fill={themeTint("#B07DDF")} />
-        <Circle cx="151" cy="25" r="2.2" fill={themeTint("#C196EA")} />
-        <Circle cx="176" cy="67" r="2.2" fill={themeTint("#C196EA")} />
+        <Circle cx="169" cy="42" r="2.8" fill={artworkColor("#B07DDF")} />
+        <Circle cx="151" cy="25" r="2.2" fill={artworkColor("#C196EA")} />
+        <Circle cx="176" cy="67" r="2.2" fill={artworkColor("#C196EA")} />
 
         <G transform="translate(29 93) rotate(-25)">
-          <Ellipse cx="8" cy="23" rx="8" ry="29" fill={themeTint("#8D55CA")} />
-          <Ellipse cx="22" cy="19" rx="7" ry="27" fill={themeTint("#B184E8")} />
-          <Ellipse cx="35" cy="17" rx="6" ry="23" fill={themeTint("#D0B5F6")} />
+          <Ellipse cx="8" cy="23" rx="8" ry="29" fill={artworkColor("#8D55CA")} />
+          <Ellipse cx="22" cy="19" rx="7" ry="27" fill={artworkColor("#B184E8")} />
+          <Ellipse cx="35" cy="17" rx="6" ry="23" fill={artworkColor("#D0B5F6")} />
         </G>
 
         <G transform="translate(63 30)">
-          <Rect x="16" y="20" width="95" height="115" rx="19" fill={themeTint("#C6AAEE")} opacity="0.45" />
-          <Rect x="8" y="13" width="99" height="116" rx="19" fill={themeTint("#FFFFFF")} stroke={themeTint("#E5DDF1")} strokeWidth="1.4" />
+          <Rect x="16" y="20" width="95" height="115" rx="19" fill={artworkColor("#C6AAEE")} opacity="0.45" />
+          <Rect x="8" y="13" width="99" height="116" rx="19" fill={artworkColor("#FFFFFF")} stroke={artworkColor("#E5DDF1")} strokeWidth="1.4" />
           <Rect x="8" y="13" width="99" height="30" rx="19" fill="url(#boardPurple)" />
-          <Rect x="36" y="3" width="43" height="23" rx="7" fill={themeTint("#6B32A5")} />
-          <Rect x="45" y="9" width="25" height="6" rx="3" fill={themeTint("#D9C7F4")} />
+          <Rect x="36" y="3" width="43" height="23" rx="7" fill={artworkColor("#6B32A5")} />
+          <Rect x="45" y="9" width="25" height="6" rx="3" fill={artworkColor("#D9C7F4")} />
 
-          <Rect x="23" y="55" width="20" height="20" rx="5" fill={themeTint("#8A43C3")} />
-          <Path d="M28 64 L33 69 L40 60" stroke={themeTint("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Rect x="52" y="57" width="37" height="6" rx="3" fill={themeTint("#D9D2E8")} />
-          <Rect x="52" y="68" width="29" height="5" rx="2.5" fill={themeTint("#ECE7F2")} />
+          <Rect x="23" y="55" width="20" height="20" rx="5" fill={artworkColor("#8A43C3")} />
+          <Path d="M28 64 L33 69 L40 60" stroke={artworkColor("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Rect x="52" y="57" width="37" height="6" rx="3" fill={artworkColor("#D9D2E8")} />
+          <Rect x="52" y="68" width="29" height="5" rx="2.5" fill={artworkColor("#ECE7F2")} />
 
-          <Rect x="23" y="86" width="20" height="20" rx="5" fill={themeTint("#8A43C3")} />
-          <Path d="M28 95 L33 100 L40 91" stroke={themeTint("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Rect x="52" y="88" width="43" height="6" rx="3" fill={themeTint("#D9D2E8")} />
-          <Rect x="52" y="99" width="31" height="5" rx="2.5" fill={themeTint("#ECE7F2")} />
+          <Rect x="23" y="86" width="20" height="20" rx="5" fill={artworkColor("#8A43C3")} />
+          <Path d="M28 95 L33 100 L40 91" stroke={artworkColor("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Rect x="52" y="88" width="43" height="6" rx="3" fill={artworkColor("#D9D2E8")} />
+          <Rect x="52" y="99" width="31" height="5" rx="2.5" fill={artworkColor("#ECE7F2")} />
 
-          <Rect x="23" y="117" width="20" height="20" rx="5" fill={themeTint("#D5C9EA")} />
-          <Path d="M28 126 L33 131 L40 122" stroke={themeTint("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Rect x="52" y="119" width="39" height="6" rx="3" fill={themeTint("#D9D2E8")} />
-          <Rect x="52" y="130" width="26" height="5" rx="2.5" fill={themeTint("#ECE7F2")} />
+          <Rect x="23" y="117" width="20" height="20" rx="5" fill={artworkColor("#D5C9EA")} />
+          <Path d="M28 126 L33 131 L40 122" stroke={artworkColor("#FFFFFF")} strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Rect x="52" y="119" width="39" height="6" rx="3" fill={artworkColor("#D9D2E8")} />
+          <Rect x="52" y="130" width="26" height="5" rx="2.5" fill={artworkColor("#ECE7F2")} />
         </G>
 
         <G transform="translate(12 52)">
           <Path d="M38 30 C22 18 18 7 26 2 C34 -2 39 6 39 6 C39 6 45 -2 53 2 C62 7 57 19 38 30 Z" fill="url(#boardRed)" />
-          <Path d="M49 25 L53 34 L43 29 Z" fill={themeTint("#F55367")} />
+          <Path d="M49 25 L53 34 L43 29 Z" fill={artworkColor("#F55367")} />
         </G>
 
         <G transform="translate(130 111)">
-          <Circle cx="28" cy="28" r="27" fill={themeTint("#5D248D")} />
-          <Circle cx="28" cy="28" r="20" fill={themeTint("#F3EAFB")} />
-          <Path d="M28 14 V28 L37 31" stroke={themeTint("#5D248D")} strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <Circle cx="28" cy="28" r="3.2" fill={themeTint("#5D248D")} />
+          <Circle cx="28" cy="28" r="27" fill={artworkColor("#5D248D")} />
+          <Circle cx="28" cy="28" r="20" fill={artworkColor("#F3EAFB")} />
+          <Path d="M28 14 V28 L37 31" stroke={artworkColor("#5D248D")} strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <Circle cx="28" cy="28" r="3.2" fill={artworkColor("#5D248D")} />
         </G>
       </Svg>
     </View>
