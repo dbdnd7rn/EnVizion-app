@@ -17,7 +17,7 @@ import {
   Txt,
 } from "../ui";
 import { useNav } from "./MainScreens";
-import { themeBackground, themeBorder, themeForeground } from "../themeColors";
+import { themeBackground, themeBorder, themeForeground, themeIconSurface } from "../themeColors";
 
 
 const PURPLE = "#7139A9";
@@ -33,8 +33,8 @@ function Page({ children }: { children: React.ReactNode }) {
         <Pressable accessibilityRole="button" accessibilityLabel="Go back"
           onPress={() => n.canGoBack() ? n.goBack() : n.navigate("CareTeam")}
           style={({pressed})=>({width:45,height:45,borderRadius:24,justifyContent:"center",
-            alignItems:"center",backgroundColor:"#F1EAFB",borderWidth:1,
-            borderColor:"#FFFFFF",opacity:pressed?0.75:1})}>
+            alignItems:"center",backgroundColor:themeIconSurface("#F1EAFB"),borderWidth:1,
+            borderColor:themeBorder("#FFFFFF"),opacity:pressed?0.75:1})}>
           <Icon name="arrow-back-outline" color={themeForeground(PURPLE)} size={22}/>
         </Pressable>
         <Text accessibilityRole="header" style={{flex:1,color:themeForeground(INK),fontSize:18,
@@ -359,7 +359,7 @@ export function CareAccessRecertificationScreen() {
         <Heading eyebrow="90-DAY ACCESS RECERTIFICATION"
           title="Reconfirm who still needs care-team access."
           body="Access-review information must come from your care-team records." />
-        <Card style={{ borderColor: "#EECEDA", backgroundColor: "#FFF8FA" }}>
+        <Card style={{ borderColor: themeBorder("#EECEDA"), backgroundColor: themeBackground("#FFF8FA") }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 11 }}>
             <IconTile icon="alert-circle-outline" />
             <Text accessibilityRole="alert" style={{ flex: 1, color: themeForeground(INK),
@@ -446,7 +446,7 @@ export function CareAccessRecertificationScreen() {
                   {roleLabel(item.role)} · due {dateLabel(item.dueAt)}
                 </Txt>
               </View>
-              <View style={[S.pill, { backgroundColor: "#FFF3DE" }]}>
+              <View style={[S.pill, { backgroundColor: themeBackground("#FFF3DE") }]}>
                 <Text
                   style={[
                     S.small,
@@ -540,7 +540,7 @@ export function CareAccessRecertificationScreen() {
                 <View
                   style={{
                     borderRadius: 17,
-                    backgroundColor: "#F3EEF5",
+                    backgroundColor: themeBackground("#F3EEF5"),
                     padding: 13,
                     gap: 5,
                   }}
@@ -580,7 +580,7 @@ export function CareAccessRecertificationScreen() {
                     borderRadius: 17,
                     borderWidth: 1,
                     borderColor: confirmed ? C.purple : "#DCCFDF",
-                    backgroundColor: confirmed ? "#F3EAF7" : C.white,
+                    backgroundColor: themeBackground(confirmed ? "#F3EAF7" : C.white),
                     padding: 13,
                     flexDirection: "row",
                     gap: 11,
@@ -642,7 +642,7 @@ export function CareAccessRecertificationScreen() {
                 <Text style={S.h3}>{item.displayName}</Text>
                 <Txt style={S.small}>{roleLabel(item.role)}</Txt>
               </View>
-              <View style={[S.pill, { backgroundColor: "#F3EAF7" }]}>
+              <View style={[S.pill, { backgroundColor: themeBackground("#F3EAF7") }]}>
                 <Text style={[S.small, { color: C.purple }]}>
                   {dateLabel(item.dueAt)}
                 </Text>
