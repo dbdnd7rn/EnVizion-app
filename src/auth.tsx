@@ -1,4 +1,4 @@
-import { themeAction, themeBackground, themeBorder, themeForeground, themeTint } from "./themeColors";
+import { themeAction, themeBackground, themeBorder, themeForeground, artworkColor } from "./themeColors";
 import React, {
   createContext,
   useCallback,
@@ -36,6 +36,7 @@ import {
   passwordValidationMessage,
 } from "./authHelpers";
 import { Brand, Button, C, Card, Heading, Icon, Page, S, Txt } from "./ui";
+import { useAppearance } from "./appearance";
 
 type AuthContextValue = {
   session: Session | null;
@@ -63,6 +64,27 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Auth colors are separate from illustration paint and general card tints.
+const AUTH_DARK = {
+  panel: "#292433",
+  panelBorder: "#52435F",
+  input: "#383142",
+  inputBorder: "#62516D",
+  inputText: "#F5EEF9",
+  placeholder: "#BCAFC7",
+  heading: "#F0E4F7",
+  label: "#DDC9EC",
+  chip: "#342A40",
+  chipBorder: "#594766",
+  google: "#342D40",
+  googlePressed: "#41354C",
+  googleBorder: "#685773",
+  googleText: "#F3EAF8",
+  divider: "#5B4C66",
+  decorationOne: "#362B45",
+  decorationTwo: "#453451",
+} as const;
+
 function GoogleLogo({ size = 20 }: { size?: number }) {
   return (
     <Svg
@@ -73,19 +95,19 @@ function GoogleLogo({ size = 20 }: { size?: number }) {
       importantForAccessibility="no-hide-descendants"
     >
       <Path
-        fill={themeTint("#FFC107")}
+        fill={artworkColor("#FFC107")}
         d="M43.611 20H42V20H24v8h11.303C33.654 32.657 29.223 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-4Z"
       />
       <Path
-        fill={themeTint("#FF3D00")}
+        fill={artworkColor("#FF3D00")}
         d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4c-7.682 0-14.344 4.337-17.694 10.691Z"
       />
       <Path
-        fill={themeTint("#4CAF50")}
+        fill={artworkColor("#4CAF50")}
         d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44Z"
       />
       <Path
-        fill={themeTint("#1976D2")}
+        fill={artworkColor("#1976D2")}
         d="M43.611 20H42V20H24v8h11.303a12.03 12.03 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-4Z"
       />
     </Svg>
@@ -544,6 +566,7 @@ export function PasswordRecoveryScreen() {
 
 
 function AuthBrandStatic() {
+  const { dark } = useAppearance();
   // Login decoration stays motionless on mobile and web.
   return (
     <View style={{ alignItems: "center", gap: 9, paddingTop: 26, paddingBottom: 8, overflow: "hidden" }}>
@@ -558,7 +581,7 @@ function AuthBrandStatic() {
       <View style={{
         flexDirection: "row", alignItems: "center", gap: 8,
         paddingHorizontal: 15, paddingVertical: 8, borderRadius: 30,
-        backgroundColor: themeBackground("#F5E9FA"), borderColor: themeBorder("#E9D8F0"), borderWidth: 1,
+        backgroundColor: dark ? AUTH_DARK.chip : themeBackground("#F5E9FA"), borderColor: dark ? AUTH_DARK.chipBorder : themeBorder("#E9D8F0"), borderWidth: 1,
       }}>
         <Icon name="shield-checkmark-outline" size={14} color={C.purple} />
         <Text style={[S.eyebrow, { fontSize: 10, letterSpacing: 1.6, color: C.purple }]}>
@@ -579,6 +602,7 @@ export function AuthScreen() {
     authMessage,
     clearAuthMessage,
   } = useAuth();
+  const { dark } = useAppearance();
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -725,6 +749,15 @@ export function AuthScreen() {
     message.toLowerCase().includes("account request accepted") ||
     message.toLowerCase().includes("request accepted");
 
+  const authInputStyle = {
+    borderRadius: 23, minHeight: 56,
+    backgroundColor: dark ? AUTH_DARK.input : themeBackground("#FFFAFF"),
+    borderColor: dark ? AUTH_DARK.inputBorder : themeBorder("#E2CDEB"),
+    color: dark ? AUTH_DARK.inputText : C.ink,
+    shadowOpacity: dark ? 0 : 0.025, fontSize: 16, paddingHorizontal: 18,
+  };
+  const authPlaceholderColor = dark ? AUTH_DARK.placeholder : themeForeground("#AAA0AF");
+
   return (
     <Page>
       <AuthBrandStatic />
@@ -732,7 +765,7 @@ export function AuthScreen() {
       <View style={{ alignItems: "center", paddingBottom: 5 }}>
         <Text accessibilityRole="header" style={{
           fontFamily: "Lora_500Medium", fontSize: 33, lineHeight: 46,
-          textAlign: "center", letterSpacing: -1, color: C.ink,
+          textAlign: "center", letterSpacing: -1, color: dark ? AUTH_DARK.heading : C.ink,
         }}>
           {mode === "signin" ? (
             <>Care starts <Text style={{ color: C.purple }}>here.</Text></>
@@ -745,45 +778,46 @@ export function AuthScreen() {
       </View>
       <Card style={{
         gap: 18, padding: 22, paddingTop: 30, borderRadius: 34,
-        backgroundColor: themeBackground("#FFFCFF"),
-        borderColor: themeBorder("#EBD7F3"),
-        shadowOpacity: 0.10, shadowRadius: 26, shadowOffset: { width: 0, height: 12 },
+        backgroundColor: dark ? AUTH_DARK.panel : themeBackground("#FFFCFF"),
+        borderColor: dark ? AUTH_DARK.panelBorder : themeBorder("#EBD7F3"),
+        shadowColor: dark ? "#000000" : "#35223F",
+        shadowOpacity: dark ? 0.21 : 0.10, shadowRadius: 26, shadowOffset: { width: 0, height: 12 },
         elevation: 3,
       }}>
         <View pointerEvents="none" style={{ position: "absolute", right: 0, top: 0, width: 240, height: 118 }}>
           <Svg width="100%" height="100%" viewBox="0 0 240 118" preserveAspectRatio="none">
-            <Path d="M36 0H240V116C205 78 174 84 150 66C113 39 90 0 36 0Z" fill={themeBackground("#F3E5FA")} />
-            <Path d="M136 0H240V66C205 58 193 34 177 23C166 15 151 7 136 0Z" fill={themeBackground("#ECD5F8")} />
+            <Path d="M36 0H240V116C205 78 174 84 150 66C113 39 90 0 36 0Z" fill={dark ? AUTH_DARK.decorationOne : themeBackground("#F3E5FA")} />
+            <Path d="M136 0H240V66C205 58 193 34 177 23C166 15 151 7 136 0Z" fill={dark ? AUTH_DARK.decorationTwo : themeBackground("#ECD5F8")} />
           </Svg>
         </View>
         <View style={[S.between, { marginBottom: 4 }]}>
-          <Text style={[S.h3, { fontSize: 23, lineHeight: 29, letterSpacing: -0.6 }]}>
+          <Text style={[S.h3, { fontSize: 23, lineHeight: 29, letterSpacing: -0.6, color: dark ? AUTH_DARK.heading : C.ink }]}>
             {mode === "signin" ? "Sign in" : mode === "signup" ? "Create account" : "Account recovery"}
           </Text>
           <View style={{
             width: 42, height: 42, borderRadius: 21, alignItems: "center", justifyContent: "center",
-            backgroundColor: themeBackground("#F0DAFA"),
+            backgroundColor: dark ? "#42344F" : themeBackground("#F0DAFA"),
           }}>
             <Icon name="lock-closed-outline" size={20} color={C.purple} />
           </View>
         </View>
         {mode === "signup" && (
           <View style={{ gap: 8 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="person-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14 }]}>Your name</Text></View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="person-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14, color: dark ? AUTH_DARK.label : C.ink }]}>Your name</Text></View>
             <TextInput
               accessibilityLabel="Your name"
               value={fullName}
               onChangeText={setFullName}
               autoComplete="name"
-              style={[S.input, { borderRadius: 23, minHeight: 56, backgroundColor: themeBackground("#FFFAFF"), borderColor: themeBorder("#E2CDEB"), shadowOpacity: 0.025, fontSize: 16, paddingHorizontal: 18 }]}
+              style={[S.input, authInputStyle]}
               placeholder="Your name"
-              placeholderTextColor={themeForeground("#AAA0AF")}
+              placeholderTextColor={authPlaceholderColor}
             />
           </View>
         )}
 
         <View style={{ gap: 8 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="mail-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14 }]}>Email address</Text></View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="mail-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14, color: dark ? AUTH_DARK.label : C.ink }]}>Email address</Text></View>
           <TextInput
             accessibilityLabel="Email address"
             value={email}
@@ -792,15 +826,15 @@ export function AuthScreen() {
             autoCorrect={false}
             autoComplete="email"
             keyboardType="email-address"
-            style={[S.input, { borderRadius: 23, minHeight: 56, backgroundColor: themeBackground("#FFFAFF"), borderColor: themeBorder("#E2CDEB"), shadowOpacity: 0.025, fontSize: 16, paddingHorizontal: 18 }]}
+            style={[S.input, authInputStyle]}
             placeholder="you@example.com"
-            placeholderTextColor={themeForeground("#AAA0AF")}
+            placeholderTextColor={authPlaceholderColor}
           />
         </View>
 
         {mode !== "forgot" && (
           <View style={{ gap: 8 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="lock-closed-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14 }]}>Password</Text></View>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}><Icon name="lock-closed-outline" size={18} color={C.purple} /><Text style={[S.h3, { fontSize: 14, color: dark ? AUTH_DARK.label : C.ink }]}>Password</Text></View>
             <View style={{ position: "relative" }}>
             <TextInput
               accessibilityLabel="Password"
@@ -810,7 +844,7 @@ export function AuthScreen() {
               autoCorrect={false}
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
               secureTextEntry={!showPassword}
-              style={[S.input, { borderRadius: 23, minHeight: 56, backgroundColor: themeBackground("#FFFAFF"), borderColor: themeBorder("#E2CDEB"), shadowOpacity: 0.025, fontSize: 16, paddingHorizontal: 18, paddingRight: 56 }]}
+              style={[S.input, authInputStyle, { paddingRight: 56 }]}
               returnKeyType="go"
               onSubmitEditing={() => void submit()}
               placeholder={
@@ -818,7 +852,7 @@ export function AuthScreen() {
                   ? `At least ${MIN_PASSWORD_LENGTH} characters`
                   : "Your password"
               }
-              placeholderTextColor={themeForeground("#AAA0AF")}
+              placeholderTextColor={authPlaceholderColor}
             />
             <Pressable accessibilityRole="button" accessibilityLabel={showPassword ? "Hide password" : "Show password"}
               onPress={() => setShowPassword(value => !value)}
@@ -855,9 +889,9 @@ export function AuthScreen() {
         >
           <View pointerEvents="none" style={{ position: "absolute", top: 0, right: 0, left: 0, bottom: 0 }}>
             <Svg width="100%" height="100%" viewBox="0 0 360 58" preserveAspectRatio="none">
-              <Path d="M0 0H360V58H0Z" fill={themeAction("#791787")} />
-              <Path d="M0 0H150C117 14 107 32 62 35C35 37 24 48 0 58Z" fill={themeAction("#8B34A2")} />
-              <Path d="M260 58C305 27 330 44 360 12V58Z" fill={themeAction("#9B38B0")} />
+              <Path d="M0 0H360V58H0Z" fill={dark ? "#8253AD" : themeAction("#791787")} />
+              <Path d="M0 0H150C117 14 107 32 62 35C35 37 24 48 0 58Z" fill={dark ? "#9866BB" : themeAction("#8B34A2")} />
+              <Path d="M260 58C305 27 330 44 360 12V58Z" fill={dark ? "#73499D" : themeAction("#9B38B0")} />
             </Svg>
           </View>
           <Icon name="arrow-forward" size={21} color={themeForeground("#FFFFFF")} />
@@ -873,9 +907,9 @@ export function AuthScreen() {
               accessibilityElementsHidden
               style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
             >
-              <View style={{ height: 1, flex: 1, backgroundColor: C.line }} />
+              <View style={{ height: 1, flex: 1, backgroundColor: dark ? AUTH_DARK.divider : C.line }} />
               <Text style={[S.small, { color: C.muted }]}>or</Text>
-              <View style={{ height: 1, flex: 1, backgroundColor: C.line }} />
+              <View style={{ height: 1, flex: 1, backgroundColor: dark ? AUTH_DARK.divider : C.line }} />
             </View>
             <Pressable
               accessibilityRole="button"
@@ -888,8 +922,8 @@ export function AuthScreen() {
                 minHeight: 56,
                 borderRadius: 26,
                 borderWidth: 1,
-                borderColor: themeBorder("#DFC4EE"),
-                backgroundColor: pressed ? themeBackground("#F5E9FA") : themeBackground("#FFFAFF"),
+                borderColor: dark ? AUTH_DARK.googleBorder : themeBorder("#DFC4EE"),
+                backgroundColor: dark ? (pressed ? AUTH_DARK.googlePressed : AUTH_DARK.google) : (pressed ? themeBackground("#F5E9FA") : themeBackground("#FFFAFF")),
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
@@ -907,7 +941,7 @@ export function AuthScreen() {
               >
                 <GoogleLogo size={22} />
               </View>
-              <Text style={[S.h3, { color: C.ink, fontSize: 14 }]}>
+              <Text style={[S.h3, { color: dark ? AUTH_DARK.googleText : C.ink, fontSize: 14 }]}>
                 {googleBusy
                   ? "Opening Google…"
                   : mode === "signup"
