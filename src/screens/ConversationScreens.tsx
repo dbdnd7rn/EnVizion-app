@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeTint, themedStyles } from "../themeColors";
+import { themeBackground, themeForeground, artworkColor, themedStyles } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
@@ -757,7 +757,7 @@ function AssistantRobot() {
             <Stop offset="1" stopColor="#E7EAF8" />
           </LinearGradient>
           <LinearGradient id="robotFace" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#101542")} />
+            <Stop offset="0" stopColor={artworkColor("#101542")} />
             <Stop offset="0.58" stopColor="#171B52" />
             <Stop offset="1" stopColor="#27215D" />
           </LinearGradient>
