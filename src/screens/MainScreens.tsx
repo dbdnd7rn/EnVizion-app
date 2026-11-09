@@ -1,5 +1,5 @@
 import { themeTint } from "../themeColors";
-import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction, themeIconSurface } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -1074,12 +1074,12 @@ function HomeStat({
           width: 35,
           height: 35,
           borderRadius: 13,
-          backgroundColor: iconBackground,
+          backgroundColor: themeIconSurface(iconBackground),
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={20} color={iconColor} />
+        <Icon name={icon} size={20} color={themeForeground(iconColor)} />
       </View>
       <Text
         style={{
@@ -1133,7 +1133,7 @@ function HomeActionCard({
         minWidth: 0,
         minHeight: 122,
         borderRadius: 21,
-        backgroundColor: background,
+        backgroundColor: themeBackground(background),
         paddingHorizontal: 9,
         paddingVertical: 11,
         gap: 8,
@@ -1148,12 +1148,12 @@ function HomeActionCard({
           width: 40,
           height: 40,
           borderRadius: 15,
-          backgroundColor: iconBackground,
+          backgroundColor: themeIconSurface(iconBackground),
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Icon name={icon} size={22} color={iconColor} />
+        <Icon name={icon} size={22} color={themeForeground(iconColor)} />
       </View>
       <View style={{ gap: 2 }}>
         <Text
@@ -2739,7 +2739,7 @@ export function LibraryScreen() {
                 paddingHorizontal: 20,
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: filter === item ? themeAction(C.purple) : "#F1EDF2",
+                backgroundColor: filter === item ? themeAction(C.purple) : themeBackground("#F1EDF2"),
                 opacity: pressed ? 0.76 : 1,
               })}
             >
@@ -2747,7 +2747,7 @@ export function LibraryScreen() {
                 style={{
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 14,
-                  color: filter === item ? C.white : "#716B7E",
+                  color: filter === item ? C.white : themeForeground("#716B7E"),
                 }}
               >
                 {item}
@@ -2890,7 +2890,7 @@ export function LibraryScreen() {
                     width: 52,
                     height: 52,
                     borderRadius: 26,
-                    backgroundColor: item.bg,
+                    backgroundColor: themeIconSurface(item.bg),
                     alignItems: "center",
                     justifyContent: "center",
                   }}
