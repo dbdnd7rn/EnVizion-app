@@ -13,6 +13,7 @@
     "build:web": "npm run typecheck && npm test && expo export --platform web",
     "smoke:dist": "node scripts/verify-web-export.mjs",
     "smoke:live": "node scripts/live-smoke.mjs",
+    "preflight:native": "node scripts/verify-native-release.mjs",
     "audit:prod": "npm audit --omit=dev"
   },
   "dependencies": {
