@@ -1,4 +1,4 @@
-import { themeBackground, themeForeground, themeBorder, themeTint } from "../themeColors";
+import { themeBackground, themeForeground, themeBorder, artworkColor } from "../themeColors";
 import { themeShadow } from "../themeColors";
 import React, {
   useCallback,
@@ -139,17 +139,17 @@ function WeekCardBackground() {
     >
       <Defs>
         <LinearGradient id="weekBg" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#9B5DCA")} />
-          <Stop offset="0.55" stopColor={themeTint("#7D3CAF")} />
-          <Stop offset="1" stopColor={themeTint("#A06BCD")} />
+          <Stop offset="0" stopColor={artworkColor("#9B5DCA")} />
+          <Stop offset="0.55" stopColor={artworkColor("#7D3CAF")} />
+          <Stop offset="1" stopColor={artworkColor("#A06BCD")} />
         </LinearGradient>
       </Defs>
       <Rect x="0" y="0" width="420" height="122" rx="28" fill="url(#weekBg)" />
-      <Circle cx="74" cy="29" r="66" fill={themeTint("#FFFFFF")} opacity="0.075" />
-      <Circle cx="351" cy="100" r="86" fill={themeTint("#FFFFFF")} opacity="0.05" />
+      <Circle cx="74" cy="29" r="66" fill={artworkColor("#FFFFFF")} opacity="0.075" />
+      <Circle cx="351" cy="100" r="86" fill={artworkColor("#FFFFFF")} opacity="0.05" />
       <Path
         d="M220 122C251 73 310 51 420 54V122H220Z"
-        fill={themeTint("#FFFFFF")}
+        fill={artworkColor("#FFFFFF")}
         opacity="0.045"
       />
     </Svg>
@@ -198,21 +198,21 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
       <Svg width="100%" height="100%" viewBox="0 0 220 205">
         <Defs>
           <LinearGradient id="calBody" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#A46EE4")} />
-            <Stop offset="0.55" stopColor={themeTint("#B885ED")} />
-            <Stop offset="1" stopColor={themeTint("#D2B0F4")} />
+            <Stop offset="0" stopColor={artworkColor("#A46EE4")} />
+            <Stop offset="0.55" stopColor={artworkColor("#B885ED")} />
+            <Stop offset="1" stopColor={artworkColor("#D2B0F4")} />
           </LinearGradient>
           <LinearGradient id="calGlass" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#FFFFFF")} stopOpacity="0.78" />
-            <Stop offset="1" stopColor={themeTint("#F4E9FF")} stopOpacity="0.52" />
+            <Stop offset="0" stopColor={artworkColor("#FFFFFF")} stopOpacity="0.78" />
+            <Stop offset="1" stopColor={artworkColor("#F4E9FF")} stopOpacity="0.52" />
           </LinearGradient>
           <LinearGradient id="calHeart" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={themeTint("#F4C6FF")} />
-            <Stop offset="1" stopColor={themeTint("#A75DE2")} />
+            <Stop offset="0" stopColor={artworkColor("#F4C6FF")} />
+            <Stop offset="1" stopColor={artworkColor("#A75DE2")} />
           </LinearGradient>
         </Defs>
 
-        <Ellipse cx="111" cy="183" rx="74" ry="14" fill={themeTint("#8A4ABB")} opacity="0.14" />
+        <Ellipse cx="111" cy="183" rx="74" ry="14" fill={artworkColor("#8A4ABB")} opacity="0.14" />
 
         <G transform="translate(30 27)">
           <Rect
@@ -221,7 +221,7 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
             width="153"
             height="138"
             rx="30"
-            fill={themeTint("#8E4BC4")}
+            fill={artworkColor("#8E4BC4")}
             opacity="0.18"
           />
           <Rect
@@ -231,7 +231,7 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
             height="142"
             rx="29"
             fill="url(#calBody)"
-            stroke={themeTint("#E5CDF8")}
+            stroke={artworkColor("#E5CDF8")}
             strokeWidth="3"
           />
           <Rect
@@ -244,10 +244,10 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
           />
 
           <G>
-            <Ellipse cx="43" cy="13" rx="13" ry="21" fill={themeTint("#8C4CC0")} />
-            <Ellipse cx="43" cy="13" rx="7" ry="14" fill={themeTint("#D6B8F2")} />
-            <Ellipse cx="119" cy="13" rx="13" ry="21" fill={themeTint("#8C4CC0")} />
-            <Ellipse cx="119" cy="13" rx="7" ry="14" fill={themeTint("#D6B8F2")} />
+            <Ellipse cx="43" cy="13" rx="13" ry="21" fill={artworkColor("#8C4CC0")} />
+            <Ellipse cx="43" cy="13" rx="7" ry="14" fill={artworkColor("#D6B8F2")} />
+            <Ellipse cx="119" cy="13" rx="13" ry="21" fill={artworkColor("#8C4CC0")} />
+            <Ellipse cx="119" cy="13" rx="7" ry="14" fill={artworkColor("#D6B8F2")} />
           </G>
 
           {[0, 1, 2, 3].map((column) =>
@@ -268,7 +268,7 @@ function CalendarGraphic({ reducedMotion }: { reducedMotion: boolean }) {
           <Path
             d="M87 85c-8-12-25-5-20 8 5 10 20 18 20 18s16-8 21-18c5-13-12-20-21-8Z"
             fill="url(#calHeart)"
-            stroke={themeTint("#FFFFFF")}
+            stroke={artworkColor("#FFFFFF")}
             strokeWidth="2"
           />
         </G>
