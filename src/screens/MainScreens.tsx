@@ -1,4 +1,4 @@
-import { themeTint } from "../themeColors";
+import { artworkColor, artworkBackdrop } from "../themeColors";
 import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction, themeIconSurface } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
 import { AccessibilityInfo, Animated, Easing, Keyboard, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
@@ -1205,7 +1205,7 @@ function ToolkitWave({ tint = "#F4ECFB" }: { tint?: string }) {
         />
         <Path
           d="M54 118 C99 91 113 66 190 48 L190 118 Z"
-          fill={themeTint("#FBF8FE")}
+          fill={artworkColor("#FBF8FE")}
           opacity="0.88"
         />
       </Svg>
@@ -2414,20 +2414,20 @@ function LearnHeroGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 300 240">
       <Defs>
         <LinearGradient id="learnHalo" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#F7F1FC")} />
-          <Stop offset="1" stopColor={themeTint("#E7D9F5")} />
+          <Stop offset="0" stopColor={artworkBackdrop("#F7F1FC", "#3D2D50")} />
+          <Stop offset="1" stopColor={artworkBackdrop("#E7D9F5", "#5A4470")} />
         </LinearGradient>
         <LinearGradient id="learnHair" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#51375F")} />
-          <Stop offset="1" stopColor={themeTint("#36263F")} />
+          <Stop offset="0" stopColor={artworkColor("#51375F")} />
+          <Stop offset="1" stopColor={artworkColor("#36263F")} />
         </LinearGradient>
         <LinearGradient id="learnTop" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#8150A2")} />
-          <Stop offset="1" stopColor={themeTint("#64357F")} />
+          <Stop offset="0" stopColor={artworkColor("#8150A2")} />
+          <Stop offset="1" stopColor={artworkColor("#64357F")} />
         </LinearGradient>
         <LinearGradient id="learnBook" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#75408F")} />
-          <Stop offset="1" stopColor={themeTint("#4F2967")} />
+          <Stop offset="0" stopColor={artworkColor("#75408F")} />
+          <Stop offset="1" stopColor={artworkColor("#4F2967")} />
         </LinearGradient>
       </Defs>
 
@@ -2435,15 +2435,15 @@ function LearnHeroGraphic() {
       <Circle cx="178" cy="105" r="92" fill="url(#learnHalo)" />
 
       {/* layered leaves behind the reader */}
-      <Ellipse cx="224" cy="50" rx="17" ry="55" fill={themeTint("#C7AFE3")} transform="rotate(17 224 50)" />
-      <Ellipse cx="252" cy="79" rx="14" ry="47" fill={themeTint("#B89AD8")} transform="rotate(34 252 79)" />
-      <Ellipse cx="270" cy="121" rx="14" ry="43" fill={themeTint("#D7C6EB")} transform="rotate(51 270 121)" />
-      <Ellipse cx="197" cy="37" rx="12" ry="37" fill={themeTint("#DCCEF0")} transform="rotate(-10 197 37)" />
+      <Ellipse cx="224" cy="50" rx="17" ry="55" fill={artworkColor("#C7AFE3")} transform="rotate(17 224 50)" />
+      <Ellipse cx="252" cy="79" rx="14" ry="47" fill={artworkColor("#B89AD8")} transform="rotate(34 252 79)" />
+      <Ellipse cx="270" cy="121" rx="14" ry="43" fill={artworkColor("#D7C6EB")} transform="rotate(51 270 121)" />
+      <Ellipse cx="197" cy="37" rx="12" ry="37" fill={artworkColor("#DCCEF0")} transform="rotate(-10 197 37)" />
 
       {/* shoulders / cardigan */}
       <Path
         d="M119 194 C126 151 153 127 191 127 C228 127 255 153 261 196 L261 222 L113 222 C113 211 115 202 119 194 Z"
-        fill={themeTint("#FFF9F6")}
+        fill={artworkColor("#FFF9F6")}
       />
       <Path
         d="M119 185 C132 161 147 149 162 145 L174 219 L108 219 C107 205 110 193 119 185 Z"
@@ -2451,7 +2451,7 @@ function LearnHeroGraphic() {
       />
       <Path
         d="M218 145 C237 151 250 166 260 188 L266 219 L207 219 L208 161 Z"
-        fill={themeTint("#F5ECE7")}
+        fill={artworkColor("#F5ECE7")}
       />
 
       {/* hair mass */}
@@ -2461,42 +2461,42 @@ function LearnHeroGraphic() {
       />
 
       {/* face and neck */}
-      <Rect x="181" y="119" width="24" height="25" rx="10" fill={themeTint("#EDC0AC")} />
-      <Circle cx="193" cy="84" r="38" fill={themeTint("#F0C8B5")} />
+      <Rect x="181" y="119" width="24" height="25" rx="10" fill={artworkColor("#EDC0AC")} />
+      <Circle cx="193" cy="84" r="38" fill={artworkColor("#F0C8B5")} />
       <Path
         d="M158 72 C168 43 198 36 223 47 C239 54 248 67 249 83 C239 70 226 63 208 62 C188 61 172 66 158 72 Z"
         fill="url(#learnHair)"
       />
-      <Path d="M164 58 C151 72 150 95 156 113 C143 102 139 84 145 69 C149 59 155 52 164 47 Z" fill={themeTint("#4B3255")} />
+      <Path d="M164 58 C151 72 150 95 156 113 C143 102 139 84 145 69 C149 59 155 52 164 47 Z" fill={artworkColor("#4B3255")} />
 
       {/* face details */}
-      <Circle cx="181" cy="84" r="2.6" fill={themeTint("#74505A")} />
-      <Circle cx="206" cy="84" r="2.6" fill={themeTint("#74505A")} />
-      <Path d="M184 101 C190 106 198 106 204 101" stroke={themeTint("#C77976")} strokeWidth="2.4" strokeLinecap="round" fill="none" />
-      <Path d="M181 75 C176 73 172 73 168 75" stroke={themeTint("#B07C76")} strokeWidth="1.8" strokeLinecap="round" fill="none" />
-      <Path d="M207 75 C212 73 216 73 220 75" stroke={themeTint("#B07C76")} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <Circle cx="181" cy="84" r="2.6" fill={artworkColor("#74505A")} />
+      <Circle cx="206" cy="84" r="2.6" fill={artworkColor("#74505A")} />
+      <Path d="M184 101 C190 106 198 106 204 101" stroke={artworkColor("#C77976")} strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <Path d="M181 75 C176 73 172 73 168 75" stroke={artworkColor("#B07C76")} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <Path d="M207 75 C212 73 216 73 220 75" stroke={artworkColor("#B07C76")} strokeWidth="1.8" strokeLinecap="round" fill="none" />
 
       {/* open book */}
       <Path
         d="M101 166 C126 154 151 156 177 170 L171 222 C146 208 124 206 99 215 Z"
-        fill={themeTint("#7A45A0")}
+        fill={artworkColor("#7A45A0")}
       />
       <Path
         d="M177 170 C200 156 225 154 250 166 L252 215 C228 206 204 208 171 222 Z"
         fill="url(#learnBook)"
       />
-      <Path d="M177 171 L171 222" stroke={themeTint("#A983BC")} strokeWidth="2" />
-      <Path d="M112 173 C131 167 148 169 165 178" stroke={themeTint("#AA7CC0")} strokeWidth="3" strokeLinecap="round" fill="none" />
-      <Path d="M113 184 C131 180 146 181 160 187" stroke={themeTint("#AA7CC0")} strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <Path d="M177 171 L171 222" stroke={artworkColor("#A983BC")} strokeWidth="2" />
+      <Path d="M112 173 C131 167 148 169 165 178" stroke={artworkColor("#AA7CC0")} strokeWidth="3" strokeLinecap="round" fill="none" />
+      <Path d="M113 184 C131 180 146 181 160 187" stroke={artworkColor("#AA7CC0")} strokeWidth="2.4" strokeLinecap="round" fill="none" />
 
       {/* hands */}
-      <Ellipse cx="126" cy="161" rx="14" ry="22" fill={themeTint("#F0C8B5")} transform="rotate(-19 126 161)" />
-      <Ellipse cx="228" cy="154" rx="14" ry="23" fill={themeTint("#F0C8B5")} transform="rotate(10 228 154)" />
+      <Ellipse cx="126" cy="161" rx="14" ry="22" fill={artworkColor("#F0C8B5")} transform="rotate(-19 126 161)" />
+      <Ellipse cx="228" cy="154" rx="14" ry="23" fill={artworkColor("#F0C8B5")} transform="rotate(10 228 154)" />
 
       {/* mug */}
-      <Rect x="234" y="121" width="42" height="43" rx="10" fill={themeTint("#FFFFFF")} stroke={themeTint("#E8DDEB")} strokeWidth="3" />
-      <Path d="M275 132 C287 131 291 151 278 154" stroke={themeTint("#D9CCE0")} strokeWidth="4" fill="none" strokeLinecap="round" />
-      <Path d="M241 128 C249 124 260 124 269 128" stroke={themeTint("#F4EDF6")} strokeWidth="3" strokeLinecap="round" />
+      <Rect x="234" y="121" width="42" height="43" rx="10" fill={artworkColor("#FFFFFF")} stroke={artworkColor("#E8DDEB")} strokeWidth="3" />
+      <Path d="M275 132 C287 131 291 151 278 154" stroke={artworkColor("#D9CCE0")} strokeWidth="4" fill="none" strokeLinecap="round" />
+      <Path d="M241 128 C249 124 260 124 269 128" stroke={artworkColor("#F4EDF6")} strokeWidth="3" strokeLinecap="round" />
     </Svg>
   );
 }
@@ -2506,40 +2506,40 @@ function LearnFeaturedGraphic() {
     <Svg width="100%" height="100%" viewBox="0 0 190 178">
       <Defs>
         <LinearGradient id="featuredPaper" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#FFFFFF")} />
-          <Stop offset="1" stopColor={themeTint("#F8F4FB")} />
+          <Stop offset="0" stopColor={artworkColor("#FFFFFF")} />
+          <Stop offset="1" stopColor={artworkColor("#F8F4FB")} />
         </LinearGradient>
         <LinearGradient id="featuredLeaf" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={themeTint("#D7C3EB")} />
-          <Stop offset="1" stopColor={themeTint("#B495D4")} />
+          <Stop offset="0" stopColor={artworkColor("#D7C3EB")} />
+          <Stop offset="1" stopColor={artworkColor("#B495D4")} />
         </LinearGradient>
       </Defs>
 
-      <Circle cx="126" cy="90" r="65" fill={themeTint("#EDE0F7")} />
+      <Circle cx="126" cy="90" r="65" fill={artworkColor("#EDE0F7")} />
       <Ellipse cx="47" cy="121" rx="19" ry="61" fill="url(#featuredLeaf)" transform="rotate(28 47 121)" />
-      <Ellipse cx="76" cy="116" rx="15" ry="50" fill={themeTint("#D2BDE7")} transform="rotate(-8 76 116)" />
-      <Ellipse cx="160" cy="105" rx="18" ry="57" fill={themeTint("#D9C9EC")} transform="rotate(24 160 105)" />
+      <Ellipse cx="76" cy="116" rx="15" ry="50" fill={artworkColor("#D2BDE7")} transform="rotate(-8 76 116)" />
+      <Ellipse cx="160" cy="105" rx="18" ry="57" fill={artworkColor("#D9C9EC")} transform="rotate(24 160 105)" />
 
       {/* rear paper */}
       <G transform="translate(76 30) rotate(10 50 62)">
-        <Rect x="18" y="11" width="93" height="122" rx="15" fill={themeTint("#DCCFE8")} opacity="0.85" />
+        <Rect x="18" y="11" width="93" height="122" rx="15" fill={artworkColor("#DCCFE8")} opacity="0.85" />
       </G>
 
       {/* front resource card */}
       <G transform="translate(63 22) rotate(8 50 62)">
         <Rect x="0" y="0" width="101" height="127" rx="15" fill="url(#featuredPaper)" />
-        <Circle cx="50" cy="34" r="21" fill={themeTint("#E7D6F2")} />
+        <Circle cx="50" cy="34" r="21" fill={artworkColor("#E7D6F2")} />
         <Path
           d="M50 47 C35 36 33 27 41 23 C47 20 50 25 50 25 C50 25 53 20 59 23 C67 27 65 36 50 47 Z"
-          fill={themeTint("#9D6FB8")}
+          fill={artworkColor("#9D6FB8")}
         />
-        <Rect x="22" y="68" width="58" height="7" rx="3.5" fill={themeTint("#D6C2E5")} />
-        <Rect x="22" y="84" width="66" height="7" rx="3.5" fill={themeTint("#D6C2E5")} />
-        <Rect x="22" y="100" width="51" height="7" rx="3.5" fill={themeTint("#D6C2E5")} />
+        <Rect x="22" y="68" width="58" height="7" rx="3.5" fill={artworkColor("#D6C2E5")} />
+        <Rect x="22" y="84" width="66" height="7" rx="3.5" fill={artworkColor("#D6C2E5")} />
+        <Rect x="22" y="100" width="51" height="7" rx="3.5" fill={artworkColor("#D6C2E5")} />
       </G>
 
       {/* small sparkle */}
-      <Path d="M156 26 L160 36 L170 40 L160 44 L156 54 L152 44 L142 40 L152 36 Z" fill={themeTint("#B489CC")} opacity="0.75" />
+      <Path d="M156 26 L160 36 L170 40 L160 44 L156 54 L152 44 L142 40 L152 36 Z" fill={artworkColor("#B489CC")} opacity="0.75" />
     </Svg>
   );
 }
@@ -2547,26 +2547,26 @@ function LearnFeaturedGraphic() {
 function LearnGuideGraphic({ kind }: { kind: "medication" | "symptoms" }) {
   return (
     <Svg width="100%" height="100%" viewBox="0 0 180 100">
-      <Circle cx="28" cy="91" r="42" fill={themeTint("#DCC8ED")} />
-      <Circle cx="160" cy="13" r="42" fill={themeTint("#F7E9EB")} />
+      <Circle cx="28" cy="91" r="42" fill={artworkColor("#DCC8ED")} />
+      <Circle cx="160" cy="13" r="42" fill={artworkColor("#F7E9EB")} />
       {kind === "medication" ? (
         <>
-          <Ellipse cx="74" cy="67" rx="13" ry="38" fill={themeTint("#A283B6")} transform="rotate(38 74 67)" />
-          <Rect x="82" y="18" width="43" height="65" rx="8" fill={themeTint("#C97836")} />
-          <Rect x="86" y="26" width="35" height="17" rx="4" fill={themeTint("#FFFFFF")} />
-          <Rect x="90" y="12" width="27" height="10" rx="4" fill={themeTint("#EAE2E5")} />
-          <Ellipse cx="126" cy="77" rx="11" ry="5" fill={themeTint("#FFFDFD")} stroke={themeTint("#D8CADF")} strokeWidth="1.5" transform="rotate(-10 126 77)" />
-          <Ellipse cx="146" cy="70" rx="11" ry="5" fill={themeTint("#FFFDFD")} stroke={themeTint("#D8CADF")} strokeWidth="1.5" transform="rotate(17 146 70)" />
+          <Ellipse cx="74" cy="67" rx="13" ry="38" fill={artworkColor("#A283B6")} transform="rotate(38 74 67)" />
+          <Rect x="82" y="18" width="43" height="65" rx="8" fill={artworkColor("#C97836")} />
+          <Rect x="86" y="26" width="35" height="17" rx="4" fill={artworkColor("#FFFFFF")} />
+          <Rect x="90" y="12" width="27" height="10" rx="4" fill={artworkColor("#EAE2E5")} />
+          <Ellipse cx="126" cy="77" rx="11" ry="5" fill={artworkColor("#FFFDFD")} stroke={artworkColor("#D8CADF")} strokeWidth="1.5" transform="rotate(-10 126 77)" />
+          <Ellipse cx="146" cy="70" rx="11" ry="5" fill={artworkColor("#FFFDFD")} stroke={artworkColor("#D8CADF")} strokeWidth="1.5" transform="rotate(17 146 70)" />
         </>
       ) : (
         <>
-          <Path d="M91 15c28 0 47 20 47 46 0 11-4 21-10 29H78c-10-9-16-22-16-36 0-22 9-39 29-39Z" fill={themeTint("#8A6AA0")} />
-          <Path d="M79 36c-12 14-17 25-17 43 0 12 4 20 12 29h35v-14c-10-8-15-16-15-28 0-12 4-22 12-30H79Z" fill={themeTint("#7A5C91")} />
-          <Circle cx="111" cy="45" r="17" fill={themeTint("#F1DFF4")} />
-          <Path d="M111 54c-11-8-13-14-6-17 4-2 6 2 6 2s2-4 6-2c7 3 5 9-6 17Z" fill={themeTint("#6E3D82")} />
-          <Line x1="145" y1="29" x2="154" y2="20" stroke={themeTint("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
-          <Line x1="150" y1="43" x2="162" y2="41" stroke={themeTint("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
-          <Line x1="141" y1="17" x2="145" y2="6" stroke={themeTint("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
+          <Path d="M91 15c28 0 47 20 47 46 0 11-4 21-10 29H78c-10-9-16-22-16-36 0-22 9-39 29-39Z" fill={artworkColor("#8A6AA0")} />
+          <Path d="M79 36c-12 14-17 25-17 43 0 12 4 20 12 29h35v-14c-10-8-15-16-15-28 0-12 4-22 12-30H79Z" fill={artworkColor("#7A5C91")} />
+          <Circle cx="111" cy="45" r="17" fill={artworkColor("#F1DFF4")} />
+          <Path d="M111 54c-11-8-13-14-6-17 4-2 6 2 6 2s2-4 6-2c7 3 5 9-6 17Z" fill={artworkColor("#6E3D82")} />
+          <Line x1="145" y1="29" x2="154" y2="20" stroke={artworkColor("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
+          <Line x1="150" y1="43" x2="162" y2="41" stroke={artworkColor("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
+          <Line x1="141" y1="17" x2="145" y2="6" stroke={artworkColor("#B58BC6")} strokeWidth="3" strokeLinecap="round" />
         </>
       )}
     </Svg>
