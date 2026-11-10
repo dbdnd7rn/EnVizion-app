@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.envizionlife.caregiver",
-      "versionCode": 3,
+      "versionCode": 5,
       "softwareKeyboardLayoutMode": "resize",
       "icon": "./assets/envizion-app-icon.png",
       "adaptiveIcon": {
