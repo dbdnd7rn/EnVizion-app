@@ -1,7 +1,44 @@
 # Step 10 — Installable Mobile Beta & Real-Device Testing
 
-Prepared 9 November 2026. Scope: `dbdnd7rn/EnVizion-app` and its existing EAS
+Prepared 9 November; verification updated 10 November 2026.
+Scope: `dbdnd7rn/EnVizion-app` and its existing EAS
 project `947baaf0-54d1-44c2-86c5-86c57c6aa11a`. VAC HMS is outside this work.
+
+## Verified Android beta snapshot — 0.1.2, build 5
+
+**EAS status: FINISHED**, completed 10 November 2026 at **00:11:04
+Africa/Blantyre** (9 November, 22:11:04 UTC).
+
+- [Download the verified APK](https://expo.dev/artifacts/eas/maeFN2bi4rkn7nRhNgj6Qbx4dIQ69sX_Mq7U7B573MU.apk).
+- [EAS build record](https://expo.dev/accounts/ntonga_victor/projects/envizion-life/builds/392b4ad2-0d44-47bc-b279-1751e0058aa6).
+- Build ID: `392b4ad2-0d44-47bc-b279-1751e0058aa6`.
+- Exact source commit: `fe94aa83902c8b89d260ca090a56cbf9d3bd8504`.
+- Version **0.1.2**, Android versionCode **5**, `preview` profile, internal
+  distribution, existing remote keystore with credential changes frozen.
+- Source includes main `a365f36` and its branding/theme changes. HEAD and files
+  remained unchanged throughout submission, and EAS recorded the same commit.
+- [Source CI run 42705661634](https://github.com/dbdnd7rn/EnVizion-app/actions/runs/42705661634)
+  completed successfully. Local native preflight, branding verification,
+  TypeScript and **556 tests** also passed.
+
+The real APK returned **HTTP 200** and was downloaded in full on 10 November
+at 11:04 Africa/Blantyre. Size: **82,061,274 bytes**, matching response content
+length. Its ZIP opens and includes `AndroidManifest.xml`, `classes.dex` and
+`resources.arsc`. SHA-256:
+`a0332587b6a5c7682dae0e8d53426060e215e61b9b86671ed99dd169cc7e4082`.
+This verifies the artifact's download and structure; independent cryptographic
+signature verification and physical installation were not performed. EAS lists
+artifact expiry as **23 November 2026 at 21:48:21 UTC**.
+
+**Release boundary:** main advanced after this build to `f0cbbcf`, including
+additional theme, authentication, emergency-guidance and iPhone PWA changes.
+Those [later main changes](https://github.com/dbdnd7rn/EnVizion-app/compare/a365f36573ca0a273a87715401f6bf9fc289d5cc...f0cbbcf)
+are **not included in this APK** and require a new native build to test. Use the
+exact build ID and source revision above in every test record. Do not describe
+build 5 as containing all subsequent main changes.
+
+**Physical-device testing: NOT RUN. Native iPhone signing: BLOCKED**, as detailed
+below. The PR's subsequent evidence-only commit does not change this APK.
 
 ## Release provenance and boundaries
 
@@ -16,14 +53,14 @@ project `947baaf0-54d1-44c2-86c5-86c57c6aa11a`. VAC HMS is outside this work.
   `android.versionCode` from 2 to **4**, retaining marketing version **0.1.1**.
 - While that build waited in EAS, `main` advanced to
   `a365f36573ca0a273a87715401f6bf9fc289d5cc` with branding PR #60 and theme PR #59.
-  Their app changes are preserved in this release branch. Its next APK uses
+  Their app changes are preserved in this release branch. Verified build 5 uses
   marketing version **0.1.2**, Android build **5**, and unchanged iOS build **2**.
   Build 4 does not contain those later branding/theme changes. Build 5 is tracked
   separately below so its result cannot be confused with the earlier artifact.
 - No production credential rotation, database writes, clinical approvals, patient
   data changes, store submission, or web deployment was performed by this step.
 
-## Verified Expo access and Android build
+## Expo access and earlier Android build 4
 
 - EAS CLI 27.5.0 authenticated as `ntonga_victor` using the existing environment
   token. Token values are never recorded here.
@@ -77,18 +114,6 @@ verify the actual APK download before sharing an installation link. Do not run
 `eas init`, rotate a keystore, change ownership, or submit to stores as part of
 this repeat-preview procedure.
 
-## Updated-main beta candidate — Android build 5
-
-The initial documentation push conflicted with the concurrent branding release's
-Android versionCode 3, preventing the final PR CI run. The branch integrates main
-`a365f36`, keeps all its branding/theme work, and advances Android versionCode to
-**5** so it can update verified build 4. No other native identifier or signing
-configuration is changed. This is the fixed source baseline for the second build.
-
-**Status: pending submission and verification.** Record its real EAS ID, terminal
-status, exact source commit, APK size/hash and CI result before calling this
-updated beta available. The successful build 4 above is not evidence for build 5.
-
 ## iPhone signing blocker
 
 Read-only EAS queries returned **zero iOS credential configurations** for this
@@ -133,7 +158,7 @@ than silently passing a capability.
 
 | Test | Roles / setup | Required expected behavior | Android | iOS |
 |---|---|---|---|---|
-| Installation and upgrade | Fresh synthetic test device; existing build 2/3 with synthetic data | Confirm package, version/build, signature-compatible upgrade, preserved test session/data; cold launch without development server | NOT RUN | BLOCKED |
+| Installation and upgrade | Fresh synthetic test device; existing build 2/3/4 with synthetic data | Confirm package, version/build, signature-compatible upgrade, preserved test session/data; cold launch without development server | NOT RUN | BLOCKED |
 | Startup and accessibility | All roles; reduced motion; large fonts; TalkBack/VoiceOver | Splash transitions, controls readable/reachable, keyboard safe area, no hidden critical actions | NOT RUN | BLOCKED |
 | Sign-in and recovery | Each role; valid/expired links; cancelled Google OAuth | Email sign-in, reset and `envizionlife://auth/confirmed` / `envizionlife://auth/reset-password` return to the right native flow | NOT RUN | BLOCKED |
 | Primary Advocate | Two synthetic care recipients and authorized memberships | Invite/manage within role, switch profiles, no records or late responses from another profile | NOT RUN | BLOCKED |
@@ -168,16 +193,18 @@ extended. Resolve or obtain explicit security review before expiry; retain the
 preflight's expiry enforcement. This step also repairs Windows execution of the
 existing audit gate and fails closed on incomplete/failed audit responses.
 
-Local validation passed: locked dependency installation, TypeScript, 551 tests,
-native preflight, Expo web export and production artifact smoke. The repaired
+Initial validation passed: locked dependency installation, TypeScript, 551 tests,
+native preflight, Expo web export and production artifact smoke. The final build 5
+source then passed TypeScript, 556 tests, branding checks and native preflight;
+its full GitHub gate also passed web export, artifact smoke and audit. The repaired
 audit passed with 13 vulnerable dependency paths covered by existing exceptions;
 this is not a vulnerability-free result. A first registry attempt returned an
 incomplete response and correctly failed; the subsequent complete report passed
 the unchanged exception policy.
 
 [PR #61](https://github.com/dbdnd7rn/EnVizion-app/pull/61)'s
-[GitHub quality gate](https://github.com/dbdnd7rn/EnVizion-app/actions/runs/42699696566)
-completed successfully for revision `ba6c4b3`. Final documentation-only revisions
+[GitHub quality gate](https://github.com/dbdnd7rn/EnVizion-app/actions/runs/42705661634)
+completed successfully for build 5's exact source revision `fe94aa8`. Final documentation-only revisions
 must have their own checks verified before this PR is reported ready.
 
 The [Step 8 handover](STEP8_PREPILOT_QA_HANDOVER_2026-11-04.md) and Step 9 ownership,
