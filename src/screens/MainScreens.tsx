@@ -1703,6 +1703,10 @@ function ToolGroup({
 
 export function ToolkitScreen() {
   const n = useNav();
+  const { width, fontScale } = useWindowDimensions();
+  const contentWidth = Math.min(440, Math.max(0, width - 40));
+  const showHeroGraphic = contentWidth >= 260 && fontScale <= 1.25;
+  const heroScale = Math.min(0.9, Math.max(0.58, (contentWidth * 0.36) / 176));
   const [query, setQuery] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [scope, setScope] = useState<CareToolScope>("all");
@@ -2012,247 +2016,261 @@ export function ToolkitScreen() {
   return (
     <Page>
       <Fade>
-        <View
-          style={{
-            minHeight: 245,
-            position: "relative",
-            overflow: "hidden",
-            paddingTop: 4,
-          }}
-        >
-          <View style={{ maxWidth: 300, paddingRight: 80, gap: 10 }}>
-            <Text
-              style={[
-                S.eyebrow,
-                {
-                  color: themeForeground("#7A2F9E"),
-                  fontSize: 10.5,
-                  letterSpacing: 2.6,
-                },
-              ]}
-            >
-              FIND WHAT YOU NEED
-            </Text>
-            <Text
-              accessibilityRole="header"
-              style={{
-                fontFamily: "DMSans_700Bold",
-                fontSize: 39,
-                lineHeight: 44,
-                letterSpacing: -1.05,
-                color: themeForeground("#12133D"),
-              }}
-            >
-              Care tools, without the clutter
-            </Text>
-            <Text
-              style={{
-                marginTop: 4,
-                maxWidth: 280,
-                fontFamily: "DMSans_400Regular",
-                fontSize: 15.5,
-                lineHeight: 23,
-                color: themeForeground("#777489"),
-              }}
-            >
-              Search by what you want to do, open a category, or pin the tools
-              you use most. Every existing care feature is still here.
-            </Text>
-          </View>
-
+        <View style={{ gap: 14 }}>
           <View
-            pointerEvents="none"
             style={{
-              position: "absolute",
-              right: -14,
-              top: 5,
-            }}
-          >
-            <ToolkitHeroGraphic />
-          </View>
-        </View>
-
-        <View
-          style={{
-            minHeight: 60,
-            borderRadius: 24,
-            borderWidth: 1,
-            borderColor: themeBorder("#E7DDEE"),
-            backgroundColor: themeBackground("#FFFFFF"),
-            flexDirection: "row",
-            alignItems: "center",
-            paddingLeft: 17,
-            shadowColor: themeShadow("#5B3C6B"),
-            shadowOpacity: 0.03,
-            shadowRadius: 12,
-            shadowOffset: { width: 0, height: 5 },
-            elevation: 1,
-          }}
-        >
-          <Icon name="search-outline" size={24} color={themeForeground("#7F2FA1")} />
-          <TextInput
-            accessibilityLabel="Search care tools"
-            placeholder="Try “medication”, “coverage”, “documents”…"
-            placeholderTextColor={themeForeground("#AAA0B2")}
-            value={query}
-            onChangeText={setQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
-            onSubmitEditing={() => Keyboard.dismiss()}
-            style={{
-              flex: 1,
-              minHeight: 58,
-              paddingHorizontal: 13,
-              fontFamily: "DMSans_400Regular",
-              fontSize: 14,
-              color: C.ink,
-            }}
-          />
-          {Boolean(query) && (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Clear care tool search"
-              onPress={() => setQuery("")}
-              style={({ pressed }) => ({
-                width: 43,
-                minHeight: 58,
-                alignItems: "center",
-                justifyContent: "center",
-                opacity: pressed ? 0.6 : 1,
-              })}
-            >
-              <Icon name="close-circle-outline" size={22} color={themeForeground("#897C9B")} />
-            </Pressable>
-          )}
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={filtersOpen ? "Close care tool filters" : "Open care tool filters"}
-            accessibilityState={{ expanded: filtersOpen }}
-            onPress={() => {
-              Keyboard.dismiss();
-              setFiltersOpen((value) => !value);
-            }}
-            style={({ pressed }) => ({
-              width: 56,
-              minHeight: 58,
-              borderLeftWidth: 1,
-              borderLeftColor: themeBorder("#EEE6F2"),
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: filtersOpen || scope !== "all" || sort !== "relevance"
-                ? themeSurface("#F5ECFB") : "transparent",
-              borderTopRightRadius: 23,
-              borderBottomRightRadius: 23,
-              opacity: pressed ? 0.6 : 1,
-            })}
-          >
-            <Icon name="options-outline" size={24} color={themeForeground("#7F2FA1")} />
-            {(scope !== "all" || sort !== "relevance") && (
-              <View
-                style={{
-                  position: "absolute",
-                  right: 10,
-                  top: 10,
-                  width: 7,
-                  height: 7,
-                  borderRadius: 4,
-                  backgroundColor: themeBackground("#70338F"),
-                }}
-              />
-            )}
-          </Pressable>
-        </View>
-
-        {filtersOpen && (
-          <Fade>
-            <CareToolFilters
-              scope={scope}
-              sort={sort}
-              categoryOptions={categoryOptions}
-              pinnedCount={preferences.pinned.length}
-              recentCount={preferences.recent.length}
-              onScopeChange={setScope}
-              onSortChange={setSort}
-              onClose={() => setFiltersOpen(false)}
-              onReset={() => {
-                setScope("all");
-                setSort("relevance");
-              }}
-            />
-          </Fade>
-        )}
-
-        {!hasActiveResults && (
-          <>
-        <HomeReveal delay={110}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Emergency and warning signs"
-            onPress={() => n.navigate("Emergency")}
-            style={({ pressed }) => ({
-              minHeight: 88,
-              borderRadius: 24,
-              overflow: "hidden",
-              paddingHorizontal: 16,
               flexDirection: "row",
               alignItems: "center",
-              gap: 14,
-              backgroundColor: themeBackground("#FFF0F1"),
-              borderWidth: 1,
-              borderColor: themeBorder("#F5CFD5"),
-              opacity: pressed ? 0.78 : 1,
-            })}
+              gap: 8,
+              paddingVertical: 4,
+            }}
           >
-            <ToolkitWave tint="#FFE3E7" />
-            <View
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 26,
-                backgroundColor: themeBackground("#FFE0E6"),
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Icon name="alert-circle-outline" size={29} color={themeForeground("#CE365C")} />
-            </View>
-            <View style={{ flex: 1, gap: 3 }}>
+            <View style={{ flex: 1, minWidth: 0, gap: 7 }}>
               <Text
+                style={[
+                  S.eyebrow,
+                  {
+                    color: themeForeground("#7A2F9E"),
+                    fontSize: 10.5,
+                    letterSpacing: 2.6,
+                  },
+                ]}
+              >
+                FIND WHAT YOU NEED
+              </Text>
+              <Text
+                accessibilityRole="header"
                 style={{
                   fontFamily: "DMSans_700Bold",
-                  fontSize: 15.5,
-                  color: themeForeground("#A92F47"),
+                  fontSize: contentWidth < 350 ? 32 : 39,
+                  letterSpacing: -1.05,
+                  color: themeForeground("#12133D"),
                 }}
               >
-                Emergency & warning signs
+                Care Tools
               </Text>
               <Text
                 style={{
                   fontFamily: "DMSans_400Regular",
-                  fontSize: 13,
-                  color: themeForeground("#A95865"),
+                  fontSize: 14,
+                  lineHeight: 20,
+                  color: themeForeground("#777489"),
                 }}
               >
-                Know when to get help
+                Quick access to your care features.
               </Text>
             </View>
-            <View
+
+            {showHeroGraphic && (
+              <View
+                pointerEvents="none"
+                accessible={false}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+                style={{
+                  width: 176 * heroScale,
+                  height: 156 * heroScale,
+                  flexShrink: 0,
+                }}
+              >
+                <View
+                  style={{
+                    position: "absolute",
+                    left: (176 * heroScale - 176) / 2,
+                    top: (156 * heroScale - 156) / 2,
+                    transform: [{ scale: heroScale }],
+                  }}
+                >
+                  <ToolkitHeroGraphic />
+                </View>
+              </View>
+            )}
+          </View>
+
+          <View
+            style={{
+              minHeight: 60,
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: themeBorder("#E7DDEE"),
+              backgroundColor: themeBackground("#FFFFFF"),
+              flexDirection: "row",
+              alignItems: "center",
+              paddingLeft: 17,
+              shadowColor: themeShadow("#5B3C6B"),
+              shadowOpacity: 0.03,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 5 },
+              elevation: 1,
+            }}
+          >
+            <Icon name="search-outline" size={24} color={themeForeground("#7F2FA1")} />
+            <TextInput
+              accessibilityLabel="Search care tools"
+              placeholder={contentWidth >= 320 && fontScale <= 1.05 ? "Try “medication”, “vitals”…" : "Search care tools"}
+              placeholderTextColor={themeForeground("#AAA0B2")}
+              value={query}
+              onChangeText={setQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+              onSubmitEditing={() => Keyboard.dismiss()}
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: themeBackground("#FFDDE4"),
+                flex: 1,
+                minHeight: 58,
+                paddingHorizontal: 13,
+                fontFamily: "DMSans_400Regular",
+                fontSize: 14,
+                color: C.ink,
+              }}
+            />
+            {Boolean(query) && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Clear care tool search"
+                onPress={() => setQuery("")}
+                style={({ pressed }) => ({
+                  width: 43,
+                  minHeight: 58,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: pressed ? 0.6 : 1,
+                })}
+              >
+                <Icon name="close-circle-outline" size={22} color={themeForeground("#897C9B")} />
+              </Pressable>
+            )}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={filtersOpen ? "Close care tool filters" : "Open care tool filters"}
+              accessibilityState={{ expanded: filtersOpen }}
+              onPress={() => {
+                Keyboard.dismiss();
+                setFiltersOpen((value) => !value);
+              }}
+              style={({ pressed }) => ({
+                width: 56,
+                minHeight: 58,
+                borderLeftWidth: 1,
+                borderLeftColor: themeBorder("#EEE6F2"),
                 alignItems: "center",
                 justifyContent: "center",
-              }}
+                backgroundColor: filtersOpen || scope !== "all" || sort !== "relevance"
+                  ? themeSurface("#F5ECFB") : "transparent",
+                borderTopRightRadius: 23,
+                borderBottomRightRadius: 23,
+                opacity: pressed ? 0.6 : 1,
+              })}
             >
-              <Icon name="chevron-forward" size={19} color={themeForeground("#D1395D")} />
-            </View>
-          </Pressable>
-        </HomeReveal>
-          </>
-        )}
+              <Icon name="options-outline" size={24} color={themeForeground("#7F2FA1")} />
+              {(scope !== "all" || sort !== "relevance") && (
+                <View
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: 10,
+                    width: 7,
+                    height: 7,
+                    borderRadius: 4,
+                    backgroundColor: themeBackground("#70338F"),
+                  }}
+                />
+              )}
+            </Pressable>
+          </View>
+
+          {filtersOpen && (
+            <Fade>
+              <CareToolFilters
+                scope={scope}
+                sort={sort}
+                categoryOptions={categoryOptions}
+                pinnedCount={preferences.pinned.length}
+                recentCount={preferences.recent.length}
+                onScopeChange={setScope}
+                onSortChange={setSort}
+                onClose={() => setFiltersOpen(false)}
+                onReset={() => {
+                  setScope("all");
+                  setSort("relevance");
+                }}
+              />
+            </Fade>
+          )}
+
+          {!hasActiveResults && (
+            <>
+          <HomeReveal delay={110}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Emergency and warning signs"
+              onPress={() => n.navigate("Emergency")}
+              style={({ pressed }) => ({
+                minHeight: 88,
+                borderRadius: 24,
+                overflow: "hidden",
+                paddingHorizontal: 16,
+                paddingVertical: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 14,
+                backgroundColor: themeBackground("#FFF0F1"),
+                borderWidth: 1,
+                borderColor: themeBorder("#F5CFD5"),
+                opacity: pressed ? 0.78 : 1,
+              })}
+            >
+              <ToolkitWave tint="#FFE3E7" />
+              <View
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: 26,
+                  backgroundColor: themeBackground("#FFE0E6"),
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="alert-circle-outline" size={29} color={themeForeground("#CE365C")} />
+              </View>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_700Bold",
+                    fontSize: 15.5,
+                    color: themeForeground("#A92F47"),
+                  }}
+                >
+                  Emergency & warning signs
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: "DMSans_400Regular",
+                    fontSize: 13,
+                    color: themeForeground("#A95865"),
+                  }}
+                >
+                  Know when to get help
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: themeBackground("#FFDDE4"),
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="chevron-forward" size={19} color={themeForeground("#D1395D")} />
+              </View>
+            </Pressable>
+          </HomeReveal>
+            </>
+          )}
+
+        </View>
 
         {hasActiveResults ? (
           <View style={{ gap: 12 }}>
@@ -2383,7 +2401,7 @@ export function ToolkitScreen() {
                   color: themeForeground("#777489"),
                 }}
               >
-                Open a category to choose a task, or use search and the pinned filter above for your favorites.
+                Open a category to choose a task, or use search.
               </Text>
             </View>
 
