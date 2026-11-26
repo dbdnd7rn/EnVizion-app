@@ -16,6 +16,7 @@ import {
   Text,
   TextInput,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -104,9 +105,11 @@ function Entrance({
 function QuietTimerRing({
   elapsedMs,
   timerState,
+  size,
 }: {
   elapsedMs: number;
   timerState: TimerState;
+  size: number;
 }) {
   const progress = quietMomentProgress(elapsedMs);
   const remainingSeconds = quietMomentRemainingSeconds(elapsedMs);
@@ -125,11 +128,11 @@ function QuietTimerRing({
           ? "Quiet moment complete"
           : `${formatQuietMomentClock(remainingSeconds)} remaining in quiet moment`
       }
-      style={{ width: 160, height: 160, alignItems: "center", justifyContent: "center" }}
+      style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}
     >
       <Svg
-        width="160"
-        height="160"
+        width={size}
+        height={size}
         viewBox="0 0 160 160"
         style={{ position: "absolute" }}
         accessibilityElementsHidden
@@ -172,8 +175,8 @@ function QuietTimerRing({
       <Text
         style={{
           fontFamily: "Lora_500Medium",
-          fontSize: 37,
-          lineHeight: 44,
+          fontSize: 31,
+          lineHeight: 38,
           color: themeForeground("#12113C"),
         }}
       >
@@ -181,11 +184,12 @@ function QuietTimerRing({
       </Text>
       <Text
         style={{
-          marginTop: 4,
+          marginTop: 2,
           fontFamily: "DMSans_600SemiBold",
           fontSize: 9.5,
           lineHeight: 14,
-          letterSpacing: 2.8,
+          letterSpacing: 1.7,
+          textAlign: "center",
           color: themeForeground("#76708C"),
           textTransform: "uppercase",
         }}
@@ -215,8 +219,10 @@ function GradientButton({
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => ({
-        minHeight: 58,
-        borderRadius: 29,
+        minHeight: 48,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 24,
         overflow: "hidden",
         flexDirection: "row",
         alignItems: "center",
@@ -258,6 +264,8 @@ function GradientButton({
           fontFamily: "DMSans_600SemiBold",
           fontSize: 15,
           color: disabled ? "#9978AE" : "#FFFFFF",
+          flexShrink: 1,
+          textAlign: "center",
         }}
       >
         {title}
@@ -269,6 +277,9 @@ function GradientButton({
 export function WellnessScreen() {
   const navigation = useNavigation<WellnessNavigation>();
   const reducedMotion = useReducedMotionPreference();
+  const { width, fontScale } = useWindowDimensions();
+  const compact = width < 420;
+  const landscapeHeight = compact ? 148 : 180;
 
   const [timerState, setTimerState] = useState<TimerState>("idle");
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -394,9 +405,9 @@ export function WellnessScreen() {
           marginTop: -18,
           marginBottom: -42,
           paddingHorizontal: 20,
-          paddingTop: 18,
-          paddingBottom: 46,
-          gap: 20,
+          paddingTop: 12,
+          paddingBottom: 28,
+          gap: 12,
           overflow: "hidden",
           backgroundColor: themeBackground("#FFFDFC"),
         }}
@@ -404,10 +415,10 @@ export function WellnessScreen() {
         <Entrance reducedMotion={reducedMotion}>
           <View
             style={{
-              minHeight: 56,
+              minHeight: 48,
               flexDirection: "row",
               alignItems: "center",
-              gap: 15,
+              gap: 10,
             }}
           >
             <Pressable
@@ -415,9 +426,9 @@ export function WellnessScreen() {
               accessibilityLabel="Go back"
               onPress={() => navigation.goBack()}
               style={({ pressed }) => ({
-                width: 52,
-                height: 52,
-                borderRadius: 26,
+                width: 44,
+                height: 44,
+                borderRadius: 22,
                 backgroundColor: themeBackground("#F8F2FA"),
                 alignItems: "center",
                 justifyContent: "center",
@@ -432,7 +443,8 @@ export function WellnessScreen() {
               style={{
                 fontFamily: "DMSans_700Bold",
                 fontSize: 19,
-                lineHeight: 24,
+                flex: 1,
+                minWidth: 0,
                 color: themeForeground("#713198"),
               }}
             >
@@ -442,25 +454,24 @@ export function WellnessScreen() {
         </Entrance>
 
         <Entrance delay={45} reducedMotion={reducedMotion}>
-          <View style={{ gap: 7, paddingHorizontal: 4 }}>
+          <View style={{ gap: 4, paddingHorizontal: 4 }}>
             <Text
               accessibilityRole="header"
               style={{
                 maxWidth: 385,
                 fontFamily: "Lora_500Medium",
-                fontSize: 40,
-                lineHeight: 47,
+                fontSize: compact ? 30 : 35,
                 letterSpacing: -0.9,
                 color: themeForeground("#12113C"),
               }}
             >
-              A quiet moment,{"\n"}just for you.
+              A quiet moment, just for you.
             </Text>
             <Text
               style={{
                 fontFamily: "DMSans_400Regular",
-                fontSize: 18,
-                lineHeight: 25,
+                fontSize: 15,
+                lineHeight: 21,
                 color: themeForeground("#77718A"),
               }}
             >
@@ -473,28 +484,28 @@ export function WellnessScreen() {
           <View
             style={{
               marginHorizontal: -20,
-              height: 305,
+              height: landscapeHeight,
               overflow: "hidden",
             }}
           >
-            <SpiritualLandscapeArt height={305} />
+            <SpiritualLandscapeArt height={landscapeHeight} />
           </View>
         </Entrance>
 
         <Entrance delay={115} reducedMotion={reducedMotion}>
           <View
             style={{
-              marginTop: -108,
-              marginHorizontal: 14,
+              marginTop: -38,
+              marginHorizontal: 4,
               borderRadius: 32,
               borderWidth: 1.5,
               borderColor: themeBorder("#FFFFFF"),
               backgroundColor: themeBackground("#FFFFFFE8"),
-              paddingHorizontal: 20,
-              paddingTop: 23,
-              paddingBottom: 20,
+              paddingHorizontal: 14,
+              paddingTop: 14,
+              paddingBottom: 14,
               alignItems: "center",
-              gap: 13,
+              gap: 7,
               shadowColor: themeShadow("#4B335A"),
               shadowOpacity: 0.09,
               shadowRadius: 24,
@@ -502,12 +513,11 @@ export function WellnessScreen() {
               elevation: 5,
             }}
           >
-            <Icon name="sparkles-outline" size={28} color={themeForeground("#7A329F")} />
+            <Icon name="sparkles-outline" size={23} color={themeForeground("#7A329F")} />
             <Text
               style={{
                 fontFamily: "Lora_500Medium",
-                fontSize: 27,
-                lineHeight: 34,
+                fontSize: 22,
                 color: themeForeground("#15123F"),
                 textAlign: "center",
               }}
@@ -519,8 +529,8 @@ export function WellnessScreen() {
             <Text
               style={{
                 fontFamily: "DMSans_400Regular",
-                fontSize: 15.5,
-                lineHeight: 22,
+                fontSize: 14,
+                lineHeight: 20,
                 color: themeForeground("#817A92"),
                 textAlign: "center",
               }}
@@ -528,7 +538,7 @@ export function WellnessScreen() {
               Breathe naturally. Nothing to achieve.
             </Text>
 
-            <QuietTimerRing elapsedMs={elapsedMs} timerState={timerState} />
+            <QuietTimerRing elapsedMs={elapsedMs} timerState={timerState} size={Math.max(124, Math.min(160, 124 * fontScale))} />
 
             <View style={{ width: "100%" }}>
               <GradientButton
@@ -565,9 +575,9 @@ export function WellnessScreen() {
           <View
             style={{
               alignItems: "center",
-              gap: 10,
-              paddingHorizontal: 15,
-              paddingTop: 4,
+              gap: 5,
+              paddingHorizontal: 8,
+              paddingTop: 2,
             }}
           >
             <Text
@@ -585,8 +595,8 @@ export function WellnessScreen() {
             <Text
               style={{
                 fontFamily: "Lora_500Medium",
-                fontSize: 24,
-                lineHeight: 34,
+                fontSize: 22,
+                lineHeight: 29,
                 color: themeForeground("#12113C"),
                 textAlign: "center",
               }}
@@ -598,7 +608,7 @@ export function WellnessScreen() {
                 fontFamily: "DMSans_600SemiBold",
                 fontSize: 10,
                 lineHeight: 16,
-                letterSpacing: 2.4,
+                letterSpacing: 1.6,
                 color: themeForeground("#77718A"),
                 textTransform: "uppercase",
                 textAlign: "center",
@@ -621,13 +631,13 @@ export function WellnessScreen() {
         </Entrance>
 
         <Entrance delay={185} reducedMotion={reducedMotion}>
-          <View style={{ gap: 12, paddingHorizontal: 3 }}>
+          <View style={{ gap: 8, paddingHorizontal: 3 }}>
             <Text
               accessibilityRole="header"
               style={{
                 fontFamily: "Lora_500Medium",
-                fontSize: 27,
-                lineHeight: 34,
+                fontSize: 24,
+                lineHeight: 30,
                 color: themeForeground("#12113C"),
               }}
             >
@@ -635,7 +645,6 @@ export function WellnessScreen() {
             </Text>
             <Text
               style={{
-                marginTop: -5,
                 fontFamily: "DMSans_500Medium",
                 fontSize: 15.5,
                 lineHeight: 22,
@@ -658,13 +667,13 @@ export function WellnessScreen() {
               placeholderTextColor={themeForeground("#9A93A8")}
               textAlignVertical="top"
               style={{
-                minHeight: 118,
+                minHeight: 100,
                 borderRadius: 20,
                 borderWidth: 1,
                 borderColor: themeBorder("#D9CEE1"),
                 backgroundColor: themeBackground("#FFFFFF"),
                 paddingHorizontal: 16,
-                paddingVertical: 15,
+                paddingVertical: 12,
                 fontFamily: "DMSans_400Regular",
                 fontSize: 16,
                 lineHeight: 23,
@@ -684,8 +693,8 @@ export function WellnessScreen() {
               disabled={!reflection.trim()}
               onPress={() => setKeptForVisit(true)}
               style={({ pressed }) => ({
-                minHeight: 56,
-                borderRadius: 28,
+                minHeight: 48,
+                borderRadius: 24,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: themeBackground(reflection.trim() ? "#F0E8F6" : "#F5F0F7"),
