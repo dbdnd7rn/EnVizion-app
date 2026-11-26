@@ -159,28 +159,28 @@ function VitalMetricField({
   return (
     <View
       style={{
-        width: "48.5%",
+        flex: 1,
+        flexBasis: 0,
         minWidth: 0,
-        paddingVertical: 4,
-        gap: 9,
+        gap: 8,
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 7, minHeight: 48 }}>
         <View
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 22,
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            flexShrink: 0,
             backgroundColor: themeIconSurface(iconBackground),
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Icon name={icon} size={23} color={themeForeground(iconColor)} />
+          <Icon name={icon} size={20} color={themeForeground(iconColor)} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text
-            numberOfLines={2}
             style={{
               fontFamily: "DMSans_600SemiBold",
               fontSize: 12,
@@ -212,7 +212,8 @@ function VitalMetricField({
         value={value}
         onChangeText={onChange}
         style={{
-          minHeight: 48,
+          minHeight: 46,
+          width: "100%",
           borderRadius: 14,
           borderWidth: 1,
           borderColor: themeBorder("#DED3E4"),
@@ -1036,13 +1037,13 @@ export function TrackerScreen({
         <TrackerTopBar onBack={() => n.goBack()} onHelp={() => n.navigate("Resources")} />
         <View
           style={{
-            minHeight: 214,
-            position: "relative",
-            overflow: "hidden",
-            marginBottom: 2,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 6,
+            marginBottom: 0,
           }}
         >
-          <View style={{ maxWidth: 245, gap: 8, paddingTop: 4 }}>
+          <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
             <Text
               style={[
                 S.eyebrow,
@@ -1069,7 +1070,6 @@ export function TrackerScreen({
                 fontSize: 15.5,
                 lineHeight: 22,
                 color: themeForeground("#747184"),
-                maxWidth: 245,
               }}
             >
               Notice, record, and share with your healthcare team.
@@ -1079,11 +1079,10 @@ export function TrackerScreen({
           <View
             pointerEvents="none"
             style={{
-              position: "absolute",
-              right: -12,
-              top: 0,
-              width: 205,
-              height: 190,
+              width: "36%",
+              maxWidth: 150,
+              height: 126,
+              flexShrink: 0,
             }}
           >
             <VitalsHeroGraphic />
@@ -1095,23 +1094,24 @@ export function TrackerScreen({
           accessibilityLabel="Emergency and warning signs"
           onPress={() => n.navigate("Emergency")}
           style={({ pressed }) => ({
-            minHeight: 92,
+            minHeight: 82,
+            paddingVertical: 10,
             borderRadius: 22,
             borderWidth: 1,
             borderColor: themeBorder("#F3C9D2"),
             backgroundColor: themeBackground("#FFF1F2"),
             flexDirection: "row",
             alignItems: "center",
-            paddingHorizontal: 17,
-            gap: 14,
+            paddingHorizontal: 13,
+            gap: 10,
             opacity: pressed ? 0.75 : 1,
           })}
         >
           <View
             style={{
-              width: 54,
-              height: 54,
-              borderRadius: 27,
+              width: 46,
+              height: 46,
+              borderRadius: 23,
               backgroundColor: themeBackground("#FFDCE2"),
               alignItems: "center",
               justifyContent: "center",
@@ -1119,9 +1119,9 @@ export function TrackerScreen({
           >
             <View
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 19,
+                width: 34,
+                height: 34,
+                borderRadius: 17,
                 backgroundColor: themeBackground("#E54563"),
                 alignItems: "center",
                 justifyContent: "center",
@@ -1218,17 +1218,17 @@ export function TrackerScreen({
         <Card
           style={{
             borderRadius: 26,
-            padding: 16,
-            gap: 16,
+            padding: 14,
+            gap: 14,
             backgroundColor: themeBackground("#FFFEFF"),
             borderColor: themeBorder("#EEE8F0"),
           }}
         >
-          <View style={S.between}>
+          <View style={[S.between, { gap: 6, flexWrap: "wrap" }]}>
             <Text
               style={[
                 S.eyebrow,
-                { color: themeForeground("#74328F"), fontSize: 10.5, letterSpacing: 2.4 },
+                { color: themeForeground("#74328F"), fontSize: 10.5, letterSpacing: 1.6, flexShrink: 1 },
               ]}
             >
               NEW OBSERVATION
@@ -1242,10 +1242,10 @@ export function TrackerScreen({
                 minHeight: 40,
                 borderRadius: 20,
                 backgroundColor: themeBackground("#F3ECFA"),
-                paddingHorizontal: 13,
+                paddingHorizontal: 10,
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 8,
+                gap: 5,
                 opacity: pressed ? 0.72 : 1,
               })}
             >
@@ -1266,9 +1266,8 @@ export function TrackerScreen({
           <View
             style={{
               flexDirection: "row",
-              flexWrap: "wrap",
-              columnGap: 10,
-              rowGap: 14,
+              alignItems: "stretch",
+              gap: 10,
             }}
           >
             <VitalMetricField
@@ -1293,6 +1292,8 @@ export function TrackerScreen({
               onChange={(value) => setVital("diastolic", value)}
               editable={!readOnly && !saving}
             />
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "stretch", gap: 10 }}>
             <VitalMetricField
               label="Pulse"
               unit="bpm"
@@ -1453,7 +1454,7 @@ export function TrackerScreen({
         </Card>
 
         <View style={S.between}>
-          <Text style={[S.h2, { fontSize: 23, color: C.ink }]}>Recent observations</Text>
+          <Text style={[S.h2, { fontSize: 23, color: C.ink, flex: 1, minWidth: 0 }]}>Recent observations</Text>
           <Pressable accessibilityRole="button" accessibilityLabel={recentFilter === "today" ? "Show all observations" : "Show today's observations"}
             onPress={() => { setRecentFilter(old => old === "today" ? "all" : "today"); setRecentLimit(6); }}
             style={{
