@@ -14,8 +14,11 @@ assert.equal(
   icon,
   "Android adaptive icon must use the official EnVizion logo",
 );
-assert.equal(expo.splash.image, splash, "Native splash must use the original EnVizion logo");
-assert.equal(expo.splash.backgroundColor, "#FCF9F6");
+const splashPlugin = (expo.plugins ?? []).find(plugin =>
+  Array.isArray(plugin) && plugin[0] === "expo-splash-screen");
+const splashConfig = splashPlugin?.[1] ?? expo.splash;
+assert.equal(splashConfig?.image, splash, "Native splash must use the original EnVizion logo");
+assert.equal(splashConfig?.backgroundColor, "#FCF9F6");
 assert.equal(expo.android.adaptiveIcon.backgroundColor, "#FCF9F6");
 assert.ok(
   Number.isInteger(expo.android.versionCode) && expo.android.versionCode >= 3,

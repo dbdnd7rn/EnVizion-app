@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   AccessibilityInfo,
-  ActivityIndicator,
-  Animated,
-  Easing,
+  Image,
   Platform,
   Pressable,
   Text,
@@ -70,8 +68,6 @@ import {
 import { EnVizionAIScreen } from "./src/screens/EnVizionAIScreen";
 import type { RootStack, Tabs } from "./src/navigation";
 import { C, Icon } from "./src/ui";
-import { BrandOpeningScreen } from "./src/BrandOpeningScreen";
-import { brandOpeningHoldMs, BRAND_OPENING_FADE_MS } from "./src/brandOpeningTiming";
 import { NotificationsProvider } from "./src/notifications";
 import { NotificationsScreen } from "./src/screens/NotificationsScreen";
 import { NotificationSettingsScreen } from "./src/screens/NotificationSettingsScreen";
@@ -311,8 +307,13 @@ function LoadingState({ message = "Preparing your care companion…" }: { messag
         backgroundColor: C.paper,
       }}
     >
-      <ActivityIndicator color={C.purple} />
-      <Text style={{ marginTop: 12, color: C.deep }}>
+      <Image
+        source={require("./assets/envizion-original.png")}
+        resizeMode="contain"
+        accessibilityLabel="EnVizion Life"
+        style={{ width: 220, height: 140, maxWidth: "80%" }}
+      />
+      <Text accessibilityLiveRegion="polite" style={{ marginTop: 16, color: C.deep, fontSize: 14, textAlign: "center" }}>
         {message}
       </Text>
     </View>
@@ -1005,10 +1006,7 @@ function AuthGate({ reducedMotion }: { reducedMotion: boolean }) {
 function AppShell() {
   const { dark, ready } = useAppearance();
   const reducedMotion = useReducedMotion();
-  const [showLaunch, setShowLaunch] = useState(true);
-  const [introPlayed, setIntroPlayed] = useState(false);
   const [fontsTimedOut, setFontsTimedOut] = useState(false);
-  const launchOpacity = React.useRef(new Animated.Value(1)).current;
   const [loaded, error] = useFonts({
     DMSans_400Regular,
     DMSans_600SemiBold,
@@ -1024,36 +1022,11 @@ function AppShell() {
 
   const fontsReady = loaded || Boolean(error) || fontsTimedOut;
 
-  // Start the intro as soon as the OS motion preference is known. Font
-  // loading, appearance restoration and authentication proceed behind it.
-  useEffect(() => {
-    if (reducedMotion === null) return;
-    const timer = setTimeout(
-      () => setIntroPlayed(true),
-      brandOpeningHoldMs(Platform.OS, reducedMotion),
-    );
-    return () => clearTimeout(timer);
-  }, [reducedMotion]);
-
-  // Never fade into a blank view: keep the brand visible until resources
-  // are ready, then cross-fade to the already-mounted auth/workspace tree.
-  useEffect(() => {
-    if (!introPlayed || !fontsReady || !ready || !showLaunch || reducedMotion === null) return;
-    const animation = Animated.timing(launchOpacity, {
-      toValue: 0,
-      duration: reducedMotion ? 0 : BRAND_OPENING_FADE_MS,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    });
-    animation.start(({ finished }) => {
-      if (finished) setShowLaunch(false);
-    });
-    return () => animation.stop();
-  }, [fontsReady, introPlayed, launchOpacity, ready, reducedMotion, showLaunch]);
+  if (!fontsReady || !ready) return <LoadingState message="Loading app resources…" />;
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={showLaunch ? "dark" : dark ? "light" : "dark"} />
+      <StatusBar style={dark ? "light" : "dark"} />
       <View
         style={{ flex: 1, backgroundColor: dark ? "#17151F" : "#EDE5EF", alignItems: "center" }}
       >
@@ -1062,41 +1035,16 @@ function AppShell() {
             width: "100%",
             maxWidth: 480,
             flex: 1,
-            backgroundColor: showLaunch ? "#FCF9F6" : C.paper,
+            backgroundColor: C.paper,
             ...(Platform.OS === "web"
               ? { boxShadow: dark ? "0 0 65px #00000055" : "0 0 80px #59306818" }
               : {}),
           }}
         >
           <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
-            <View
-              style={{ flex: 1 }}
-              importantForAccessibility={showLaunch ? "no-hide-descendants" : "auto"}
-            >
-              {fontsReady && ready ? (
-                <AuthProvider>
-                  <AuthGate reducedMotion={reducedMotion ?? true} />
-                </AuthProvider>
-              ) : (
-                <LoadingState message="Loading app resources…" />
-              )}
-            </View>
-            {showLaunch && (
-              <Animated.View
-                pointerEvents="auto"
-                accessibilityViewIsModal
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  bottom: 0,
-                  left: 0,
-                  opacity: launchOpacity,
-                }}
-              >
-                <BrandOpeningScreen reducedMotion={reducedMotion} />
-              </Animated.View>
-            )}
+            <AuthProvider>
+              <AuthGate reducedMotion={reducedMotion ?? true} />
+            </AuthProvider>
           </SafeAreaView>
         </View>
       </View>

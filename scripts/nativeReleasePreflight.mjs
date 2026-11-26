@@ -71,9 +71,12 @@ export function inspectNativeReleaseConfiguration({
   if (production.ios?.simulator === true)
     errors.push("EAS production iOS builds must target actual devices.");
 
+  const splashPlugin = (expo.plugins ?? []).find(plugin =>
+    Array.isArray(plugin) && plugin[0] === "expo-splash-screen");
+  const splashConfig = splashPlugin?.[1] ?? expo.splash;
   for (const assetPath of [
     expo.icon,
-    expo.splash?.image,
+    splashConfig?.image,
     android.icon,
     android.adaptiveIcon?.foregroundImage,
   ]) {
