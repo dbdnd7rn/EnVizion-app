@@ -1,7 +1,7 @@
 import { themeBorder, artworkColor, themeSurface, themeIconSurface } from "../themeColors";
 import { themeBackground, themeForeground, themeShadow, themeAction } from "../themeColors";
 import React, { useEffect, useRef, useState } from "react";
-import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { AccessibilityInfo, Animated, Easing, Linking, Platform, Pressable, Text, TextInput, View, useWindowDimensions } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
@@ -934,6 +934,7 @@ export function TrackerScreen({
   route,
 }: NativeStackScreenProps<RootStack, "Tracker">) {
   const { kind } = route.params;
+  const trackerWindow = useWindowDimensions();
   const { state, dispatch, refresh } = useCare();
   const n = useNav();
   const [values, setValues] = useState<Record<string, string>>({});
@@ -2134,6 +2135,10 @@ export function TrackerScreen({
       void refresh().catch(e=>setGlucoseHistoryError(String(e))).finally(()=>setGlucoseHistoryLoading(false));
     };
 
+    const bloodContentWidth = Math.min(440, Math.max(0, trackerWindow.width - 40));
+    const compactBloodLayout = bloodContentWidth < 390 || trackerWindow.fontScale > 1.05;
+    const showBloodArtwork = bloodContentWidth >= 260 && trackerWindow.fontScale <= 1.25;
+    const bloodArtworkWidth = Math.min(170, bloodContentWidth * 0.35);
     const todayLabel = new Date().toLocaleDateString(undefined, {
       day: "numeric",
       month: "short",
@@ -2146,12 +2151,12 @@ export function TrackerScreen({
 
         <View
           style={{
-            minHeight: 250,
             position: "relative",
             overflow: "hidden",
             marginHorizontal: -20,
             paddingHorizontal: 20,
-            paddingTop: 18,
+            paddingVertical: 16,
+            gap: 10,
           }}
         >
           <Svg
@@ -2173,8 +2178,7 @@ export function TrackerScreen({
             <Circle cx="410" cy="58" r="92" fill={artworkColor("#F4EEFF")} opacity={0.84} />
           </Svg>
 
-          <View style={{ maxWidth: 245, gap: 9, paddingTop: 4 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 9 }}>
               <View
                 style={{
                   width: 42,
@@ -2190,19 +2194,20 @@ export function TrackerScreen({
               <Text
                 style={[
                   S.eyebrow,
-                  { color: themeForeground("#74328F"), fontSize: 10.5, letterSpacing: 2.35 },
+                  { color: themeForeground("#74328F"), fontSize: 10.5, letterSpacing: 2.35, flex: 1, minWidth: 0 },
                 ]}
               >
                 DAILY CARE JOURNAL
               </Text>
-            </View>
+          </View>
 
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <View style={{ flex: 1, minWidth: 0, gap: 9 }}>
             <Text
               accessibilityRole="header"
               style={{
                 fontFamily: "DMSans_700Bold",
-                fontSize: 41,
-                lineHeight: 45,
+                fontSize: compactBloodLayout ? 32 : 39,
                 letterSpacing: -1.05,
                 color: themeForeground("#17143D"),
               }}
@@ -2216,24 +2221,23 @@ export function TrackerScreen({
                 fontSize: 15.5,
                 lineHeight: 22,
                 color: themeForeground("#747184"),
-                maxWidth: 250,
               }}
             >
               Notice, record, and share with your healthcare team.
             </Text>
           </View>
 
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              right: -4,
-              top: 15,
-              width: 206,
-              height: 192,
-            }}
-          >
-            <BloodSugarHeroGraphic />
+          {showBloodArtwork && (
+            <View
+              pointerEvents="none"
+              accessible={false}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={{ width: bloodArtworkWidth, height: bloodArtworkWidth * 190 / 230, flexShrink: 0 }}
+            >
+              <BloodSugarHeroGraphic />
+            </View>
+          )}
           </View>
         </View>
 
@@ -2309,8 +2313,8 @@ export function TrackerScreen({
             elevation: 2,
           }}
         >
-          <View style={S.between}>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, maxWidth: "100%", ...(compactBloodLayout ? { width: "100%" as const } : {}) }}>
               <View
                 style={{
                   width: 42,
@@ -2323,12 +2327,13 @@ export function TrackerScreen({
               >
                 <Icon name="document-text-outline" size={22} color={themeForeground("#7C3ABE")} />
               </View>
-              <Text style={[S.h2, { fontSize: 20, lineHeight: 25 }]}>New observation</Text>
+              <Text style={[S.h2, { fontSize: 20, flexShrink: 1, minWidth: 0 }]}>New observation</Text>
             </View>
 
             <View
               style={{
                 minHeight: 38,
+                maxWidth: "100%",
                 borderRadius: 19,
                 backgroundColor: themeBackground("#F3EAFE"),
                 paddingHorizontal: 12,
@@ -2342,6 +2347,7 @@ export function TrackerScreen({
                 style={{
                   fontFamily: "DMSans_600SemiBold",
                   fontSize: 11.5,
+                  flexShrink: 1,
                   color: themeForeground("#6F35A5"),
                 }}
               >
@@ -2352,7 +2358,7 @@ export function TrackerScreen({
 
           <View style={{gap:8}}>
             <Text style={[S.small,{fontFamily:"DMSans_600SemiBold"}]}>Glucose unit</Text>
-            <View style={{flexDirection:"row",gap:8}}>
+            <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
               {(["mg/dL","mmol/L"] as GlucoseUnit[]).map(unit=><Pressable key={unit}
                 accessibilityRole="button" accessibilityLabel={`Use ${unit}`}
                 accessibilityState={{selected:unit===glucoseUnit,disabled:saving}}
@@ -2497,12 +2503,14 @@ export function TrackerScreen({
           </Text>
         </Card>
 
-        <View style={S.between}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
           <Text
             style={{
               fontFamily: "DMSans_700Bold",
-              fontSize: 25,
-              lineHeight: 31,
+              fontSize: compactBloodLayout ? 22 : 25,
+              flexShrink: 1,
+              minWidth: 0,
+              ...(compactBloodLayout ? { width: "100%" as const } : {}),
               letterSpacing: -0.45,
               color: C.ink,
             }}
@@ -2514,7 +2522,8 @@ export function TrackerScreen({
             accessibilityRole="button"
             onPress={openGlucoseHistory}
             style={({ pressed }) => ({
-              minHeight: 42,
+              minHeight: 44,
+              maxWidth: "100%",
               paddingHorizontal: 5,
               flexDirection: "row",
               alignItems: "center",
@@ -2526,6 +2535,7 @@ export function TrackerScreen({
               style={{
                 fontFamily: "DMSans_600SemiBold",
                 fontSize: 13,
+                flexShrink: 1,
                 color: themeForeground("#7D36B5"),
               }}
             >
@@ -2573,7 +2583,7 @@ export function TrackerScreen({
               overflow: "hidden",
             }}
           >
-            <View style={{ width: 112, height: 88 }}>
+            <View style={{ width: Math.min(112, bloodContentWidth * 0.3), height: 88, flexShrink: 0 }}>
               <BloodSugarEmptyGraphic />
             </View>
             <View style={{ flex: 1, gap: 6 }}>
