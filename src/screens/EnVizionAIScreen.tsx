@@ -2,7 +2,7 @@ import { themeBackground, themeForeground, themeBorder, themeShadow, themeAction
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator, Dimensions, Keyboard, Platform, Pressable, ScrollView,
-  Switch, Text, TextInput, View,
+  StatusBar, Switch, Text, TextInput, View,
 } from "react-native";
 import { useCare } from "../store";
 import { makeMessage } from "../assistant/model";
@@ -88,6 +88,9 @@ export function EnVizionAIScreen() {
   const { state, dispatch } = useCare();
   const scroll = useRef<ScrollView>(null);
   const [keyboardInset, setKeyboardInset] = useState(0);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const screen = useRef<View>(null);
+  const androidKeyboardTop = useRef<number | null>(null);
   const [draftText, setDraftText] = useState("");
   const [careDataAllowed, setCareDataAllowed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -105,28 +108,93 @@ export function EnVizionAIScreen() {
     Boolean(state.careRecipientId);
   const messages = state.conversation.messages;
 
-  // Native iOS screens sometimes do not resize when the system keyboard opens,
-  // leaving a fixed chat composer underneath it. Move the entire flex layout
-  // above the actual keyboard frame instead of depending on KeyboardAvoidingView
-  // (and disable overlapping automatic ScrollView keyboard insets).
+  // Measure the remaining overlap, not the full keyboard height, on Android:
+  // adjustResize may already have moved the bottom of the screen above the IME.
+  // Mobile browsers may instead resize only the visual viewport.
+  const updateKeyboardOverlap = useCallback(() => {
+    if (Platform.OS === "android") {
+      const top = androidKeyboardTop.current;
+      if (top === null) return;
+      screen.current?.measureInWindow((_x, y, _width, height) => {
+        if (androidKeyboardTop.current !== top) return;
+        // Android measureInWindow is relative to the visible window origin.
+        const bottom = y + height + (StatusBar.currentHeight ?? 0);
+        setKeyboardInset(Math.max(0, Math.ceil(bottom - top)));
+      });
+    } else if (Platform.OS === "web" && typeof window !== "undefined") {
+      const viewport = window.visualViewport;
+      if (!viewport || Math.abs(viewport.scale - 1) > 0.05) {
+        setKeyboardInset(0);
+        setKeyboardVisible(false);
+        return;
+      }
+      const top = viewport.offsetTop;
+      const visibleHeight = viewport.height;
+      const bottom = top + visibleHeight;
+      screen.current?.measureInWindow((_x, y, _width, height) => {
+        if (window.visualViewport !== viewport ||
+            viewport.offsetTop !== top || viewport.height !== visibleHeight) return;
+        const overlap = Math.max(0, Math.ceil(y + height - bottom));
+        setKeyboardInset(overlap);
+        setKeyboardVisible(overlap > 0 || window.innerHeight - viewport.height > 100);
+      });
+    }
+  }, []);
+
+  const onScreenLayout = useCallback(() => {
+    requestAnimationFrame(updateKeyboardOverlap);
+  }, [updateKeyboardOverlap]);
+
   useEffect(() => {
-    if (Platform.OS !== "ios") return;
+    const scrollToLatest = () =>
+      requestAnimationFrame(() => scroll.current?.scrollToEnd({ animated: false }));
+
+    if (Platform.OS === "web") {
+      if (typeof window === "undefined") return;
+      const viewport = window.visualViewport;
+      const update = () => { updateKeyboardOverlap(); scrollToLatest(); };
+      viewport?.addEventListener("resize", update);
+      viewport?.addEventListener("scroll", update);
+      window.addEventListener("resize", update);
+      updateKeyboardOverlap();
+      return () => {
+        viewport?.removeEventListener("resize", update);
+        viewport?.removeEventListener("scroll", update);
+        window.removeEventListener("resize", update);
+      };
+    }
+
     const updateFrame = (event: { endCoordinates: { height: number; screenY: number } }) => {
       const { height, screenY } = event.endCoordinates;
-      const overlap = Dimensions.get("screen").height - screenY;
-      setKeyboardInset(Math.max(0, Math.min(height, overlap)));
-      requestAnimationFrame(() => scroll.current?.scrollToEnd({ animated: true }));
+      setKeyboardVisible(true);
+      if (Platform.OS === "ios") {
+        // Preserve the existing iOS keyboard behavior.
+        const overlap = Dimensions.get("screen").height - screenY;
+        setKeyboardInset(Math.max(0, Math.min(height, overlap)));
+      } else {
+        androidKeyboardTop.current = screenY;
+        requestAnimationFrame(updateKeyboardOverlap);
+      }
+      scrollToLatest();
     };
-    const frame = Keyboard.addListener("keyboardWillChangeFrame", updateFrame);
-    const show = Keyboard.addListener("keyboardWillShow", updateFrame);
-    const didShow = Keyboard.addListener("keyboardDidShow", updateFrame);
-    const hide = Keyboard.addListener("keyboardWillHide", () => setKeyboardInset(0));
-    const didHide = Keyboard.addListener("keyboardDidHide", () => setKeyboardInset(0));
-    return () => {
-      frame.remove(); show.remove(); didShow.remove();
-      hide.remove(); didHide.remove();
+    const clear = () => {
+      androidKeyboardTop.current = null;
+      setKeyboardInset(0);
+      setKeyboardVisible(false);
     };
-  }, []);
+    const subscriptions = [
+      Keyboard.addListener("keyboardDidShow", updateFrame),
+      Keyboard.addListener("keyboardDidHide", clear),
+    ];
+    if (Platform.OS === "ios") {
+      subscriptions.push(
+        Keyboard.addListener("keyboardWillChangeFrame", updateFrame),
+        Keyboard.addListener("keyboardWillShow", updateFrame),
+        Keyboard.addListener("keyboardWillHide", clear),
+      );
+    }
+    return () => subscriptions.forEach(subscription => subscription.remove());
+  }, [updateKeyboardOverlap]);
 
   useEffect(() => {
     if (previousProfile.current === state.careRecipientId) return;
@@ -247,10 +315,10 @@ export function EnVizionAIScreen() {
   };
 
   return (
-    <View style={{
-      flex: 1,
+    <View ref={screen} collapsable={false} onLayout={onScreenLayout} style={{
+      flex: 1, minHeight: 0,
       backgroundColor: themeBackground("#FFFCFB"),
-      paddingBottom: Platform.OS === "ios" ? keyboardInset : 0,
+      paddingBottom: keyboardInset,
     }}>
       <AIAtmosphere/>
       <View style={{ padding: 16, flexDirection: "row", alignItems: "center", gap: 10,
@@ -280,8 +348,8 @@ export function EnVizionAIScreen() {
         </Pressable>
       </View>
 
-      <ScrollView ref={scroll} style={{ flex: 1 }} automaticallyAdjustKeyboardInsets={Platform.OS !== "ios"}
-        keyboardShouldPersistTaps="handled" keyboardDismissMode="interactive"
+      <ScrollView ref={scroll} style={{ flex: 1, minHeight: 0 }} automaticallyAdjustKeyboardInsets={false}
+        keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "none"}
         onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}
         contentContainerStyle={{ paddingHorizontal: 17, paddingVertical: 16, gap: 13 }}>
         {!messages.length && (
@@ -514,11 +582,14 @@ export function EnVizionAIScreen() {
         )}
       </ScrollView>
 
-      <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: themeBorder("#EDE3F2"),
+      <View style={{ flexShrink: 0, padding: 12, borderTopWidth: 1, borderTopColor: themeBorder("#EDE3F2"),
         gap: 7, backgroundColor: themeBackground("#FFFCFB") }}>
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 9 }}>
           <TextInput value={draftText} onChangeText={setDraftText} multiline
-            onFocus={() => requestAnimationFrame(() => scroll.current?.scrollToEnd({ animated: true }))}
+            onFocus={() => requestAnimationFrame(() => {
+              updateKeyboardOverlap();
+              scroll.current?.scrollToEnd({ animated: false });
+            })}
             accessibilityLabel="Message EnVizion AI"
             placeholder="Ask about your toolkit, or set a reminder…"
             placeholderTextColor={themeForeground("#958DA4")} maxLength={1800}
@@ -541,7 +612,7 @@ export function EnVizionAIScreen() {
             <Icon name="send-outline" color="#FFFFFF" size={23}/>
           </Pressable>
         </View>
-        {keyboardInset === 0 && <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), textAlign: "center",
+        {!keyboardVisible && keyboardInset === 0 && <Text style={{ fontFamily: "DMSans_400Regular", color: themeForeground(MUTED), textAlign: "center",
           fontSize: 10.3, lineHeight: 15 }}>
           Toolkit guidance only. Not for emergencies, prescriptions or clinical decisions.
         </Text>}
