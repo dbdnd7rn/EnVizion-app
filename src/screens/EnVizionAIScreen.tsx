@@ -129,10 +129,11 @@ export function EnVizionAIScreen() {
         return;
       }
       const top = viewport.offsetTop;
-      const bottom = top + viewport.height;
+      const visibleHeight = viewport.height;
+      const bottom = top + visibleHeight;
       screen.current?.measureInWindow((_x, y, _width, height) => {
         if (window.visualViewport !== viewport ||
-            viewport.offsetTop !== top || viewport.height !== bottom - top) return;
+            viewport.offsetTop !== top || viewport.height !== visibleHeight) return;
         const overlap = Math.max(0, Math.ceil(y + height - bottom));
         setKeyboardInset(overlap);
         setKeyboardVisible(overlap > 0 || window.innerHeight - viewport.height > 100);
